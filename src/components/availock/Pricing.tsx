@@ -108,9 +108,9 @@ const Pricing = () => (
     <div className="relative mx-auto max-w-7xl px-6 md:px-10">
       {/* Early backer banner */}
       <div className="flex justify-center mb-8">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 ghost-border text-[11px] font-bold tracking-[0.18em] uppercase text-accent">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 ghost-border text-[11px] font-bold tracking-[0.18em] uppercase text-accent text-center">
           <Sparkles className="w-3.5 h-3.5" />
-          Kickstarter early backers lock in advantage pricing
+          Become an early supporter — unlock 40% off for life
         </div>
       </div>
 
@@ -126,8 +126,9 @@ const Pricing = () => (
           workflow. From individuals to global enterprises.
         </p>
         <p className="mt-4 text-xs md:text-sm text-muted-foreground italic max-w-xl mx-auto">
-          These are the regular post-launch prices. Early backers on Kickstarter
-          receive permanent advantage pricing on every tier.
+          These are the regular post-launch prices. Leave your email below and
+          we'll notify you the moment we go live on Kickstarter — back us early
+          to validate the mission and lock in <span className="text-accent not-italic font-semibold">40% off</span> every tier, forever.
         </p>
       </div>
 
