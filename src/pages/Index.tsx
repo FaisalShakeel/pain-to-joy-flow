@@ -3,6 +3,7 @@ import Hero from "@/components/availock/Hero";
 import WhatChanged from "@/components/availock/WhatChanged";
 import AccessControl from "@/components/availock/AccessControl";
 import Protocols from "@/components/availock/Protocols";
+import HowItWorks from "@/components/availock/HowItWorks";
 import Cost from "@/components/availock/Cost";
 import Audience from "@/components/availock/Audience";
 import Manifesto from "@/components/availock/Manifesto";
@@ -20,6 +21,7 @@ const Index = () => {
         <WhatChanged />
         <AccessControl />
         <Protocols />
+        <HowItWorks />
         <Cost />
         <Audience />
         <Manifesto />
