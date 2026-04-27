@@ -2,7 +2,6 @@ import Nav from "@/components/availock/Nav";
 import Hero from "@/components/availock/Hero";
 import WhatChanged from "@/components/availock/WhatChanged";
 import AccessControl from "@/components/availock/AccessControl";
-import HowItWorks from "@/components/availock/HowItWorks";
 import Protocols from "@/components/availock/Protocols";
 import Cost from "@/components/availock/Cost";
 import Audience from "@/components/availock/Audience";
@@ -20,7 +19,6 @@ const Index = () => {
         <Hero />
         <WhatChanged />
         <AccessControl />
-        <HowItWorks />
         <Protocols />
         <Cost />
         <Audience />

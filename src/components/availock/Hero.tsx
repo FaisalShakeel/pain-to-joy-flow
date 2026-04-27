@@ -46,7 +46,7 @@ const Hero = () => {
           </div>
           <div className="mt-10 flex items-center gap-6 text-xs text-muted-foreground">
             <div className="flex -space-x-2">
-              {["#9b8cff", "#c4baff", "#3a2d6b"].map((c) => (
+              {["#15196c", "#644ead", "#2d3282"].map((c) => (
                 <div key={c} className="w-7 h-7 rounded-full ring-2 ring-surface-lowest" style={{ background: c }} />
               ))}
             </div>
