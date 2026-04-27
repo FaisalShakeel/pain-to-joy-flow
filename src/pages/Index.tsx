@@ -6,6 +6,7 @@ import Protocols from "@/components/availock/Protocols";
 import Cost from "@/components/availock/Cost";
 import Audience from "@/components/availock/Audience";
 import Manifesto from "@/components/availock/Manifesto";
+import Pricing from "@/components/availock/Pricing";
 import Claim from "@/components/availock/Claim";
 import Footer from "@/components/availock/Footer";
 
@@ -21,6 +22,7 @@ const Index = () => {
         <Cost />
         <Audience />
         <Manifesto />
+        <Pricing />
         <Claim />
       </main>
       <Footer />
