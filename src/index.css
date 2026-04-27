@@ -10,71 +10,75 @@
 
 @layer base {
   :root {
-    /* Surfaces — paper / frosted glass tiers */
-    --background: 210 20% 98%;            /* #f7f9fb */
-    --foreground: 210 10% 11%;            /* #191c1e */
+    /* Brand palette: Navy #474973 · Gold #EABD23 · Cream #F4F1DE
+       Dark, editorial canvas — gold & cream lift type and CTAs. */
 
-    --surface: 210 20% 98%;
-    --surface-bright: 210 20% 98%;
-    --surface-low: 220 14% 96%;           /* #f2f4f6 */
-    --surface-lowest: 0 0% 100%;
-    --surface-high: 210 6% 91%;           /* #e6e8ea */
-    --surface-highest: 210 6% 89%;
+    /* Surfaces — navy tiers (lowest = brightest navy card, highest = deepest) */
+    --background: 235 25% 37%;            /* #474973 base navy */
+    --foreground: 47 56% 91%;             /* #F4F1DE cream */
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 10% 11%;
+    --surface: 235 25% 37%;
+    --surface-bright: 235 25% 42%;        /* lifted navy */
+    --surface-low: 235 25% 32%;           /* slightly deeper card */
+    --surface-lowest: 235 24% 27%;        /* deepest panel */
+    --surface-high: 235 24% 46%;
+    --surface-highest: 235 22% 52%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 10% 11%;
+    --card: 235 25% 32%;
+    --card-foreground: 47 56% 91%;
 
-    /* Brand — Midnight ink + Electric violet */
-    --primary: 237 67% 25%;               /* #15196c */
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 237 47% 35%;          /* #2d3282 */
-    --primary-fixed: 240 100% 94%;        /* #e0e0ff */
-    --on-primary-fixed: 237 86% 21%;      /* #070963 */
+    --popover: 235 24% 27%;
+    --popover-foreground: 47 56% 91%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 237 67% 25%;
+    /* Brand — Cream takes "primary" so headlines/CTA labels read as cream-on-navy.
+       Gold is the accent for highlights, badges, and gradient CTAs. */
+    --primary: 47 56% 91%;                /* #F4F1DE — used for headline/foreground emphasis */
+    --primary-foreground: 235 30% 18%;    /* deep navy text on cream chips */
+    --primary-glow: 46 84% 60%;           /* gold glow */
+    --primary-fixed: 46 84% 53%;          /* #EABD23 gold pill bg */
+    --on-primary-fixed: 235 35% 16%;      /* deep navy text on gold */
 
-    --accent: 256 49% 49%;                /* violet — #644ead */
-    --accent-foreground: 0 0% 100%;
-    --accent-soft: 252 100% 80%;
+    --secondary: 235 25% 32%;
+    --secondary-foreground: 47 56% 91%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 230 7% 30%;       /* #464651 */
+    --accent: 46 84% 53%;                 /* #EABD23 gold */
+    --accent-foreground: 235 35% 16%;
+    --accent-soft: 46 80% 70%;
 
-    --outline: 240 6% 49%;                /* #777682 */
-    --outline-variant: 240 14% 80%;       /* #c7c5d3 */
+    --muted: 235 25% 32%;
+    --muted-foreground: 47 30% 78%;       /* dim cream */
 
-    --destructive: 0 75% 42%;             /* #ba1a1a */
-    --destructive-foreground: 0 0% 100%;
+    --outline: 47 20% 70%;
+    --outline-variant: 47 25% 80%;
 
-    --border: 240 14% 80%;
-    --input: 240 14% 80%;
-    --ring: 237 67% 25%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 47 56% 91%;
+
+    --border: 47 25% 80%;
+    --input: 47 25% 80%;
+    --ring: 46 84% 53%;
 
     --radius: 0.75rem;
 
-    /* Signature gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(237 67% 25%), hsl(237 47% 35%));
-    --gradient-vault: linear-gradient(160deg, hsl(237 67% 18%) 0%, hsl(256 49% 35%) 100%);
-    --gradient-mist: radial-gradient(ellipse at top, hsl(240 100% 94% / 0.6), transparent 60%);
+    /* Signature gradients — gold-forward CTA, navy depth, gold mist */
+    --gradient-primary: linear-gradient(135deg, hsl(46 84% 53%), hsl(38 88% 48%));
+    --gradient-vault: linear-gradient(160deg, hsl(235 30% 18%) 0%, hsl(235 25% 37%) 100%);
+    --gradient-mist: radial-gradient(ellipse at top, hsl(46 84% 53% / 0.18), transparent 60%);
 
-    /* Ambient shadows — soft, tinted */
-    --shadow-ambient: 0 30px 60px -20px hsl(210 10% 11% / 0.08);
-    --shadow-elevated: 0 40px 80px -30px hsl(237 67% 25% / 0.25);
-    --shadow-glass: 0 32px 64px -16px hsl(237 67% 25% / 0.15);
+    /* Ambient shadows — deep navy */
+    --shadow-ambient: 0 30px 60px -20px hsl(235 40% 8% / 0.45);
+    --shadow-elevated: 0 40px 80px -30px hsl(235 50% 6% / 0.55);
+    --shadow-glass: 0 32px 64px -16px hsl(46 84% 30% / 0.25);
 
-    /* Sidebar (kept for shadcn compatibility) */
-    --sidebar-background: 210 20% 98%;
-    --sidebar-foreground: 230 7% 30%;
-    --sidebar-primary: 237 67% 25%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 237 67% 25%;
-    --sidebar-border: 240 14% 80%;
-    --sidebar-ring: 237 67% 25%;
+    /* Sidebar */
+    --sidebar-background: 235 24% 27%;
+    --sidebar-foreground: 47 56% 91%;
+    --sidebar-primary: 46 84% 53%;
+    --sidebar-primary-foreground: 235 35% 16%;
+    --sidebar-accent: 235 25% 32%;
+    --sidebar-accent-foreground: 47 56% 91%;
+    --sidebar-border: 235 20% 22%;
+    --sidebar-ring: 46 84% 53%;
   }
 
   .dark {
@@ -117,16 +121,16 @@
 
 @layer components {
   .glass {
-    background: hsl(var(--surface-lowest) / 0.7);
+    background: hsl(var(--surface-lowest) / 0.65);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
   .glass-dark {
-    background: hsl(237 67% 12% / 0.6);
+    background: hsl(235 35% 14% / 0.65);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
-  .ghost-border { border: 1px solid hsl(var(--outline-variant) / 0.25); }
+  .ghost-border { border: 1px solid hsl(var(--accent) / 0.18); }
   .grain::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
