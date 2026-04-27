@@ -17,8 +17,8 @@ const Claim = () => {
       setLoading(false);
       setEmail("");
       toast({
-        title: "You're on the vault list",
-        description: "We'll send your encrypted invite within 24 hours.",
+        title: "You're on the early supporter list",
+        description: "We'll email you the moment we go live on Kickstarter — your 40% lifetime discount is reserved.",
       });
     }, 700);
   };
@@ -26,13 +26,14 @@ const Claim = () => {
   return (
     <section id="claim" className="py-24 md:py-32 bg-surface-lowest">
       <div className="mx-auto max-w-3xl px-6 md:px-10 text-center">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-5">Early Access</p>
+        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-5">Early Supporter · 40% Off For Life</p>
         <h2 className="font-headline font-extrabold text-primary text-4xl md:text-6xl leading-[1.05] text-balance">
-          Secure your spot in the vault.
+          Back us early. Pay 40% less, forever.
         </h2>
         <p className="mt-6 text-lg text-muted-foreground">
-          We're inviting holders in batches. Reserve your Availock ID before
-          public release — it stays yours, forever.
+          Leave your email and we'll notify you the instant Availock goes live
+          on Kickstarter. Your support helps us validate the mission — and
+          locks in a permanent 40% discount on every tier.
         </p>
 
         <form
@@ -60,7 +61,7 @@ const Claim = () => {
           </button>
         </form>
         <p className="mt-5 text-xs text-muted-foreground">
-          No spam. No sale of data. Your address stays inside the vault.
+          One email when we launch on Kickstarter. No spam. No data sold. Ever.
         </p>
       </div>
     </section>
