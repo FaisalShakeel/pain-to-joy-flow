@@ -10,75 +10,72 @@
 
 @layer base {
   :root {
-    /* Brand palette: Cream #F4F1DE bg · Navy #474973 fg · Gold #EABD23 accent
-       Light editorial canvas — navy type, gold CTAs & highlights. */
+    /* Original "Ethereal Vault" palette
+       Deep indigo canvas · Soft lavender type · Electric violet accent */
 
-    /* Surfaces — cream tiers */
-    --background: 47 56% 91%;             /* #F4F1DE cream */
-    --foreground: 235 25% 37%;            /* #474973 navy */
+    --background: 237 30% 6%;
+    --foreground: 240 20% 96%;
 
-    --surface: 47 56% 91%;
-    --surface-bright: 47 60% 95%;         /* near-white cream */
-    --surface-low: 47 45% 86%;            /* slightly deeper cream */
-    --surface-lowest: 47 38% 81%;         /* deepest cream panel */
-    --surface-high: 48 70% 96%;
-    --surface-highest: 0 0% 100%;
+    --surface: 237 30% 6%;
+    --surface-bright: 237 28% 11%;
+    --surface-low: 237 30% 9%;
+    --surface-lowest: 237 32% 7%;
+    --surface-high: 237 26% 14%;
+    --surface-highest: 237 24% 18%;
 
-    --card: 47 60% 95%;
-    --card-foreground: 235 25% 37%;
+    --card: 237 30% 9%;
+    --card-foreground: 240 20% 96%;
 
-    --popover: 47 60% 95%;
-    --popover-foreground: 235 25% 37%;
+    --popover: 237 32% 7%;
+    --popover-foreground: 240 20% 96%;
 
-    /* Brand — Navy takes "primary" so headlines read as navy-on-cream.
-       Gold is the accent for highlights, badges, and gradient CTAs. */
-    --primary: 235 25% 37%;               /* #474973 navy headline/CTA bg */
-    --primary-foreground: 47 56% 91%;     /* cream text on navy chips */
-    --primary-glow: 46 84% 60%;           /* gold glow */
-    --primary-fixed: 46 84% 53%;          /* #EABD23 gold pill bg */
-    --on-primary-fixed: 235 35% 16%;      /* deep navy text on gold */
+    --primary: 240 100% 88%;              /* soft lavender — headline emphasis */
+    --primary-foreground: 237 67% 15%;
+    --primary-glow: 252 100% 80%;
+    --primary-fixed: 252 100% 80%;        /* electric violet pill */
+    --on-primary-fixed: 237 67% 15%;
 
-    --secondary: 47 45% 86%;
-    --secondary-foreground: 235 25% 37%;
+    --secondary: 237 22% 14%;
+    --secondary-foreground: 240 20% 96%;
 
-    --accent: 46 84% 53%;                 /* #EABD23 gold */
-    --accent-foreground: 235 35% 16%;
-    --accent-soft: 46 80% 75%;
+    --accent: 252 100% 80%;               /* electric violet */
+    --accent-foreground: 237 67% 15%;
+    --accent-soft: 252 80% 88%;
 
-    --muted: 47 40% 84%;
-    --muted-foreground: 235 18% 45%;      /* dim navy */
+    --muted: 237 22% 14%;
+    --muted-foreground: 240 12% 70%;
 
-    --outline: 235 15% 55%;
-    --outline-variant: 235 18% 42%;
+    --outline: 240 10% 60%;
+    --outline-variant: 240 12% 75%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 47 56% 91%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 240 20% 96%;
 
-    --border: 235 20% 70%;
-    --input: 235 20% 70%;
-    --ring: 46 84% 53%;
+    --border: 237 22% 18%;
+    --input: 237 22% 18%;
+    --ring: 252 100% 80%;
 
     --radius: 0.75rem;
 
-    /* Signature gradients — navy CTA, cream depth, gold mist */
-    --gradient-primary: linear-gradient(135deg, hsl(235 30% 30%), hsl(235 25% 42%));
-    --gradient-vault: linear-gradient(160deg, hsl(47 60% 95%) 0%, hsl(47 45% 86%) 100%);
-    --gradient-mist: radial-gradient(ellipse at top, hsl(46 84% 53% / 0.22), transparent 60%);
+    /* Signature gradients — violet-forward CTA, indigo depth, lavender mist */
+    --gradient-primary: linear-gradient(135deg, hsl(252 100% 80%), hsl(265 90% 70%));
+    --gradient-vault: linear-gradient(160deg, hsl(237 32% 7%) 0%, hsl(237 28% 14%) 100%);
+    --gradient-mist: radial-gradient(ellipse at top, hsl(252 100% 80% / 0.18), transparent 60%);
 
-    /* Ambient shadows — soft navy */
-    --shadow-ambient: 0 30px 60px -20px hsl(235 30% 25% / 0.18);
-    --shadow-elevated: 0 40px 80px -30px hsl(235 40% 20% / 0.22);
-    --shadow-glass: 0 32px 64px -16px hsl(46 84% 40% / 0.20);
+    /* Ambient shadows — deep indigo */
+    --shadow-ambient: 0 30px 60px -20px hsl(237 60% 4% / 0.55);
+    --shadow-elevated: 0 40px 80px -30px hsl(237 70% 3% / 0.65);
+    --shadow-glass: 0 32px 64px -16px hsl(252 80% 30% / 0.30);
 
     /* Sidebar */
-    --sidebar-background: 47 60% 95%;
-    --sidebar-foreground: 235 25% 37%;
-    --sidebar-primary: 46 84% 53%;
-    --sidebar-primary-foreground: 235 35% 16%;
-    --sidebar-accent: 47 45% 86%;
-    --sidebar-accent-foreground: 235 25% 37%;
-    --sidebar-border: 235 18% 70%;
-    --sidebar-ring: 46 84% 53%;
+    --sidebar-background: 237 32% 7%;
+    --sidebar-foreground: 240 20% 96%;
+    --sidebar-primary: 252 100% 80%;
+    --sidebar-primary-foreground: 237 67% 15%;
+    --sidebar-accent: 237 22% 14%;
+    --sidebar-accent-foreground: 240 20% 96%;
+    --sidebar-border: 237 22% 18%;
+    --sidebar-ring: 252 100% 80%;
   }
 
   .dark {
@@ -121,16 +118,16 @@
 
 @layer components {
   .glass {
-    background: hsl(var(--surface-bright) / 0.75);
+    background: hsl(var(--surface-lowest) / 0.65);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
   .glass-dark {
-    background: hsl(235 25% 37% / 0.85);
+    background: hsl(237 35% 4% / 0.65);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
-  .ghost-border { border: 1px solid hsl(var(--primary) / 0.15); }
+  .ghost-border { border: 1px solid hsl(var(--accent) / 0.18); }
   .grain::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
