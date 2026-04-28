@@ -35,6 +35,7 @@ const Nav = () => {
           <a href="#protocol" className="text-muted-foreground hover:text-primary transition-colors">Protocol</a>
           <a href="#vault" className="text-muted-foreground hover:text-primary transition-colors">The Vault</a>
           <a href="#how" className="text-muted-foreground hover:text-primary transition-colors">How it works</a>
+          <a href="#video" className="text-muted-foreground hover:text-primary transition-colors">Video</a>
           <a href="#audience" className="text-muted-foreground hover:text-primary transition-colors">For You</a>
           <a href="#manifesto" className="text-muted-foreground hover:text-primary transition-colors">Manifesto</a>
           <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</a>
