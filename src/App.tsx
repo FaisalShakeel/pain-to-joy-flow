@@ -9,6 +9,7 @@ import Privacy from "./pages/legal/Privacy.tsx";
 import Terms from "./pages/legal/Terms.tsx";
 import Encryption from "./pages/legal/Encryption.tsx";
 import Contact from "./pages/legal/Contact.tsx";
+import PatentPending from "./pages/legal/PatentPending.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/terms" element={<Terms />} />
           <Route path="/encryption" element={<Encryption />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/patent-pending" element={<PatentPending />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -28,6 +28,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Use", href: "/terms" },
       { label: "Encryption & Security", href: "/encryption" },
+      { label: "Patent Pending", href: "/patent-pending" },
     ],
   },
 ];
