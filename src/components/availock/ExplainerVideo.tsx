@@ -23,7 +23,7 @@ const ExplainerVideo = () => (
         <div className="aspect-video">
           <iframe
             className="w-full h-full"
-            src="https://www.youtube.com/embed/KgyW8CRfdV4"
+            src="https://www.youtube.com/embed/XVjjl2U-R_Q"
             title="Availock — Explainer"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
