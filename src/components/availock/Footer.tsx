@@ -1,5 +1,6 @@
 import { Lock } from "lucide-react";
 import { Link } from "react-router-dom";
+import logoMark from "@/assets/availock-mark.png";
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
@@ -87,9 +88,14 @@ const Footer = () => (
       <div className="grid md:grid-cols-4 gap-10 pb-12 border-b border-border/30">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground">
-              <Lock className="w-4 h-4" strokeWidth={2.5} />
-            </span>
+            <img
+              src={logoMark}
+              alt="Availock logo"
+              width={36}
+              height={36}
+              loading="lazy"
+              className="w-9 h-9 object-contain"
+            />
             <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
           </div>
           <p className="text-sm text-muted-foreground max-w-xs">
