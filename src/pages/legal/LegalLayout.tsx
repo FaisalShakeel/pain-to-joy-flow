@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Lock, ArrowLeft } from "lucide-react";
 import Footer from "@/components/availock/Footer";
+import logoMark from "@/assets/availock-mark.png";
 
 interface Props {
   eyebrow: string;
@@ -15,9 +16,13 @@ const LegalLayout = ({ eyebrow, title, lastUpdated, children }: Props) => (
     <header className="border-b border-border/40 bg-surface-lowest/80 backdrop-blur sticky top-0 z-40">
       <div className="mx-auto max-w-5xl px-6 md:px-10 py-5 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground shadow-glass">
-            <Lock className="w-4 h-4" strokeWidth={2.5} />
-          </span>
+          <img
+            src={logoMark}
+            alt="Availock logo"
+            width={36}
+            height={36}
+            className="w-9 h-9 object-contain"
+          />
           <span className="font-headline font-extrabold text-xl tracking-tight text-primary">
             Availock
           </span>
