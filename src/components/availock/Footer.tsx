@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Lock, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoMark from "@/assets/availock-mark.png";
 
@@ -36,67 +36,19 @@ const columns: { title: string; links: FooterLink[] }[] = [
 const Footer = () => (
   <footer className="bg-surface-low pt-16 pb-10">
     <div className="mx-auto max-w-7xl px-6 md:px-10">
-      {/* A-Vault description block */}
-      <div className="mb-12 pb-12 border-b border-border/30 grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary mb-3">
-            About A-Vault
-          </p>
-          <h3 className="font-headline text-2xl font-extrabold text-foreground leading-tight">
-            Your digital valuables deserve a vault.
-          </h3>
-        </div>
-        <div className="md:col-span-2 space-y-4 text-sm text-muted-foreground leading-relaxed">
-          <p>
-            A-Vault is a secure digital vault designed to protect, organize, and control access to your most important information, files, and personal assets. It gives users one trusted place to store sensitive data while deciding exactly who can access it, when, and under what conditions.
-          </p>
-          <p className="text-foreground/80">
-            <span className="font-semibold text-primary">Core Purpose — </span>
-            Turn scattered sensitive information into one protected, permission-based vault.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">What it can hold</p>
-              <ul className="space-y-1 text-xs">
-                <li>· Passwords and credentials</li>
-                <li>· IDs and important documents</li>
-                <li>· Contracts and records</li>
-                <li>· Financial details</li>
-                <li>· Emergency information</li>
-                <li>· Personal notes and media</li>
-                <li>· Business files</li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Key features</p>
-              <ul className="space-y-1 text-xs">
-                <li>· Secure encrypted storage</li>
-                <li>· Permission-based sharing</li>
-                <li>· Time-limited access links</li>
-                <li>· Emergency access controls</li>
-                <li>· Activity logs and alerts</li>
-                <li>· Cloud sync across devices</li>
-                <li>· Recovery and backup options</li>
-              </ul>
-            </div>
-          </div>
-          <p className="text-xs italic">
-            Most people keep valuable data scattered across emails, phones, drives, and paper files. A-Vault centralizes and protects it.
-          </p>
-        </div>
-      </div>
-
       <div className="grid md:grid-cols-4 gap-10 pb-12 border-b border-border/30">
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <img
-              src={logoMark}
-              alt="Availock logo"
-              width={36}
-              height={36}
-              loading="lazy"
-              className="w-9 h-9 object-contain"
-            />
+          <div className="flex items-center gap-2.5 mb-4">
+            <span className="grid place-items-center w-11 h-11 rounded-xl bg-primary p-1.5 shadow-glass">
+              <img
+                src={logoMark}
+                alt="Availock logo"
+                width={40}
+                height={40}
+                loading="lazy"
+                className="w-full h-full object-contain"
+              />
+            </span>
             <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
           </div>
           <p className="text-sm text-muted-foreground max-w-xs">
@@ -130,19 +82,22 @@ const Footer = () => (
         ))}
       </div>
 
-      {/* Patent Pending Notice */}
+      {/* Patent Pending Notice — collapsible */}
       <div className="pt-8 pb-8 border-b border-border/30">
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-              <Lock className="w-3 h-3" strokeWidth={2.5} />
-              Patent Pending
-            </span>
-          </div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary mb-3">
-            Patent Pending Notice
-          </p>
-          <div className="space-y-3 text-xs text-muted-foreground leading-relaxed max-w-4xl">
+        <details className="group rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 [&_summary::-webkit-details-marker]:hidden">
+          <summary className="flex items-center justify-between gap-4 cursor-pointer list-none">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                <Lock className="w-3 h-3" strokeWidth={2.5} />
+                Patent Pending
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                Patent Pending Notice
+              </span>
+            </div>
+            <ChevronDown className="w-4 h-4 text-primary transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="mt-5 space-y-3 text-xs text-muted-foreground leading-relaxed max-w-4xl">
             <p>
               Certain products, systems, methods, features, designs, and technologies related to Availock may be protected by one or more pending patent applications in applicable jurisdictions.
             </p>
@@ -163,7 +118,7 @@ const Footer = () => (
               </a>
             </p>
           </div>
-        </div>
+        </details>
       </div>
 
       <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Lock, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Footer from "@/components/availock/Footer";
 import logoMark from "@/assets/availock-mark.png";
 
@@ -15,14 +15,16 @@ const LegalLayout = ({ eyebrow, title, lastUpdated, children }: Props) => (
   <div className="min-h-screen bg-background text-foreground">
     <header className="border-b border-border/40 bg-surface-lowest/80 backdrop-blur sticky top-0 z-40">
       <div className="mx-auto max-w-5xl px-6 md:px-10 py-5 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <img
-            src={logoMark}
-            alt="Availock logo"
-            width={36}
-            height={36}
-            className="w-9 h-9 object-contain"
-          />
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary p-1.5 shadow-glass">
+            <img
+              src={logoMark}
+              alt="Availock logo"
+              width={36}
+              height={36}
+              className="w-full h-full object-contain"
+            />
+          </span>
           <span className="font-headline font-extrabold text-xl tracking-tight text-primary">
             Availock
           </span>
