@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logoMark from "@/assets/availock-mark.png";
+import logoIcon from "@/assets/availock-icon.png";
 
 const Nav = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -23,16 +23,14 @@ const Nav = () => {
             : ""
         }`}
       >
-        <a href="#top" className="flex items-center gap-2.5 group">
-          <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary p-1.5 shadow-glass">
-            <img
-              src={logoMark}
-              alt="Availock logo"
-              width={36}
-              height={36}
-              className="w-full h-full object-contain"
-            />
-          </span>
+        <a href="#top" className="flex items-center gap-2 group">
+          <img
+            src={logoIcon}
+            alt="Availock"
+            width={28}
+            height={28}
+            className="h-7 w-7 object-contain"
+          />
           <span className="font-headline font-extrabold text-xl tracking-tight text-primary">
             Availock
           </span>
