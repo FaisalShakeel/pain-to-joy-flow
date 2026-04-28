@@ -41,6 +41,10 @@
     --accent-foreground: 0 0% 100%;
     --accent-soft: 252 100% 80%;
 
+    /* Brand gold — from logo */
+    --brand-gold: 45 90% 55%;             /* #f0c419-ish */
+    --brand-gold-soft: 45 95% 88%;
+
     --muted: 220 14% 96%;
     --muted-foreground: 230 7% 30%;       /* #464651 */
 
