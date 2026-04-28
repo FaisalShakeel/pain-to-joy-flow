@@ -1,4 +1,35 @@
 import { Lock } from "lucide-react";
+import { Link } from "react-router-dom";
+
+type FooterLink = { label: string; href: string; external?: boolean };
+
+const columns: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Product",
+    links: [
+      { label: "The Vault", href: "/#vault" },
+      { label: "Protocols", href: "/#protocol" },
+      { label: "How it works", href: "/#how" },
+      { label: "Pricing", href: "/#pricing" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "Manifesto", href: "/#manifesto" },
+      { label: "Contact", href: "/contact" },
+      { label: "Explainer video", href: "/#video" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Use", href: "/terms" },
+      { label: "Encryption & Security", href: "/encryption" },
+    ],
+  },
+];
 
 const Footer = () => (
   <footer className="bg-surface-low pt-16 pb-10">
@@ -14,20 +45,29 @@ const Footer = () => (
           <p className="text-sm text-muted-foreground max-w-xs">
             The encrypted identity vault. Share availability, not access.
           </p>
+          <p className="text-xs text-muted-foreground mt-4">
+            Operated by ANGILL TECHNOLOGIESS FZE LLC · UAE
+          </p>
         </div>
-        {[
-          { title: "Product", links: ["The Vault", "Protocols", "Pricing", "Security"] },
-          { title: "Company", links: ["Manifesto", "About", "Press", "Contact"] },
-          { title: "Legal", links: ["Privacy", "Terms", "Encryption", "DPA"] },
-        ].map((c) => (
+        {columns.map((c) => (
           <div key={c.title}>
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary mb-4">{c.title}</p>
             <ul className="space-y-2.5 text-sm">
-              {c.links.map((l) => (
-                <li key={l}>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">{l}</a>
-                </li>
-              ))}
+              {c.links.map((l) =>
+                l.href.startsWith("/#") || l.external ? (
+                  <li key={l.label}>
+                    <a href={l.href} className="text-muted-foreground hover:text-primary transition-colors">
+                      {l.label}
+                    </a>
+                  </li>
+                ) : (
+                  <li key={l.label}>
+                    <Link to={l.href} className="text-muted-foreground hover:text-primary transition-colors">
+                      {l.label}
+                    </Link>
+                  </li>
+                ),
+              )}
             </ul>
           </div>
         ))}
