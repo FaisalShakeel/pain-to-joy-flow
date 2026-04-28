@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Lock } from "lucide-react";
+import logoMark from "@/assets/availock-mark.png";
 
 const Nav = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -24,9 +25,13 @@ const Nav = () => {
         }`}
       >
         <a href="#top" className="flex items-center gap-2 group">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground shadow-glass">
-            <Lock className="w-4 h-4" strokeWidth={2.5} />
-          </span>
+          <img
+            src={logoMark}
+            alt="Availock logo"
+            width={36}
+            height={36}
+            className="w-9 h-9 object-contain drop-shadow-sm"
+          />
           <span className="font-headline font-extrabold text-xl tracking-tight text-primary">
             Availock
           </span>
