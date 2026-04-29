@@ -19,7 +19,7 @@ import {
   UserCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import logoIcon from "@/assets/availock-icon.png";
+import logoFull from "@/assets/availock-logo.svg";
 import { useRole } from "@/lib/role";
 import { me } from "@/lib/mockData";
 import { useNotifications } from "./NotificationsContext";
@@ -90,9 +90,8 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
     <div className="min-h-screen bg-surface text-foreground flex">
       {/* Sidebar (desktop / tablet) */}
       <aside className="hidden md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen">
-        <Link to="/app" className="flex items-center gap-2 px-6 py-6">
-          <img src={logoIcon} alt="Availock" width={28} height={28} className="h-7 w-7 object-contain" />
-          <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
+        <Link to="/app" className="flex items-center px-6 py-6" aria-label="Availock home">
+          <img src={logoFull} alt="Availock" className="h-9 w-auto object-contain" />
         </Link>
 
         <nav className="px-3 flex-1 overflow-y-auto">
@@ -250,9 +249,8 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
           />
           <aside className="absolute inset-y-0 left-0 w-72 bg-surface-lowest p-5 flex flex-col">
             <div className="flex items-center justify-between mb-6">
-              <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center gap-2">
-                <img src={logoIcon} alt="Availock" width={28} height={28} className="h-7 w-7 object-contain" />
-                <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
+              <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center" aria-label="Availock home">
+                <img src={logoFull} alt="Availock" className="h-9 w-auto object-contain" />
               </Link>
               <button onClick={() => setMobileNav(false)} aria-label="Close menu" className="grid place-items-center w-9 h-9 rounded-lg ghost-border">
                 <X className="w-4 h-4 text-primary" />
