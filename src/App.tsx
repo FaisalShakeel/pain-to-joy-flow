@@ -11,6 +11,7 @@ import Encryption from "./pages/legal/Encryption.tsx";
 import Contact from "./pages/legal/Contact.tsx";
 import PatentPending from "./pages/legal/PatentPending.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import { SpotlightProvider } from "./components/app/SpotlightContext.tsx";
 
 // Marketing extras
 import Pricing from "./pages/Pricing.tsx";
@@ -52,6 +53,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <SpotlightProvider>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -89,6 +91,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </SpotlightProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
