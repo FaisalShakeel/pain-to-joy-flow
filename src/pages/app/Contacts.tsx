@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -64,6 +64,9 @@ const Contacts = () => {
   const [filter, setFilter] = useState<Filter>("all");
   const [density, setDensity] = useState<Density>(6);
   const birdsEye = true;
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [pinned, setPinned] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -81,6 +84,30 @@ const Contacts = () => {
       /* ignore */
     }
   }, [pinned]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!searchWrapRef.current) return;
+      if (!searchWrapRef.current.contains(e.target as Node)) setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  // ⌘K / Ctrl+K to focus
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setSearchOpen(true);
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   const togglePin = (id: string) => {
     setPinned((prev) => {
@@ -117,6 +144,43 @@ const Contacts = () => {
     return [...pinnedList, ...rest];
   }, [q, filter, pinned]);
 
+  // Search-only matches (ignore filter chip), used for the dropdown preview.
+  const searchMatches = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return [] as typeof contacts;
+    return contacts.filter((c) =>
+      c.name.toLowerCase().includes(s) ||
+      c.title.toLowerCase().includes(s) ||
+      c.org.toLowerCase().includes(s) ||
+      c.tags.some((t) => t.toLowerCase().includes(s)),
+    );
+  }, [q]);
+
+  const trimmedQ = q.trim();
+  const hasExactNameMatch = useMemo(
+    () => trimmedQ.length > 0 && searchMatches.some((c) => c.name.toLowerCase() === trimmedQ.toLowerCase()),
+    [searchMatches, trimmedQ],
+  );
+  const looksLikeContactInput =
+    trimmedQ.length >= 2 && /[a-zA-Z@+0-9]/.test(trimmedQ);
+  const showNotInVault = looksLikeContactInput && !hasExactNameMatch;
+
+  const handleAddNewContact = () => {
+    toast({
+      title: "Add to vault",
+      description: trimmedQ ? `“${trimmedQ}” will be saved as a new contact.` : "Open the new contact form.",
+    });
+    setSearchOpen(false);
+  };
+
+  const handleSendInvite = () => {
+    toast({
+      title: "Invite link copied",
+      description: trimmedQ ? `Share it with ${trimmedQ} to connect on Availock.` : "Share it with anyone to connect.",
+    });
+    setSearchOpen(false);
+  };
+
   const densityCols: Record<Density, string> = {
     6:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3",
     10: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
@@ -148,25 +212,135 @@ const Contacts = () => {
       subtitle="Vault directory"
       title="Your contacts"
       actions={
-        birdsEye ? null : (
-          <button
-            onClick={() => toast({ title: "Add contact", description: "Invite link copied — share it with anyone." })}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
-          >
-            <Plus className="w-4 h-4" /> Add contact
-          </button>
-        )
+        <button
+          onClick={handleAddNewContact}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
+        >
+          <Plus className="w-4 h-4" /> Add contact
+        </button>
       }
     >
-      {/* Search bar (kept visible in bird's-eye too) */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border max-w-xl">
-        <Search className="w-4 h-4 text-muted-foreground" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search by name, company, role or tag…"
-          className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
-        />
+      {/* Smart unified search: filters vault + offers Add / Invite when no match */}
+      <div ref={searchWrapRef} className="relative max-w-xl">
+        <div
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border transition",
+            searchOpen && "shadow-elevated ring-1 ring-accent/40",
+          )}
+        >
+          <Search className="w-4 h-4 text-muted-foreground" />
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => setSearchOpen(true)}
+            placeholder="Search vault, or type a name / email to add…"
+            className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
+          />
+          {q ? (
+            <button
+              type="button"
+              onClick={() => { setQ(""); inputRef.current?.focus(); }}
+              className="text-muted-foreground hover:text-primary"
+              aria-label="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-muted-foreground bg-surface-low rounded px-1.5 py-0.5 ghost-border">
+              ⌘K
+            </kbd>
+          )}
+        </div>
+
+        {searchOpen && trimmedQ.length > 0 && (
+          <div className="absolute z-30 left-0 right-0 mt-2 rounded-2xl bg-surface-lowest ghost-border shadow-elevated overflow-hidden">
+            {/* In-vault matches */}
+            <div className="px-3 pt-3 pb-1 flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                In your vault
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                {searchMatches.length} {searchMatches.length === 1 ? "match" : "matches"}
+              </span>
+            </div>
+            {searchMatches.length > 0 ? (
+              <ul className="max-h-64 overflow-y-auto px-2 pb-2">
+                {searchMatches.slice(0, 6).map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      to={`/app/contact/${c.id}`}
+                      onClick={() => setSearchOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition"
+                    >
+                      <Avatar initials={c.initials} accent={c.accent} size="sm" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{c.title} · {c.org}</p>
+                      </div>
+                      <CornerDownLeft className="w-3.5 h-3.5 text-muted-foreground" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-4 pb-3 text-xs text-muted-foreground">
+                No one in your vault matches “{trimmedQ}”.
+              </p>
+            )}
+
+            {/* Not-in-vault actions */}
+            {showNotInVault && (
+              <>
+                <div className="h-px bg-border" />
+                <div className="px-3 pt-2 pb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Not in your vault
+                  </span>
+                </div>
+                <div className="px-2 pb-2 grid gap-1">
+                  <button
+                    type="button"
+                    onClick={handleAddNewContact}
+                    className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition text-left"
+                  >
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent/15 text-accent">
+                      <UserPlus className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-primary truncate">
+                        Add “{trimmedQ}” as a new contact
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Save details to your vault — no invite needed.
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendInvite}
+                    className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition text-left"
+                  >
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                      <Send className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-primary truncate">
+                        Send invite link to “{trimmedQ}”
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        They join Availock and connect back to you.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Quick filters + bird's-eye density (always visible) */}
@@ -217,6 +391,22 @@ const Contacts = () => {
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
+          {trimmedQ && (
+            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+              <button
+                onClick={handleAddNewContact}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-semibold shadow-elevated hover:opacity-95 transition"
+              >
+                <UserPlus className="w-3.5 h-3.5" /> Add “{trimmedQ}” to vault
+              </button>
+              <button
+                onClick={handleSendInvite}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-lowest ghost-border text-primary text-xs font-semibold hover:bg-surface-low transition"
+              >
+                <Send className="w-3.5 h-3.5" /> Send invite link
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div
