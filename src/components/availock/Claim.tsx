@@ -63,6 +63,10 @@ const Claim = () => {
         <p className="mt-5 text-xs text-muted-foreground">
           One email when we launch on Kickstarter. No spam. No data sold. Ever.
         </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Already have a vault?{" "}
+          <a href="/login" className="font-semibold text-primary hover:underline">Log in</a>
+        </p>
       </div>
     </section>
   );

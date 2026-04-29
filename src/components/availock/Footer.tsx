@@ -11,7 +11,8 @@ const columns: { title: string; links: FooterLink[] }[] = [
       { label: "The Vault", href: "/#vault" },
       { label: "Protocols", href: "/#protocol" },
       { label: "How it works", href: "/#how" },
-      { label: "Pricing", href: "/#pricing" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "FAQ", href: "/faq" },
     ],
   },
   {
@@ -20,6 +21,8 @@ const columns: { title: string; links: FooterLink[] }[] = [
       { label: "Manifesto", href: "/#manifesto" },
       { label: "Contact", href: "/contact" },
       { label: "Explainer video", href: "/#video" },
+      { label: "Log in", href: "/login" },
+      { label: "Sign up", href: "/signup" },
     ],
   },
   {
