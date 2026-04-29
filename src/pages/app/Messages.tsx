@@ -3,6 +3,7 @@ import { MessageSquare, Send } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import EmptyState from "@/components/app/EmptyState";
+import BroadcastsRail from "@/components/app/BroadcastsRail";
 import { contacts, threads as initial } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -13,6 +14,31 @@ const Messages = () => {
 
   const current = threads.find((t) => t.id === active);
   const contact = current ? contacts.find((c) => c.id === current.contactId) : undefined;
+
+  const replyToBroadcast = (contactId: string, quotedTitle: string) => {
+    const body = `Re: ${quotedTitle}`;
+    setThreads((prev) => {
+      const existing = prev.find((t) => t.contactId === contactId);
+      if (existing) {
+        return prev.map((t) =>
+          t.id === existing.id
+            ? { ...t, messages: [...t.messages, { id: `m${Date.now()}`, from: "me", body, at: "now" }], preview: body, lastAt: "now" }
+            : t,
+        );
+      }
+      const newThread = {
+        id: `t${Date.now()}`,
+        contactId,
+        preview: body,
+        unread: 0,
+        lastAt: "now",
+        messages: [{ id: `m${Date.now()}`, from: "me" as const, body, at: "now" }],
+      };
+      return [newThread, ...prev];
+    });
+    const next = threads.find((t) => t.contactId === contactId);
+    if (next) setActive(next.id);
+  };
 
   const send = () => {
     if (!current || !draft.trim()) return;
@@ -31,7 +57,10 @@ const Messages = () => {
     <AppShell subtitle="Secure communications" title="Messages">
       <div className="grid lg:grid-cols-[320px_1fr] gap-5 h-[calc(100vh-220px)] min-h-[480px]">
         {/* List */}
-        <aside className="rounded-3xl bg-surface-lowest ghost-border p-3 overflow-y-auto">
+        <aside className="rounded-3xl bg-surface-lowest ghost-border p-3 overflow-y-auto space-y-3">
+          <BroadcastsRail onReply={replyToBroadcast} />
+          <div>
+            <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Conversations</p>
           <ul className="space-y-1">
             {threads.map((t) => {
               const c = contacts.find((x) => x.id === t.contactId)!;
@@ -60,6 +89,7 @@ const Messages = () => {
               );
             })}
           </ul>
+          </div>
         </aside>
 
         {/* Thread */}
