@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
-  Pencil, Trash2, Sparkles, AlertTriangle, Info,
+  Pencil, Trash2, Sparkles, AlertTriangle, Info, Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -18,10 +18,15 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
 import { toast } from "sonner";
+import { contacts, type Relationship } from "@/lib/mockData";
 
 // Maximum number of simultaneously-published spotlight posts the
 // logged-in user is allowed to keep live at once.
 const MAX_ACTIVE_BY_ME = 2;
+
+// In the "From others" feed, only the most recent post per author is shown
+// — keeps the surface light (one window per contact).
+const MAX_PER_OTHER_AUTHOR = 1;
 
 const visMeta: Record<Visibility, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
   public:   { label: "Public",        icon: Globe,    cls: "bg-emerald-500/10 text-emerald-700" },
@@ -41,6 +46,29 @@ const expiryOptions = [
   { id: "24h",    label: "Tomorrow",    value: "expires tomorrow" },
   { id: "7d",     label: "7 days",      value: "expires in 7 days" },
 ];
+
+// Audience filter buckets for the "From others" feed.
+// "client" / "colleague" map straight to Relationship; "friend" includes
+// friend + family + mentor; "other" catches anything that doesn't fit.
+type AudienceFilter = "all" | "colleague" | "friend" | "client" | "other";
+
+const audienceFilters: { id: AudienceFilter; label: string }[] = [
+  { id: "all",       label: "All" },
+  { id: "colleague", label: "Office colleagues" },
+  { id: "friend",    label: "Friends" },
+  { id: "client",    label: "Clients" },
+  { id: "other",     label: "Other" },
+];
+
+const matchesAudience = (rel: Relationship | undefined, f: AudienceFilter) => {
+  if (f === "all") return true;
+  if (!rel) return f === "other";
+  if (f === "colleague") return rel === "colleague";
+  if (f === "client") return rel === "client";
+  if (f === "friend") return rel === "friend" || rel === "family" || rel === "mentor";
+  if (f === "other") return rel === "investor";
+  return false;
+};
 
 type Draft = {
   id?: string;
@@ -70,6 +98,7 @@ const SpotlightBoard = () => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [audience, setAudience] = useState<AudienceFilter>("all");
 
   const myActive = posts.filter((p) => !p.authorId || p.authorId === "me");
   const atLimit = myActive.length >= MAX_ACTIVE_BY_ME;
@@ -122,14 +151,36 @@ const SpotlightBoard = () => {
   const valid = draft.title.trim().length > 0 && draft.body.trim().length > 0
     && titleLeft >= 0 && bodyLeft >= 0;
 
-  // Spotlight board only shows the logged-in user's own posts (cap = 2).
-  // Posts from other contacts power the torch indicator elsewhere.
+  // ── My posts (cap = 2) ────────────────────────────────────────────
   const mine = posts.filter((p) => !p.authorId || p.authorId === "me");
-  // Pinned first, then most recent
-  const ordered = [...mine].sort((a, b) => {
+  const orderedMine = [...mine].sort((a, b) => {
     if (!!b.pinned !== !!a.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
     return b.createdAt - a.createdAt;
   });
+
+  // ── From others ───────────────────────────────────────────────────
+  // Build a quick lookup of contact -> relationship.
+  const contactRel: Record<string, Relationship> = {};
+  contacts.forEach((c) => { contactRel[c.id] = c.relationship; });
+  const contactName: Record<string, string> = {};
+  contacts.forEach((c) => { contactName[c.id] = c.name; });
+
+  const others = posts
+    .filter((p) => p.authorId && p.authorId !== "me" && p.visibility !== "private")
+    .sort((a, b) => b.createdAt - a.createdAt);
+
+  // Cap to 1 post per author (most recent wins)
+  const seenAuthors = new Set<string>();
+  const cappedOthers = others.filter((p) => {
+    if (!p.authorId) return false;
+    if (seenAuthors.has(p.authorId)) return false;
+    seenAuthors.add(p.authorId);
+    return true;
+  });
+
+  const filteredOthers = cappedOthers.filter((p) =>
+    matchesAudience(contactRel[p.authorId!], audience),
+  );
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -141,7 +192,7 @@ const SpotlightBoard = () => {
           <div>
             <h3 className="font-headline font-bold text-primary leading-tight">Spotlight</h3>
             <p className="text-[11px] text-muted-foreground">
-              Announcements, invites, updates and notes · {ordered.length} active
+              Your posts and updates from your network
             </p>
           </div>
         </div>
@@ -171,67 +222,153 @@ const SpotlightBoard = () => {
         </p>
       )}
 
-      {ordered.length === 0 ? (
-        <div className="mt-4 p-6 rounded-2xl ghost-border bg-surface-low/50 text-center text-sm text-muted-foreground">
-          No spotlight posts yet — share an update to light up your contacts.
+      {/* ── Section 1: My posts ─────────────────────────────────── */}
+      <div className="mt-5">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            My posts · {orderedMine.length}/{MAX_ACTIVE_BY_ME}
+          </h4>
         </div>
-      ) : (
-        <ul className="mt-4 grid sm:grid-cols-2 gap-3">
-          {ordered.slice(0, 4).map((p) => {
-            const Vis = visMeta[p.visibility];
-            const Tn = toneMeta[p.tone];
-            return (
-              <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
-                <div className="absolute top-2 right-2 flex items-center gap-1">
-                  <button
-                    onClick={() => openEdit(p)}
-                    className="p-1 rounded-full text-muted-foreground hover:bg-surface-low/70 hover:text-primary transition"
-                    aria-label="Edit"
-                    title="Edit"
-                  >
-                    <Pencil className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete(p.id)}
-                    className="p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
-                    aria-label="Delete"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-                <div className="flex items-center gap-1.5 flex-wrap pr-14">
-                  {p.pinned && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
-                      <Pin className="w-2.5 h-2.5" /> Pinned
+        {orderedMine.length === 0 ? (
+          <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
+            No spotlight posts yet — share an update to light up your contacts.
+          </div>
+        ) : (
+          <ul className="grid sm:grid-cols-2 gap-3">
+            {orderedMine.map((p) => {
+              const Vis = visMeta[p.visibility];
+              const Tn = toneMeta[p.tone];
+              return (
+                <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    <button
+                      onClick={() => openEdit(p)}
+                      className="p-1 rounded-full text-muted-foreground hover:bg-surface-low/70 hover:text-primary transition"
+                      aria-label="Edit"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(p.id)}
+                      className="p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
+                      aria-label="Delete"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap pr-14">
+                    {p.pinned && (
+                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                        <Pin className="w-2.5 h-2.5" /> Pinned
+                      </span>
+                    )}
+                    <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full", Vis.cls)}>
+                      <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
                     </span>
-                  )}
-                  <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full", Vis.cls)}>
-                    <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
-                    <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
-                  </span>
-                </div>
-                <h4 className="mt-2 font-headline font-bold text-primary text-sm leading-tight">{p.title}</h4>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.body}</p>
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  {p.expiresIn ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <Clock className="w-3 h-3" /> {p.expiresIn}
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
+                      <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
                     </span>
-                  ) : <span />}
-                  {p.cta && (
-                    <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent">
-                      {p.cta.label} <ArrowRight className="w-3 h-3" />
-                    </a>
+                  </div>
+                  <h4 className="mt-2 font-headline font-bold text-primary text-sm leading-tight">{p.title}</h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.body}</p>
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    {p.expiresIn ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Clock className="w-3 h-3" /> {p.expiresIn}
+                      </span>
+                    ) : <span />}
+                    {p.cta && (
+                      <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent">
+                        {p.cta.label} <ArrowRight className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {/* ── Section 2: From others ──────────────────────────────── */}
+      <div className="mt-6 pt-5 border-t border-border/60">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            From others · {filteredOthers.length}
+          </h4>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Filter className="w-3 h-3 text-muted-foreground" />
+            {audienceFilters.map((f) => {
+              const active = audience === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setAudience(f.id)}
+                  className={cn(
+                    "px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-surface-lowest text-muted-foreground hover:text-primary",
                   )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {filteredOthers.length === 0 ? (
+          <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
+            No spotlight posts from this group right now.
+          </div>
+        ) : (
+          <ul className="grid sm:grid-cols-2 gap-3">
+            {filteredOthers.map((p) => {
+              const Vis = visMeta[p.visibility];
+              const Tn = toneMeta[p.tone];
+              const author = contactName[p.authorId!] ?? "Contact";
+              const rel = contactRel[p.authorId!];
+              return (
+                <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full", Vis.cls)}>
+                      <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
+                      <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
+                    </span>
+                    {rel && (
+                      <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                        {rel}
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="mt-2 font-headline font-bold text-primary text-sm leading-tight">{p.title}</h4>
+                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {author}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.body}</p>
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    {p.expiresIn ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Clock className="w-3 h-3" /> {p.expiresIn}
+                      </span>
+                    ) : <span />}
+                    {p.cta && (
+                      <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent">
+                        {p.cta.label} <ArrowRight className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
 
       {/* Editor dialog */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
