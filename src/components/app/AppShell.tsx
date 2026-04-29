@@ -1,0 +1,281 @@
+import { ReactNode, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  Inbox,
+  CalendarDays,
+  MessageSquare,
+  QrCode,
+  Settings,
+  BarChart3,
+  Bell,
+  Search,
+  Menu,
+  X,
+  Crown,
+  ShieldCheck,
+  LogOut,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import logoIcon from "@/assets/availock-icon.png";
+import { useRole } from "@/lib/role";
+import { me, notifications } from "@/lib/mockData";
+import Avatar from "./Avatar";
+
+interface NavItem {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  badge?: number;
+  end?: boolean;
+  providerOnly?: boolean;
+}
+
+const baseItems: NavItem[] = [
+  { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/app/contacts", label: "Contacts", icon: Users },
+  { to: "/app/availability", label: "Availability", icon: CalendarDays },
+  { to: "/app/requests", label: "Requests", icon: Inbox, badge: 2 },
+  { to: "/app/messages", label: "Messages", icon: MessageSquare, badge: 3 },
+  { to: "/app/analytics", label: "Analytics", icon: BarChart3, providerOnly: true },
+  { to: "/app/share", label: "Share", icon: QrCode },
+  { to: "/app/settings", label: "Settings", icon: Settings },
+];
+
+interface Props {
+  children: ReactNode;
+  title?: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}
+
+const AppShell = ({ children, title, subtitle, actions }: Props) => {
+  const [role] = useRole();
+  const [mobileNav, setMobileNav] = useState(false);
+  const navigate = useNavigate();
+  const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  return (
+    <div className="min-h-screen bg-surface text-foreground flex">
+      {/* Sidebar (desktop / tablet) */}
+      <aside className="hidden md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen">
+        <Link to="/app" className="flex items-center gap-2 px-6 py-6">
+          <img src={logoIcon} alt="Availock" width={28} height={28} className="h-7 w-7 object-contain" />
+          <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
+        </Link>
+
+        <nav className="px-3 flex-1 overflow-y-auto">
+          <p className="px-3 mt-2 mb-2 text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground">
+            Workspace
+          </p>
+          <ul className="space-y-0.5">
+            {items.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    cn(
+                      "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-glass"
+                        : "text-muted-foreground hover:text-primary hover:bg-surface-low",
+                    )
+                  }
+                >
+                  <item.icon className="w-4 h-4 shrink-0" />
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge ? (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                      {item.badge}
+                    </span>
+                  ) : null}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 mx-1 rounded-2xl bg-gradient-vault p-4 text-primary-foreground shadow-elevated">
+            <Crown className="w-5 h-5 text-gold" />
+            <p className="mt-2 font-headline font-bold text-sm leading-snug">Unlock the Vault</p>
+            <p className="mt-1 text-[11px] text-primary-foreground/80 leading-relaxed">
+              Smart Filter, analytics and Power Calls — from $9/mo.
+            </p>
+            <Link
+              to="/app/upgrade"
+              className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gold hover:text-gold/80"
+            >
+              Upgrade →
+            </Link>
+          </div>
+        </nav>
+
+        <div className="p-3 border-t border-border/50">
+          <Link
+            to="/app/settings"
+            className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-low transition"
+          >
+            <Avatar initials={me.initials} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-primary truncate">{me.name}</p>
+              <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" /> {role === "provider" ? "Provider" : "Seeker"} · {me.plan}
+              </p>
+            </div>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main column */}
+      <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border/50">
+          <div className="px-4 md:px-8 py-3.5 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileNav(true)}
+              className="md:hidden grid place-items-center w-9 h-9 rounded-lg ghost-border bg-surface-lowest"
+              aria-label="Open menu"
+            >
+              <Menu className="w-4 h-4 text-primary" />
+            </button>
+
+            <div className="hidden sm:flex items-center gap-2 flex-1 max-w-md px-3.5 py-2 rounded-full bg-surface-low ghost-border">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <input
+                placeholder="Search contacts, requests, slots…"
+                className="bg-transparent outline-none text-sm flex-1 placeholder:text-muted-foreground"
+              />
+              <kbd className="hidden md:inline text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-lowest text-muted-foreground ghost-border">
+                ⌘K
+              </kbd>
+            </div>
+
+            <div className="flex-1 sm:hidden" />
+
+            <button
+              type="button"
+              onClick={() => navigate("/app/notifications")}
+              className="relative grid place-items-center w-9 h-9 rounded-full ghost-border bg-surface-lowest hover:bg-surface-low transition"
+              aria-label="Notifications"
+            >
+              <Bell className="w-4 h-4 text-primary" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 grid place-items-center w-4 h-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            <Link to="/app/settings" className="md:hidden">
+              <Avatar initials={me.initials} size="sm" />
+            </Link>
+          </div>
+
+          {(title || actions) && (
+            <div className="px-4 md:px-8 pb-5 pt-1 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                {subtitle && (
+                  <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-1.5">{subtitle}</p>
+                )}
+                {title && (
+                  <h1 className="font-headline font-extrabold text-primary text-2xl md:text-3xl leading-tight">
+                    {title}
+                  </h1>
+                )}
+              </div>
+              {actions && <div className="flex items-center gap-2">{actions}</div>}
+            </div>
+          )}
+        </header>
+
+        <main className="flex-1 px-4 md:px-8 py-6 md:py-8">{children}</main>
+      </div>
+
+      {/* Mobile drawer */}
+      {mobileNav && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+            onClick={() => setMobileNav(false)}
+          />
+          <aside className="absolute inset-y-0 left-0 w-72 bg-surface-lowest p-5 flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center gap-2">
+                <img src={logoIcon} alt="Availock" width={28} height={28} className="h-7 w-7 object-contain" />
+                <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
+              </Link>
+              <button onClick={() => setMobileNav(false)} aria-label="Close menu" className="grid place-items-center w-9 h-9 rounded-lg ghost-border">
+                <X className="w-4 h-4 text-primary" />
+              </button>
+            </div>
+            <ul className="space-y-1">
+              {items.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    onClick={() => setMobileNav(false)}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-surface-low",
+                      )
+                    }
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => {
+                setMobileNav(false);
+                navigate("/");
+              }}
+              className="mt-auto inline-flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-destructive transition"
+            >
+              <LogOut className="w-4 h-4" /> Log out
+            </button>
+          </aside>
+        </div>
+      )}
+
+      {/* Mobile bottom nav */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-lowest border-t border-border/50">
+        <ul className="grid grid-cols-5">
+          {[
+            baseItems[0],
+            baseItems[1],
+            baseItems[3],
+            baseItems[4],
+            baseItems[7],
+          ].map((item) => (
+            <li key={item.to}>
+              <NavLink
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center gap-0.5 py-2.5 text-[10px] font-medium",
+                    isActive ? "text-primary" : "text-muted-foreground",
+                  )
+                }
+              >
+                <item.icon className="w-5 h-5" />
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  );
+};
+
+export default AppShell;

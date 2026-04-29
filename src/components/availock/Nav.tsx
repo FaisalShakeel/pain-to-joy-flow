@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import logoIcon from "@/assets/availock-icon.png";
 
 const Nav = () => {
@@ -42,14 +43,23 @@ const Nav = () => {
           <a href="#video" className="text-muted-foreground hover:text-primary transition-colors">Video</a>
           <a href="#audience" className="text-muted-foreground hover:text-primary transition-colors">For You</a>
           <a href="#manifesto" className="text-muted-foreground hover:text-primary transition-colors">Manifesto</a>
-          <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</a>
+          <Link to="/pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+          <Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link>
         </div>
-        <a
-          href="#claim"
-          className="px-5 md:px-7 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-glass hover:opacity-95 active:scale-[0.97] transition"
-        >
-          Claim your ID
-        </a>
+        <div className="flex items-center gap-2 md:gap-3">
+          <Link
+            to="/login"
+            className="hidden sm:inline-flex text-sm font-semibold text-muted-foreground hover:text-primary transition px-3 py-2"
+          >
+            Log in
+          </Link>
+          <a
+            href="#claim"
+            className="px-5 md:px-7 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-glass hover:opacity-95 active:scale-[0.97] transition"
+          >
+            Claim your ID
+          </a>
+        </div>
       </div>
     </nav>
   );
