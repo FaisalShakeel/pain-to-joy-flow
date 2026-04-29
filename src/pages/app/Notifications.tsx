@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { Bell, Check, Inbox, MessageSquare, CalendarDays, Sparkles } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import EmptyState from "@/components/app/EmptyState";
-import { notifications as initial } from "@/lib/mockData";
+import { useNotifications } from "@/components/app/NotificationsContext";
 import { toast } from "@/hooks/use-toast";
 
 const iconFor = {
@@ -13,10 +12,10 @@ const iconFor = {
 };
 
 const Notifications = () => {
-  const [list, setList] = useState(initial);
+  const { list, markRead, markAllRead, unreadCount } = useNotifications();
 
   const markAll = () => {
-    setList((p) => p.map((n) => ({ ...n, unread: false })));
+    markAllRead();
     toast({ title: "All caught up" });
   };
 
@@ -25,12 +24,14 @@ const Notifications = () => {
       subtitle="Updates"
       title="Notifications"
       actions={
-        <button
-          onClick={markAll}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full ghost-border bg-surface-lowest text-sm font-semibold text-primary hover:bg-surface-low transition"
-        >
-          <Check className="w-4 h-4" /> Mark all read
-        </button>
+        unreadCount > 0 ? (
+          <button
+            onClick={markAll}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full ghost-border bg-surface-lowest text-sm font-semibold text-primary hover:bg-surface-low transition"
+          >
+            <Check className="w-4 h-4" /> Mark all read
+          </button>
+        ) : null
       }
     >
       {list.length === 0 ? (
@@ -52,7 +53,19 @@ const Notifications = () => {
                   <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">{n.at}</p>
                 </div>
-                {n.unread && <span className="w-2 h-2 rounded-full bg-accent mt-2" />}
+                {n.unread ? (
+                  <button
+                    onClick={() => markRead(n.id)}
+                    title="Mark as read"
+                    aria-label="Mark as read"
+                    className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-lowest text-[11px] font-semibold text-primary hover:bg-surface-low transition"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                    Mark read
+                  </button>
+                ) : (
+                  <span className="shrink-0 text-[11px] text-muted-foreground">Read</span>
+                )}
               </li>
             );
           })}
