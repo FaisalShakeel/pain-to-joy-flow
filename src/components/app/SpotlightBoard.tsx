@@ -435,16 +435,29 @@ const SpotlightBoard = () => {
                       {filteredOthers.map((o) => {
                         const oAuthor = contactName[o.authorId!] ?? "Contact";
                         const isActive = o.id === p.id;
+                        const isUnseen = !viewedPosts.has(o.id);
                         return (
                           <DropdownMenuItem
                             key={o.id}
                             onClick={() => setActiveOtherId(o.id)}
-                            className={cn("flex flex-col items-start gap-0.5", isActive && "bg-accent/10")}
+                            className={cn(
+                              "flex flex-col items-start gap-0.5",
+                              isActive && "bg-accent/10",
+                              !isUnseen && "opacity-60",
+                            )}
                           >
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                               {oAuthor}
+                              {isUnseen && (
+                                <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-full bg-primary text-primary-foreground">
+                                  <span className="w-1 h-1 rounded-full bg-primary-foreground" /> New
+                                </span>
+                              )}
                             </span>
-                            <span className="text-xs font-medium text-primary line-clamp-1">
+                            <span className={cn(
+                              "text-xs line-clamp-1",
+                              isUnseen ? "font-bold text-primary" : "font-medium text-muted-foreground",
+                            )}>
                               {o.title}
                             </span>
                           </DropdownMenuItem>
