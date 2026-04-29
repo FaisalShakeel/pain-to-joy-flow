@@ -125,10 +125,10 @@ const Contacts = () => {
 
   // Approximate per-tile heights (px) used to compute the visible window height.
   // Keeps exactly `density` tiles in view; the rest scrolls within the panel.
-  const densityRowHeight: Record<Density, number> = { 6: 96, 10: 92, 16: 88 };
+  const densityRowHeight: Record<Density, number> = { 6: 168, 10: 124, 16: 88 };
   const densityColCount: Record<Density, number> = { 6: 3, 10: 5, 16: 4 };
   const visibleRows: Record<Density, number> = { 6: 2, 10: 2, 16: 4 };
-  const scrollMaxHeight = visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 8 + 16;
+  const scrollMaxHeight = visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
@@ -223,23 +223,25 @@ const Contacts = () => {
           className="mt-4 overflow-y-auto pr-1 rounded-2xl"
           style={{ maxHeight: scrollMaxHeight }}
         >
-          <ul className={cn("grid gap-2", densityCols[density])}>
+          <ul className={cn("grid", density === 6 ? "gap-4" : density === 10 ? "gap-3" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const compact = density === 16;
+              const roomy = density === 6;
+              const medium = density === 10;
               return (
                 <li key={c.id} className="relative">
                   <Link
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
-                      "group flex items-start gap-2 rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
-                      compact ? "p-2" : "p-2.5",
+                      "group flex items-start rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
+                      roomy ? "gap-3 p-4" : medium ? "gap-2.5 p-3" : "gap-2 p-2",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
                     <div className="relative shrink-0">
-                      <Avatar initials={c.initials} accent={c.accent} size={compact ? "sm" : "md"} />
+                      <Avatar initials={c.initials} accent={c.accent} size={roomy ? "lg" : medium ? "md" : "sm"} />
                       <span
                         className={cn(
                           "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
@@ -248,17 +250,17 @@ const Contacts = () => {
                       />
                     </div>
                     <div className="min-w-0 flex-1 pr-5">
-                      <p className={cn("font-semibold text-primary truncate leading-tight", compact ? "text-[11px]" : "text-xs")}>
+                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : medium ? "text-xs" : "text-[11px]")}>
                         {c.name}
                       </p>
                       <div className="flex items-center justify-between gap-1">
-                        <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
+                        <p className={cn("flex items-center gap-1 text-muted-foreground truncate", roomy ? "text-[11px]" : medium ? "text-[10px]" : "text-[9px]")}>
                           <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
                           {statusLabel[c.status]}
                         </p>
-                        <AlertIcons alerts={c.alerts} size="xs" />
+                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
                       </div>
-                      <p className={cn("mt-0.5 text-foreground/80 leading-tight", compact ? "text-[9px] line-clamp-2" : "text-[10px] line-clamp-2")}>
+                      <p className={cn("mt-1 text-foreground/80 leading-snug", roomy ? "text-[11px] line-clamp-3" : medium ? "text-[10px] line-clamp-2" : "text-[9px] line-clamp-2")}>
                         {c.availabilityContext}
                       </p>
                     </div>
