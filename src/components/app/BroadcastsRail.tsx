@@ -142,8 +142,17 @@ const BroadcastsRail = ({ onReply }: Props) => {
               if (!c) return null;
               const Tn = toneMeta[p.tone];
               const isOpen = openId === p.id;
+              const isUnseen = !viewedPosts.has(p.id);
               return (
-                <div key={p.id} className="rounded-xl bg-surface-lowest ghost-border overflow-hidden">
+                <div
+                  key={p.id}
+                  className={cn(
+                    "rounded-xl ghost-border overflow-hidden border-l-2 transition",
+                    isUnseen
+                      ? "bg-surface-lowest border-l-primary"
+                      : "bg-surface-lowest/60 border-l-transparent opacity-70",
+                  )}
+                >
                   <button
                     type="button"
                     onClick={() => {
@@ -159,9 +168,24 @@ const BroadcastsRail = ({ onReply }: Props) => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className={cn("w-1.5 h-1.5 rounded-full", Tn.dot)} />
-                        <p className="text-xs font-semibold text-primary truncate">{c.name}</p>
+                        <p className={cn(
+                          "text-xs truncate",
+                          isUnseen ? "font-bold text-primary" : "font-medium text-muted-foreground",
+                        )}>
+                          {c.name}
+                        </p>
+                        {isUnseen && (
+                          <span className="inline-flex items-center text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-full bg-primary text-primary-foreground">
+                            New
+                          </span>
+                        )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">{p.title}</p>
+                      <p className={cn(
+                        "text-[11px] truncate",
+                        isUnseen ? "text-primary/80 font-medium" : "text-muted-foreground",
+                      )}>
+                        {p.title}
+                      </p>
                     </div>
                     <span
                       role="button"
