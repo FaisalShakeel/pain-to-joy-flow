@@ -9,7 +9,7 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import AccessRequestComposer from "@/components/app/AccessRequestComposer";
 import PingButton from "@/components/app/PingButton";
-import { findContact } from "@/lib/mockData";
+import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
 const ContactProfile = () => {
@@ -36,6 +36,18 @@ const ContactProfile = () => {
   const isPending = contact.syncStatus === "pending";
   const isApproved = contact.syncStatus === "approved";
   const firstName = contact.name.split(" ")[0];
+
+  // Owner-controlled profile + per-field visibility
+  const owner = useMemo(() => ownerProfileFor(contact), [contact]);
+  const viewer: ViewerAccess = isApproved ? "approved" : "public";
+  const show = (rule: keyof typeof owner.visibility) => canSee(owner.visibility[rule], viewer);
+
+  const visiblePrimaryComms = show("primaryCommsSection")
+    ? owner.primaryComms.filter((c) => canSee(c.visibility, viewer))
+    : [];
+  const visibleSocials = show("socialHandlesSection")
+    ? owner.socialHandles.filter((s) => canSee(s.visibility, viewer))
+    : [];
 
   // Status pill data
   const statusData = (() => {
@@ -67,11 +79,6 @@ const ContactProfile = () => {
       description: next[k] ? `We'll ping you the moment ${firstName} is reachable.` : "You won't be notified about status changes.",
     });
   };
-
-  // Mock comms data — derived from contact id for stability (purely presentational)
-  const handle = contact.name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z_]/g, "");
-  const emailDomain = contact.org.toLowerCase().replace(/[^a-z]/g, "") || "company";
-  const email = `${handle.split("_")[0]}@${emailDomain}.io`;
 
   return (
     <AppShell subtitle="Contact profile" title={contact.name}>
