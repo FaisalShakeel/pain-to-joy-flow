@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -42,6 +42,24 @@ const baseItems: NavItem[] = [
   { to: "/app/settings", label: "Settings", icon: Settings },
 ];
 
+// Map sibling/child routes to a sidebar item so the right entry highlights.
+const activeAliases: { match: (path: string) => boolean; to: string }[] = [
+  { to: "/app/contacts", match: (p) => p.startsWith("/app/contact/") || p.startsWith("/app/contacts") },
+  { to: "/app/availability", match: (p) => p.startsWith("/app/availability") || p.startsWith("/app/schedule") },
+  { to: "/app/requests", match: (p) => p.startsWith("/app/requests") },
+  { to: "/app/messages", match: (p) => p.startsWith("/app/messages") },
+  { to: "/app/analytics", match: (p) => p.startsWith("/app/analytics") },
+  { to: "/app/share", match: (p) => p.startsWith("/app/share") },
+  { to: "/app/settings", label: "" as never, match: (p) => p.startsWith("/app/settings") } as any,
+];
+
+const isItemActive = (to: string, end: boolean | undefined, pathname: string) => {
+  if (end) return pathname === to;
+  if (pathname === to || pathname.startsWith(to + "/")) return true;
+  const alias = activeAliases.find((a) => a.to === to);
+  return alias ? alias.match(pathname) : false;
+};
+
 interface Props {
   children: ReactNode;
   title?: string;
@@ -53,6 +71,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -75,14 +94,16 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
                 <NavLink
                   to={item.to}
                   end={item.end}
-                  className={({ isActive }) =>
+                  className={() => {
+                    const isActive = isItemActive(item.to, item.end, location.pathname);
+                    return
                     cn(
                       "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground shadow-glass"
                         : "text-muted-foreground hover:text-primary hover:bg-surface-low",
-                    )
-                  }
+                    );
+                  }}
                 >
                   <item.icon className="w-4 h-4 shrink-0" />
                   <span className="flex-1">{item.label}</span>
