@@ -1,6 +1,7 @@
 export type SyncStatus = "locked" | "pending" | "approved";
 export type AvailabilityStatus = "available" | "busy" | "focus" | "offline";
 export type Relationship = "client" | "colleague" | "family" | "investor" | "mentor" | "friend";
+export type AlertKind = "callback" | "message" | "calendar";
 
 export interface Contact {
   id: string;
@@ -18,6 +19,7 @@ export interface Contact {
   relationship: Relationship;
   favorite?: boolean;
   frequent?: boolean;
+  alerts?: AlertKind[];
 }
 
 export interface AccessRequest {
@@ -95,6 +97,7 @@ export const contacts: Contact[] = [
     relationship: "client",
     favorite: true,
     frequent: true,
+    alerts: ["message", "calendar"],
   },
   {
     id: "rashid-al-amir",
@@ -111,6 +114,7 @@ export const contacts: Contact[] = [
     availabilityContext: "Available now until 5:00 PM",
     relationship: "mentor",
     frequent: true,
+    alerts: ["callback"],
   },
   {
     id: "elena-vance",
@@ -143,6 +147,7 @@ export const contacts: Contact[] = [
     relationship: "colleague",
     favorite: true,
     frequent: true,
+    alerts: ["calendar"],
   },
   {
     id: "mark-thompson",
@@ -174,6 +179,7 @@ export const contacts: Contact[] = [
     availabilityContext: "Deep focus until Friday — async only",
     relationship: "colleague",
     favorite: true,
+    alerts: ["message"],
   },
 ];
 

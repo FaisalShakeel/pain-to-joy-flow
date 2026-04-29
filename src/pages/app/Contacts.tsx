@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
 import EmptyState from "@/components/app/EmptyState";
-import { contacts, type Relationship } from "@/lib/mockData";
+import { contacts, type Relationship, type AlertKind } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,31 @@ const filters: { id: Filter; label: string; icon: React.ComponentType<{ classNam
   { id: "colleague", label: "Colleagues", icon: UserCheck },
   { id: "family",    label: "Family",     icon: Heart },
 ];
+
+const alertMeta: Record<AlertKind, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
+  callback: { label: "Callback alert set",       icon: PhoneCall,     cls: "bg-emerald-500/15 text-emerald-700" },
+  message:  { label: "Message alert set",        icon: MessageSquare, cls: "bg-sky-500/15 text-sky-700" },
+  calendar: { label: "Calendar booking alert",   icon: CalendarClock, cls: "bg-violet-500/15 text-violet-700" },
+};
+
+const AlertIcons = ({ alerts, size = "md" }: { alerts?: AlertKind[]; size?: "xs" | "sm" | "md" }) => {
+  if (!alerts || alerts.length === 0) return null;
+  const dim = size === "xs" ? "w-3 h-3 p-0.5" : size === "sm" ? "w-4 h-4 p-0.5" : "w-5 h-5 p-1";
+  const icon = size === "xs" ? "w-2 h-2" : size === "sm" ? "w-2.5 h-2.5" : "w-3 h-3";
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label="Contact attempt set">
+      {alerts.map((a) => {
+        const m = alertMeta[a];
+        const Icon = m.icon;
+        return (
+          <span key={a} title={m.label} className={cn("inline-flex items-center justify-center rounded-full", dim, m.cls)}>
+            <Icon className={icon} />
+          </span>
+        );
+      })}
+    </span>
+  );
+};
 
 const Contacts = () => {
   const [q, setQ] = useState("");
@@ -210,10 +235,13 @@ const Contacts = () => {
                     <p className={cn("font-semibold text-primary truncate leading-tight", compact ? "text-[11px]" : "text-xs")}>
                       {c.name}
                     </p>
-                    <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
-                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
-                      {statusLabel[c.status]}
-                    </p>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
+                        {statusLabel[c.status]}
+                      </p>
+                      <AlertIcons alerts={c.alerts} size="xs" />
+                    </div>
                     <p className={cn("mt-0.5 text-foreground/80 leading-tight", compact ? "text-[9px] line-clamp-2" : "text-[10px] line-clamp-2")}>
                       {c.availabilityContext}
                     </p>
@@ -237,7 +265,10 @@ const Contacts = () => {
                     <Avatar initials={c.initials} accent={c.accent} size="lg" />
                     <div className="flex flex-col items-end gap-1.5">
                       <StatusPill tone={c.status} />
-                      {c.favorite && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                      <div className="flex items-center gap-1">
+                        {c.favorite && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                        <AlertIcons alerts={c.alerts} size="sm" />
+                      </div>
                     </div>
                   </div>
                   <p className="mt-3 font-headline font-bold text-primary truncate">{c.name}</p>
@@ -277,6 +308,7 @@ const Contacts = () => {
                       {c.favorite && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
                       <StatusPill tone={c.status} />
                       <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full", rel.cls)}>{rel.label}</span>
+                      <AlertIcons alerts={c.alerts} size="sm" />
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{c.title} · {c.org}</p>
                     <p className="mt-1 text-[11px] text-foreground/80 flex items-center gap-1 truncate">
