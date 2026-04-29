@@ -77,18 +77,18 @@ const ContactProfile = () => {
     <AppShell subtitle="Contact profile" title={contact.name}>
       <button
         onClick={goBack}
-        className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
+        className="inline-flex items-center gap-2 mb-9 px-4 py-2 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
         aria-label="Back to contacts"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Back to contacts
       </button>
 
       {/* TOP: Profile Window */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         {/* Left: Portrait + Spotlight */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+        <div className="lg:col-span-4 flex flex-col gap-9">
           <div className={`aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br ${contact.accent} shadow-elevated ring-8 ${statusData.ringClass} relative grid place-items-center`}>
-            <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-lg">
+            <span className="text-white font-headline font-extrabold text-8xl tracking-tight drop-shadow-lg">
               {contact.initials}
             </span>
             <div className={`absolute top-4 right-4 h-5 w-5 ${statusData.dotClass} rounded-full ring-4 ring-white shadow-lg z-10 animate-pulse`} />
@@ -97,18 +97,18 @@ const ContactProfile = () => {
           {/* Spotlight */}
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-primary/5 to-primary/30 rounded-3xl blur opacity-75 transition" />
-            <div className="relative bg-surface-lowest rounded-3xl p-6 ghost-border overflow-hidden shadow-ambient">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Building2 className="w-14 h-14 text-primary" />
+            <div className="relative bg-surface-lowest rounded-3xl p-8 ghost-border overflow-hidden shadow-ambient">
+              <div className="absolute top-0 right-0 p-5 opacity-10">
+                <Building2 className="w-16 h-16 text-primary" />
               </div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-5">
                 <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Spotlight</h4>
               </div>
-              <p className="text-base font-headline font-light italic leading-relaxed text-foreground/90">
+              <p className="text-lg font-headline font-light italic leading-relaxed text-foreground/90">
                 "{contact.bio}"
               </p>
-              <div className="mt-5 pt-4 border-t border-primary/5 flex items-center justify-between">
+              <div className="mt-7 pt-5 border-t border-primary/5 flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">Security Layer</span>
                   <span className="text-[10px] font-mono text-primary/70">v2.4 handshake active</span>
@@ -119,21 +119,21 @@ const ContactProfile = () => {
           </div>
 
           {/* Quick Ping */}
-          <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient flex items-center justify-between">
+          <div className="rounded-2xl bg-surface-lowest ghost-border p-6 shadow-ambient flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Quick Ping</p>
-              <p className="text-sm font-semibold text-primary">Tap to nudge {firstName}</p>
+              <p className="text-base font-semibold text-primary mt-1">Tap to nudge {firstName}</p>
             </div>
             <PingButton contact={contact} size="md" />
           </div>
         </div>
 
         {/* Right: Profile info */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-9">
           {/* Hero card */}
-          <div className="bg-surface-lowest rounded-3xl p-8 md:p-10 shadow-ambient ghost-border relative overflow-hidden">
+          <div className="bg-surface-lowest rounded-3xl p-10 md:p-14 shadow-ambient ghost-border relative overflow-hidden">
             {/* Status block (top-right) */}
-            <div className="absolute top-6 right-6 md:top-8 md:right-8 flex flex-col items-end gap-2">
+            <div className="absolute top-8 right-8 md:top-10 md:right-10 flex flex-col items-end gap-3">
               <div className={`${statusData.chipClass} border px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2`}>
                 <span className="relative flex h-2 w-2">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusData.pingClass} opacity-75`} />
@@ -144,9 +144,9 @@ const ContactProfile = () => {
                   <Zap className="w-3 h-3" /> {statusData.subLabel}
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`grid place-items-center w-7 h-7 rounded-full ${statusData.chipClass}`}>
-                  <Clock className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-2.5 mt-1">
+                <span className={`grid place-items-center w-8 h-8 rounded-full ${statusData.chipClass}`}>
+                  <Clock className="w-4 h-4" />
                 </span>
                 <div className="flex flex-col">
                   <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Current availability</span>
@@ -156,21 +156,21 @@ const ContactProfile = () => {
             </div>
 
             {/* Bio */}
-            <div className="space-y-3 max-w-2xl pr-32 md:pr-48">
+            <div className="space-y-5 max-w-2xl pr-32 md:pr-48">
               <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
                   {firstName}
                 </h1>
-                <div className="flex items-center gap-2 text-muted-foreground font-semibold tracking-wide mt-1">
+                <div className="flex items-center gap-2 text-muted-foreground font-semibold tracking-wide mt-3">
                   <Building2 className="w-4 h-4 text-primary" />
                   <span>{contact.org}</span>
                 </div>
               </div>
-              <p className="text-lg md:text-xl font-light text-foreground/70 font-headline">{contact.title}</p>
+              <p className="text-xl md:text-2xl font-light text-foreground/70 font-headline leading-snug">{contact.title}</p>
 
-              <div className="flex flex-wrap gap-2 pt-1">
+              <div className="flex flex-wrap gap-2.5 pt-2">
                 {contact.tags.map((t) => (
-                  <span key={t} className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/5 text-primary">
+                  <span key={t} className="text-[11px] font-semibold px-3 py-1.5 rounded-full bg-primary/5 text-primary">
                     {t}
                   </span>
                 ))}
@@ -178,11 +178,11 @@ const ContactProfile = () => {
             </div>
 
             {/* Operations Center */}
-            <div className="pt-8 mt-8 border-t border-surface-container">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-2">
+            <div className="pt-12 mt-12 border-t border-surface-container">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-8 flex items-center gap-2">
                 <span className="h-px w-8 bg-surface-container" /> Operations Center
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-9">
                 <OpsItem icon={CalendarDays} label="Operation Days" value="Monday — Friday" sub="Weekend access by priority only" />
                 <OpsItem icon={Briefcase} label="Operation Hours" value="09:00 — 18:00 (GMT+0)" />
                 <OpsItem icon={MapPin} label="Headquarters" value={contact.org} sub={`${firstName}'s primary base`} />
@@ -191,7 +191,7 @@ const ContactProfile = () => {
           </div>
 
           {/* Comms grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <CommsCard
               title="Primary Comms"
               badge="Secure Tunnels"
@@ -215,19 +215,19 @@ const ContactProfile = () => {
           </div>
 
           {/* Availability alerts */}
-          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-            <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="rounded-3xl bg-surface-lowest ghost-border p-8 shadow-ambient">
+            <div className="flex items-center justify-between gap-3 mb-6">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Availability alerts</p>
-                <h3 className="mt-1 font-headline font-bold text-primary text-base">
+                <h3 className="mt-2 font-headline font-bold text-primary text-lg">
                   Notify me when {firstName} is reachable
                 </h3>
               </div>
-              <span className={`grid place-items-center w-10 h-10 rounded-xl ${Object.values(alerts).some(Boolean) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+              <span className={`grid place-items-center w-12 h-12 rounded-xl ${Object.values(alerts).some(Boolean) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                 {Object.values(alerts).some(Boolean) ? <BellRing className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {[
                 { key: "callback" as const, icon: PhoneCall, label: "Callback" },
                 { key: "message" as const, icon: MessageSquare, label: "Message" },
@@ -238,13 +238,13 @@ const ContactProfile = () => {
                   <button
                     key={key}
                     onClick={() => toggleAlert(key)}
-                    className={`flex items-center justify-between gap-3 p-3 rounded-2xl ghost-border text-left transition ${on ? "bg-primary/5" : "bg-surface-low hover:bg-surface"}`}
+                    className={`flex items-center justify-between gap-3 p-4 rounded-2xl ghost-border text-left transition ${on ? "bg-primary/5" : "bg-surface-low hover:bg-surface"}`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className={`grid place-items-center w-8 h-8 rounded-xl ${on ? "bg-primary text-primary-foreground" : "bg-surface text-primary"}`}>
-                        <Icon className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`grid place-items-center w-9 h-9 rounded-xl ${on ? "bg-primary text-primary-foreground" : "bg-surface text-primary"}`}>
+                        <Icon className="w-4 h-4" />
                       </span>
-                      <p className="text-xs font-semibold text-primary truncate">{label}</p>
+                      <p className="text-sm font-semibold text-primary truncate">{label}</p>
                     </div>
                     <span className={`relative inline-flex h-4 w-7 items-center rounded-full transition ${on ? "bg-primary" : "bg-muted"}`} aria-hidden>
                       <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
@@ -258,23 +258,23 @@ const ContactProfile = () => {
       </section>
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer */}
-      <section className="mt-10 rounded-[2rem] overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
+      <section className="mt-14 rounded-[2rem] overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
         <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.4),transparent_60%)]" />
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 p-8 md:p-12 lg:p-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <div className="relative z-10 p-12 md:p-16 lg:p-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-16 items-center">
             {/* Left: Portal */}
-            <div className="lg:col-span-8 space-y-10">
-              <div className="space-y-5">
-                <div className={`inline-flex items-center gap-2.5 ${syncBannerData.chipBg} px-4 py-2 rounded-full border backdrop-blur-md`}>
+            <div className="lg:col-span-8 space-y-14">
+              <div className="space-y-7">
+                <div className={`inline-flex items-center gap-2.5 ${syncBannerData.chipBg} px-5 py-2.5 rounded-full border backdrop-blur-md`}>
                   <syncBannerData.icon className={`w-3.5 h-3.5 ${syncBannerData.textColor}`} />
                   <span className={`${syncBannerData.textColor} text-[10px] uppercase font-bold tracking-[0.2em]`}>{syncBannerData.label}</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-headline font-extrabold tracking-tight leading-tight">
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold tracking-tight leading-[1.05]">
                   Secure Interaction Layer
                 </h2>
-                <p className="text-primary-foreground/70 text-base md:text-lg leading-relaxed font-light max-w-2xl">
+                <p className="text-primary-foreground/70 text-lg md:text-xl leading-relaxed font-light max-w-2xl">
                   {isApproved && "Strategic alignment established. Select your context to initiate optimized communication protocols for this session."}
                   {isPending && `${firstName} is reviewing your request — typically responds within ${contact.responseTime}. Channels unlock on approval.`}
                   {isLocked && `Send an access request to unlock secure communication channels with ${firstName}.`}
@@ -282,7 +282,7 @@ const ContactProfile = () => {
               </div>
 
               {/* Three interaction tiles */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
                 {/* Call */}
                 <PortalTile
                   icon={Phone}
@@ -324,16 +324,16 @@ const ContactProfile = () => {
               </div>
 
               {/* Identity selector */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-5 pt-4">
                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Select Identity:</span>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2.5">
                   {(["client", "colleague", "partner"] as const).map((r) => {
                     const active = identity === r;
                     return (
                       <button
                         key={r}
                         onClick={() => setIdentity(r)}
-                        className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
+                        className={`px-5 py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
                           active
                             ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
                             : "border-white/10 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
@@ -349,22 +349,22 @@ const ContactProfile = () => {
 
             {/* Right: Verification card */}
             <div className="lg:col-span-4">
-              <div className="bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-3xl p-8 md:p-10 flex flex-col items-center justify-center relative overflow-hidden text-center">
+              <div className="bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-3xl p-10 md:p-14 flex flex-col items-center justify-center relative overflow-hidden text-center">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.15),transparent_60%)]" />
-                <div className={`w-24 h-24 rounded-full grid place-items-center mb-8 ring-[10px] relative ${
+                <div className={`w-28 h-28 rounded-full grid place-items-center mb-10 ring-[12px] relative ${
                   isApproved ? "bg-emerald-500/20 ring-emerald-500/5" : isPending ? "bg-amber-500/20 ring-amber-500/5" : "bg-rose-500/20 ring-rose-500/5"
                 }`}>
-                  {isApproved && <BadgeCheck className="w-14 h-14 text-emerald-400" strokeWidth={1.5} />}
-                  {isPending && <Clock className="w-12 h-12 text-amber-400" strokeWidth={1.5} />}
-                  {isLocked && <Lock className="w-12 h-12 text-rose-300" strokeWidth={1.5} />}
+                  {isApproved && <BadgeCheck className="w-16 h-16 text-emerald-400" strokeWidth={1.5} />}
+                  {isPending && <Clock className="w-14 h-14 text-amber-400" strokeWidth={1.5} />}
+                  {isLocked && <Lock className="w-14 h-14 text-rose-300" strokeWidth={1.5} />}
                 </div>
-                <div className="space-y-2 mb-8 relative z-10">
-                  <h4 className="font-headline font-extrabold text-xl md:text-2xl">
+                <div className="space-y-3 mb-10 relative z-10">
+                  <h4 className="font-headline font-extrabold text-2xl md:text-3xl">
                     {isApproved && "Identity Verified"}
                     {isPending && "Awaiting Approval"}
                     {isLocked && "Access Required"}
                   </h4>
-                  <p className="text-primary-foreground/60 text-xs md:text-sm">
+                  <p className="text-primary-foreground/60 text-sm md:text-base">
                     {isApproved && `Auth Level: ${identity.charAt(0).toUpperCase() + identity.slice(1)} Alpha`}
                     {isPending && `${firstName} typically reviews within ${contact.responseTime}`}
                     {isLocked && "Calendar, contact, and live channels are sealed"}
@@ -374,7 +374,7 @@ const ContactProfile = () => {
                 {isApproved && (
                   <button
                     onClick={() => toast({ title: "Brief downloaded", description: `${firstName}'s engagement brief saved.` })}
-                    className="group w-full bg-emerald-500 text-white py-5 rounded-2xl font-headline font-black text-base shadow-2xl shadow-emerald-900/40 hover:bg-emerald-400 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 relative z-10"
+                    className="group w-full bg-emerald-500 text-white py-6 rounded-3xl font-headline font-black text-lg shadow-2xl shadow-emerald-900/40 hover:bg-emerald-400 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 relative z-10"
                   >
                     DOWNLOAD BRIEF
                     <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
@@ -383,19 +383,19 @@ const ContactProfile = () => {
                 {isLocked && (
                   <button
                     onClick={() => setOpenSent(true)}
-                    className="group w-full bg-white text-primary py-5 rounded-2xl font-headline font-black text-base shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 relative z-10"
+                    className="group w-full bg-white text-primary py-6 rounded-3xl font-headline font-black text-lg shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 relative z-10"
                   >
                     REQUEST ACCESS
                     <ShieldCheck className="w-4 h-4" />
                   </button>
                 )}
                 {isPending && (
-                  <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-300 py-4 rounded-2xl font-headline font-bold text-sm flex items-center justify-center gap-2 relative z-10">
+                  <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-300 py-5 rounded-3xl font-headline font-bold text-base flex items-center justify-center gap-2 relative z-10">
                     <Clock className="w-4 h-4" /> Request pending
                   </div>
                 )}
 
-                <div className="mt-8 flex flex-col items-center gap-2 relative z-10">
+                <div className="mt-10 flex flex-col items-center gap-2.5 relative z-10">
                   <p className="text-emerald-400 text-[10px] font-bold tracking-[0.4em] uppercase">Session Encrypted</p>
                   <div className="flex gap-1.5">
                     <div className="h-1.5 w-4 bg-emerald-400 rounded-full" />
@@ -422,14 +422,14 @@ const ContactProfile = () => {
 /* --- Subcomponents --- */
 
 const OpsItem = ({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) => (
-  <div className="flex gap-3">
-    <div className="w-10 h-10 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-      <Icon className="w-4 h-4 text-primary" />
+  <div className="flex gap-4">
+    <div className="w-12 h-12 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+      <Icon className="w-5 h-5 text-primary" />
     </div>
-    <div className="min-w-0">
+    <div className="min-w-0 space-y-1">
       <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-primary truncate">{value}</p>
-      {sub && <p className="text-[11px] font-medium text-muted-foreground">{sub}</p>}
+      <p className="text-base font-semibold text-primary truncate">{value}</p>
+      {sub && <p className="text-xs font-medium text-muted-foreground">{sub}</p>}
     </div>
   </div>
 );
@@ -443,25 +443,25 @@ const CommsCard = ({
   locked: boolean;
   footer?: string;
 }) => (
-  <div className="bg-surface-lowest rounded-2xl p-6 ghost-border shadow-ambient flex flex-col relative">
-    <div className="flex justify-between items-start mb-5">
+  <div className="bg-surface-lowest rounded-2xl p-8 ghost-border shadow-ambient flex flex-col relative">
+    <div className="flex justify-between items-start mb-7">
       <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
         <span className="h-px w-8 bg-surface-container" /> {title}
       </h3>
-      <span className="text-[8px] font-bold uppercase tracking-widest text-primary/60 bg-primary/5 px-2 py-1 rounded">
+      <span className="text-[8px] font-bold uppercase tracking-widest text-primary/60 bg-primary/5 px-2.5 py-1.5 rounded">
         {badge}
       </span>
     </div>
-    <div className={`space-y-4 ${locked ? "blur-sm select-none pointer-events-none" : ""}`}>
+    <div className={`space-y-6 ${locked ? "blur-sm select-none pointer-events-none" : ""}`}>
       {items.map((it) => (
         <a key={it.label} href={locked ? "#" : it.href} className="flex items-center justify-between group">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-11 h-11 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
               <it.icon className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 space-y-0.5">
               <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{it.label}</p>
-              <p className="text-sm font-semibold text-primary truncate">{it.value}</p>
+              <p className="text-base font-semibold text-primary truncate">{it.value}</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -470,13 +470,13 @@ const CommsCard = ({
     </div>
     {locked && (
       <div className="absolute inset-0 grid place-items-center bg-surface-lowest/40 backdrop-blur-[2px] rounded-2xl">
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+        <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
           <Lock className="w-3.5 h-3.5" /> Unlocks on approval
         </div>
       </div>
     )}
     {footer && !locked && (
-      <p className="mt-auto pt-4 text-[9px] text-muted-foreground italic text-center border-t border-surface-container">
+      <p className="mt-auto pt-6 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
         {footer}
       </p>
     )}
@@ -507,27 +507,27 @@ const PortalTile = ({
   const button = (
     <button
       disabled={!to}
-      className={`w-full mt-6 py-3.5 rounded-2xl text-sm font-extrabold transition-all flex items-center justify-center gap-2.5 ${ctaClass}`}
+      className={`w-full mt-8 py-4 rounded-2xl text-sm font-extrabold transition-all flex items-center justify-center gap-2.5 ${ctaClass}`}
     >
       <CtaIcon className="w-4 h-4" /> {cta}
     </button>
   );
 
   return (
-    <div className={`relative overflow-hidden rounded-3xl backdrop-blur-xl p-6 md:p-7 transition-all flex flex-col justify-between min-h-[240px] shadow-2xl ${wrapperBase}`}>
-      <div className="space-y-4 relative z-10">
+    <div className={`relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 md:p-9 transition-all flex flex-col justify-between min-h-[300px] shadow-2xl ${wrapperBase}`}>
+      <div className="space-y-5 relative z-10">
         <div className="flex items-center justify-between">
-          <div className={`h-11 w-11 rounded-2xl grid place-items-center ${iconBox}`}>
-            <Icon className="w-5 h-5" />
+          <div className={`h-12 w-12 rounded-2xl grid place-items-center ${iconBox}`}>
+            <Icon className="w-6 h-6" />
           </div>
           {badge && (
-            <span className={`${badge.color} text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
+            <span className={`${badge.color} text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
               {badge.label}
             </span>
           )}
         </div>
         {preview && (
-          <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
+          <div className="bg-black/20 p-3.5 rounded-xl border border-white/5">
             <p className="text-emerald-400/60 text-[10px] italic font-mono uppercase tracking-widest">{preview}</p>
           </div>
         )}
@@ -539,8 +539,8 @@ const PortalTile = ({
           </div>
         )}
         <div>
-          <h5 className="font-bold text-lg font-headline">{title}</h5>
-          <p className="text-primary-foreground/60 text-xs mt-1.5 leading-relaxed">{desc}</p>
+          <h5 className="font-bold text-xl font-headline">{title}</h5>
+          <p className="text-primary-foreground/60 text-sm mt-2 leading-relaxed">{desc}</p>
         </div>
       </div>
       {to ? <Link to={to} className="relative z-10">{button}</Link> : <div className="relative z-10">{button}</div>}
