@@ -305,6 +305,51 @@ function TextareaField({ label, value, onChange }: { label: string; value: strin
   );
 }
 
+function AvailabilityContextField({
+  value, onChange,
+}: { value: string; onChange: (v: string) => void }) {
+  const isPreset = availabilityPresets.includes(value);
+  return (
+    <div className="block">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold text-muted-foreground inline-flex items-center gap-1.5">
+          <Radio className="w-3 h-3 text-accent" /> Availability context
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          Shown on your profile right now
+        </span>
+      </div>
+
+      {/* Live preview of what contacts see */}
+      <div className="mt-1.5 px-3 py-2 rounded-xl bg-accent/10 border border-accent/20 text-xs text-primary font-medium">
+        {value || <span className="text-muted-foreground italic">No status set</span>}
+      </div>
+
+      <div className="mt-2 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Write a custom line… e.g. Free after 6 PM"
+          maxLength={80}
+          className="w-full px-4 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
+        />
+        <select
+          value={isPreset ? value : ""}
+          onChange={(e) => e.target.value && onChange(e.target.value)}
+          className="px-3 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
+          aria-label="Choose preset"
+        >
+          <option value="">Pick preset…</option>
+          {availabilityPresets.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+      </div>
+      <p className="mt-1 text-[10px] text-muted-foreground text-right">{value.length}/80</p>
+    </div>
+  );
+}
+
 function VisibilityPicker({
   value, onChange, compact,
 }: { value: Visibility; onChange: (v: Visibility) => void; compact?: boolean }) {
