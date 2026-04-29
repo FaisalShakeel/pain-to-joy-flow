@@ -13,6 +13,8 @@ import PatentPending from "./pages/legal/PatentPending.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import { SpotlightProvider } from "./components/app/SpotlightContext.tsx";
 import { NotificationsProvider } from "./components/app/NotificationsContext.tsx";
+import { MessagesProvider } from "./components/app/MessagesContext.tsx";
+import { RequestsProvider } from "./components/app/RequestsContext.tsx";
 
 // Marketing extras
 import Pricing from "./pages/Pricing.tsx";
@@ -56,6 +58,8 @@ const App = () => (
         <ScrollToTop />
         <SpotlightProvider>
         <NotificationsProvider>
+        <MessagesProvider>
+        <RequestsProvider>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -93,6 +97,8 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </RequestsProvider>
+        </MessagesProvider>
         </NotificationsProvider>
         </SpotlightProvider>
       </BrowserRouter>
