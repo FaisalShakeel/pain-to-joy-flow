@@ -30,6 +30,7 @@ import ContactProfile from "./pages/app/ContactProfile.tsx";
 import ContactLog from "./pages/app/ContactLog.tsx";
 import LiveCall from "./pages/app/LiveCall.tsx";
 import Availability from "./pages/app/Availability.tsx";
+import SlotBuilder from "./pages/app/SlotBuilder.tsx";
 import ScheduleCall from "./pages/app/ScheduleCall.tsx";
 import AccessRequests from "./pages/app/AccessRequests.tsx";
 import ApprovalFlow from "./pages/app/ApprovalFlow.tsx";
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/app/contact/:id/log" element={<ContactLog />} />
           <Route path="/app/contact/:id/call" element={<LiveCall />} />
           <Route path="/app/availability" element={<Availability />} />
+          <Route path="/app/availability/builder" element={<SlotBuilder />} />
           <Route path="/app/schedule/:id" element={<ScheduleCall />} />
           <Route path="/app/requests" element={<AccessRequests />} />
           <Route path="/app/requests/manage" element={<ApprovalFlow />} />

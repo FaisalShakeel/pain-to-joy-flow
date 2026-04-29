@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Loader2, CalendarDays, Plus } from "lucide-react";
+import { Loader2, CalendarDays, Plus, Sparkles } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
+import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
@@ -36,12 +37,20 @@ const Availability = () => {
       subtitle="This week"
       title="Your availability"
       actions={
-        <button
-          onClick={() => toast({ title: "Window added", description: "A new open slot is now visible to approved contacts." })}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
-        >
-          <Plus className="w-4 h-4" /> Add window
-        </button>
+        <>
+          <Link
+            to="/app/availability/builder"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full ghost-border bg-surface-lowest text-primary text-sm font-semibold hover:bg-surface-low transition"
+          >
+            <Sparkles className="w-4 h-4" /> Slot builder
+          </Link>
+          <button
+            onClick={() => toast({ title: "Window added", description: "A new open slot is now visible to approved contacts." })}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
+          >
+            <Plus className="w-4 h-4" /> Add window
+          </button>
+        </>
       }
     >
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
