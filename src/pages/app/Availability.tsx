@@ -54,8 +54,8 @@ const Availability = () => {
               </div>
             ))}
             {hours.map((h) => (
-              <>
-                <div key={`l-${h}`} className="text-[11px] text-muted-foreground text-right pr-2 pt-2">{h}:00</div>
+              <div key={`row-${h}`} className="contents">
+                <div className="text-[11px] text-muted-foreground text-right pr-2 pt-2">{h}:00</div>
                 {days.map((d) => {
                   const k = `${h}-${d}`;
                   const isBooked = booked.has(k);
@@ -76,7 +76,7 @@ const Availability = () => {
                     </button>
                   );
                 })}
-              </>
+              </div>
             ))}
           </div>
         </div>
