@@ -197,6 +197,11 @@ export const requests: AccessRequest[] = [
     receivedAt: "2h ago",
     state: "pending",
     direction: "incoming",
+    purpose: "Strategic discussion",
+    relation: "client",
+    channel: "voice",
+    senderType: "member",
+    referredBy: "Sarah Jenkins",
   },
   {
     id: "r2",
@@ -206,6 +211,10 @@ export const requests: AccessRequest[] = [
     receivedAt: "5h ago",
     state: "pending",
     direction: "incoming",
+    purpose: "Deal / partnership",
+    relation: "investor",
+    channel: "calendar",
+    senderType: "member",
   },
   {
     id: "r3",
@@ -215,6 +224,10 @@ export const requests: AccessRequest[] = [
     receivedAt: "Yesterday",
     state: "scheduled",
     direction: "incoming",
+    purpose: "Advice / mentoring",
+    relation: "colleague",
+    channel: "message",
+    senderType: "guest",
   },
   {
     id: "r4",
@@ -224,6 +237,11 @@ export const requests: AccessRequest[] = [
     receivedAt: "1d ago",
     state: "pending",
     direction: "outgoing",
+    purpose: "Intro",
+    relation: "client",
+    channel: "voice",
+    senderType: "member",
+    referredBy: "Sarah Jenkins",
   },
 ];
 
