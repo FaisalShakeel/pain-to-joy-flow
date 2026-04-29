@@ -339,21 +339,25 @@ const SpotlightBoard = () => {
             })}
           </div>
         </div>
-        {filteredOthers.length === 0 ? (
+        {visibleOther === null ? (
           <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
             All caught up — no new spotlight posts from this group.
           </div>
         ) : (
-          <ul className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-            {filteredOthers.map((p) => {
-              const Vis = visMeta[p.visibility];
-              const Tn = toneMeta[p.tone];
-              const author = contactName[p.authorId!] ?? "Contact";
-              const rel = contactRel[p.authorId!];
-              return (
-                <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
+          (() => {
+            const p = visibleOther;
+            const Vis = visMeta[p.visibility];
+            const Tn = toneMeta[p.tone];
+            const author = contactName[p.authorId!] ?? "Contact";
+            const rel = contactRel[p.authorId!];
+            return (
+              <div className="space-y-2">
+                <div className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
                   <button
-                    onClick={() => dismissPost(p.id)}
+                    onClick={() => {
+                      dismissPost(p.id);
+                      setActiveOtherId(null);
+                    }}
                     className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
                     aria-label="Mark seen and dismiss"
                     title="Mark seen and dismiss"
@@ -390,10 +394,45 @@ const SpotlightBoard = () => {
                       </a>
                     )}
                   </div>
-                </li>
-              );
-            })}
-          </ul>
+                </div>
+
+                {filteredOthers.length > 1 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-lowest text-[11px] font-semibold text-muted-foreground hover:text-primary transition">
+                        <span>Check more · {filteredOthers.length - 1} more</span>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-72 max-h-80 overflow-y-auto">
+                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        From your network
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {filteredOthers.map((o) => {
+                        const oAuthor = contactName[o.authorId!] ?? "Contact";
+                        const isActive = o.id === p.id;
+                        return (
+                          <DropdownMenuItem
+                            key={o.id}
+                            onClick={() => setActiveOtherId(o.id)}
+                            className={cn("flex flex-col items-start gap-0.5", isActive && "bg-accent/10")}
+                          >
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              {oAuthor}
+                            </span>
+                            <span className="text-xs font-medium text-primary line-clamp-1">
+                              {o.title}
+                            </span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            );
+          })()
         )}
         </div>
       </div>
