@@ -1,6 +1,6 @@
 import { Lock, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import logoMark from "@/assets/availock-mark.png";
+import logoIcon from "@/assets/availock-icon.svg";
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
@@ -41,17 +41,13 @@ const Footer = () => (
     <div className="mx-auto max-w-7xl px-6 md:px-10">
       <div className="grid md:grid-cols-4 gap-10 pb-12 border-b border-border/30">
         <div>
-          <div className="flex items-center gap-2.5 mb-4">
-            <span className="grid place-items-center w-11 h-11 rounded-xl bg-primary p-1.5 shadow-glass">
-              <img
-                src={logoMark}
-                alt="Availock logo"
-                width={40}
-                height={40}
-                loading="lazy"
-                className="w-full h-full object-contain"
-              />
-            </span>
+          <div className="flex items-center gap-3 mb-4">
+            <img
+              src={logoIcon}
+              alt="Availock logo"
+              loading="lazy"
+              className="h-14 w-auto object-contain"
+            />
             <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
           </div>
           <p className="text-sm text-muted-foreground max-w-xs">

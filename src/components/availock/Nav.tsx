@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import logoFull from "@/assets/availock-logo.svg";
+import logoIcon from "@/assets/availock-icon.svg";
 
 const Nav = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -26,9 +26,9 @@ const Nav = () => {
       >
         <a href="#top" className="flex items-center group" aria-label="Availock home">
           <img
-            src={logoFull}
+            src={logoIcon}
             alt="Availock"
-            className="h-8 md:h-10 w-auto object-contain"
+            className="h-12 md:h-14 w-auto object-contain"
           />
         </a>
         <div className="hidden md:flex items-center gap-9 text-sm font-medium">
