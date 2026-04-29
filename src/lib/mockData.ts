@@ -570,6 +570,8 @@ export interface OwnerProfile {
   operationDays: string;
   operationDaysSub?: string;
   operationHours: string;
+  timeZone: string;
+  location: string;
   headquarters: string;
   headquartersSub?: string;
 
@@ -586,6 +588,8 @@ export interface OwnerProfile {
     availabilityContext: Visibility;
     operationDays: Visibility;
     operationHours: Visibility;
+    timeZone: Visibility;
+    location: Visibility;
     headquarters: Visibility;
     primaryCommsSection: Visibility;
     socialHandlesSection: Visibility;
@@ -609,6 +613,8 @@ const defaultVisibility: OwnerProfile["visibility"] = {
   availabilityContext: "public",
   operationDays: "approved",
   operationHours: "approved",
+  timeZone: "public",
+  location: "public",
   headquarters: "public",
   primaryCommsSection: "approved",
   socialHandlesSection: "public",
@@ -633,6 +639,8 @@ export const ownerProfileFor = (c: Contact): OwnerProfile => {
     operationDays: "Monday — Friday",
     operationDaysSub: "Weekend access by priority only",
     operationHours: "09:00 — 18:00 (GMT+0)",
+    timeZone: "GMT+0 · London",
+    location: "London, United Kingdom",
     headquarters: c.org,
     headquartersSub: `${c.name.split(" ")[0]}'s primary base`,
     primaryComms: [
@@ -663,6 +671,8 @@ export const myOwnerProfile: OwnerProfile = {
   operationDays: "Monday — Friday",
   operationDaysSub: "Weekends async only",
   operationHours: "09:00 — 18:00 (GMT+4)",
+  timeZone: "GMT+4 · Gulf Standard Time",
+  location: "Dubai, United Arab Emirates",
   headquarters: me.org,
   headquartersSub: "Dubai, UAE",
   primaryComms: [
