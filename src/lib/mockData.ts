@@ -97,6 +97,7 @@ export const contacts: Contact[] = [
     relationship: "client",
     favorite: true,
     frequent: true,
+    alerts: ["message", "calendar"],
   },
   {
     id: "rashid-al-amir",
@@ -113,6 +114,7 @@ export const contacts: Contact[] = [
     availabilityContext: "Available now until 5:00 PM",
     relationship: "mentor",
     frequent: true,
+    alerts: ["callback"],
   },
   {
     id: "elena-vance",
@@ -145,6 +147,7 @@ export const contacts: Contact[] = [
     relationship: "colleague",
     favorite: true,
     frequent: true,
+    alerts: ["calendar"],
   },
   {
     id: "mark-thompson",
@@ -176,6 +179,7 @@ export const contacts: Contact[] = [
     availabilityContext: "Deep focus until Friday — async only",
     relationship: "colleague",
     favorite: true,
+    alerts: ["message"],
   },
 ];
 
