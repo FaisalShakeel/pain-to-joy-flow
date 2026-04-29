@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-  Lock, ShieldCheck, Phone, CalendarDays, MessageSquare, ArrowRight, ListChecks, Building2, Clock,
+  Lock, ShieldCheck, Phone, CalendarDays, MessageSquare, ArrowRight, ListChecks, Building2, Clock, BellRing, BellOff, PhoneCall,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -16,6 +16,11 @@ const ContactProfile = () => {
   const [contact, setContact] = useState(baseContact);
   const [openSent, setOpenSent] = useState(false);
   const [reason, setReason] = useState("");
+  const [alerts, setAlerts] = useState<{ callback: boolean; message: boolean; calendar: boolean }>({
+    callback: false,
+    message: false,
+    calendar: false,
+  });
 
   if (!contact) {
     return (
@@ -33,6 +38,27 @@ const ContactProfile = () => {
   const isLocked = contact.syncStatus === "locked";
   const isPending = contact.syncStatus === "pending";
   const isApproved = contact.syncStatus === "approved";
+
+  const firstName = contact.name.split(" ")[0];
+  const anyAlert = alerts.callback || alerts.message || alerts.calendar;
+
+  const toggleAlert = (k: "callback" | "message" | "calendar") => {
+    const next = { ...alerts, [k]: !alerts[k] };
+    setAlerts(next);
+    const labelMap = {
+      callback: "Callback alert",
+      message: "Message alert",
+      calendar: "Calendar alert",
+    } as const;
+    if (next[k]) {
+      toast({
+        title: `${labelMap[k]} on`,
+        description: `We'll ping you the moment ${firstName} is reachable. Example: "${firstName} is available to contact now."`,
+      });
+    } else {
+      toast({ title: `${labelMap[k]} off`, description: "You won't be notified about status changes." });
+    }
+  };
 
   return (
     <AppShell subtitle="Contact profile" title={contact.name}>
@@ -104,6 +130,71 @@ const ContactProfile = () => {
 
         {/* Side info */}
         <div className="space-y-4">
+          {/* Availability alerts */}
+          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Availability alerts</p>
+                <h3 className="mt-1.5 font-headline font-bold text-primary text-lg">
+                  Notify me when {firstName} is reachable
+                </h3>
+              </div>
+              <span className={`grid place-items-center w-10 h-10 rounded-xl ${anyAlert ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                {anyAlert ? <BellRing className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              No alert set means no contact. Pick how you want to be pinged on status changes.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              {[
+                { key: "callback" as const, icon: PhoneCall, label: "Callback alert", hint: `e.g. "${firstName} is available to contact now"` },
+                { key: "message" as const, icon: MessageSquare, label: "Message alert", hint: "Ping me when async window opens" },
+                { key: "calendar" as const, icon: CalendarDays, label: "Calendar alert", hint: "Notify before their next free slot" },
+              ].map(({ key, icon: Icon, label, hint }) => {
+                const on = alerts[key];
+                return (
+                  <button
+                    key={key}
+                    onClick={() => toggleAlert(key)}
+                    className={`w-full flex items-center justify-between gap-3 p-3 rounded-2xl ghost-border text-left transition ${
+                      on ? "bg-primary/5" : "bg-surface-low hover:bg-surface"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`grid place-items-center w-9 h-9 rounded-xl ${on ? "bg-primary text-primary-foreground" : "bg-surface text-primary"}`}>
+                        <Icon className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-primary truncate">{label}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{hint}</p>
+                      </div>
+                    </div>
+                    <span
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
+                        on ? "bg-primary" : "bg-muted"
+                      }`}
+                      aria-hidden
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                          on ? "translate-x-4" : "translate-x-0.5"
+                        }`}
+                      />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {!anyAlert && (
+              <p className="mt-3 text-[11px] text-muted-foreground italic">
+                No alert active — you won't be notified when {firstName}'s status changes.
+              </p>
+            )}
+          </div>
+
           <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Sync status</p>
             <h3 className="mt-1.5 font-headline font-bold text-primary text-lg">
