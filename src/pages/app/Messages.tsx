@@ -1,19 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import EmptyState from "@/components/app/EmptyState";
 import BroadcastsRail from "@/components/app/BroadcastsRail";
-import { contacts, threads as initial } from "@/lib/mockData";
+import { contacts } from "@/lib/mockData";
+import { useMessages } from "@/components/app/MessagesContext";
 import { toast } from "@/hooks/use-toast";
 
 const Messages = () => {
-  const [threads, setThreads] = useState(initial);
-  const [active, setActive] = useState(initial[0]?.id ?? null);
+  const { threads, setThreads, markRead } = useMessages();
+  const [active, setActive] = useState<string | null>(threads[0]?.id ?? null);
   const [draft, setDraft] = useState("");
 
   const current = threads.find((t) => t.id === active);
   const contact = current ? contacts.find((c) => c.id === current.contactId) : undefined;
+
+  // Mark the active thread as read whenever it changes
+  useEffect(() => {
+    if (active) markRead(active);
+  }, [active, markRead]);
 
   const replyToBroadcast = (contactId: string, quotedTitle: string) => {
     const body = `Re: ${quotedTitle}`;

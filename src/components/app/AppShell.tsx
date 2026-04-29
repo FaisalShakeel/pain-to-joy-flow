@@ -23,6 +23,8 @@ import logoIcon from "@/assets/availock-icon.png";
 import { useRole } from "@/lib/role";
 import { me } from "@/lib/mockData";
 import { useNotifications } from "./NotificationsContext";
+import { useMessages } from "./MessagesContext";
+import { useRequests } from "./RequestsContext";
 import Avatar from "./Avatar";
 import {
   DropdownMenu,
@@ -46,8 +48,8 @@ const baseItems: NavItem[] = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/app/contacts", label: "Contacts", icon: Users },
   { to: "/app/availability", label: "Availability", icon: CalendarDays },
-  { to: "/app/requests", label: "Requests", icon: Inbox, badge: 2 },
-  { to: "/app/messages", label: "Messages", icon: MessageSquare, badge: 3 },
+  { to: "/app/requests", label: "Requests", icon: Inbox },
+  { to: "/app/messages", label: "Messages", icon: MessageSquare },
   { to: "/app/analytics", label: "Analytics", icon: BarChart3, providerOnly: true },
   { to: "/app/share", label: "Share", icon: QrCode },
   { to: "/app/settings", label: "Settings", icon: Settings },
@@ -85,6 +87,14 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
   const location = useLocation();
   const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
   const { unreadCount } = useNotifications();
+  const { unreadCount: messagesUnread } = useMessages();
+  const { pendingIncomingCount } = useRequests();
+
+  const itemsWithBadges = items.map((i) => {
+    if (i.to === "/app/messages") return { ...i, badge: messagesUnread || undefined };
+    if (i.to === "/app/requests") return { ...i, badge: pendingIncomingCount || undefined };
+    return i;
+  });
 
   return (
     <div className="min-h-screen bg-surface text-foreground flex">
@@ -102,7 +112,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
             Workspace
           </p>
           <ul className="space-y-0.5">
-            {items.map((item) => (
+            {itemsWithBadges.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
@@ -263,7 +273,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
               </button>
             </div>
             <ul className="space-y-1">
-              {items.map((item) => (
+              {itemsWithBadges.map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
@@ -280,7 +290,12 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
                     }}
                   >
                     <item.icon className="w-4 h-4" />
-                    {item.label}
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge ? (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                        {item.badge}
+                      </span>
+                    ) : null}
                   </NavLink>
                 </li>
               ))}

@@ -8,14 +8,16 @@ import Avatar from "@/components/app/Avatar";
 import MessagesPanel from "@/components/app/MessagesPanel";
 import PriorityContactsWidget from "@/components/app/PriorityContactsWidget";
 import SpotlightBoard from "@/components/app/SpotlightBoard";
-import { me, contacts, requests, threads } from "@/lib/mockData";
+import { me, contacts, threads } from "@/lib/mockData";
+import { useRequests } from "@/components/app/RequestsContext";
 import { useState } from "react";
 import { useRole } from "@/lib/role";
 
 const Dashboard = () => {
   const [status, setStatus] = useState<"available" | "busy" | "focus">("available");
   const [role] = useRole();
-  const incoming = requests.filter((r) => r.direction === "incoming" && r.state === "pending");
+  const { list } = useRequests();
+  const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
 
   return (
     <AppShell
@@ -122,13 +124,19 @@ const Dashboard = () => {
             {incoming.slice(0, 3).map((r) => {
               const c = contacts.find((x) => x.id === r.contactId)!;
               return (
-                <li key={r.id} className="py-3 flex items-center gap-3">
-                  <Avatar initials={c.initials} accent={c.accent} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{r.reason}</p>
-                  </div>
-                  <StatusPill tone="pending" />
+                <li key={r.id}>
+                  <Link
+                    to={`/app/requests?id=${r.id}`}
+                    className="py-3 flex items-center gap-3 hover:bg-surface-low/50 -mx-2 px-2 rounded-xl transition"
+                  >
+                    <Avatar initials={c.initials} accent={c.accent} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{r.reason}</p>
+                    </div>
+                    <StatusPill tone="pending" />
+                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  </Link>
                 </li>
               );
             })}

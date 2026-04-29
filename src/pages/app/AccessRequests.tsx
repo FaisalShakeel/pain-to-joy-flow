@@ -1,16 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Inbox, Check, X, CalendarPlus, ArrowRight, ListChecks, ShieldCheck,
   Mic, MessageSquare, CalendarDays, Sparkles, AlertTriangle, Clock3,
   Lock, Plus, Shield, Eye, EyeOff, Phone, Mail, AtSign, Briefcase,
   MonitorPlay, Building2, Ban,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
 import EmptyState from "@/components/app/EmptyState";
-import { contacts, requests as initial, type AccessRequest } from "@/lib/mockData";
+import { contacts, type AccessRequest } from "@/lib/mockData";
+import { useRequests } from "@/components/app/RequestsContext";
 import { toast } from "@/hooks/use-toast";
 import { useRole } from "@/lib/role";
 
@@ -41,10 +42,12 @@ const durationOptions: { id: Duration; label: string; tone: "default" | "danger"
 ];
 
 const AccessRequests = () => {
-  const [list, setList] = useState(initial);
+  const { list, act: actCtx } = useRequests();
   const [tab, setTab] = useState<"incoming" | "outgoing">("incoming");
   const [queue, setQueue] = useState<QueueId>("high");
   const [role] = useRole();
+  const [searchParams] = useSearchParams();
+  const initialId = searchParams.get("id");
 
   const filtered = useMemo(
     () =>
@@ -60,11 +63,29 @@ const AccessRequests = () => {
     [list, tab, queue],
   );
 
-  const [selectedId, setSelectedId] = useState<string | null>(filtered[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialId ?? filtered[0]?.id ?? null);
+
+  // If the URL ?id= changes (e.g., navigating from dashboard), pick that request
+  // and switch to the tab/queue that contains it.
+  useEffect(() => {
+    if (!initialId) return;
+    const target = list.find((r) => r.id === initialId);
+    if (!target) return;
+    setSelectedId(initialId);
+    setTab(target.direction);
+    setQueue(
+      target.state === "denied"
+        ? "quarantine"
+        : target.urgency === "low"
+        ? "regular"
+        : "high",
+    );
+  }, [initialId, list]);
+
   const selected = list.find((r) => r.id === (selectedId ?? filtered[0]?.id)) ?? filtered[0];
 
   const act = (id: string, state: "approved" | "denied" | "scheduled") => {
-    setList((prev) => prev.map((r) => (r.id === id ? { ...r, state } : r)));
+    actCtx(id, state);
     toast({
       title:
         state === "approved" ? "Request approved" : state === "denied" ? "Request declined" : "Scheduled — invite sent",
