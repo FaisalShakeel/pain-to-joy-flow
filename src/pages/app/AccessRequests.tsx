@@ -198,9 +198,13 @@ const RequestDetail = ({
   const [showPhone, setShowPhone] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showSocial, setShowSocial] = useState(false);
-  const [activeChannel, setActiveChannel] = useState<"voice" | "message" | "calendar">(
-    request.channel ?? "voice",
-  );
+  const [allowedChannels, setAllowedChannels] = useState<Record<"voice" | "message" | "calendar", boolean>>({
+    voice: true,
+    message: true,
+    calendar: true,
+  });
+  const toggleChannel = (ch: "voice" | "message" | "calendar") =>
+    setAllowedChannels((prev) => ({ ...prev, [ch]: !prev[ch] }));
   const [lane, setLane] = useState<Lane>(
     request.urgency === "high" ? "high" : request.urgency === "medium" ? "priority" : "low",
   );
@@ -348,28 +352,49 @@ const RequestDetail = ({
 
       {/* Connection Channels */}
       <div className="rounded-3xl bg-surface-lowest p-6 ghost-border">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary/60">Connection channels</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary/60">Connection channels</p>
+          <p className="text-[10px] text-muted-foreground">
+            {Object.values(allowedChannels).filter(Boolean).length} of 3 enabled
+          </p>
+        </div>
         <div className="mt-4 grid grid-cols-3 gap-3">
           {(["voice", "message", "calendar"] as const).map((ch) => {
             const meta = channelMeta[ch];
-            const active = activeChannel === ch;
+            const active = allowedChannels[ch];
             return (
               <button
                 key={ch}
-                onClick={() => isIncomingPending && setActiveChannel(ch)}
+                onClick={() => isIncomingPending && toggleChannel(ch)}
                 disabled={!isIncomingPending}
-                className={`flex flex-col items-center gap-2 p-5 rounded-2xl transition text-center ${
+                className={`relative flex flex-col items-center gap-2 p-5 rounded-2xl transition text-center ${
                   active
                     ? "bg-primary/5 ring-2 ring-primary text-primary"
-                    : "bg-surface-low text-muted-foreground hover:text-primary"
+                    : "bg-surface-low text-muted-foreground/60 hover:text-primary opacity-60"
                 }`}
+                aria-pressed={active}
               >
+                <span
+                  className={`absolute top-2 right-2 grid place-items-center w-5 h-5 rounded-full transition ${
+                    active ? "bg-primary text-primary-foreground" : "bg-surface-lowest ghost-border text-transparent"
+                  }`}
+                >
+                  <Check className="w-3 h-3" />
+                </span>
                 <meta.icon className="w-5 h-5" />
                 <span className="text-xs font-semibold">{meta.label}</span>
+                {!active && isIncomingPending && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-rose-600">Blocked</span>
+                )}
               </button>
             );
           })}
         </div>
+        {isIncomingPending && (
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            All channels are enabled by default. Tap any channel to revoke sync access for that medium.
+          </p>
+        )}
       </div>
         </div>
 
