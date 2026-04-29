@@ -64,11 +64,11 @@ const AccountSettings = () => {
                 <Pencil className="w-3 h-3" /> Update
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <OpsRow icon={CalendarDays} label="Working days" value={myOwnerProfile.operationDays} sub={myOwnerProfile.operationDaysSub} visibility={myOwnerProfile.visibility.operationDays} />
+            <div className="flex flex-col gap-3">
               <OpsRow icon={Clock} label="Office hours" value={myOwnerProfile.operationHours} visibility={myOwnerProfile.visibility.operationHours} />
               <OpsRow icon={Globe2} label="Time zone" value={myOwnerProfile.timeZone} visibility={myOwnerProfile.visibility.timeZone} />
-              <OpsRow icon={MapPin} label="Location" value={myOwnerProfile.location} visibility={myOwnerProfile.visibility.location} />
+              <OpsRow icon={CalendarDays} label="Working days" value={myOwnerProfile.operationDays} sub={myOwnerProfile.operationDaysSub} visibility={myOwnerProfile.visibility.operationDays} />
+              <OpsRow icon={MapPin} label="Office location" value={myOwnerProfile.location} visibility={myOwnerProfile.visibility.location} />
               <OpsRow icon={Building2} label="Headquarters" value={myOwnerProfile.headquarters} sub={myOwnerProfile.headquartersSub} visibility={myOwnerProfile.visibility.headquarters} />
             </div>
           </div>
