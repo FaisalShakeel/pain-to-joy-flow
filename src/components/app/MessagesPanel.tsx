@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 import { MessageSquare, ArrowRight, Inbox, Zap, AlertTriangle } from "lucide-react";
 import Avatar from "./Avatar";
-import { threads, contacts, requests } from "@/lib/mockData";
+import { contacts } from "@/lib/mockData";
+import { useMessages } from "./MessagesContext";
+import { useRequests } from "./RequestsContext";
 import { cn } from "@/lib/utils";
 
 const MessagesPanel = () => {
-  const incoming = requests.filter((r) => r.direction === "incoming" && r.state === "pending");
-  const totalUnread = threads.reduce((n, t) => n + t.unread, 0);
+  const { threads, unreadCount: totalUnread } = useMessages();
+  const { list } = useRequests();
+  const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
