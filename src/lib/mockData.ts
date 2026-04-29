@@ -91,6 +91,10 @@ export const contacts: Contact[] = [
     bio: "Permission-based architecture for executive operators. Replies to vetted requests within 4 working hours.",
     responseTime: "≈ 4h",
     tags: ["Architecture", "Leadership", "Strategy"],
+    availabilityContext: "In a meeting — leave a message",
+    relationship: "client",
+    favorite: true,
+    frequent: true,
   },
   {
     id: "rashid-al-amir",
@@ -104,6 +108,9 @@ export const contacts: Contact[] = [
     bio: "Sync approved. Open to live calls during posted technical windows.",
     responseTime: "≈ 30m",
     tags: ["Design", "Mentorship"],
+    availabilityContext: "Available now until 5:00 PM",
+    relationship: "mentor",
+    frequent: true,
   },
   {
     id: "elena-vance",
@@ -117,6 +124,8 @@ export const contacts: Contact[] = [
     bio: "Reviewing your request — typically responds within a working day.",
     responseTime: "≈ 1d",
     tags: ["Product", "Research"],
+    availabilityContext: "Expected free in ~30 minutes",
+    relationship: "client",
   },
   {
     id: "sarah-jenkins",
@@ -130,6 +139,10 @@ export const contacts: Contact[] = [
     bio: "Available for technical syncs and board prep.",
     responseTime: "≈ 1h",
     tags: ["Operations", "Strategy"],
+    availabilityContext: "Available after 2:00 PM",
+    relationship: "colleague",
+    favorite: true,
+    frequent: true,
   },
   {
     id: "mark-thompson",
@@ -143,6 +156,8 @@ export const contacts: Contact[] = [
     bio: "Office hours: Tue & Thu, 14:00–16:00 GST.",
     responseTime: "≈ 2d",
     tags: ["Capital", "Diligence"],
+    availabilityContext: "Office hours Tue & Thu, 2–4 PM GST",
+    relationship: "investor",
   },
   {
     id: "alex-rivera",
@@ -156,6 +171,9 @@ export const contacts: Contact[] = [
     bio: "Currently in deep work — async messages only until Friday.",
     responseTime: "≈ 1d",
     tags: ["Engineering", "Architecture"],
+    availabilityContext: "Deep focus until Friday — async only",
+    relationship: "colleague",
+    favorite: true,
   },
 ];
 
