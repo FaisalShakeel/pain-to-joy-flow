@@ -91,7 +91,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
       {/* Sidebar (desktop / tablet) */}
       <aside className="hidden md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen">
         <Link to="/app" className="flex items-center px-6 py-6" aria-label="Availock home">
-          <img src={logoFull} alt="Availock" className="h-14 w-auto object-contain" />
+          <img src={logoFull} alt="Availock" className="h-9 md:h-10 w-auto object-contain" />
         </Link>
 
         <nav className="px-3 flex-1 overflow-y-auto">
@@ -250,7 +250,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
           <aside className="absolute inset-y-0 left-0 w-72 bg-surface-lowest p-5 flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center" aria-label="Availock home">
-                <img src={logoFull} alt="Availock" className="h-14 w-auto object-contain" />
+                <img src={logoFull} alt="Availock" className="h-9 md:h-10 w-auto object-contain" />
               </Link>
               <button onClick={() => setMobileNav(false)} aria-label="Close menu" className="grid place-items-center w-9 h-9 rounded-lg ghost-border">
                 <X className="w-4 h-4 text-primary" />
