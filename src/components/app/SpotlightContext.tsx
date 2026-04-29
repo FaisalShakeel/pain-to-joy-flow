@@ -148,10 +148,11 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
         if (p.authorId !== contactId) return false;
         if (p.visibility === "private") return false;
         if (dismissedPosts.has(p.id)) return false;
+        if (viewedPosts.has(p.id)) return false;
         return p.createdAt > last;
       }).length;
     },
-    [posts, lastSeen, dismissedPosts],
+    [posts, lastSeen, dismissedPosts, viewedPosts],
   );
 
   const markSeen = useCallback((contactId: string) => {
