@@ -6,6 +6,7 @@ interface MessagesContextValue {
   setThreads: React.Dispatch<React.SetStateAction<MessageThread[]>>;
   unreadCount: number;
   markRead: (threadId: string) => void;
+  markAllRead: () => void;
 }
 
 const MessagesContext = createContext<MessagesContextValue | undefined>(undefined);
@@ -17,14 +18,19 @@ export const MessagesProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => (t.id === threadId ? { ...t, unread: 0 } : t)));
   }, []);
 
+  const markAllRead = useCallback(() => {
+    setThreads((prev) => prev.map((t) => (t.unread === 0 ? t : { ...t, unread: 0 })));
+  }, []);
+
   const value = useMemo<MessagesContextValue>(
     () => ({
       threads,
       setThreads,
       unreadCount: threads.reduce((n, t) => n + t.unread, 0),
       markRead,
+      markAllRead,
     }),
-    [threads, markRead],
+    [threads, markRead, markAllRead],
   );
 
   return <MessagesContext.Provider value={value}>{children}</MessagesContext.Provider>;
