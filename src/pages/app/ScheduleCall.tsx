@@ -447,7 +447,7 @@ function MeetingCard({ slot, active, onPick }: { slot: MeetingSlot; active: bool
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-4 rounded-2xl border transition ${
+      className={`text-left p-3 rounded-xl border transition ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
@@ -456,19 +456,27 @@ function MeetingCard({ slot, active, onPick }: { slot: MeetingSlot; active: bool
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-headline font-bold text-base">{slot.time}</span>
-        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${active ? "bg-white/15 border-white/30 text-primary-foreground" : C.cls}`}>
-          <C.icon className="w-3 h-3" /> {C.label}
+        <span className="font-headline font-bold text-sm leading-none">{slot.time}</span>
+        <span className={`inline-flex items-center gap-1 ${active ? "text-primary-foreground" : ""}`}>
+          {slot.channel === "hybrid" ? (
+            <>
+              <Video className={`w-3.5 h-3.5 ${active ? "" : "text-sky-600"} ${slot.taken === "online" ? "opacity-30" : ""}`} />
+              <MapPin className={`w-3.5 h-3.5 ${active ? "" : "text-indigo-600"} ${slot.taken === "onsite" ? "opacity-30" : ""}`} />
+            </>
+          ) : (
+            <C.icon className={`w-3.5 h-3.5 ${active ? "" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
+          )}
         </span>
       </div>
-      <p className={`mt-1 text-xs ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+      <p className={`mt-1 text-[11px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
         {slot.durations[0]}–{slot.durations[slot.durations.length - 1]} min
         {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
       </p>
-      <div className={`mt-2 flex items-center gap-2 text-[10px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+      <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+        <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> 3-min buffer</span>
         {slot.approval && <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>}
         {slot.channel === "hybrid" && slot.taken && (
-          <span className="inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> {slot.taken === "online" ? "On-site only left" : "Online only left"}</span>
+          <span className="inline-flex items-center gap-1">{slot.taken === "online" ? "On-site only" : "Online only"}</span>
         )}
       </div>
     </button>
@@ -481,7 +489,7 @@ function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean;
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-4 rounded-2xl border transition relative overflow-hidden ${
+      className={`text-left p-3 rounded-xl border transition relative overflow-hidden ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
@@ -490,17 +498,17 @@ function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean;
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-headline font-bold text-base inline-flex items-center gap-1.5">
-          <Zap className={`w-4 h-4 ${active ? "text-white" : "text-amber-600"}`} /> {slot.time}
+        <span className="font-headline font-bold text-sm inline-flex items-center gap-1.5 leading-none">
+          <Zap className={`w-3.5 h-3.5 ${active ? "text-white" : "text-amber-600"}`} /> {slot.time}
         </span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
+        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
           {slot.duration} min
         </span>
       </div>
-      <p className={`mt-1 text-xs ${active ? "text-white/85" : "text-muted-foreground"}`}>
-        Online · one-tap connect
+      <p className={`mt-1 text-[11px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
+        <Video className="w-3 h-3" /> Online · one-tap
       </p>
-      <div className={`mt-2 flex items-center gap-2 text-[10px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
+      <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
         {slot.approval ? <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>
           : <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> Instant</span>}
       </div>
