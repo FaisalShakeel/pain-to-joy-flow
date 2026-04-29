@@ -249,9 +249,8 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
           />
           <aside className="absolute inset-y-0 left-0 w-72 bg-surface-lowest p-5 flex flex-col">
             <div className="flex items-center justify-between mb-6">
-              <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center gap-2">
-                <img src={logoIcon} alt="Availock" width={28} height={28} className="h-7 w-7 object-contain" />
-                <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
+              <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center" aria-label="Availock home">
+                <img src={logoFull} alt="Availock" className="h-9 w-auto object-contain" />
               </Link>
               <button onClick={() => setMobileNav(false)} aria-label="Close menu" className="grid place-items-center w-9 h-9 rounded-lg ghost-border">
                 <X className="w-4 h-4 text-primary" />
