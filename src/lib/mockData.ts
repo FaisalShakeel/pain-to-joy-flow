@@ -1,5 +1,6 @@
 export type SyncStatus = "locked" | "pending" | "approved";
 export type AvailabilityStatus = "available" | "busy" | "focus" | "offline";
+export type Relationship = "client" | "colleague" | "family" | "investor" | "mentor" | "friend";
 
 export interface Contact {
   id: string;
@@ -13,6 +14,10 @@ export interface Contact {
   bio: string;
   responseTime: string;
   tags: string[];
+  availabilityContext: string;
+  relationship: Relationship;
+  favorite?: boolean;
+  frequent?: boolean;
 }
 
 export interface AccessRequest {
