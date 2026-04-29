@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Search, Maximize2, X, Star, Pin, PinOff, PhoneCall, MessageSquare,
+  Search, Maximize2, X, Star, Pin, PinOff,
   Users as UsersIcon, ArrowRight, Car,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPill from "./StatusPill";
+import PingButton from "./PingButton";
 import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 
@@ -39,30 +40,6 @@ const statusTone = (s: AvailabilityStatus | "driving") =>
   : s === "busy" ? "busy"
   : s === "focus" ? "focus"
   : "offline";
-
-const PingActions = ({ contactId, status }: { contactId: string; status: AvailabilityStatus | "driving" }) => (
-  <div className="flex items-center gap-1.5">
-    <Link
-      to={`/app/contact/${contactId}/call`}
-      title="Ping for call back"
-      className={cn(
-        "grid place-items-center w-8 h-8 rounded-full transition",
-        status === "available"
-          ? "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25"
-          : "bg-primary/10 text-primary hover:bg-primary/20",
-      )}
-    >
-      <PhoneCall className="w-3.5 h-3.5" />
-    </Link>
-    <Link
-      to="/app/messages"
-      title="Ping by message"
-      className="grid place-items-center w-8 h-8 rounded-full bg-sky-500/15 text-sky-700 hover:bg-sky-500/25 transition"
-    >
-      <MessageSquare className="w-3.5 h-3.5" />
-    </Link>
-  </div>
-);
 
 const ContactRow = ({
   id, pinned, onToggle, compact = false,
@@ -112,7 +89,7 @@ const ContactRow = ({
           >
             {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
           </button>
-          <PingActions contactId={c.id} status={effective} />
+          <PingButton contact={c} drivingOverride={driving} />
         </div>
       </div>
     </div>
