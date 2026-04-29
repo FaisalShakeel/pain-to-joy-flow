@@ -92,6 +92,9 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
       <aside className="hidden md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen">
         <Link to="/app" className="flex items-center px-6 py-6" aria-label="Availock home">
           <img src={logoIcon} alt="Availock" className="h-12 md:h-14 w-auto object-contain" />
+          <span className="ml-3 font-headline font-extrabold text-xl text-primary tracking-tight">
+            Availock
+          </span>
         </Link>
 
         <nav className="px-3 flex-1 overflow-y-auto">
@@ -251,6 +254,9 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
             <div className="flex items-center justify-between mb-6">
               <Link to="/app" onClick={() => setMobileNav(false)} className="flex items-center" aria-label="Availock home">
                 <img src={logoIcon} alt="Availock" className="h-12 md:h-14 w-auto object-contain" />
+                <span className="ml-3 font-headline font-extrabold text-xl text-primary tracking-tight">
+                  Availock
+                </span>
               </Link>
               <button onClick={() => setMobileNav(false)} aria-label="Close menu" className="grid place-items-center w-9 h-9 rounded-lg ghost-border">
                 <X className="w-4 h-4 text-primary" />
