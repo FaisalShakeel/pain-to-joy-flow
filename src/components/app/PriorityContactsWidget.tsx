@@ -49,7 +49,7 @@ const ContactRow = ({
   if (!c) return null;
   const driving = drivingOverride[c.id];
   const effective: AvailabilityStatus | "driving" = driving ? "driving" : c.status;
-  const { unseenForContact, markSeen } = useSpotlight();
+  const { unseenForContact, markSeen, markContactPostsViewed } = useSpotlight();
   const unseen = unseenForContact(c.id);
 
   return (
@@ -57,7 +57,7 @@ const ContactRow = ({
       {unseen > 0 && (
         <Link
           to={`/app/contact/${c.id}`}
-          onClick={() => markSeen(c.id)}
+          onClick={() => { markSeen(c.id); markContactPostsViewed(c.id); }}
           title={`${unseen} new spotlight ${unseen === 1 ? "post" : "posts"} — open profile`}
           className="absolute -top-1.5 -left-1.5 z-10 grid place-items-center w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 text-white shadow-glass ring-2 ring-surface-lowest animate-pulse"
         >

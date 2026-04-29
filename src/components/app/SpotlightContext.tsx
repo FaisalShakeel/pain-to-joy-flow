@@ -38,6 +38,7 @@ interface SpotlightCtx {
   viewedPosts: Set<string>;
   markPostViewed: (postId: string) => void;
   unseenOthersCount: () => number;
+  markContactPostsViewed: (contactId: string) => void;
 }
 
 const Ctx = createContext<SpotlightCtx | null>(null);
@@ -176,6 +177,18 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const markContactPostsViewed = useCallback((contactId: string) => {
+    setViewedPosts((prev) => {
+      const next = new Set(prev);
+      posts.forEach((p) => {
+        if (p.authorId === contactId && p.authorId !== "me" && p.visibility !== "private") {
+          next.add(p.id);
+        }
+      });
+      return next;
+    });
+  }, [posts]);
+
   const unseenOthersCount = useCallback(() => {
     return posts.filter(
       (p) =>
@@ -188,8 +201,8 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
   }, [posts, dismissedPosts, viewedPosts]);
 
   const value = useMemo(
-    () => ({ posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount }),
-    [posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount],
+    () => ({ posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount, markContactPostsViewed }),
+    [posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount, markContactPostsViewed],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
