@@ -4,6 +4,7 @@ import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Mail, Smartphone,
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
+  Linkedin, Github, Globe, MessageCircle,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -157,7 +158,9 @@ const ContactProfile = () => {
                 </span>
                 <div className="flex flex-col">
                   <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Current availability</span>
-                  <span className={`text-[10px] font-bold ${statusData.subClass}`}>{contact.availabilityContext}</span>
+                  <span className={`text-[10px] font-bold ${statusData.subClass}`}>
+                    {show("availabilityContext") ? owner.availabilityContext : "Hidden by owner"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -168,58 +171,76 @@ const ContactProfile = () => {
                 <h1 className="text-2xl md:text-3xl font-extrabold font-headline tracking-tight text-primary leading-tight">
                   {firstName}
                 </h1>
+                {show("org") && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold tracking-wide mt-1">
                   <Building2 className="w-3.5 h-3.5 text-primary" />
-                  <span className="truncate">{contact.org}</span>
+                  <span className="truncate">{owner.org}</span>
                 </div>
+                )}
               </div>
-              <p className="text-sm md:text-base font-light text-foreground/80 font-headline leading-snug">{contact.title}</p>
-
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {contact.tags.map((t) => (
-                  <span key={t} className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/5 text-primary">
-                    {t}
-                  </span>
-                ))}
-              </div>
+              {show("title") && (
+                <p className="text-sm md:text-base font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+              )}
+              {show("tags") && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {owner.tags.map((t) => (
+                    <span key={t} className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/5 text-primary">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Operations Center */}
+            {(show("operationDays") || show("operationHours") || show("headquarters")) && (
             <div className="pt-5 mt-5 border-t border-surface-container">
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-4 flex items-center gap-2">
                 <span className="h-px w-6 bg-surface-container" /> Operations Center
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <OpsItem icon={CalendarDays} label="Operation Days" value="Monday — Friday" sub="Weekend access by priority only" />
-                <OpsItem icon={Briefcase} label="Operation Hours" value="09:00 — 18:00 (GMT+0)" />
-                <OpsItem icon={MapPin} label="Headquarters" value={contact.org} sub={`${firstName}'s primary base`} />
+                {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
+                {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
+                {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
               </div>
             </div>
+            )}
           </div>
 
           {/* Comms grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CommsCard
-              title="Primary Comms"
-              badge="Secure Tunnels"
-              locked={isLocked}
-              items={[
-                { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
-                { icon: Phone, label: "Office Number", value: "+44 20 7946 0123", href: "tel:+442079460123" },
-                { icon: Smartphone, label: "Mobile Number", value: "+44 7700 900 123", href: "tel:+447700900123" },
-              ]}
-            />
-            <CommsCard
-              title="Social Protocols"
-              badge="Personalized Reach"
-              locked={isLocked}
-              footer="Visibility is determined per-seeker by the provider"
-              items={[
-                { icon: Share2, label: "X (Twitter)", value: `@${handle}`, href: "#" },
-                { icon: Camera, label: "Instagram", value: `@${handle.split("_")[0]}.work`, href: "#" },
-              ]}
-            />
-          </div>
+          {(visiblePrimaryComms.length > 0 || visibleSocials.length > 0 || isLocked || isPending) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(visiblePrimaryComms.length > 0 || isLocked || isPending) && (
+                <CommsCard
+                  title="Primary Comms"
+                  badge="Secure Tunnels"
+                  locked={isLocked}
+                  emptyLabel={visiblePrimaryComms.length === 0 ? "Owner has hidden all channels" : undefined}
+                  items={visiblePrimaryComms.map((c) => ({
+                    icon: commsIcon(c.kind),
+                    label: c.label,
+                    value: c.value,
+                    href: hrefFor(c.kind, c.value),
+                  }))}
+                />
+              )}
+              {(visibleSocials.length > 0 || isLocked || isPending) && (
+                <CommsCard
+                  title="Social Protocols"
+                  badge="Personalized Reach"
+                  locked={isLocked}
+                  footer="Visibility is determined per-seeker by the provider"
+                  emptyLabel={visibleSocials.length === 0 ? "Owner has hidden all handles" : undefined}
+                  items={visibleSocials.map((s) => ({
+                    icon: socialIcon(s.kind),
+                    label: s.label,
+                    value: s.value,
+                    href: s.href,
+                  }))}
+                />
+              )}
+            </div>
+          )}
 
           {/* Availability alerts */}
           <div className="rounded-2xl bg-surface-lowest ghost-border p-5 shadow-ambient">
@@ -442,13 +463,14 @@ const OpsItem = ({ icon: Icon, label, value, sub }: { icon: any; label: string; 
 );
 
 const CommsCard = ({
-  title, badge, items, locked, footer,
+  title, badge, items, locked, footer, emptyLabel,
 }: {
   title: string;
   badge: string;
   items: { icon: any; label: string; value: string; href: string }[];
   locked: boolean;
   footer?: string;
+  emptyLabel?: string;
 }) => (
   <div className="bg-surface-lowest rounded-2xl p-5 ghost-border shadow-ambient flex flex-col relative">
     <div className="flex justify-between items-start mb-4">
@@ -460,6 +482,9 @@ const CommsCard = ({
       </span>
     </div>
     <div className={`space-y-3 ${locked ? "blur-sm select-none pointer-events-none" : ""}`}>
+      {items.length === 0 && !locked && emptyLabel && (
+        <p className="text-xs text-muted-foreground italic py-2">{emptyLabel}</p>
+      )}
       {items.map((it) => (
         <a key={it.label} href={locked ? "#" : it.href} className="flex items-center justify-between group">
           <div className="flex items-center gap-2.5 min-w-0">
