@@ -99,7 +99,7 @@ const emptyDraft: Draft = {
 };
 
 const SpotlightBoard = () => {
-  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen } = useSpotlight();
+  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen, markPostViewed } = useSpotlight();
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -205,7 +205,8 @@ const SpotlightBoard = () => {
   // counts as seen — extinguish the torch on that contact's profile.
   useEffect(() => {
     if (visibleOther?.authorId) markSeen(visibleOther.authorId);
-  }, [visibleOther?.id, visibleOther?.authorId, markSeen]);
+    if (visibleOther?.id) markPostViewed(visibleOther.id);
+  }, [visibleOther?.id, visibleOther?.authorId, markSeen, markPostViewed]);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
