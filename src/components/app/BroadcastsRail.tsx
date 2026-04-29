@@ -38,7 +38,7 @@ interface Props {
 }
 
 const BroadcastsRail = ({ onReply }: Props) => {
-  const { posts, dismissedPosts, dismissPost } = useSpotlight();
+  const { posts, dismissedPosts, dismissPost, markSeen } = useSpotlight();
   const [collapsed, setCollapsed] = useState(false);
   const [audience, setAudience] = useState<AudienceFilter>("all");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -66,6 +66,7 @@ const BroadcastsRail = ({ onReply }: Props) => {
   const sendReply = (contactId: string, title: string) => {
     if (!reply.trim()) return;
     onReply?.(contactId, title);
+    markSeen(contactId);
     toast.success("Reply sent", { description: `Re: ${title}` });
     setReply("");
     setOpenId(null);
@@ -143,7 +144,12 @@ const BroadcastsRail = ({ onReply }: Props) => {
                 <div key={p.id} className="rounded-xl bg-surface-lowest ghost-border overflow-hidden">
                   <button
                     type="button"
-                    onClick={() => setOpenId(isOpen ? null : p.id)}
+                    onClick={() => {
+                      const next = isOpen ? null : p.id;
+                      setOpenId(next);
+                      // Opening a broadcast counts as "seen" — extinguish the torch
+                      if (next && p.authorId) markSeen(p.authorId);
+                    }}
                     className="w-full flex items-center gap-2.5 p-2 text-left hover:bg-surface-low/60 transition"
                   >
                     <Avatar initials={c.initials} accent={c.accent} />
