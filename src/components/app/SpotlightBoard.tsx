@@ -20,6 +20,7 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
 import { toast } from "sonner";
 import { contacts, type Relationship } from "@/lib/mockData";
@@ -240,7 +241,7 @@ const SpotlightBoard = () => {
         <div className="rounded-2xl ghost-border bg-surface-low/30 p-3">
           <div className="flex items-center justify-between mb-2 px-1">
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              My post · {orderedMine.length}/{MAX_ACTIVE_BY_ME}
+              My broadcast · {orderedMine.length}/{MAX_ACTIVE_BY_ME}
             </h4>
           </div>
           {orderedMine.length === 0 ? (
@@ -308,37 +309,51 @@ const SpotlightBoard = () => {
 
         {/* Window 2 — From others (with filter + unread badge + dismiss) */}
         <div className="rounded-2xl ghost-border bg-surface-low/30 p-3">
-          <div className="flex items-center justify-between flex-wrap gap-2 mb-3 px-1">
+          <div className="flex items-center justify-between gap-2 mb-3 px-1">
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
-              From others
+              Their broadcast
               {unreadOthers > 0 && (
                 <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                   {unreadOthers}
                 </span>
               )}
             </h4>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Filter className="w-3 h-3 text-muted-foreground" />
-            {audienceFilters.map((f) => {
-              const active = audience === f.id;
-              return (
+            <Popover>
+              <PopoverTrigger asChild>
                 <button
-                  key={f.id}
                   type="button"
-                  onClick={() => setAudience(f.id)}
-                  className={cn(
-                    "px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-surface-lowest text-muted-foreground hover:text-primary",
-                  )}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border bg-surface-lowest text-[10px] font-semibold text-muted-foreground hover:text-primary transition"
+                  title="Filter by audience"
                 >
-                  {f.label}
+                  <Filter className="w-3 h-3" />
+                  <span>{audienceFilters.find((f) => f.id === audience)?.label ?? "All"}</span>
+                  <ChevronDown className="w-3 h-3" />
                 </button>
-              );
-            })}
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-44 p-1.5">
+                <div className="flex flex-col gap-1">
+                  {audienceFilters.map((f) => {
+                    const active = audience === f.id;
+                    return (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setAudience(f.id)}
+                        className={cn(
+                          "text-left px-2 py-1 rounded-md text-[11px] font-semibold border transition",
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-transparent text-muted-foreground hover:bg-surface-low hover:text-primary",
+                        )}
+                      >
+                        {f.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-        </div>
         {visibleOther === null ? (
           <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
             All caught up — no new spotlight posts from this group.
