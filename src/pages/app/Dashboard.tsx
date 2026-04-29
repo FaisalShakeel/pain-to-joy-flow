@@ -5,6 +5,9 @@ import {
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
 import Avatar from "@/components/app/Avatar";
+import MessagesPanel from "@/components/app/MessagesPanel";
+import FrequentContactsWidget from "@/components/app/FrequentContactsWidget";
+import SpotlightBoard from "@/components/app/SpotlightBoard";
 import { me, contacts, requests, threads } from "@/lib/mockData";
 import { useState } from "react";
 import { useRole } from "@/lib/role";
@@ -106,6 +109,21 @@ const Dashboard = () => {
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Spotlight board */}
+        <div className="lg:col-span-3">
+          <SpotlightBoard />
+        </div>
+
+        {/* Frequent contacts (8) with expand */}
+        <div className="lg:col-span-2">
+          <FrequentContactsWidget />
+        </div>
+
+        {/* Messages panel */}
+        <div className="lg:col-span-1">
+          <MessagesPanel />
         </div>
 
         {/* Access requests */}
