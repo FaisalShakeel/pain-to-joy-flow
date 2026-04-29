@@ -9,7 +9,7 @@ import { useMessages } from "@/components/app/MessagesContext";
 import { toast } from "@/hooks/use-toast";
 
 const Messages = () => {
-  const { threads, setThreads, markRead } = useMessages();
+  const { threads, setThreads, markRead, markAllRead } = useMessages();
   const [active, setActive] = useState<string | null>(threads[0]?.id ?? null);
   const [draft, setDraft] = useState("");
 
@@ -20,6 +20,12 @@ const Messages = () => {
   useEffect(() => {
     if (active) markRead(active);
   }, [active, markRead]);
+
+  // Clear the global Messages badge as soon as the inbox is opened
+  useEffect(() => {
+    markAllRead();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const replyToBroadcast = (contactId: string, quotedTitle: string) => {
     const body = `Re: ${quotedTitle}`;
