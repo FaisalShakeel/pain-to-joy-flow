@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock,
-  Radio,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -16,17 +15,6 @@ const visibilityOptions: { value: Visibility; label: string; icon: typeof Eye; h
   { value: "public",   label: "Public",   icon: Globe,  hint: "Anyone viewing your profile" },
   { value: "approved", label: "Approved", icon: Users,  hint: "Only synced contacts" },
   { value: "hidden",   label: "Hidden",   icon: EyeOff, hint: "Only you" },
-];
-
-const availabilityPresets = [
-  "Available now",
-  "Available after 2:00 PM",
-  "In a meeting — leave a message",
-  "Deep focus — async only",
-  "Office hours Tue & Thu, 2–4 PM",
-  "Travelling — limited windows",
-  "Free after 5:00 PM today",
-  "Out of office — back Monday",
 ];
 
 const EditProfile = () => {
@@ -133,10 +121,13 @@ const EditProfile = () => {
               <VisibilityPicker value={profile.visibility.tags} onChange={(v) => setFieldVisibility("tags", v)} />
             </FieldRow>
             <FieldRow>
-              <AvailabilityContextField
-                value={profile.availabilityContext}
-                onChange={(v) => update("availabilityContext", v)}
-              />
+              <div className="block">
+                <span className="text-xs font-semibold text-muted-foreground">Availability context</span>
+                <div className="mt-1 px-4 py-2.5 rounded-xl bg-surface-low ghost-border text-sm text-muted-foreground">
+                  {profile.availabilityContext || <span className="italic">No status set</span>}
+                  <span className="ml-2 text-[10px]">· Set this from your profile page.</span>
+                </div>
+              </div>
               <VisibilityPicker
                 value={profile.visibility.availabilityContext}
                 onChange={(v) => setFieldVisibility("availabilityContext", v)}
