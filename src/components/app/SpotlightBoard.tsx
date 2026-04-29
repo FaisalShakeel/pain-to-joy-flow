@@ -195,6 +195,11 @@ const SpotlightBoard = () => {
 
   const unreadOthers = filteredOthers.length;
 
+  // Pick which "from others" post is currently visible. Default = newest in
+  // the filtered list. The dropdown lets the user switch to any other.
+  const visibleOther =
+    filteredOthers.find((p) => p.id === activeOtherId) ?? filteredOthers[0] ?? null;
+
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
       <div className="flex items-center justify-between flex-wrap gap-2">
