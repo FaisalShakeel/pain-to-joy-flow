@@ -7,6 +7,7 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
 import AccessRequestComposer from "@/components/app/AccessRequestComposer";
+import PingButton from "@/components/app/PingButton";
 import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -98,6 +99,10 @@ const ContactProfile = () => {
 
             {/* CTAs */}
             <div className="mt-7 flex flex-wrap gap-2.5">
+              <div className="inline-flex items-center gap-2 px-2 py-1.5 rounded-full ghost-border bg-surface-low">
+                <span className="pl-2 text-xs font-semibold text-primary">Quick Ping</span>
+                <PingButton contact={contact} size="md" />
+              </div>
               {isLocked && (
                 <button
                   onClick={sendRequest}
