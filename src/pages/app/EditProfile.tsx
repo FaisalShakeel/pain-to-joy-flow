@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock,
+  Radio,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -15,6 +16,17 @@ const visibilityOptions: { value: Visibility; label: string; icon: typeof Eye; h
   { value: "public",   label: "Public",   icon: Globe,  hint: "Anyone viewing your profile" },
   { value: "approved", label: "Approved", icon: Users,  hint: "Only synced contacts" },
   { value: "hidden",   label: "Hidden",   icon: EyeOff, hint: "Only you" },
+];
+
+const availabilityPresets = [
+  "Available now",
+  "Available after 2:00 PM",
+  "In a meeting — leave a message",
+  "Deep focus — async only",
+  "Office hours Tue & Thu, 2–4 PM",
+  "Travelling — limited windows",
+  "Free after 5:00 PM today",
+  "Out of office — back Monday",
 ];
 
 const EditProfile = () => {
@@ -121,8 +133,7 @@ const EditProfile = () => {
               <VisibilityPicker value={profile.visibility.tags} onChange={(v) => setFieldVisibility("tags", v)} />
             </FieldRow>
             <FieldRow>
-              <Field
-                label="Availability context"
+              <AvailabilityContextField
                 value={profile.availabilityContext}
                 onChange={(v) => update("availabilityContext", v)}
               />
