@@ -240,7 +240,7 @@ const ScheduleCall = () => {
                   No {bookingType === "meeting" ? "meeting" : "quick call"} slots on this day.
                 </div>
               ) : (
-                <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {filtered.map((s) =>
                     s.kind === "meeting" ? (
                       <MeetingCard key={s.id} slot={s} active={s.id === slotId} onPick={() => pickSlot(s)} />
@@ -304,6 +304,15 @@ const ScheduleCall = () => {
                     </button>
                   ))}
                 </div>
+                {selected.kind === "meeting" && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl bg-primary/5 ghost-border p-3 text-xs text-muted-foreground">
+                    <Timer className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                    <p>
+                      <span className="font-semibold text-primary">3-minute buffer included.</span>{" "}
+                      Client can join 3 min before the scheduled time, and the call may extend up to 3 min beyond the allocated duration.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Notes */}
