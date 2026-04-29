@@ -148,12 +148,12 @@ const PriorityContactsWidget = () => {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setExpanded(true)}
+          <Link
+            to="/app/contacts"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/10 text-xs font-semibold text-primary transition"
           >
-            <Maximize2 className="w-3.5 h-3.5" /> View all
-          </button>
+            <Maximize2 className="w-3.5 h-3.5" /> Open Vault
+          </Link>
         </div>
 
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
