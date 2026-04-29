@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
 import EmptyState from "@/components/app/EmptyState";
-import { contacts, type Relationship } from "@/lib/mockData";
+import { contacts, type Relationship, type AlertKind } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,31 @@ const filters: { id: Filter; label: string; icon: React.ComponentType<{ classNam
   { id: "colleague", label: "Colleagues", icon: UserCheck },
   { id: "family",    label: "Family",     icon: Heart },
 ];
+
+const alertMeta: Record<AlertKind, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
+  callback: { label: "Callback alert set",       icon: PhoneCall,     cls: "bg-emerald-500/15 text-emerald-700" },
+  message:  { label: "Message alert set",        icon: MessageSquare, cls: "bg-sky-500/15 text-sky-700" },
+  calendar: { label: "Calendar booking alert",   icon: CalendarClock, cls: "bg-violet-500/15 text-violet-700" },
+};
+
+const AlertIcons = ({ alerts, size = "md" }: { alerts?: AlertKind[]; size?: "xs" | "sm" | "md" }) => {
+  if (!alerts || alerts.length === 0) return null;
+  const dim = size === "xs" ? "w-3 h-3 p-0.5" : size === "sm" ? "w-4 h-4 p-0.5" : "w-5 h-5 p-1";
+  const icon = size === "xs" ? "w-2 h-2" : size === "sm" ? "w-2.5 h-2.5" : "w-3 h-3";
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label="Contact attempt set">
+      {alerts.map((a) => {
+        const m = alertMeta[a];
+        const Icon = m.icon;
+        return (
+          <span key={a} title={m.label} className={cn("inline-flex items-center justify-center rounded-full", dim, m.cls)}>
+            <Icon className={icon} />
+          </span>
+        );
+      })}
+    </span>
+  );
+};
 
 const Contacts = () => {
   const [q, setQ] = useState("");
