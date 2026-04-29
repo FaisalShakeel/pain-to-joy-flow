@@ -6,7 +6,7 @@ import {
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
-import RequestSentDialog from "@/components/app/RequestSentDialog";
+import AccessRequestComposer from "@/components/app/AccessRequestComposer";
 import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -35,10 +35,7 @@ const ContactProfile = () => {
     );
   }
 
-  const sendRequest = () => {
-    setContact({ ...contact, syncStatus: "pending" });
-    setOpenSent(true);
-  };
+  const sendRequest = () => setOpenSent(true);
 
   const isLocked = contact.syncStatus === "locked";
   const isPending = contact.syncStatus === "pending";
@@ -254,13 +251,11 @@ const ContactProfile = () => {
         </div>
       </div>
 
-      <RequestSentDialog
+      <AccessRequestComposer
         open={openSent}
-        onOpenChange={(v) => {
-          setOpenSent(v);
-          if (!v) toast({ title: "Request queued", description: "We'll ping you the moment they respond." });
-        }}
-        contactName={contact.name}
+        onOpenChange={setOpenSent}
+        contact={contact}
+        onSubmitted={() => setContact({ ...contact, syncStatus: "pending" })}
       />
     </AppShell>
   );
