@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
+import { toast } from "sonner";
 
 // Maximum number of simultaneously-published spotlight posts the
 // logged-in user is allowed to keep live at once.
@@ -74,7 +75,12 @@ const SpotlightBoard = () => {
   const atLimit = myActive.length >= MAX_ACTIVE_BY_ME;
 
   const openNew = () => {
-    if (atLimit) return;
+    if (atLimit) {
+      toast.error(`Limit reached — ${MAX_ACTIVE_BY_ME} active posts max`, {
+        description: "Delete or edit one of your live spotlight posts to publish a new one.",
+      });
+      return;
+    }
     setDraft(emptyDraft);
     setEditorOpen(true);
   };
@@ -93,7 +99,12 @@ const SpotlightBoard = () => {
     if (!title || !body) return;
     // Hard cap: only allow MAX_ACTIVE_BY_ME live posts authored by "me".
     // Editing existing posts is always allowed.
-    if (!draft.id && atLimit) return;
+    if (!draft.id && atLimit) {
+      toast.error(`Limit reached — ${MAX_ACTIVE_BY_ME} active posts max`, {
+        description: "Delete or edit one of your live spotlight posts first.",
+      });
+      return;
+    }
     const cta = draft.ctaLabel.trim() && draft.ctaHref.trim()
       ? { label: draft.ctaLabel.trim().slice(0, SPOTLIGHT_LIMITS.ctaLabel), href: draft.ctaHref.trim() }
       : undefined;
@@ -111,8 +122,11 @@ const SpotlightBoard = () => {
   const valid = draft.title.trim().length > 0 && draft.body.trim().length > 0
     && titleLeft >= 0 && bodyLeft >= 0;
 
+  // Spotlight board only shows the logged-in user's own posts (cap = 2).
+  // Posts from other contacts power the torch indicator elsewhere.
+  const mine = posts.filter((p) => !p.authorId || p.authorId === "me");
   // Pinned first, then most recent
-  const ordered = [...posts].sort((a, b) => {
+  const ordered = [...mine].sort((a, b) => {
     if (!!b.pinned !== !!a.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
     return b.createdAt - a.createdAt;
   });
