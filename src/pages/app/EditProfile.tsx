@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock,
+  Radio,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -15,6 +16,17 @@ const visibilityOptions: { value: Visibility; label: string; icon: typeof Eye; h
   { value: "public",   label: "Public",   icon: Globe,  hint: "Anyone viewing your profile" },
   { value: "approved", label: "Approved", icon: Users,  hint: "Only synced contacts" },
   { value: "hidden",   label: "Hidden",   icon: EyeOff, hint: "Only you" },
+];
+
+const availabilityPresets = [
+  "Available now",
+  "Available after 2:00 PM",
+  "In a meeting — leave a message",
+  "Deep focus — async only",
+  "Office hours Tue & Thu, 2–4 PM",
+  "Travelling — limited windows",
+  "Free after 5:00 PM today",
+  "Out of office — back Monday",
 ];
 
 const EditProfile = () => {
@@ -121,8 +133,7 @@ const EditProfile = () => {
               <VisibilityPicker value={profile.visibility.tags} onChange={(v) => setFieldVisibility("tags", v)} />
             </FieldRow>
             <FieldRow>
-              <Field
-                label="Availability context"
+              <AvailabilityContextField
                 value={profile.availabilityContext}
                 onChange={(v) => update("availabilityContext", v)}
               />
@@ -291,6 +302,51 @@ function TextareaField({ label, value, onChange }: { label: string; value: strin
         className="mt-1 w-full px-4 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20 resize-none"
       />
     </label>
+  );
+}
+
+function AvailabilityContextField({
+  value, onChange,
+}: { value: string; onChange: (v: string) => void }) {
+  const isPreset = availabilityPresets.includes(value);
+  return (
+    <div className="block">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold text-muted-foreground inline-flex items-center gap-1.5">
+          <Radio className="w-3 h-3 text-accent" /> Availability context
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          Shown on your profile right now
+        </span>
+      </div>
+
+      {/* Live preview of what contacts see */}
+      <div className="mt-1.5 px-3 py-2 rounded-xl bg-accent/10 border border-accent/20 text-xs text-primary font-medium">
+        {value || <span className="text-muted-foreground italic">No status set</span>}
+      </div>
+
+      <div className="mt-2 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Write a custom line… e.g. Free after 6 PM"
+          maxLength={80}
+          className="w-full px-4 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
+        />
+        <select
+          value={isPreset ? value : ""}
+          onChange={(e) => e.target.value && onChange(e.target.value)}
+          className="px-3 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
+          aria-label="Choose preset"
+        >
+          <option value="">Pick preset…</option>
+          {availabilityPresets.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+      </div>
+      <p className="mt-1 text-[10px] text-muted-foreground text-right">{value.length}/80</p>
+    </div>
   );
 }
 
