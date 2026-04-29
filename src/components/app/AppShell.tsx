@@ -15,12 +15,22 @@ import {
   Crown,
   ShieldCheck,
   LogOut,
+  Pencil,
+  UserCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
 import { useRole } from "@/lib/role";
 import { me, notifications } from "@/lib/mockData";
 import Avatar from "./Avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavItem {
   to: string;
@@ -177,9 +187,37 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
               )}
             </button>
 
-            <Link to="/app/settings" className="md:hidden">
-              <Avatar initials={me.initials} size="sm" />
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label="Account menu"
+                className="rounded-full ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 hover:opacity-90 transition"
+              >
+                <Avatar initials={me.initials} size="sm" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuLabel className="flex items-center gap-3 py-2">
+                  <Avatar initials={me.initials} size="sm" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-primary truncate">{me.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{me.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/app/settings")}>
+                  <UserCircle2 className="w-4 h-4 mr-2" /> View profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/app/settings/edit")}>
+                  <Pencil className="w-4 h-4 mr-2" /> Edit profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/app/settings")}>
+                  <Settings className="w-4 h-4 mr-2" /> Account settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/")} className="text-destructive focus:text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" /> Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {(title || actions) && (
