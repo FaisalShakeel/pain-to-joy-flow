@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, Phone, ShieldCheck, Crown, Sparkles, Clock, Users, TrendingUp,
+  CalendarDays, ArrowRight, Inbox, ShieldCheck, Sparkles, Clock, Users, TrendingUp,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
 import Avatar from "@/components/app/Avatar";
 import MessagesPanel from "@/components/app/MessagesPanel";
-import FrequentContactsWidget from "@/components/app/FrequentContactsWidget";
+import PriorityContactsWidget from "@/components/app/PriorityContactsWidget";
 import SpotlightBoard from "@/components/app/SpotlightBoard";
 import { me, contacts, requests, threads } from "@/lib/mockData";
 import { useState } from "react";
@@ -30,25 +30,6 @@ const Dashboard = () => {
         </Link>
       }
     >
-      {/* Free plan banner */}
-      <Link
-        to="/app/upgrade"
-        className="flex items-center justify-between gap-4 mb-6 rounded-2xl bg-gradient-vault text-primary-foreground p-4 md:p-5 shadow-elevated hover:opacity-95 transition"
-      >
-        <div className="flex items-center gap-3">
-          <span className="grid place-items-center w-10 h-10 rounded-xl bg-gold/20 text-gold">
-            <Crown className="w-5 h-5" />
-          </span>
-          <div>
-            <p className="font-headline font-bold text-sm">You're on the Free plan</p>
-            <p className="text-xs text-primary-foreground/80">Unlock Smart Filter, analytics and Power Calls.</p>
-          </div>
-        </div>
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gold">
-          Upgrade <ArrowRight className="w-3.5 h-3.5" />
-        </span>
-      </Link>
-
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Status card */}
         <div className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-6 md:p-7 shadow-ambient">
@@ -86,10 +67,13 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Today's slots */}
+        {/* Reserved Time */}
         <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
           <div className="flex items-center justify-between">
-            <h3 className="font-headline font-bold text-primary">Today's slots</h3>
+            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-accent" />
+              Reserved Time <span aria-hidden>📅</span>
+            </h3>
             <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
           </div>
           <ul className="mt-4 space-y-2.5">
@@ -111,14 +95,14 @@ const Dashboard = () => {
           </ul>
         </div>
 
-        {/* Spotlight board */}
+        {/* Priority Contacts (6) */}
         <div className="lg:col-span-3">
-          <SpotlightBoard />
+          <PriorityContactsWidget />
         </div>
 
-        {/* Frequent contacts (8) with expand */}
-        <div className="lg:col-span-2">
-          <FrequentContactsWidget />
+        {/* Spotlight board (max 2 cards) */}
+        <div className="lg:col-span-3">
+          <SpotlightBoard />
         </div>
 
         {/* Messages panel */}
@@ -149,25 +133,6 @@ const Dashboard = () => {
               );
             })}
           </ul>
-        </div>
-
-        {/* Live calls */}
-        <div className="rounded-3xl bg-gradient-primary p-6 text-primary-foreground shadow-elevated">
-          <div className="flex items-center gap-3">
-            <span className="grid place-items-center w-10 h-10 rounded-xl bg-white/15">
-              <Phone className="w-5 h-5" />
-            </span>
-            <h3 className="font-headline font-bold text-lg">Live calls</h3>
-          </div>
-          <p className="mt-3 text-sm text-primary-foreground/85">
-            Open Power Call windows let approved contacts ring you on demand — without giving up your number.
-          </p>
-          <Link
-            to="/app/contact/rashid-al-amir/call"
-            className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gold text-primary text-sm font-bold hover:bg-gold/90 transition"
-          >
-            Open call window <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
 
         {/* Recent activity */}
