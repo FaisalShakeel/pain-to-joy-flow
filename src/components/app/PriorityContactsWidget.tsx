@@ -95,6 +95,11 @@ const ContactRow = ({
               <StatusPill tone={statusTone(effective)} className="text-[10px] px-2 py-0.5" />
             )}
           </div>
+          {c.availabilityContext && (
+            <p className="mt-1 text-[11px] text-muted-foreground line-clamp-1" title={c.availabilityContext}>
+              {c.availabilityContext}
+            </p>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1.5">
           <button

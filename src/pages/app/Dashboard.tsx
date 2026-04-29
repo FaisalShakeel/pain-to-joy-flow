@@ -31,6 +31,11 @@ const Dashboard = () => {
       }
     >
       <div className="grid lg:grid-cols-3 gap-5">
+        {/* Spotlight board (moved above status) */}
+        <div className="lg:col-span-3">
+          <SpotlightBoard />
+        </div>
+
         {/* Status card */}
         <div className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-6 md:p-7 shadow-ambient">
           <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -98,11 +103,6 @@ const Dashboard = () => {
         {/* Priority Contacts (6) */}
         <div className="lg:col-span-3">
           <PriorityContactsWidget />
-        </div>
-
-        {/* Spotlight board (max 2 cards) */}
-        <div className="lg:col-span-3">
-          <SpotlightBoard />
         </div>
 
         {/* Messages panel */}
