@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
-  Pencil, Trash2, Sparkles, AlertTriangle, Info, Filter,
+  Pencil, Trash2, Sparkles, AlertTriangle, Info, Filter, ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
 import { toast } from "sonner";
 import { contacts, type Relationship } from "@/lib/mockData";
@@ -99,6 +103,7 @@ const SpotlightBoard = () => {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [audience, setAudience] = useState<AudienceFilter>("all");
+  const [activeOtherId, setActiveOtherId] = useState<string | null>(null);
 
   const myActive = posts.filter((p) => !p.authorId || p.authorId === "me");
   const atLimit = myActive.length >= MAX_ACTIVE_BY_ME;
