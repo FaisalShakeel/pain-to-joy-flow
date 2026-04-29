@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
-  Lock, ShieldCheck, Phone, CalendarDays, MessageSquare, ArrowRight, ListChecks, Building2, Clock, BellRing, BellOff, PhoneCall,
+  Lock, ShieldCheck, Phone, CalendarDays, MessageSquare, ArrowRight, ListChecks, Building2, Clock, BellRing, BellOff, PhoneCall, ArrowLeft,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -12,6 +12,11 @@ import { toast } from "@/hooks/use-toast";
 
 const ContactProfile = () => {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
+  const goBack = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/app/contacts");
+  };
   const baseContact = useMemo(() => findContact(id), [id]);
   const [contact, setContact] = useState(baseContact);
   const [openSent, setOpenSent] = useState(false);
@@ -62,6 +67,13 @@ const ContactProfile = () => {
 
   return (
     <AppShell subtitle="Contact profile" title={contact.name}>
+      <button
+        onClick={goBack}
+        className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
+        aria-label="Back to contacts"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to contacts
+      </button>
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Hero */}
         <div className="lg:col-span-2 rounded-3xl overflow-hidden ghost-border bg-surface-lowest shadow-ambient">
