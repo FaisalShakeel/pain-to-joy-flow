@@ -156,6 +156,14 @@ const EditProfile = () => {
               <VisibilityPicker value={profile.visibility.operationHours} onChange={(v) => setFieldVisibility("operationHours", v)} />
             </FieldRow>
             <FieldRow>
+              <Field label="Time zone" value={profile.timeZone} onChange={(v) => update("timeZone", v)} />
+              <VisibilityPicker value={profile.visibility.timeZone} onChange={(v) => setFieldVisibility("timeZone", v)} />
+            </FieldRow>
+            <FieldRow>
+              <Field label="Location" value={profile.location} onChange={(v) => update("location", v)} />
+              <VisibilityPicker value={profile.visibility.location} onChange={(v) => setFieldVisibility("location", v)} />
+            </FieldRow>
+            <FieldRow>
               <Field label="Headquarters" value={profile.headquarters} onChange={(v) => update("headquarters", v)} />
               <VisibilityPicker value={profile.visibility.headquarters} onChange={(v) => setFieldVisibility("headquarters", v)} />
             </FieldRow>

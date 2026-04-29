@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio } from "lucide-react";
+import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio, Clock, CalendarDays, Globe2, MapPin, Building2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { me, transactions, myOwnerProfile } from "@/lib/mockData";
@@ -47,6 +47,29 @@ const AccountSettings = () => {
               >
                 <Pencil className="w-3 h-3" /> Update
               </Link>
+            </div>
+          </div>
+
+          {/* Operations Center */}
+          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Operations Center</p>
+                <p className="text-xs text-muted-foreground mt-1">Working schedule, time zone and base — shown on your profile.</p>
+              </div>
+              <Link
+                to="/app/settings/edit"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-xs font-semibold text-primary hover:bg-surface transition shrink-0"
+              >
+                <Pencil className="w-3 h-3" /> Update
+              </Link>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <OpsRow icon={CalendarDays} label="Working days" value={myOwnerProfile.operationDays} sub={myOwnerProfile.operationDaysSub} visibility={myOwnerProfile.visibility.operationDays} />
+              <OpsRow icon={Clock} label="Office hours" value={myOwnerProfile.operationHours} visibility={myOwnerProfile.visibility.operationHours} />
+              <OpsRow icon={Globe2} label="Time zone" value={myOwnerProfile.timeZone} visibility={myOwnerProfile.visibility.timeZone} />
+              <OpsRow icon={MapPin} label="Location" value={myOwnerProfile.location} visibility={myOwnerProfile.visibility.location} />
+              <OpsRow icon={Building2} label="Headquarters" value={myOwnerProfile.headquarters} sub={myOwnerProfile.headquartersSub} visibility={myOwnerProfile.visibility.headquarters} />
             </div>
           </div>
 
@@ -126,3 +149,27 @@ const AccountSettings = () => {
 };
 
 export default AccountSettings;
+
+function OpsRow({
+  icon: Icon, label, value, sub, visibility,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  sub?: string;
+  visibility: "public" | "approved" | "hidden";
+}) {
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-2xl ghost-border bg-surface-low">
+      <span className="grid place-items-center w-8 h-8 rounded-lg bg-primary/10 text-primary shrink-0">
+        <Icon className="w-3.5 h-3.5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold text-primary truncate">{value || <span className="text-muted-foreground italic font-normal">Not set</span>}</p>
+        {sub && <p className="text-[11px] text-muted-foreground truncate">{sub}</p>}
+        <p className="mt-0.5 text-[10px] text-muted-foreground capitalize">Visible to {visibility}</p>
+      </div>
+    </div>
+  );
+}
