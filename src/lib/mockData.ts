@@ -30,6 +30,11 @@ export interface AccessRequest {
   receivedAt: string; // human readable
   state: "pending" | "approved" | "denied" | "scheduled";
   direction: "incoming" | "outgoing";
+  purpose?: string;
+  relation?: Relationship;
+  referredBy?: string;
+  channel?: "voice" | "message" | "calendar";
+  senderType?: "member" | "guest";
 }
 
 export interface MessageThread {
