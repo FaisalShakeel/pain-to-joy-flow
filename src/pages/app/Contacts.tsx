@@ -5,6 +5,7 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
 import EmptyState from "@/components/app/EmptyState";
+import PingButton from "@/components/app/PingButton";
 import { contacts, type Relationship, type AlertKind } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -439,10 +440,31 @@ const Contacts = () => {
                         )}
                       />
                     </div>
-                    <div className="min-w-0 flex-1 pr-5">
-                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : medium ? "text-xs" : "text-[11px]")}>
-                        {c.name}
-                      </p>
+                    <div className={cn("min-w-0 flex-1", roomy ? "pr-10" : medium ? "pr-9" : "pr-8")}>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            togglePin(c.id);
+                          }}
+                          title={isPinned ? "Unpin contact" : "Pin contact"}
+                          aria-label={isPinned ? "Unpin contact" : "Pin contact"}
+                          className={cn(
+                            "inline-flex items-center justify-center rounded-full transition shrink-0",
+                            roomy ? "w-5 h-5" : "w-4 h-4",
+                            isPinned
+                              ? "bg-accent text-accent-foreground shadow-elevated"
+                              : "bg-surface-low text-muted-foreground hover:text-primary opacity-60 group-hover:opacity-100",
+                          )}
+                        >
+                          {isPinned ? <PinOff className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} /> : <Pin className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} />}
+                        </button>
+                        <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : medium ? "text-xs" : "text-[11px]")}>
+                          {c.name}
+                        </p>
+                      </div>
                       <div className="flex items-center justify-between gap-1">
                         <p className={cn("flex items-center gap-1 text-muted-foreground truncate", roomy ? "text-[11px]" : medium ? "text-[10px]" : "text-[9px]")}>
                           <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
@@ -455,24 +477,9 @@ const Contacts = () => {
                       </p>
                     </div>
                   </Link>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      togglePin(c.id);
-                    }}
-                    title={isPinned ? "Unpin contact" : "Pin contact"}
-                    aria-label={isPinned ? "Unpin contact" : "Pin contact"}
-                    className={cn(
-                      "absolute top-1.5 right-1.5 inline-flex items-center justify-center w-6 h-6 rounded-full transition",
-                      isPinned
-                        ? "bg-accent text-accent-foreground shadow-elevated"
-                        : "bg-surface-low text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100",
-                    )}
-                  >
-                    {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
-                  </button>
+                  <div className={cn("absolute", roomy ? "bottom-2 right-2" : medium ? "bottom-1.5 right-1.5" : "bottom-1 right-1")}>
+                    <PingButton contact={c} size="sm" />
+                  </div>
                 </li>
               );
             })}
