@@ -66,7 +66,7 @@ const Contacts = () => {
   const densityCols: Record<Density, string> = {
     8:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
     16: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-8",
-    32: "grid-cols-4 sm:grid-cols-8 lg:grid-cols-8 xl:grid-cols-16",
+    32: "grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:[grid-template-columns:repeat(16,minmax(0,1fr))]",
   };
 
   return (
