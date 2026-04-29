@@ -77,18 +77,18 @@ const ContactProfile = () => {
     <AppShell subtitle="Contact profile" title={contact.name}>
       <button
         onClick={goBack}
-        className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
+        className="inline-flex items-center gap-2 mb-9 px-4 py-2 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
         aria-label="Back to contacts"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Back to contacts
       </button>
 
       {/* TOP: Profile Window */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         {/* Left: Portrait + Spotlight */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+        <div className="lg:col-span-4 flex flex-col gap-9">
           <div className={`aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br ${contact.accent} shadow-elevated ring-8 ${statusData.ringClass} relative grid place-items-center`}>
-            <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-lg">
+            <span className="text-white font-headline font-extrabold text-8xl tracking-tight drop-shadow-lg">
               {contact.initials}
             </span>
             <div className={`absolute top-4 right-4 h-5 w-5 ${statusData.dotClass} rounded-full ring-4 ring-white shadow-lg z-10 animate-pulse`} />
@@ -97,18 +97,18 @@ const ContactProfile = () => {
           {/* Spotlight */}
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-primary/5 to-primary/30 rounded-3xl blur opacity-75 transition" />
-            <div className="relative bg-surface-lowest rounded-3xl p-6 ghost-border overflow-hidden shadow-ambient">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Building2 className="w-14 h-14 text-primary" />
+            <div className="relative bg-surface-lowest rounded-3xl p-8 ghost-border overflow-hidden shadow-ambient">
+              <div className="absolute top-0 right-0 p-5 opacity-10">
+                <Building2 className="w-16 h-16 text-primary" />
               </div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-5">
                 <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Spotlight</h4>
               </div>
-              <p className="text-base font-headline font-light italic leading-relaxed text-foreground/90">
+              <p className="text-lg font-headline font-light italic leading-relaxed text-foreground/90">
                 "{contact.bio}"
               </p>
-              <div className="mt-5 pt-4 border-t border-primary/5 flex items-center justify-between">
+              <div className="mt-7 pt-5 border-t border-primary/5 flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">Security Layer</span>
                   <span className="text-[10px] font-mono text-primary/70">v2.4 handshake active</span>
@@ -119,21 +119,21 @@ const ContactProfile = () => {
           </div>
 
           {/* Quick Ping */}
-          <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient flex items-center justify-between">
+          <div className="rounded-2xl bg-surface-lowest ghost-border p-6 shadow-ambient flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Quick Ping</p>
-              <p className="text-sm font-semibold text-primary">Tap to nudge {firstName}</p>
+              <p className="text-base font-semibold text-primary mt-1">Tap to nudge {firstName}</p>
             </div>
             <PingButton contact={contact} size="md" />
           </div>
         </div>
 
         {/* Right: Profile info */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-9">
           {/* Hero card */}
-          <div className="bg-surface-lowest rounded-3xl p-8 md:p-10 shadow-ambient ghost-border relative overflow-hidden">
+          <div className="bg-surface-lowest rounded-3xl p-10 md:p-14 shadow-ambient ghost-border relative overflow-hidden">
             {/* Status block (top-right) */}
-            <div className="absolute top-6 right-6 md:top-8 md:right-8 flex flex-col items-end gap-2">
+            <div className="absolute top-8 right-8 md:top-10 md:right-10 flex flex-col items-end gap-3">
               <div className={`${statusData.chipClass} border px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2`}>
                 <span className="relative flex h-2 w-2">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusData.pingClass} opacity-75`} />
@@ -144,9 +144,9 @@ const ContactProfile = () => {
                   <Zap className="w-3 h-3" /> {statusData.subLabel}
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`grid place-items-center w-7 h-7 rounded-full ${statusData.chipClass}`}>
-                  <Clock className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-2.5 mt-1">
+                <span className={`grid place-items-center w-8 h-8 rounded-full ${statusData.chipClass}`}>
+                  <Clock className="w-4 h-4" />
                 </span>
                 <div className="flex flex-col">
                   <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Current availability</span>
@@ -156,21 +156,21 @@ const ContactProfile = () => {
             </div>
 
             {/* Bio */}
-            <div className="space-y-3 max-w-2xl pr-32 md:pr-48">
+            <div className="space-y-5 max-w-2xl pr-32 md:pr-48">
               <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
                   {firstName}
                 </h1>
-                <div className="flex items-center gap-2 text-muted-foreground font-semibold tracking-wide mt-1">
+                <div className="flex items-center gap-2 text-muted-foreground font-semibold tracking-wide mt-3">
                   <Building2 className="w-4 h-4 text-primary" />
                   <span>{contact.org}</span>
                 </div>
               </div>
-              <p className="text-lg md:text-xl font-light text-foreground/70 font-headline">{contact.title}</p>
+              <p className="text-xl md:text-2xl font-light text-foreground/70 font-headline leading-snug">{contact.title}</p>
 
-              <div className="flex flex-wrap gap-2 pt-1">
+              <div className="flex flex-wrap gap-2.5 pt-2">
                 {contact.tags.map((t) => (
-                  <span key={t} className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/5 text-primary">
+                  <span key={t} className="text-[11px] font-semibold px-3 py-1.5 rounded-full bg-primary/5 text-primary">
                     {t}
                   </span>
                 ))}
@@ -178,11 +178,11 @@ const ContactProfile = () => {
             </div>
 
             {/* Operations Center */}
-            <div className="pt-8 mt-8 border-t border-surface-container">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-2">
+            <div className="pt-12 mt-12 border-t border-surface-container">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-8 flex items-center gap-2">
                 <span className="h-px w-8 bg-surface-container" /> Operations Center
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-9">
                 <OpsItem icon={CalendarDays} label="Operation Days" value="Monday — Friday" sub="Weekend access by priority only" />
                 <OpsItem icon={Briefcase} label="Operation Hours" value="09:00 — 18:00 (GMT+0)" />
                 <OpsItem icon={MapPin} label="Headquarters" value={contact.org} sub={`${firstName}'s primary base`} />
@@ -191,7 +191,7 @@ const ContactProfile = () => {
           </div>
 
           {/* Comms grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <CommsCard
               title="Primary Comms"
               badge="Secure Tunnels"
@@ -215,19 +215,19 @@ const ContactProfile = () => {
           </div>
 
           {/* Availability alerts */}
-          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-            <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="rounded-3xl bg-surface-lowest ghost-border p-8 shadow-ambient">
+            <div className="flex items-center justify-between gap-3 mb-6">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Availability alerts</p>
-                <h3 className="mt-1 font-headline font-bold text-primary text-base">
+                <h3 className="mt-2 font-headline font-bold text-primary text-lg">
                   Notify me when {firstName} is reachable
                 </h3>
               </div>
-              <span className={`grid place-items-center w-10 h-10 rounded-xl ${Object.values(alerts).some(Boolean) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+              <span className={`grid place-items-center w-12 h-12 rounded-xl ${Object.values(alerts).some(Boolean) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                 {Object.values(alerts).some(Boolean) ? <BellRing className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {[
                 { key: "callback" as const, icon: PhoneCall, label: "Callback" },
                 { key: "message" as const, icon: MessageSquare, label: "Message" },
@@ -238,13 +238,13 @@ const ContactProfile = () => {
                   <button
                     key={key}
                     onClick={() => toggleAlert(key)}
-                    className={`flex items-center justify-between gap-3 p-3 rounded-2xl ghost-border text-left transition ${on ? "bg-primary/5" : "bg-surface-low hover:bg-surface"}`}
+                    className={`flex items-center justify-between gap-3 p-4 rounded-2xl ghost-border text-left transition ${on ? "bg-primary/5" : "bg-surface-low hover:bg-surface"}`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className={`grid place-items-center w-8 h-8 rounded-xl ${on ? "bg-primary text-primary-foreground" : "bg-surface text-primary"}`}>
-                        <Icon className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`grid place-items-center w-9 h-9 rounded-xl ${on ? "bg-primary text-primary-foreground" : "bg-surface text-primary"}`}>
+                        <Icon className="w-4 h-4" />
                       </span>
-                      <p className="text-xs font-semibold text-primary truncate">{label}</p>
+                      <p className="text-sm font-semibold text-primary truncate">{label}</p>
                     </div>
                     <span className={`relative inline-flex h-4 w-7 items-center rounded-full transition ${on ? "bg-primary" : "bg-muted"}`} aria-hidden>
                       <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
