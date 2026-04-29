@@ -76,6 +76,34 @@ const seed: SpotlightPost[] = [
     createdAt: Date.now() - 1000 * 60 * 2,
     authorId: "sarah-jenkins",
   },
+  {
+    id: "s5",
+    title: "Onsite with the Atlas team",
+    body: "In Dubai through Thursday — happy to meet IRL if you're around.",
+    visibility: "contacts",
+    tone: "info",
+    createdAt: Date.now() - 1000 * 60 * 18,
+    authorId: "julian-vane",
+  },
+  {
+    id: "s6",
+    title: "Office hours Friday 3-5 PM",
+    body: "Open slots for portfolio founders — book in if you need a sounding board.",
+    visibility: "contacts",
+    tone: "offer",
+    cta: { label: "Book a slot", href: "/app/availability" },
+    createdAt: Date.now() - 1000 * 60 * 40,
+    authorId: "alex-rivera",
+  },
+  {
+    id: "s7",
+    title: "Weekend off-grid",
+    body: "Hiking — back online Sunday night. No urgent decisions please.",
+    visibility: "contacts",
+    tone: "info",
+    createdAt: Date.now() - 1000 * 60 * 60,
+    authorId: "yara-nasser",
+  },
 ];
 
 export function SpotlightProvider({ children }: { children: ReactNode }) {
