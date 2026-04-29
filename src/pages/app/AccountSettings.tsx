@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio, Clock, CalendarDays, Globe2, MapPin, Building2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -6,9 +7,31 @@ import { me, transactions, myOwnerProfile } from "@/lib/mockData";
 import { useRole, setRole } from "@/lib/role";
 import { toast } from "@/hooks/use-toast";
 
+const availabilityPresets = [
+  "Available now",
+  "Available after 2:00 PM",
+  "In a meeting — leave a message",
+  "Deep focus — async only",
+  "Office hours Tue & Thu, 2–4 PM",
+  "Travelling — limited windows",
+  "Free after 5:00 PM today",
+  "Out of office — back Monday",
+];
+
 const AccountSettings = () => {
   const [role] = useRole();
   const navigate = useNavigate();
+  // Local mirror of the live status so the dropdown updates instantly.
+  const [status, setStatus] = useState<string>(myOwnerProfile.availabilityContext);
+
+  const updateStatus = (v: string) => {
+    const next = v.slice(0, 80);
+    setStatus(next);
+    // Persist to the mock profile so other views (contacts, view profile) reflect it.
+    myOwnerProfile.availabilityContext = next;
+  };
+
+  const isPreset = availabilityPresets.includes(status);
 
   return (
     <AppShell subtitle="Account" title="Settings">
@@ -35,18 +58,40 @@ const AccountSettings = () => {
                   <Radio className="w-3 h-3" /> Availability context
                 </p>
                 <p className="mt-2 font-headline font-semibold text-primary leading-snug">
-                  {myOwnerProfile.availabilityContext || <span className="text-muted-foreground italic">No status set</span>}
+                  {status || <span className="text-muted-foreground italic">No status set</span>}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Visible to {myOwnerProfile.visibility.availabilityContext} · Typical reply {myOwnerProfile.responseTime}
                 </p>
               </div>
-              <Link
-                to="/app/settings/edit"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-xs font-semibold text-primary hover:bg-surface transition shrink-0"
+            </div>
+
+            {/* Quick status — preset dropdown + custom line, right under the status */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+              <input
+                value={status}
+                onChange={(e) => updateStatus(e.target.value)}
+                placeholder="Write a custom line… e.g. Free after 6 PM"
+                maxLength={80}
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
+              />
+              <select
+                value={isPreset ? status : ""}
+                onChange={(e) => e.target.value && updateStatus(e.target.value)}
+                className="px-3 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
+                aria-label="Choose preset status"
               >
-                <Pencil className="w-3 h-3" /> Update
-              </Link>
+                <option value="">Pick preset…</option>
+                {availabilityPresets.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground">
+                Updates instantly on your profile and contact card.
+              </p>
+              <p className="text-[10px] text-muted-foreground">{status.length}/80</p>
             </div>
           </div>
 

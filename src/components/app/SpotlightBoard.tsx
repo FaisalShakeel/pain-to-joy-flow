@@ -18,6 +18,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
 
+// Maximum number of simultaneously-published spotlight posts the
+// logged-in user is allowed to keep live at once.
+const MAX_ACTIVE_BY_ME = 2;
+
 const visMeta: Record<Visibility, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
   public:   { label: "Public",        icon: Globe,    cls: "bg-emerald-500/10 text-emerald-700" },
   contacts: { label: "Contacts only", icon: UsersIcon, cls: "bg-sky-500/10 text-sky-700" },
@@ -66,7 +70,14 @@ const SpotlightBoard = () => {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const openNew = () => { setDraft(emptyDraft); setEditorOpen(true); };
+  const myActive = posts.filter((p) => !p.authorId || p.authorId === "me");
+  const atLimit = myActive.length >= MAX_ACTIVE_BY_ME;
+
+  const openNew = () => {
+    if (atLimit) return;
+    setDraft(emptyDraft);
+    setEditorOpen(true);
+  };
   const openEdit = (p: SpotlightPost) => {
     setDraft({
       id: p.id, title: p.title, body: p.body, visibility: p.visibility, tone: p.tone,
@@ -80,6 +91,9 @@ const SpotlightBoard = () => {
     const title = draft.title.trim().slice(0, SPOTLIGHT_LIMITS.title);
     const body = draft.body.trim().slice(0, SPOTLIGHT_LIMITS.body);
     if (!title || !body) return;
+    // Hard cap: only allow MAX_ACTIVE_BY_ME live posts authored by "me".
+    // Editing existing posts is always allowed.
+    if (!draft.id && atLimit) return;
     const cta = draft.ctaLabel.trim() && draft.ctaHref.trim()
       ? { label: draft.ctaLabel.trim().slice(0, SPOTLIGHT_LIMITS.ctaLabel), href: draft.ctaHref.trim() }
       : undefined;
@@ -117,13 +131,31 @@ const SpotlightBoard = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={openNew}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:opacity-95 transition"
-        >
-          <Plus className="w-3.5 h-3.5" /> New post
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {myActive.length}/{MAX_ACTIVE_BY_ME} windows
+          </span>
+          <button
+            onClick={openNew}
+            disabled={atLimit}
+            title={atLimit ? `Limit reached — only ${MAX_ACTIVE_BY_ME} active spotlight posts at a time. Delete one to publish another.` : "New post"}
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
+              atLimit
+                ? "bg-surface-low text-muted-foreground cursor-not-allowed"
+                : "bg-primary text-primary-foreground hover:opacity-95",
+            )}
+          >
+            <Plus className="w-3.5 h-3.5" /> New post
+          </button>
+        </div>
       </div>
+
+      {atLimit && (
+        <p className="mt-3 text-[11px] text-muted-foreground bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2">
+          You've reached the limit of {MAX_ACTIVE_BY_ME} live spotlight posts. Delete or edit one to publish another.
+        </p>
+      )}
 
       {ordered.length === 0 ? (
         <div className="mt-4 p-6 rounded-2xl ghost-border bg-surface-low/50 text-center text-sm text-muted-foreground">
