@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2 } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 type View = "grid" | "list";
 type Filter = "all" | "favorites" | "frequent" | Relationship;
+type Density = 8 | 16 | 32;
 
 const relationshipMeta: Record<Relationship, { label: string; cls: string }> = {
   client:    { label: "Client",    cls: "bg-sky-500/10 text-sky-700" },
@@ -34,10 +35,12 @@ const Contacts = () => {
   const [q, setQ] = useState("");
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
+  const [density, setDensity] = useState<Density>(8);
+  const birdsEye = density !== 8;
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return contacts.filter((c) => {
+    const list = contacts.filter((c) => {
       if (filter === "favorites" && !c.favorite) return false;
       if (filter === "frequent" && !c.frequent) return false;
       if (filter !== "all" && filter !== "favorites" && filter !== "frequent" && c.relationship !== filter) return false;
@@ -49,58 +52,77 @@ const Contacts = () => {
         c.tags.some((t) => t.toLowerCase().includes(s))
       );
     });
-  }, [q, filter]);
+    // Pad list up to current density so the bird's-eye grid stays full
+    if (list.length === 0) return list;
+    const padded = [...list];
+    let i = 0;
+    while (padded.length < density) {
+      padded.push({ ...list[i % list.length], id: `${list[i % list.length].id}-pad-${padded.length}` });
+      i++;
+    }
+    return padded.slice(0, density);
+  }, [q, filter, density]);
+
+  const densityCols: Record<Density, string> = {
+    8:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+    16: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-8",
+    32: "grid-cols-4 sm:grid-cols-8 lg:grid-cols-8 xl:grid-cols-16",
+  };
 
   return (
     <AppShell
       subtitle="Vault directory"
       title="Your contacts"
       actions={
-        <button
-          onClick={() => toast({ title: "Add contact", description: "Invite link copied — share it with anyone." })}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
-        >
-          <Plus className="w-4 h-4" /> Add contact
-        </button>
+        birdsEye ? null : (
+          <button
+            onClick={() => toast({ title: "Add contact", description: "Invite link copied — share it with anyone." })}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
+          >
+            <Plus className="w-4 h-4" /> Add contact
+          </button>
+        )
       }
     >
-      {/* Search + view toggle */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border flex-1 min-w-[220px] max-w-xl">
-          <Search className="w-4 h-4 text-muted-foreground" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name, company, role or tag…"
-            className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
-          />
+      {/* Search + view toggle (folded in bird's-eye) */}
+      {!birdsEye && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border flex-1 min-w-[220px] max-w-xl">
+            <Search className="w-4 h-4 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search by name, company, role or tag…"
+              className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
+            <button
+              onClick={() => setView("grid")}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
+                view === "grid" ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
+              )}
+              aria-label="Grid view"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" /> Grid
+            </button>
+            <button
+              onClick={() => setView("list")}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
+                view === "list" ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
+              )}
+              aria-label="List view"
+            >
+              <List className="w-3.5 h-3.5" /> List
+            </button>
+          </div>
         </div>
-        <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
-          <button
-            onClick={() => setView("grid")}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
-              view === "grid" ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
-            )}
-            aria-label="Grid view"
-          >
-            <LayoutGrid className="w-3.5 h-3.5" /> Grid
-          </button>
-          <button
-            onClick={() => setView("list")}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
-              view === "list" ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
-            )}
-            aria-label="List view"
-          >
-            <List className="w-3.5 h-3.5" /> List
-          </button>
-        </div>
-      </div>
+      )}
 
-      {/* Quick filters */}
-      <div className="mt-4 flex flex-wrap gap-2">
+      {/* Quick filters + bird's-eye density (always visible) */}
+      <div className={cn("flex flex-wrap items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
         {filters.map((f) => {
           const Icon = f.icon;
           const active = filter === f.id;
@@ -119,12 +141,69 @@ const Contacts = () => {
             </button>
           );
         })}
+
+        <div className="ml-auto inline-flex items-center gap-2">
+          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Eye className="w-3.5 h-3.5" /> Bird&apos;s-eye
+          </span>
+          <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
+            {([8, 16, 32] as Density[]).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDensity(d)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-xs font-semibold transition min-w-[2.25rem]",
+                  density === d
+                    ? "bg-gradient-primary text-primary-foreground shadow-elevated"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+                aria-label={`Show ${d} contacts`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
         </div>
+      ) : birdsEye ? (
+        <ul className={cn("mt-6 grid gap-2", densityCols[density])}>
+          {filtered.map((c) => {
+            const rel = relationshipMeta[c.relationship];
+            return (
+              <li key={c.id}>
+                <Link
+                  to={`/app/contact/${c.id.split("-pad-")[0]}`}
+                  title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
+                  className="group flex flex-col items-center text-center p-2 rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition"
+                >
+                  <div className="relative">
+                    <Avatar initials={c.initials} accent={c.accent} size={density === 32 ? "sm" : "md"} />
+                    <span
+                      className={cn(
+                        "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
+                        c.status === "available" && "bg-emerald-500",
+                        c.status === "busy" && "bg-amber-500",
+                        c.status === "focus" && "bg-violet-500",
+                        c.status === "offline" && "bg-muted-foreground",
+                      )}
+                    />
+                  </div>
+                  {density === 16 && (
+                    <>
+                      <p className="mt-1.5 text-[11px] font-semibold text-primary truncate w-full leading-tight">{c.name.split(" ")[0]}</p>
+                      <span className={cn("mt-0.5 text-[9px] font-semibold px-1.5 py-0 rounded-full truncate max-w-full", rel.cls)}>{rel.label}</span>
+                    </>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       ) : view === "grid" ? (
         <ul className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((c) => {
