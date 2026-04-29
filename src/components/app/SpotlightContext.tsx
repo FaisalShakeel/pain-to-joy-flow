@@ -34,6 +34,9 @@ interface SpotlightCtx {
   // per-post dismiss (for the "From others" feed)
   dismissedPosts: Set<string>;
   dismissPost: (postId: string) => void;
+  // per-post viewed (decrements unread counts without removing the card)
+  viewedPosts: Set<string>;
+  markPostViewed: (postId: string) => void;
   unseenOthersCount: () => number;
 }
 
@@ -115,6 +118,7 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
   // map contactId -> last seen timestamp
   const [lastSeen, setLastSeen] = useState<Record<string, number>>({});
   const [dismissedPosts, setDismissedPosts] = useState<Set<string>>(new Set());
+  const [viewedPosts, setViewedPosts] = useState<Set<string>>(new Set());
 
   const create: SpotlightCtx["create"] = useCallback((p) => {
     const post: SpotlightPost = {
@@ -162,19 +166,29 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const markPostViewed = useCallback((postId: string) => {
+    setViewedPosts((prev) => {
+      if (prev.has(postId)) return prev;
+      const next = new Set(prev);
+      next.add(postId);
+      return next;
+    });
+  }, []);
+
   const unseenOthersCount = useCallback(() => {
     return posts.filter(
       (p) =>
         p.authorId &&
         p.authorId !== "me" &&
         p.visibility !== "private" &&
-        !dismissedPosts.has(p.id),
+        !dismissedPosts.has(p.id) &&
+        !viewedPosts.has(p.id),
     ).length;
-  }, [posts, dismissedPosts]);
+  }, [posts, dismissedPosts, viewedPosts]);
 
   const value = useMemo(
-    () => ({ posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, unseenOthersCount }),
-    [posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, unseenOthersCount],
+    () => ({ posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount }),
+    [posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
