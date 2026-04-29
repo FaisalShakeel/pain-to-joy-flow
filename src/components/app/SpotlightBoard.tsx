@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
-  Pencil, Trash2, Sparkles, AlertTriangle, Info,
+  Pencil, Trash2, Sparkles, AlertTriangle, Info, ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
