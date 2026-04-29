@@ -28,7 +28,7 @@ const Nav = () => {
           <img
             src={logoFull}
             alt="Availock"
-            className="h-14 md:h-16 w-auto object-contain"
+            className="h-28 md:h-32 w-auto object-contain"
           />
         </a>
         <div className="hidden md:flex items-center gap-9 text-sm font-medium">
