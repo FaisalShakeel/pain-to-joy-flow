@@ -38,7 +38,7 @@ interface Props {
 }
 
 const BroadcastsRail = ({ onReply }: Props) => {
-  const { posts, dismissedPosts, dismissPost, markSeen } = useSpotlight();
+  const { posts, dismissedPosts, dismissPost, markSeen, markPostViewed, viewedPosts } = useSpotlight();
   const [collapsed, setCollapsed] = useState(false);
   const [audience, setAudience] = useState<AudienceFilter>("all");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -63,6 +63,8 @@ const BroadcastsRail = ({ onReply }: Props) => {
       .filter((p) => matchesAudience(contactRel[p.authorId!], audience));
   }, [posts, dismissedPosts, audience, contactRel]);
 
+  const unreadCount = items.filter((p) => !viewedPosts.has(p.id)).length;
+
   const sendReply = (contactId: string, title: string) => {
     if (!reply.trim()) return;
     onReply?.(contactId, title);
@@ -84,9 +86,9 @@ const BroadcastsRail = ({ onReply }: Props) => {
             <Megaphone className="w-3 h-3" />
           </span>
           Broadcasts
-          {items.length > 0 && (
+          {unreadCount > 0 && (
             <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
-              {items.length}
+              {unreadCount}
             </span>
           )}
           {collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
@@ -149,6 +151,7 @@ const BroadcastsRail = ({ onReply }: Props) => {
                       setOpenId(next);
                       // Opening a broadcast counts as "seen" — extinguish the torch
                       if (next && p.authorId) markSeen(p.authorId);
+                      if (next) markPostViewed(p.id);
                     }}
                     className="w-full flex items-center gap-2.5 p-2 text-left hover:bg-surface-low/60 transition"
                   >

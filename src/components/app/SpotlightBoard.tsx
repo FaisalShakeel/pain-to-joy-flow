@@ -99,7 +99,7 @@ const emptyDraft: Draft = {
 };
 
 const SpotlightBoard = () => {
-  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen } = useSpotlight();
+  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen, markPostViewed, viewedPosts } = useSpotlight();
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -194,7 +194,8 @@ const SpotlightBoard = () => {
     matchesAudience(contactRel[p.authorId!], audience),
   );
 
-  const unreadOthers = filteredOthers.length;
+  // Unread = filtered "from others" posts the user hasn't yet viewed.
+  const unreadOthers = filteredOthers.filter((p) => !viewedPosts.has(p.id)).length;
 
   // Pick which "from others" post is currently visible. Default = newest in
   // the filtered list. The dropdown lets the user switch to any other.
@@ -205,7 +206,8 @@ const SpotlightBoard = () => {
   // counts as seen — extinguish the torch on that contact's profile.
   useEffect(() => {
     if (visibleOther?.authorId) markSeen(visibleOther.authorId);
-  }, [visibleOther?.id, visibleOther?.authorId, markSeen]);
+    if (visibleOther?.id) markPostViewed(visibleOther.id);
+  }, [visibleOther?.id, visibleOther?.authorId, markSeen, markPostViewed]);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
