@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
   Pencil, Trash2, Sparkles, AlertTriangle, Info, Filter, ChevronDown,
@@ -99,7 +99,7 @@ const emptyDraft: Draft = {
 };
 
 const SpotlightBoard = () => {
-  const { posts, create, update, remove, dismissedPosts, dismissPost } = useSpotlight();
+  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen } = useSpotlight();
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -200,6 +200,12 @@ const SpotlightBoard = () => {
   // the filtered list. The dropdown lets the user switch to any other.
   const visibleOther =
     filteredOthers.find((p) => p.id === activeOtherId) ?? filteredOthers[0] ?? null;
+
+  // Viewing a contact's broadcast (it being the visible "other" post)
+  // counts as seen — extinguish the torch on that contact's profile.
+  useEffect(() => {
+    if (visibleOther?.authorId) markSeen(visibleOther.authorId);
+  }, [visibleOther?.id, visibleOther?.authorId, markSeen]);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
