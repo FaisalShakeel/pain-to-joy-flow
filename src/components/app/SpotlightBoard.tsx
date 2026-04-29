@@ -224,12 +224,6 @@ const SpotlightBoard = () => {
         </div>
       </div>
 
-      {atLimit && (
-        <p className="mt-3 text-[11px] text-muted-foreground bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2">
-          You've reached the limit of {MAX_ACTIVE_BY_ME} live spotlight post. Delete or edit it to publish another.
-        </p>
-      )}
-
       {/* ── Two-window layout: [my single post] | [others feed] ── */}
       <div className="mt-5 grid lg:grid-cols-2 gap-4">
         {/* Window 1 — My post (cap = 1) */}
