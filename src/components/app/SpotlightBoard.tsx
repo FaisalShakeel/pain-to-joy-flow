@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
-  Pencil, Trash2, Sparkles, AlertTriangle, Info, Filter,
+  Pencil, Trash2, Sparkles, AlertTriangle, Info, Filter, ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
 import { toast } from "sonner";
 import { contacts, type Relationship } from "@/lib/mockData";
@@ -99,6 +103,7 @@ const SpotlightBoard = () => {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [audience, setAudience] = useState<AudienceFilter>("all");
+  const [activeOtherId, setActiveOtherId] = useState<string | null>(null);
 
   const myActive = posts.filter((p) => !p.authorId || p.authorId === "me");
   const atLimit = myActive.length >= MAX_ACTIVE_BY_ME;
@@ -190,6 +195,11 @@ const SpotlightBoard = () => {
 
   const unreadOthers = filteredOthers.length;
 
+  // Pick which "from others" post is currently visible. Default = newest in
+  // the filtered list. The dropdown lets the user switch to any other.
+  const visibleOther =
+    filteredOthers.find((p) => p.id === activeOtherId) ?? filteredOthers[0] ?? null;
+
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -223,12 +233,6 @@ const SpotlightBoard = () => {
           </button>
         </div>
       </div>
-
-      {atLimit && (
-        <p className="mt-3 text-[11px] text-muted-foreground bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2">
-          You've reached the limit of {MAX_ACTIVE_BY_ME} live spotlight post. Delete or edit it to publish another.
-        </p>
-      )}
 
       {/* ── Two-window layout: [my single post] | [others feed] ── */}
       <div className="mt-5 grid lg:grid-cols-2 gap-4">
@@ -335,21 +339,25 @@ const SpotlightBoard = () => {
             })}
           </div>
         </div>
-        {filteredOthers.length === 0 ? (
+        {visibleOther === null ? (
           <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
             All caught up — no new spotlight posts from this group.
           </div>
         ) : (
-          <ul className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-            {filteredOthers.map((p) => {
-              const Vis = visMeta[p.visibility];
-              const Tn = toneMeta[p.tone];
-              const author = contactName[p.authorId!] ?? "Contact";
-              const rel = contactRel[p.authorId!];
-              return (
-                <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
+          (() => {
+            const p = visibleOther;
+            const Vis = visMeta[p.visibility];
+            const Tn = toneMeta[p.tone];
+            const author = contactName[p.authorId!] ?? "Contact";
+            const rel = contactRel[p.authorId!];
+            return (
+              <div className="space-y-2">
+                <div className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
                   <button
-                    onClick={() => dismissPost(p.id)}
+                    onClick={() => {
+                      dismissPost(p.id);
+                      setActiveOtherId(null);
+                    }}
                     className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
                     aria-label="Mark seen and dismiss"
                     title="Mark seen and dismiss"
@@ -386,10 +394,45 @@ const SpotlightBoard = () => {
                       </a>
                     )}
                   </div>
-                </li>
-              );
-            })}
-          </ul>
+                </div>
+
+                {filteredOthers.length > 1 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-lowest text-[11px] font-semibold text-muted-foreground hover:text-primary transition">
+                        <span>Check more · {filteredOthers.length - 1} more</span>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-72 max-h-80 overflow-y-auto">
+                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        From your network
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {filteredOthers.map((o) => {
+                        const oAuthor = contactName[o.authorId!] ?? "Contact";
+                        const isActive = o.id === p.id;
+                        return (
+                          <DropdownMenuItem
+                            key={o.id}
+                            onClick={() => setActiveOtherId(o.id)}
+                            className={cn("flex flex-col items-start gap-0.5", isActive && "bg-accent/10")}
+                          >
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              {oAuthor}
+                            </span>
+                            <span className="text-xs font-medium text-primary line-clamp-1">
+                              {o.title}
+                            </span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            );
+          })()
         )}
         </div>
       </div>
