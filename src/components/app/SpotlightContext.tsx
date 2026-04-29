@@ -14,6 +14,7 @@ export interface SpotlightPost {
   tone: Tone;
   createdAt: number;
   audience?: string[]; // optional contact ids the post targets (for torch). empty = all contacts
+  authorId?: string;   // who published the post. "me" = the logged-in user.
 }
 
 export const SPOTLIGHT_LIMITS = {
@@ -44,6 +45,7 @@ const seed: SpotlightPost[] = [
     expiresIn: "expires in 3h",
     tone: "warn",
     createdAt: Date.now() - 1000 * 60 * 30,
+    authorId: "me",
   },
   {
     id: "s2",
@@ -54,6 +56,25 @@ const seed: SpotlightPost[] = [
     cta: { label: "Book a slot", href: "/app/availability" },
     tone: "offer",
     createdAt: Date.now() - 1000 * 60 * 10,
+    authorId: "me",
+  },
+  {
+    id: "s3",
+    title: "Back from Tokyo — open for intros",
+    body: "Free Wed/Thu afternoons this week. Ping me if a quick sync helps.",
+    visibility: "contacts",
+    tone: "info",
+    createdAt: Date.now() - 1000 * 60 * 5,
+    authorId: "rashid-al-amir",
+  },
+  {
+    id: "s4",
+    title: "Heads-down on Q3 close",
+    body: "Async only until Friday. Urgent? Mark as urgent and I'll surface it.",
+    visibility: "contacts",
+    tone: "warn",
+    createdAt: Date.now() - 1000 * 60 * 2,
+    authorId: "sarah-jenkins",
   },
 ];
 
@@ -63,7 +84,12 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
   const [lastSeen, setLastSeen] = useState<Record<string, number>>({});
 
   const create: SpotlightCtx["create"] = useCallback((p) => {
-    const post: SpotlightPost = { ...p, id: `s${Date.now()}`, createdAt: Date.now() };
+    const post: SpotlightPost = {
+      authorId: "me",
+      ...p,
+      id: `s${Date.now()}`,
+      createdAt: Date.now(),
+    };
     setPosts((prev) => [post, ...prev]);
   }, []);
 
@@ -79,8 +105,11 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
     (contactId: string) => {
       const last = lastSeen[contactId] ?? 0;
       return posts.filter((p) => {
+        // Torch lights up on a contact row when THAT contact publishes
+        // a new spotlight post — not when the logged-in user does.
+        if (!p.authorId || p.authorId === "me") return false;
+        if (p.authorId !== contactId) return false;
         if (p.visibility === "private") return false;
-        if (p.audience && p.audience.length > 0 && !p.audience.includes(contactId)) return false;
         return p.createdAt > last;
       }).length;
     },
