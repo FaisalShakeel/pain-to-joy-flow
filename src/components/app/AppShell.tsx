@@ -273,7 +273,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
               </button>
             </div>
             <ul className="space-y-1">
-              {items.map((item) => (
+              {itemsWithBadges.map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
@@ -290,7 +290,12 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
                     }}
                   >
                     <item.icon className="w-4 h-4" />
-                    {item.label}
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge ? (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                        {item.badge}
+                      </span>
+                    ) : null}
                   </NavLink>
                 </li>
               ))}
