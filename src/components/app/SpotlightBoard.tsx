@@ -22,7 +22,7 @@ import { contacts, type Relationship } from "@/lib/mockData";
 
 // Maximum number of simultaneously-published spotlight posts the
 // logged-in user is allowed to keep live at once.
-const MAX_ACTIVE_BY_ME = 2;
+const MAX_ACTIVE_BY_ME = 1;
 
 // In the "From others" feed, only the most recent post per author is shown
 // — keeps the surface light (one window per contact).
@@ -94,7 +94,7 @@ const emptyDraft: Draft = {
 };
 
 const SpotlightBoard = () => {
-  const { posts, create, update, remove } = useSpotlight();
+  const { posts, create, update, remove, dismissedPosts, dismissPost } = useSpotlight();
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -166,7 +166,13 @@ const SpotlightBoard = () => {
   contacts.forEach((c) => { contactName[c.id] = c.name; });
 
   const others = posts
-    .filter((p) => p.authorId && p.authorId !== "me" && p.visibility !== "private")
+    .filter(
+      (p) =>
+        p.authorId &&
+        p.authorId !== "me" &&
+        p.visibility !== "private" &&
+        !dismissedPosts.has(p.id),
+    )
     .sort((a, b) => b.createdAt - a.createdAt);
 
   // Cap to 1 post per author (most recent wins)
@@ -182,6 +188,8 @@ const SpotlightBoard = () => {
     matchesAudience(contactRel[p.authorId!], audience),
   );
 
+  const unreadOthers = filteredOthers.length;
+
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -192,7 +200,7 @@ const SpotlightBoard = () => {
           <div>
             <h3 className="font-headline font-bold text-primary leading-tight">Spotlight</h3>
             <p className="text-[11px] text-muted-foreground">
-              Your posts and updates from your network
+              One live post from you · {unreadOthers} unread from your network
             </p>
           </div>
         </div>
@@ -203,7 +211,7 @@ const SpotlightBoard = () => {
           <button
             onClick={openNew}
             disabled={atLimit}
-            title={atLimit ? `Limit reached — only ${MAX_ACTIVE_BY_ME} active spotlight posts at a time. Delete one to publish another.` : "New post"}
+            title={atLimit ? `Limit reached — only ${MAX_ACTIVE_BY_ME} active spotlight post at a time. Delete it to publish another.` : "New post"}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
               atLimit
@@ -218,24 +226,26 @@ const SpotlightBoard = () => {
 
       {atLimit && (
         <p className="mt-3 text-[11px] text-muted-foreground bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2">
-          You've reached the limit of {MAX_ACTIVE_BY_ME} live spotlight posts. Delete or edit one to publish another.
+          You've reached the limit of {MAX_ACTIVE_BY_ME} live spotlight post. Delete or edit it to publish another.
         </p>
       )}
 
-      {/* ── Section 1: My posts ─────────────────────────────────── */}
-      <div className="mt-5">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            My posts · {orderedMine.length}/{MAX_ACTIVE_BY_ME}
-          </h4>
-        </div>
-        {orderedMine.length === 0 ? (
-          <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
-            No spotlight posts yet — share an update to light up your contacts.
+      {/* ── Two-window layout: [my single post] | [others feed] ── */}
+      <div className="mt-5 grid lg:grid-cols-2 gap-4">
+        {/* Window 1 — My post (cap = 1) */}
+        <div className="rounded-2xl ghost-border bg-surface-low/30 p-3">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              My post · {orderedMine.length}/{MAX_ACTIVE_BY_ME}
+            </h4>
           </div>
-        ) : (
-          <ul className="grid sm:grid-cols-2 gap-3">
-            {orderedMine.map((p) => {
+          {orderedMine.length === 0 ? (
+            <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
+              No spotlight post yet — share an update to light up your contacts.
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {orderedMine.slice(0, MAX_ACTIVE_BY_ME).map((p) => {
               const Vis = visMeta[p.visibility];
               const Tn = toneMeta[p.tone];
               return (
@@ -287,17 +297,22 @@ const SpotlightBoard = () => {
                   </div>
                 </li>
               );
-            })}
-          </ul>
-        )}
-      </div>
+              })}
+            </ul>
+          )}
+        </div>
 
-      {/* ── Section 2: From others ──────────────────────────────── */}
-      <div className="mt-6 pt-5 border-t border-border/60">
-        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-          <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            From others · {filteredOthers.length}
-          </h4>
+        {/* Window 2 — From others (with filter + unread badge + dismiss) */}
+        <div className="rounded-2xl ghost-border bg-surface-low/30 p-3">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-3 px-1">
+            <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
+              From others
+              {unreadOthers > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                  {unreadOthers}
+                </span>
+              )}
+            </h4>
           <div className="flex items-center gap-1.5 flex-wrap">
             <Filter className="w-3 h-3 text-muted-foreground" />
             {audienceFilters.map((f) => {
@@ -322,10 +337,10 @@ const SpotlightBoard = () => {
         </div>
         {filteredOthers.length === 0 ? (
           <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
-            No spotlight posts from this group right now.
+            All caught up — no new spotlight posts from this group.
           </div>
         ) : (
-          <ul className="grid sm:grid-cols-2 gap-3">
+          <ul className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
             {filteredOthers.map((p) => {
               const Vis = visMeta[p.visibility];
               const Tn = toneMeta[p.tone];
@@ -333,7 +348,15 @@ const SpotlightBoard = () => {
               const rel = contactRel[p.authorId!];
               return (
                 <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    onClick={() => dismissPost(p.id)}
+                    className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
+                    aria-label="Mark seen and dismiss"
+                    title="Mark seen and dismiss"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                  <div className="flex items-center gap-1.5 flex-wrap pr-7">
                     <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full", Vis.cls)}>
                       <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
                     </span>
@@ -368,6 +391,7 @@ const SpotlightBoard = () => {
             })}
           </ul>
         )}
+        </div>
       </div>
 
       {/* Editor dialog */}
