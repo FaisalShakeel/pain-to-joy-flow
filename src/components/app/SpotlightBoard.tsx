@@ -99,7 +99,7 @@ const emptyDraft: Draft = {
 };
 
 const SpotlightBoard = () => {
-  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen, markPostViewed } = useSpotlight();
+  const { posts, create, update, remove, dismissedPosts, dismissPost, markSeen, markPostViewed, viewedPosts } = useSpotlight();
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -195,7 +195,6 @@ const SpotlightBoard = () => {
   );
 
   // Unread = filtered "from others" posts the user hasn't yet viewed.
-  const { viewedPosts } = useSpotlight();
   const unreadOthers = filteredOthers.filter((p) => !viewedPosts.has(p.id)).length;
 
   // Pick which "from others" post is currently visible. Default = newest in
