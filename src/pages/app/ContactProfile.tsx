@@ -258,23 +258,23 @@ const ContactProfile = () => {
       </section>
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer */}
-      <section className="mt-14 rounded-[2rem] overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
+      <section className="mt-6 rounded-2xl overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
         <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.4),transparent_60%)]" />
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 p-12 md:p-16 lg:p-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-16 items-center">
+        <div className="relative z-10 p-6 md:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             {/* Left: Portal */}
-            <div className="lg:col-span-8 space-y-14">
-              <div className="space-y-7">
-                <div className={`inline-flex items-center gap-2.5 ${syncBannerData.chipBg} px-5 py-2.5 rounded-full border backdrop-blur-md`}>
-                  <syncBannerData.icon className={`w-3.5 h-3.5 ${syncBannerData.textColor}`} />
+            <div className="lg:col-span-8 space-y-5">
+              <div className="space-y-3">
+                <div className={`inline-flex items-center gap-2 ${syncBannerData.chipBg} px-3 py-1.5 rounded-full border backdrop-blur-md`}>
+                  <syncBannerData.icon className={`w-3 h-3 ${syncBannerData.textColor}`} />
                   <span className={`${syncBannerData.textColor} text-[10px] uppercase font-bold tracking-[0.2em]`}>{syncBannerData.label}</span>
                 </div>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold tracking-tight leading-[1.05]">
+                <h2 className="text-2xl md:text-3xl font-headline font-extrabold tracking-tight leading-tight">
                   Secure Interaction Layer
                 </h2>
-                <p className="text-primary-foreground/70 text-lg md:text-xl leading-relaxed font-light max-w-2xl">
+                <p className="text-primary-foreground/70 text-sm leading-relaxed font-light max-w-xl">
                   {isApproved && "Strategic alignment established. Select your context to initiate optimized communication protocols for this session."}
                   {isPending && `${firstName} is reviewing your request — typically responds within ${contact.responseTime}. Channels unlock on approval.`}
                   {isLocked && `Send an access request to unlock secure communication channels with ${firstName}.`}
@@ -282,7 +282,7 @@ const ContactProfile = () => {
               </div>
 
               {/* Three interaction tiles */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* Call */}
                 <PortalTile
                   icon={Phone}
@@ -324,16 +324,16 @@ const ContactProfile = () => {
               </div>
 
               {/* Identity selector */}
-              <div className="flex flex-wrap items-center gap-5 pt-4">
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Select Identity:</span>
-                <div className="flex flex-wrap gap-2.5">
+                <div className="flex flex-wrap gap-1.5">
                   {(["client", "colleague", "partner"] as const).map((r) => {
                     const active = identity === r;
                     return (
                       <button
                         key={r}
                         onClick={() => setIdentity(r)}
-                        className={`px-5 py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
+                        className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${
                           active
                             ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
                             : "border-white/10 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
@@ -349,22 +349,22 @@ const ContactProfile = () => {
 
             {/* Right: Verification card */}
             <div className="lg:col-span-4">
-              <div className="bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-3xl p-10 md:p-14 flex flex-col items-center justify-center relative overflow-hidden text-center">
+              <div className="bg-white/5 rounded-2xl border border-white/10 backdrop-blur-3xl p-5 md:p-6 flex flex-col items-center justify-center relative overflow-hidden text-center">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.15),transparent_60%)]" />
-                <div className={`w-28 h-28 rounded-full grid place-items-center mb-10 ring-[12px] relative ${
+                <div className={`w-16 h-16 rounded-full grid place-items-center mb-4 ring-[6px] relative ${
                   isApproved ? "bg-emerald-500/20 ring-emerald-500/5" : isPending ? "bg-amber-500/20 ring-amber-500/5" : "bg-rose-500/20 ring-rose-500/5"
                 }`}>
-                  {isApproved && <BadgeCheck className="w-16 h-16 text-emerald-400" strokeWidth={1.5} />}
-                  {isPending && <Clock className="w-14 h-14 text-amber-400" strokeWidth={1.5} />}
-                  {isLocked && <Lock className="w-14 h-14 text-rose-300" strokeWidth={1.5} />}
+                  {isApproved && <BadgeCheck className="w-9 h-9 text-emerald-400" strokeWidth={1.75} />}
+                  {isPending && <Clock className="w-8 h-8 text-amber-400" strokeWidth={1.75} />}
+                  {isLocked && <Lock className="w-8 h-8 text-rose-300" strokeWidth={1.75} />}
                 </div>
-                <div className="space-y-3 mb-10 relative z-10">
-                  <h4 className="font-headline font-extrabold text-2xl md:text-3xl">
+                <div className="space-y-1 mb-4 relative z-10">
+                  <h4 className="font-headline font-extrabold text-base md:text-lg">
                     {isApproved && "Identity Verified"}
                     {isPending && "Awaiting Approval"}
                     {isLocked && "Access Required"}
                   </h4>
-                  <p className="text-primary-foreground/60 text-sm md:text-base">
+                  <p className="text-primary-foreground/60 text-xs">
                     {isApproved && `Auth Level: ${identity.charAt(0).toUpperCase() + identity.slice(1)} Alpha`}
                     {isPending && `${firstName} typically reviews within ${contact.responseTime}`}
                     {isLocked && "Calendar, contact, and live channels are sealed"}
@@ -374,33 +374,33 @@ const ContactProfile = () => {
                 {isApproved && (
                   <button
                     onClick={() => toast({ title: "Brief downloaded", description: `${firstName}'s engagement brief saved.` })}
-                    className="group w-full bg-emerald-500 text-white py-6 rounded-3xl font-headline font-black text-lg shadow-2xl shadow-emerald-900/40 hover:bg-emerald-400 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 relative z-10"
+                    className="group w-full bg-emerald-500 text-white py-2.5 rounded-xl font-headline font-bold text-sm shadow-lg shadow-emerald-900/40 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 relative z-10"
                   >
                     DOWNLOAD BRIEF
-                    <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                    <Download className="w-3.5 h-3.5" />
                   </button>
                 )}
                 {isLocked && (
                   <button
                     onClick={() => setOpenSent(true)}
-                    className="group w-full bg-white text-primary py-6 rounded-3xl font-headline font-black text-lg shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 relative z-10"
+                    className="group w-full bg-white text-primary py-2.5 rounded-xl font-headline font-bold text-sm shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 relative z-10"
                   >
                     REQUEST ACCESS
-                    <ShieldCheck className="w-4 h-4" />
+                    <ShieldCheck className="w-3.5 h-3.5" />
                   </button>
                 )}
                 {isPending && (
-                  <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-300 py-5 rounded-3xl font-headline font-bold text-base flex items-center justify-center gap-2 relative z-10">
-                    <Clock className="w-4 h-4" /> Request pending
+                  <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-300 py-2.5 rounded-xl font-headline font-semibold text-xs flex items-center justify-center gap-2 relative z-10">
+                    <Clock className="w-3.5 h-3.5" /> Request pending
                   </div>
                 )}
 
-                <div className="mt-10 flex flex-col items-center gap-2.5 relative z-10">
-                  <p className="text-emerald-400 text-[10px] font-bold tracking-[0.4em] uppercase">Session Encrypted</p>
-                  <div className="flex gap-1.5">
-                    <div className="h-1.5 w-4 bg-emerald-400 rounded-full" />
-                    <div className="h-1.5 w-4 bg-emerald-400 rounded-full" />
-                    <div className={`h-1.5 w-4 rounded-full ${isApproved ? "bg-emerald-400" : "bg-emerald-400/30"}`} />
+                <div className="mt-4 flex flex-col items-center gap-1.5 relative z-10">
+                  <p className="text-emerald-400 text-[9px] font-bold tracking-[0.3em] uppercase">Session Encrypted</p>
+                  <div className="flex gap-1">
+                    <div className="h-1 w-3 bg-emerald-400 rounded-full" />
+                    <div className="h-1 w-3 bg-emerald-400 rounded-full" />
+                    <div className={`h-1 w-3 rounded-full ${isApproved ? "bg-emerald-400" : "bg-emerald-400/30"}`} />
                   </div>
                 </div>
               </div>
@@ -422,14 +422,14 @@ const ContactProfile = () => {
 /* --- Subcomponents --- */
 
 const OpsItem = ({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) => (
-  <div className="flex gap-4">
-    <div className="w-12 h-12 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-      <Icon className="w-5 h-5 text-primary" />
+  <div className="flex gap-2.5">
+    <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+      <Icon className="w-4 h-4 text-primary" />
     </div>
-    <div className="min-w-0 space-y-1">
-      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="text-base font-semibold text-primary truncate">{value}</p>
-      {sub && <p className="text-xs font-medium text-muted-foreground">{sub}</p>}
+    <div className="min-w-0">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold text-primary truncate">{value}</p>
+      {sub && <p className="text-[11px] font-medium text-muted-foreground truncate">{sub}</p>}
     </div>
   </div>
 );
@@ -443,40 +443,40 @@ const CommsCard = ({
   locked: boolean;
   footer?: string;
 }) => (
-  <div className="bg-surface-lowest rounded-2xl p-8 ghost-border shadow-ambient flex flex-col relative">
-    <div className="flex justify-between items-start mb-7">
-      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-        <span className="h-px w-8 bg-surface-container" /> {title}
+  <div className="bg-surface-lowest rounded-2xl p-5 ghost-border shadow-ambient flex flex-col relative">
+    <div className="flex justify-between items-start mb-4">
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent flex items-center gap-2">
+        <span className="h-px w-6 bg-surface-container" /> {title}
       </h3>
-      <span className="text-[8px] font-bold uppercase tracking-widest text-primary/60 bg-primary/5 px-2.5 py-1.5 rounded">
+      <span className="text-[9px] font-bold uppercase tracking-wider text-primary/60 bg-primary/5 px-2 py-0.5 rounded">
         {badge}
       </span>
     </div>
-    <div className={`space-y-6 ${locked ? "blur-sm select-none pointer-events-none" : ""}`}>
+    <div className={`space-y-3 ${locked ? "blur-sm select-none pointer-events-none" : ""}`}>
       {items.map((it) => (
         <a key={it.label} href={locked ? "#" : it.href} className="flex items-center justify-between group">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-11 h-11 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
-              <it.icon className="w-4 h-4 text-primary" />
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
+              <it.icon className="w-3.5 h-3.5 text-primary" />
             </div>
-            <div className="min-w-0 space-y-0.5">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{it.label}</p>
-              <p className="text-base font-semibold text-primary truncate">{it.value}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{it.label}</p>
+              <p className="text-xs font-semibold text-primary truncate">{it.value}</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
         </a>
       ))}
     </div>
     {locked && (
       <div className="absolute inset-0 grid place-items-center bg-surface-lowest/40 backdrop-blur-[2px] rounded-2xl">
-        <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-          <Lock className="w-3.5 h-3.5" /> Unlocks on approval
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+          <Lock className="w-3 h-3" /> Unlocks on approval
         </div>
       </div>
     )}
     {footer && !locked && (
-      <p className="mt-auto pt-6 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
+      <p className="mt-auto pt-3 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
         {footer}
       </p>
     )}
@@ -507,44 +507,44 @@ const PortalTile = ({
   const button = (
     <button
       disabled={!to}
-      className={`w-full mt-8 py-4 rounded-2xl text-sm font-extrabold transition-all flex items-center justify-center gap-2.5 ${ctaClass}`}
+      className={`w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`}
     >
-      <CtaIcon className="w-4 h-4" /> {cta}
+      <CtaIcon className="w-3.5 h-3.5" /> {cta}
     </button>
   );
 
   return (
-    <div className={`relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 md:p-9 transition-all flex flex-col justify-between min-h-[300px] shadow-2xl ${wrapperBase}`}>
-      <div className="space-y-5 relative z-10">
+    <div className={`relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
+      <div className="space-y-2.5 relative z-10">
         <div className="flex items-center justify-between">
-          <div className={`h-12 w-12 rounded-2xl grid place-items-center ${iconBox}`}>
-            <Icon className="w-6 h-6" />
+          <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
+            <Icon className="w-4 h-4" />
           </div>
           {badge && (
-            <span className={`${badge.color} text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
+            <span className={`${badge.color} text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
               {badge.label}
             </span>
           )}
         </div>
         {preview && (
-          <div className="bg-black/20 p-3.5 rounded-xl border border-white/5">
-            <p className="text-emerald-400/60 text-[10px] italic font-mono uppercase tracking-widest">{preview}</p>
+          <div className="bg-black/20 px-2.5 py-1.5 rounded-lg border border-white/5">
+            <p className="text-emerald-400/60 text-[9px] italic font-mono uppercase tracking-wider">{preview}</p>
           </div>
         )}
         {dots && (
-          <div className="flex gap-1.5 opacity-40">
-            <div className="h-1.5 w-6 bg-white rounded-full" />
-            <div className="h-1.5 w-6 bg-white rounded-full" />
-            <div className="h-1.5 w-6 bg-white/20 rounded-full" />
+          <div className="flex gap-1 opacity-40">
+            <div className="h-1 w-4 bg-white rounded-full" />
+            <div className="h-1 w-4 bg-white rounded-full" />
+            <div className="h-1 w-4 bg-white/20 rounded-full" />
           </div>
         )}
         <div>
-          <h5 className="font-bold text-xl font-headline">{title}</h5>
-          <p className="text-primary-foreground/60 text-sm mt-2 leading-relaxed">{desc}</p>
+          <h5 className="font-bold text-sm font-headline">{title}</h5>
+          <p className="text-primary-foreground/60 text-[11px] mt-1 leading-relaxed">{desc}</p>
         </div>
       </div>
       {to ? <Link to={to} className="relative z-10">{button}</Link> : <div className="relative z-10">{button}</div>}
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-3xl" />
+      <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/5 rounded-full blur-3xl" />
     </div>
   );
 };
