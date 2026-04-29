@@ -235,10 +235,13 @@ const Contacts = () => {
                     <p className={cn("font-semibold text-primary truncate leading-tight", compact ? "text-[11px]" : "text-xs")}>
                       {c.name}
                     </p>
-                    <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
-                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
-                      {statusLabel[c.status]}
-                    </p>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
+                        {statusLabel[c.status]}
+                      </p>
+                      <AlertIcons alerts={c.alerts} size="xs" />
+                    </div>
                     <p className={cn("mt-0.5 text-foreground/80 leading-tight", compact ? "text-[9px] line-clamp-2" : "text-[10px] line-clamp-2")}>
                       {c.availabilityContext}
                     </p>
@@ -262,7 +265,10 @@ const Contacts = () => {
                     <Avatar initials={c.initials} accent={c.accent} size="lg" />
                     <div className="flex flex-col items-end gap-1.5">
                       <StatusPill tone={c.status} />
-                      {c.favorite && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                      <div className="flex items-center gap-1">
+                        {c.favorite && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                        <AlertIcons alerts={c.alerts} size="sm" />
+                      </div>
                     </div>
                   </div>
                   <p className="mt-3 font-headline font-bold text-primary truncate">{c.name}</p>
@@ -302,6 +308,7 @@ const Contacts = () => {
                       {c.favorite && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
                       <StatusPill tone={c.status} />
                       <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full", rel.cls)}>{rel.label}</span>
+                      <AlertIcons alerts={c.alerts} size="sm" />
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{c.title} · {c.org}</p>
                     <p className="mt-1 text-[11px] text-foreground/80 flex items-center gap-1 truncate">
