@@ -17,7 +17,7 @@ const AuthShell = ({ children, eyebrow }: Props) => (
 
     <header className="relative z-10 px-6 md:px-10 py-6 flex items-center justify-between max-w-6xl mx-auto">
       <Link to="/" className="flex items-center" aria-label="Availock home">
-        <img src={logoFull} alt="Availock" className="h-14 w-auto object-contain" />
+        <img src={logoFull} alt="Availock" className="h-8 md:h-10 w-auto object-contain" />
       </Link>
       <Link
         to="/"
