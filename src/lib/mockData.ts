@@ -1,6 +1,7 @@
 export type SyncStatus = "locked" | "pending" | "approved";
 export type AvailabilityStatus = "available" | "busy" | "focus" | "offline";
 export type Relationship = "client" | "colleague" | "family" | "investor" | "mentor" | "friend";
+export type AlertKind = "callback" | "message" | "calendar";
 
 export interface Contact {
   id: string;
@@ -18,6 +19,7 @@ export interface Contact {
   relationship: Relationship;
   favorite?: boolean;
   frequent?: boolean;
+  alerts?: AlertKind[];
 }
 
 export interface AccessRequest {
