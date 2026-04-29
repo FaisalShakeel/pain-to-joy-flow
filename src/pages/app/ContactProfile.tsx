@@ -415,7 +415,6 @@ const ContactProfile = () => {
         contact={contact}
         onSubmitted={() => setContact({ ...contact, syncStatus: "pending" })}
       />
-      </div>
     </AppShell>
   );
 };
