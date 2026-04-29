@@ -31,6 +31,10 @@ interface SpotlightCtx {
   // torch: per-contact unseen count
   unseenForContact: (contactId: string) => number;
   markSeen: (contactId: string) => void;
+  // per-post dismiss (for the "From others" feed)
+  dismissedPosts: Set<string>;
+  dismissPost: (postId: string) => void;
+  unseenOthersCount: () => number;
 }
 
 const Ctx = createContext<SpotlightCtx | null>(null);
@@ -110,6 +114,7 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<SpotlightPost[]>(seed);
   // map contactId -> last seen timestamp
   const [lastSeen, setLastSeen] = useState<Record<string, number>>({});
+  const [dismissedPosts, setDismissedPosts] = useState<Set<string>>(new Set());
 
   const create: SpotlightCtx["create"] = useCallback((p) => {
     const post: SpotlightPost = {
@@ -148,9 +153,27 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
     setLastSeen((s) => ({ ...s, [contactId]: Date.now() }));
   }, []);
 
+  const dismissPost = useCallback((postId: string) => {
+    setDismissedPosts((prev) => {
+      const next = new Set(prev);
+      next.add(postId);
+      return next;
+    });
+  }, []);
+
+  const unseenOthersCount = useCallback(() => {
+    return posts.filter(
+      (p) =>
+        p.authorId &&
+        p.authorId !== "me" &&
+        p.visibility !== "private" &&
+        !dismissedPosts.has(p.id),
+    ).length;
+  }, [posts, dismissedPosts]);
+
   const value = useMemo(
-    () => ({ posts, create, update, remove, unseenForContact, markSeen }),
-    [posts, create, update, remove, unseenForContact, markSeen],
+    () => ({ posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, unseenOthersCount }),
+    [posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, unseenOthersCount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
