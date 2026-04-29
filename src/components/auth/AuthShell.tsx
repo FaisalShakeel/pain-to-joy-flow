@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import logoIcon from "@/assets/availock-icon.png";
+import logoFull from "@/assets/availock-logo.svg";
 
 interface Props {
   children: ReactNode;
@@ -16,9 +16,8 @@ const AuthShell = ({ children, eyebrow }: Props) => (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-gradient-mist" />
 
     <header className="relative z-10 px-6 md:px-10 py-6 flex items-center justify-between max-w-6xl mx-auto">
-      <Link to="/" className="flex items-center gap-2">
-        <img src={logoIcon} alt="Availock" width={28} height={28} className="h-7 w-7 object-contain" />
-        <span className="font-headline font-extrabold text-xl text-primary">Availock</span>
+      <Link to="/" className="flex items-center" aria-label="Availock home">
+        <img src={logoFull} alt="Availock" className="h-9 w-auto object-contain" />
       </Link>
       <Link
         to="/"
