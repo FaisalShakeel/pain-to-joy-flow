@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import logoIcon from "@/assets/availock-icon.svg";
+import logoIcon from "@/assets/availock-icon.png";
 
 const Nav = () => {
   const [scrolled, setScrolled] = useState(false);

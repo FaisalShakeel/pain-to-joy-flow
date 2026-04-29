@@ -1,6 +1,6 @@
 import { Lock, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import logoIcon from "@/assets/availock-icon.svg";
+import logoIcon from "@/assets/availock-icon.png";
 
 type FooterLink = { label: string; href: string; external?: boolean };
 

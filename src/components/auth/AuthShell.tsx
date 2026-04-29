@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import logoIcon from "@/assets/availock-icon.svg";
+import logoIcon from "@/assets/availock-icon.png";
 
 interface Props {
   children: ReactNode;
