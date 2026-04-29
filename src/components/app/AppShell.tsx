@@ -10,7 +10,6 @@ import {
   Settings,
   BarChart3,
   Bell,
-  Search,
   Menu,
   X,
   Crown,
@@ -142,18 +141,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
               <Menu className="w-4 h-4 text-primary" />
             </button>
 
-            <div className="hidden sm:flex items-center gap-2 flex-1 max-w-md px-3.5 py-2 rounded-full bg-surface-low ghost-border">
-              <Search className="w-4 h-4 text-muted-foreground" />
-              <input
-                placeholder="Search contacts, requests, slots…"
-                className="bg-transparent outline-none text-sm flex-1 placeholder:text-muted-foreground"
-              />
-              <kbd className="hidden md:inline text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-lowest text-muted-foreground ghost-border">
-                ⌘K
-              </kbd>
-            </div>
-
-            <div className="flex-1 sm:hidden" />
+            <div className="flex-1" />
 
             <button
               type="button"
