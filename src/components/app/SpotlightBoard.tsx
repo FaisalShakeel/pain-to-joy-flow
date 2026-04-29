@@ -194,7 +194,9 @@ const SpotlightBoard = () => {
     matchesAudience(contactRel[p.authorId!], audience),
   );
 
-  const unreadOthers = filteredOthers.length;
+  // Unread = filtered "from others" posts the user hasn't yet viewed.
+  const { viewedPosts } = useSpotlight();
+  const unreadOthers = filteredOthers.filter((p) => !viewedPosts.has(p.id)).length;
 
   // Pick which "from others" post is currently visible. Default = newest in
   // the filtered list. The dropdown lets the user switch to any other.
