@@ -149,3 +149,27 @@ const AccountSettings = () => {
 };
 
 export default AccountSettings;
+
+function OpsRow({
+  icon: Icon, label, value, sub, visibility,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  sub?: string;
+  visibility: "public" | "approved" | "hidden";
+}) {
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-2xl ghost-border bg-surface-low">
+      <span className="grid place-items-center w-8 h-8 rounded-lg bg-primary/10 text-primary shrink-0">
+        <Icon className="w-3.5 h-3.5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold text-primary truncate">{value || <span className="text-muted-foreground italic font-normal">Not set</span>}</p>
+        {sub && <p className="text-[11px] text-muted-foreground truncate">{sub}</p>}
+        <p className="mt-0.5 text-[10px] text-muted-foreground capitalize">Visible to {visibility}</p>
+      </div>
+    </div>
+  );
+}
