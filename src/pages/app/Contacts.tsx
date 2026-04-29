@@ -65,8 +65,21 @@ const Contacts = () => {
 
   const densityCols: Record<Density, string> = {
     8:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-    16: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-8",
-    32: "grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:[grid-template-columns:repeat(16,minmax(0,1fr))]",
+    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
+    32: "grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8",
+  };
+
+  const statusDot: Record<string, string> = {
+    available: "bg-emerald-500",
+    busy: "bg-amber-500",
+    focus: "bg-violet-500",
+    offline: "bg-muted-foreground",
+  };
+  const statusLabel: Record<string, string> = {
+    available: "Available",
+    busy: "Busy",
+    focus: "In focus",
+    offline: "Offline",
   };
 
   return (
@@ -171,34 +184,40 @@ const Contacts = () => {
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
         </div>
       ) : birdsEye ? (
-        <ul className={cn("mt-6 grid gap-2", densityCols[density])}>
+        <ul className={cn("mt-4 grid gap-2", densityCols[density])}>
           {filtered.map((c) => {
-            const rel = relationshipMeta[c.relationship];
+            const compact = density === 32;
             return (
               <li key={c.id}>
                 <Link
                   to={`/app/contact/${c.id.split("-pad-")[0]}`}
                   title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
-                  className="group flex flex-col items-center text-center p-2 rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition"
+                  className={cn(
+                    "group flex items-start gap-2 rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
+                    compact ? "p-2" : "p-2.5",
+                  )}
                 >
-                  <div className="relative">
-                    <Avatar initials={c.initials} accent={c.accent} size={density === 32 ? "sm" : "md"} />
+                  <div className="relative shrink-0">
+                    <Avatar initials={c.initials} accent={c.accent} size={compact ? "sm" : "md"} />
                     <span
                       className={cn(
                         "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
-                        c.status === "available" && "bg-emerald-500",
-                        c.status === "busy" && "bg-amber-500",
-                        c.status === "focus" && "bg-violet-500",
-                        c.status === "offline" && "bg-muted-foreground",
+                        statusDot[c.status],
                       )}
                     />
                   </div>
-                  {density === 16 && (
-                    <>
-                      <p className="mt-1.5 text-[11px] font-semibold text-primary truncate w-full leading-tight">{c.name.split(" ")[0]}</p>
-                      <span className={cn("mt-0.5 text-[9px] font-semibold px-1.5 py-0 rounded-full truncate max-w-full", rel.cls)}>{rel.label}</span>
-                    </>
-                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className={cn("font-semibold text-primary truncate leading-tight", compact ? "text-[11px]" : "text-xs")}>
+                      {c.name}
+                    </p>
+                    <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
+                      {statusLabel[c.status]}
+                    </p>
+                    <p className={cn("mt-0.5 text-foreground/80 leading-tight", compact ? "text-[9px] line-clamp-2" : "text-[10px] line-clamp-2")}>
+                      {c.availabilityContext}
+                    </p>
+                  </div>
                 </Link>
               </li>
             );
