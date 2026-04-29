@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Maximize2, X, Star, TrendingUp, Clock, Hourglass, MoonStar, PhoneCall, MessageSquare, CalendarClock, ArrowRight, Users as UsersIcon } from "lucide-react";
+import { Search, Maximize2, X, Star, TrendingUp, Clock, Hourglass, MoonStar, ArrowRight, Users as UsersIcon } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPill from "./StatusPill";
 import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+import PingButton from "./PingButton";
 
 type QuickFilter = "available" | "priority" | "favorites" | "recent" | "pending" | "offline" | "all";
 
@@ -19,28 +20,6 @@ const quickFilters: { id: QuickFilter; label: string; icon: React.ComponentType<
 ];
 
 const statusTone = (s: AvailabilityStatus) => (s === "available" ? "available" : s === "busy" ? "busy" : s === "focus" ? "focus" : "offline");
-
-const QuickAction = ({ status, contactId }: { status: AvailabilityStatus; contactId: string }) => {
-  if (status === "available") {
-    return (
-      <Link to={`/app/contact/${contactId}/call`} title="Call now" className="grid place-items-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25 transition">
-        <PhoneCall className="w-3.5 h-3.5" />
-      </Link>
-    );
-  }
-  if (status === "focus" || status === "busy") {
-    return (
-      <Link to="/app/messages" title="Message" className="grid place-items-center w-8 h-8 rounded-full bg-sky-500/15 text-sky-700 hover:bg-sky-500/25 transition">
-        <MessageSquare className="w-3.5 h-3.5" />
-      </Link>
-    );
-  }
-  return (
-    <Link to={`/app/contact/${contactId}`} title="Schedule" className="grid place-items-center w-8 h-8 rounded-full bg-violet-500/15 text-violet-700 hover:bg-violet-500/25 transition">
-      <CalendarClock className="w-3.5 h-3.5" />
-    </Link>
-  );
-};
 
 const ContactTile = ({ id, compact = false }: { id: string; compact?: boolean }) => {
   const c = contacts.find((x) => x.id === id);
@@ -64,7 +43,7 @@ const ContactTile = ({ id, compact = false }: { id: string; compact?: boolean })
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground line-clamp-1">{c.availabilityContext}</p>
         </div>
-        <QuickAction status={c.status} contactId={c.id} />
+        <PingButton contact={c} />
       </div>
     </div>
   );
