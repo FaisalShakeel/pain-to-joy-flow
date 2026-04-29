@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -11,7 +11,9 @@ import { cn } from "@/lib/utils";
 
 type View = "grid" | "list";
 type Filter = "all" | "favorites" | "frequent" | Relationship;
-type Density = 8 | 16 | 32;
+type Density = 6 | 10 | 16;
+
+const PINNED_KEY = "availock.pinnedContacts";
 
 const relationshipMeta: Record<Relationship, { label: string; cls: string }> = {
   client:    { label: "Client",    cls: "bg-sky-500/10 text-sky-700" },
@@ -60,8 +62,37 @@ const Contacts = () => {
   const [q, setQ] = useState("");
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
-  const [density, setDensity] = useState<Density>(8);
-  const birdsEye = density !== 8;
+  const [density, setDensity] = useState<Density>(6);
+  const birdsEye = true;
+  const [pinned, setPinned] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(PINNED_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PINNED_KEY, JSON.stringify(pinned));
+    } catch {
+      /* ignore */
+    }
+  }, [pinned]);
+
+  const togglePin = (id: string) => {
+    setPinned((prev) => {
+      const has = prev.includes(id);
+      if (has) {
+        toast({ title: "Unpinned", description: "Contact removed from pinned." });
+        return prev.filter((x) => x !== id);
+      }
+      toast({ title: "Pinned", description: "Contact pinned to the top." });
+      return [id, ...prev];
+    });
+  };
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -77,22 +108,27 @@ const Contacts = () => {
         c.tags.some((t) => t.toLowerCase().includes(s))
       );
     });
-    // Pad list up to current density so the bird's-eye grid stays full
-    if (list.length === 0) return list;
-    const padded = [...list];
-    let i = 0;
-    while (padded.length < density) {
-      padded.push({ ...list[i % list.length], id: `${list[i % list.length].id}-pad-${padded.length}` });
-      i++;
-    }
-    return padded.slice(0, density);
-  }, [q, filter, density]);
+    // Pinned first, preserving pin order
+    const pinSet = new Set(pinned);
+    const pinnedList = pinned
+      .map((id) => list.find((c) => c.id === id))
+      .filter((c): c is (typeof list)[number] => Boolean(c));
+    const rest = list.filter((c) => !pinSet.has(c.id));
+    return [...pinnedList, ...rest];
+  }, [q, filter, pinned]);
 
   const densityCols: Record<Density, string> = {
-    8:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
-    32: "grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8",
+    6:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3",
+    10: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
+    16: "grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
   };
+
+  // Approximate per-tile heights (px) used to compute the visible window height.
+  // Keeps exactly `density` tiles in view; the rest scrolls within the panel.
+  const densityRowHeight: Record<Density, number> = { 6: 96, 10: 92, 16: 88 };
+  const densityColCount: Record<Density, number> = { 6: 3, 10: 5, 16: 4 };
+  const visibleRows: Record<Density, number> = { 6: 2, 10: 2, 16: 4 };
+  const scrollMaxHeight = visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 8 + 16;
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
@@ -122,42 +158,16 @@ const Contacts = () => {
         )
       }
     >
-      {/* Search + view toggle (folded in bird's-eye) */}
-      {!birdsEye && (
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border flex-1 min-w-[220px] max-w-xl">
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name, company, role or tag…"
-              className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
-            />
-          </div>
-          <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
-            <button
-              onClick={() => setView("grid")}
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
-                view === "grid" ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
-              )}
-              aria-label="Grid view"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" /> Grid
-            </button>
-            <button
-              onClick={() => setView("list")}
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
-                view === "list" ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
-              )}
-              aria-label="List view"
-            >
-              <List className="w-3.5 h-3.5" /> List
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Search bar (kept visible in bird's-eye too) */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border max-w-xl">
+        <Search className="w-4 h-4 text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search by name, company, role or tag…"
+          className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
+        />
+      </div>
 
       {/* Quick filters + bird's-eye density (always visible) */}
       <div className={cn("flex flex-wrap items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
@@ -185,7 +195,7 @@ const Contacts = () => {
             <Eye className="w-3.5 h-3.5" /> Bird&apos;s-eye
           </span>
           <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
-            {([8, 16, 32] as Density[]).map((d) => (
+            {([6, 10, 16] as Density[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDensity(d)}
@@ -208,50 +218,78 @@ const Contacts = () => {
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
         </div>
-      ) : birdsEye ? (
-        <ul className={cn("mt-4 grid gap-2", densityCols[density])}>
-          {filtered.map((c) => {
-            const compact = density === 32;
-            return (
-              <li key={c.id}>
-                <Link
-                  to={`/app/contact/${c.id.split("-pad-")[0]}`}
-                  title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
-                  className={cn(
-                    "group flex items-start gap-2 rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
-                    compact ? "p-2" : "p-2.5",
-                  )}
-                >
-                  <div className="relative shrink-0">
-                    <Avatar initials={c.initials} accent={c.accent} size={compact ? "sm" : "md"} />
-                    <span
-                      className={cn(
-                        "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
-                        statusDot[c.status],
-                      )}
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("font-semibold text-primary truncate leading-tight", compact ? "text-[11px]" : "text-xs")}>
-                      {c.name}
-                    </p>
-                    <div className="flex items-center justify-between gap-1">
-                      <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
-                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
-                        {statusLabel[c.status]}
-                      </p>
-                      <AlertIcons alerts={c.alerts} size="xs" />
+      ) : (
+        <div
+          className="mt-4 overflow-y-auto pr-1 rounded-2xl"
+          style={{ maxHeight: scrollMaxHeight }}
+        >
+          <ul className={cn("grid gap-2", densityCols[density])}>
+            {filtered.map((c) => {
+              const isPinned = pinned.includes(c.id);
+              const compact = density === 16;
+              return (
+                <li key={c.id} className="relative">
+                  <Link
+                    to={`/app/contact/${c.id}`}
+                    title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
+                    className={cn(
+                      "group flex items-start gap-2 rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
+                      compact ? "p-2" : "p-2.5",
+                      isPinned && "ring-1 ring-accent/40 bg-accent/5",
+                    )}
+                  >
+                    <div className="relative shrink-0">
+                      <Avatar initials={c.initials} accent={c.accent} size={compact ? "sm" : "md"} />
+                      <span
+                        className={cn(
+                          "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
+                          statusDot[c.status],
+                        )}
+                      />
                     </div>
-                    <p className={cn("mt-0.5 text-foreground/80 leading-tight", compact ? "text-[9px] line-clamp-2" : "text-[10px] line-clamp-2")}>
-                      {c.availabilityContext}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      ) : view === "grid" ? (
+                    <div className="min-w-0 flex-1 pr-5">
+                      <p className={cn("font-semibold text-primary truncate leading-tight", compact ? "text-[11px]" : "text-xs")}>
+                        {c.name}
+                      </p>
+                      <div className="flex items-center justify-between gap-1">
+                        <p className={cn("flex items-center gap-1 text-muted-foreground truncate", compact ? "text-[9px]" : "text-[10px]")}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
+                          {statusLabel[c.status]}
+                        </p>
+                        <AlertIcons alerts={c.alerts} size="xs" />
+                      </div>
+                      <p className={cn("mt-0.5 text-foreground/80 leading-tight", compact ? "text-[9px] line-clamp-2" : "text-[10px] line-clamp-2")}>
+                        {c.availabilityContext}
+                      </p>
+                    </div>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      togglePin(c.id);
+                    }}
+                    title={isPinned ? "Unpin contact" : "Pin contact"}
+                    aria-label={isPinned ? "Unpin contact" : "Pin contact"}
+                    className={cn(
+                      "absolute top-1.5 right-1.5 inline-flex items-center justify-center w-6 h-6 rounded-full transition",
+                      isPinned
+                        ? "bg-accent text-accent-foreground shadow-elevated"
+                        : "bg-surface-low text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100",
+                    )}
+                  >
+                    {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Legacy grid/list views retained but unused in bird's-eye-only mode */}
+      {false && view === "grid" && (
         <ul className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((c) => {
             const rel = relationshipMeta[c.relationship];
@@ -291,7 +329,8 @@ const Contacts = () => {
             );
           })}
         </ul>
-      ) : (
+      )}
+      {false && view === "list" && (
         <ul className="mt-6 grid md:grid-cols-2 gap-3">
           {filtered.map((c) => {
             const rel = relationshipMeta[c.relationship];
