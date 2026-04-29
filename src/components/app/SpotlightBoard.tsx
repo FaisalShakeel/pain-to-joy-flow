@@ -261,11 +261,11 @@ const SpotlightBoard = () => {
               const Vis = visMeta[p.visibility];
               const Tn = toneMeta[p.tone];
               return (
-                <li key={p.id} className={cn("relative p-4 rounded-2xl bg-gradient-to-br border", Tn.bg)}>
+                <li key={p.id} className="relative p-4 rounded-2xl bg-primary text-primary-foreground border border-primary">
                   <div className="absolute top-2 right-2 flex items-center gap-1">
                     <button
                       onClick={() => openEdit(p)}
-                      className="p-1 rounded-full text-muted-foreground hover:bg-surface-low/70 hover:text-primary transition"
+                      className="p-1 rounded-full text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition"
                       aria-label="Edit"
                       title="Edit"
                     >
@@ -273,7 +273,7 @@ const SpotlightBoard = () => {
                     </button>
                     <button
                       onClick={() => setConfirmDelete(p.id)}
-                      className="p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
+                      className="p-1 rounded-full text-primary-foreground/70 hover:bg-rose-500/20 hover:text-rose-200 transition"
                       aria-label="Delete"
                       title="Delete"
                     >
@@ -282,27 +282,27 @@ const SpotlightBoard = () => {
                   </div>
                   <div className="flex items-center gap-1.5 flex-wrap pr-14">
                     {p.pinned && (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
                         <Pin className="w-2.5 h-2.5" /> Pinned
                       </span>
                     )}
-                    <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full", Vis.cls)}>
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
                       <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
                     </span>
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
                       <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
                     </span>
                   </div>
-                  <h4 className="mt-2 font-headline font-bold text-primary text-sm leading-tight">{p.title}</h4>
-                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.body}</p>
+                  <h4 className="mt-2 font-headline font-bold text-primary-foreground text-sm leading-tight">{p.title}</h4>
+                  <p className="mt-1 text-xs text-primary-foreground/80 leading-relaxed line-clamp-3">{p.body}</p>
                   <div className="mt-3 flex items-center justify-between gap-2">
                     {p.expiresIn ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 text-[10px] text-primary-foreground/70">
                         <Clock className="w-3 h-3" /> {p.expiresIn}
                       </span>
                     ) : <span />}
                     {p.cta && (
-                      <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent">
+                      <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-gold hover:text-primary-foreground">
                         {p.cta.label} <ArrowRight className="w-3 h-3" />
                       </a>
                     )}
