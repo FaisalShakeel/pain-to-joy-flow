@@ -75,6 +75,7 @@ const ContactProfile = () => {
 
   return (
     <AppShell subtitle="Contact profile" title={contact.name}>
+      <div style={{ zoom: 0.5 }}>
       <button
         onClick={goBack}
         className="inline-flex items-center gap-2 mb-9 px-4 py-2 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
