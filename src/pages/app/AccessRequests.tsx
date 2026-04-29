@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import {
   Inbox, Check, X, CalendarPlus, ArrowRight, ListChecks, ShieldCheck,
   Mic, MessageSquare, CalendarDays, Sparkles, AlertTriangle, Clock3,
-  Lock, Plus, Shield,
+  Lock, Plus, Shield, Eye, EyeOff, Phone, Mail, AtSign, Briefcase,
+  MonitorPlay, Building2, Ban,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AppShell from "@/components/app/AppShell";
@@ -20,6 +21,24 @@ const channelMeta = {
   message: { icon: MessageSquare, label: "Messaging" },
   calendar: { icon: CalendarDays, label: "Schedule Time" },
 } as const;
+
+type Lane = "high" | "priority" | "low";
+type Duration = "days" | "week" | "month" | "forever" | "revoked";
+type Purpose = "strategic" | "technical" | "business";
+
+const purposeMeta: Record<Purpose, { icon: typeof Briefcase; label: string }> = {
+  strategic: { icon: Briefcase, label: "Strategic" },
+  technical: { icon: MonitorPlay, label: "Technical" },
+  business: { icon: Building2, label: "Business" },
+};
+
+const durationOptions: { id: Duration; label: string; tone: "default" | "danger" }[] = [
+  { id: "days", label: "Days", tone: "default" },
+  { id: "week", label: "Week", tone: "default" },
+  { id: "month", label: "Month", tone: "default" },
+  { id: "forever", label: "Forever", tone: "default" },
+  { id: "revoked", label: "Revoked Forever", tone: "danger" },
+];
 
 const AccessRequests = () => {
   const [list, setList] = useState(initial);
