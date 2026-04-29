@@ -522,3 +522,158 @@ export const transactions: Transaction[] = [
 ];
 
 export const findContact = (id: string) => contacts.find((c) => c.id === id);
+
+/* ============================================================
+ * Owner-controlled profile schema (input = output)
+ * Every field shown on ContactProfile is defined here, plus a
+ * per-field visibility rule the owner controls from Edit Profile.
+ * ============================================================ */
+
+export type Visibility = "public" | "approved" | "hidden";
+
+/** Viewer access tier derived from sync status (or "owner" when self). */
+export type ViewerAccess = "owner" | "approved" | "public";
+
+export interface CommsChannel {
+  id: string;
+  kind: "email" | "phone" | "mobile" | "whatsapp" | "sms";
+  label: string;
+  value: string;
+  visibility: Visibility;
+}
+
+export interface SocialHandle {
+  id: string;
+  kind: "x" | "instagram" | "linkedin" | "github" | "website" | "other";
+  label: string;
+  value: string; // handle or URL
+  href: string;
+  visibility: Visibility;
+}
+
+export interface OwnerProfile {
+  // Identity
+  name: string;
+  firstName: string;
+  initials: string;
+  title: string;
+  org: string;
+  accent: string;
+
+  // Narrative
+  bio: string;
+  tags: string[];
+  responseTime: string;
+  availabilityContext: string;
+
+  // Operations Center
+  operationDays: string;
+  operationDaysSub?: string;
+  operationHours: string;
+  headquarters: string;
+  headquartersSub?: string;
+
+  // Channels
+  primaryComms: CommsChannel[];
+  socialHandles: SocialHandle[];
+
+  // Per-field visibility — keys are stable field ids
+  visibility: {
+    bio: Visibility;
+    tags: Visibility;
+    title: Visibility;
+    org: Visibility;
+    availabilityContext: Visibility;
+    operationDays: Visibility;
+    operationHours: Visibility;
+    headquarters: Visibility;
+    primaryCommsSection: Visibility;
+    socialHandlesSection: Visibility;
+  };
+}
+
+/** Returns whether a given visibility rule allows the viewer. */
+export const canSee = (rule: Visibility, viewer: ViewerAccess): boolean => {
+  if (viewer === "owner") return true;
+  if (rule === "hidden") return false;
+  if (rule === "public") return true;
+  return viewer === "approved"; // rule === "approved"
+};
+
+/** Default visibility map applied to mock contacts so the viewer sees something sensible. */
+const defaultVisibility: OwnerProfile["visibility"] = {
+  bio: "public",
+  tags: "public",
+  title: "public",
+  org: "public",
+  availabilityContext: "public",
+  operationDays: "approved",
+  operationHours: "approved",
+  headquarters: "public",
+  primaryCommsSection: "approved",
+  socialHandlesSection: "public",
+};
+
+/** Build a default OwnerProfile from a Contact (mock-only). */
+export const ownerProfileFor = (c: Contact): OwnerProfile => {
+  const handle = c.name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z_]/g, "");
+  const emailDomain = c.org.toLowerCase().replace(/[^a-z]/g, "") || "company";
+  const email = `${handle.split("_")[0]}@${emailDomain}.io`;
+  return {
+    name: c.name,
+    firstName: c.name.split(" ")[0],
+    initials: c.initials,
+    title: c.title,
+    org: c.org,
+    accent: c.accent,
+    bio: c.bio,
+    tags: c.tags,
+    responseTime: c.responseTime,
+    availabilityContext: c.availabilityContext,
+    operationDays: "Monday — Friday",
+    operationDaysSub: "Weekend access by priority only",
+    operationHours: "09:00 — 18:00 (GMT+0)",
+    headquarters: c.org,
+    headquartersSub: `${c.name.split(" ")[0]}'s primary base`,
+    primaryComms: [
+      { id: "email", kind: "email", label: "Email", value: email, visibility: "approved" },
+      { id: "office", kind: "phone", label: "Office Number", value: "+44 20 7946 0123", visibility: "approved" },
+      { id: "mobile", kind: "mobile", label: "Mobile Number", value: "+44 7700 900 123", visibility: "approved" },
+    ],
+    socialHandles: [
+      { id: "x", kind: "x", label: "X (Twitter)", value: `@${handle}`, href: "#", visibility: "public" },
+      { id: "ig", kind: "instagram", label: "Instagram", value: `@${handle.split("_")[0]}.work`, href: "#", visibility: "public" },
+    ],
+    visibility: { ...defaultVisibility },
+  };
+};
+
+/** Owner profile of the signed-in user (`me`) — the source of truth for EditProfile. */
+export const myOwnerProfile: OwnerProfile = {
+  name: me.name,
+  firstName: me.name.split(" ")[0],
+  initials: me.initials,
+  title: me.title,
+  org: me.org,
+  accent: "from-indigo-500 to-violet-600",
+  bio: "Permission-based operator. I respond to vetted requests within one working day.",
+  tags: ["Operations", "Strategy"],
+  responseTime: "≈ 4h",
+  availabilityContext: "Available after 2:00 PM",
+  operationDays: "Monday — Friday",
+  operationDaysSub: "Weekends async only",
+  operationHours: "09:00 — 18:00 (GMT+4)",
+  headquarters: me.org,
+  headquartersSub: "Dubai, UAE",
+  primaryComms: [
+    { id: "email", kind: "email", label: "Email", value: me.email, visibility: "approved" },
+    { id: "mobile", kind: "mobile", label: "Mobile Number", value: me.phone, visibility: "approved" },
+    { id: "whatsapp", kind: "whatsapp", label: "WhatsApp", value: me.phone, visibility: "hidden" },
+  ],
+  socialHandles: [
+    { id: "linkedin", kind: "linkedin", label: "LinkedIn", value: "alistair-finch", href: "https://linkedin.com/in/alistair-finch", visibility: "public" },
+    { id: "x", kind: "x", label: "X (Twitter)", value: "@alistairfinch", href: "https://x.com/alistairfinch", visibility: "public" },
+    { id: "site", kind: "website", label: "Website", value: "availock.com", href: "https://availock.com", visibility: "public" },
+  ],
+  visibility: { ...defaultVisibility },
+};
