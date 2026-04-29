@@ -449,6 +449,34 @@ const ContactProfile = () => {
 
 /* --- Subcomponents --- */
 
+const commsIcon = (kind: string) => {
+  switch (kind) {
+    case "email": return Mail;
+    case "mobile": return Smartphone;
+    case "whatsapp": return MessageCircle;
+    case "sms": return MessageSquare;
+    default: return Phone;
+  }
+};
+
+const socialIcon = (kind: string) => {
+  switch (kind) {
+    case "linkedin": return Linkedin;
+    case "github": return Github;
+    case "instagram": return Camera;
+    case "website": return Globe;
+    case "x": return Share2;
+    default: return Share2;
+  }
+};
+
+const hrefFor = (kind: string, value: string) => {
+  if (kind === "email") return `mailto:${value}`;
+  if (kind === "phone" || kind === "mobile" || kind === "sms") return `tel:${value.replace(/\s+/g, "")}`;
+  if (kind === "whatsapp") return `https://wa.me/${value.replace(/[^\d]/g, "")}`;
+  return value.startsWith("http") ? value : "#";
+};
+
 const OpsItem = ({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) => (
   <div className="flex gap-2.5">
     <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
