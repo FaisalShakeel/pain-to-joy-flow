@@ -21,7 +21,8 @@ import {
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
 import { useRole } from "@/lib/role";
-import { me, notifications } from "@/lib/mockData";
+import { me } from "@/lib/mockData";
+import { useNotifications } from "./NotificationsContext";
 import Avatar from "./Avatar";
 import {
   DropdownMenu,
@@ -83,7 +84,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const { unreadCount } = useNotifications();
 
   return (
     <div className="min-h-screen bg-surface text-foreground flex">
