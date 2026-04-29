@@ -241,10 +241,17 @@ const ScheduleCall = () => {
                 </div>
               ) : (
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {filtered.map((s) =>
-                    s.kind === "meeting" ? (
-                      <MeetingCard key={s.id} slot={s} active={s.id === slotId} onPick={() => pickSlot(s)} />
-                    ) : (
+                   {filtered.map((s) =>
+                     s.kind === "meeting" ? (
+                       <MeetingCard
+                         key={s.id}
+                         slot={s}
+                         active={s.id === slotId}
+                         hybridPick={hybridPick}
+                         onPick={() => pickSlot(s)}
+                         onPickChannel={(ch) => { pickSlot(s); setHybridPick(ch); }}
+                       />
+                     ) : (
                       <QuickCard key={s.id} slot={s} active={s.id === slotId} onPick={() => pickSlot(s)} />
                     )
                   )}
@@ -449,7 +456,15 @@ function BookingTab({
   );
 }
 
-function MeetingCard({ slot, active, onPick }: { slot: MeetingSlot; active: boolean; onPick: () => void }) {
+function MeetingCard({
+  slot, active, onPick, hybridPick, onPickChannel,
+}: {
+  slot: MeetingSlot;
+  active: boolean;
+  onPick: () => void;
+  hybridPick: HybridPick;
+  onPickChannel: (ch: HybridPick) => void;
+}) {
   const C = channelMeta[slot.channel];
   const disabled = slot.full;
   return (
@@ -466,14 +481,30 @@ function MeetingCard({ slot, active, onPick }: { slot: MeetingSlot; active: bool
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-headline font-bold text-sm leading-none">{slot.time}</span>
-        <span className={`inline-flex items-center gap-1 ${active ? "text-primary-foreground" : ""}`}>
+        <span className="inline-flex items-center gap-1">
           {slot.channel === "hybrid" ? (
             <>
-              <Video className={`w-3.5 h-3.5 ${active ? "" : "text-sky-600"} ${slot.taken === "online" ? "opacity-30" : ""}`} />
-              <MapPin className={`w-3.5 h-3.5 ${active ? "" : "text-indigo-600"} ${slot.taken === "onsite" ? "opacity-30" : ""}`} />
+              <HybridIcon
+                Icon={Video}
+                title="Online"
+                active={active && hybridPick === "online"}
+                taken={slot.taken === "online"}
+                onClick={(e) => { e.stopPropagation(); onPickChannel("online"); }}
+                tone="sky"
+                cardActive={active}
+              />
+              <HybridIcon
+                Icon={MapPin}
+                title="On-site"
+                active={active && hybridPick === "onsite"}
+                taken={slot.taken === "onsite"}
+                onClick={(e) => { e.stopPropagation(); onPickChannel("onsite"); }}
+                tone="indigo"
+                cardActive={active}
+              />
             </>
           ) : (
-            <C.icon className={`w-3.5 h-3.5 ${active ? "" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
+            <C.icon className={`w-3.5 h-3.5 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
           )}
         </span>
       </div>
@@ -487,8 +518,46 @@ function MeetingCard({ slot, active, onPick }: { slot: MeetingSlot; active: bool
         {slot.channel === "hybrid" && slot.taken && (
           <span className="inline-flex items-center gap-1">{slot.taken === "online" ? "On-site only" : "Online only"}</span>
         )}
+        {slot.channel === "hybrid" && !slot.taken && active && (
+          <span className="inline-flex items-center gap-1 font-semibold">
+            · {hybridPick === "online" ? "Online picked" : "On-site picked"}
+          </span>
+        )}
       </div>
     </button>
+  );
+}
+
+function HybridIcon({
+  Icon, title, active, taken, onClick, tone, cardActive,
+}: {
+  Icon: React.ComponentType<any>;
+  title: string;
+  active: boolean;
+  taken: boolean;
+  onClick: (e: React.MouseEvent) => void;
+  tone: "sky" | "indigo";
+  cardActive: boolean;
+}) {
+  const toneRing = tone === "sky" ? "ring-sky-400 bg-sky-500/15 text-sky-700" : "ring-indigo-400 bg-indigo-500/15 text-indigo-700";
+  return (
+    <span
+      role="button"
+      title={title}
+      aria-pressed={active}
+      onClick={taken ? undefined : onClick}
+      className={`grid place-items-center w-6 h-6 rounded-md transition cursor-pointer ${
+        taken
+          ? "opacity-30 cursor-not-allowed"
+          : active
+          ? `ring-2 ${toneRing}`
+          : cardActive
+          ? "bg-white/15 text-primary-foreground hover:bg-white/25"
+          : `${toneRing} hover:brightness-110`
+      }`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+    </span>
   );
 }
 
