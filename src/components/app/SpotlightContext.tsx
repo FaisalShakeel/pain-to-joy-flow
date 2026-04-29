@@ -58,6 +58,24 @@ const seed: SpotlightPost[] = [
     createdAt: Date.now() - 1000 * 60 * 10,
     authorId: "me",
   },
+  {
+    id: "s3",
+    title: "Back from Tokyo — open for intros",
+    body: "Free Wed/Thu afternoons this week. Ping me if a quick sync helps.",
+    visibility: "contacts",
+    tone: "info",
+    createdAt: Date.now() - 1000 * 60 * 5,
+    authorId: "rashid-al-amir",
+  },
+  {
+    id: "s4",
+    title: "Heads-down on Q3 close",
+    body: "Async only until Friday. Urgent? Mark as urgent and I'll surface it.",
+    visibility: "contacts",
+    tone: "warn",
+    createdAt: Date.now() - 1000 * 60 * 2,
+    authorId: "sarah-jenkins",
+  },
 ];
 
 export function SpotlightProvider({ children }: { children: ReactNode }) {
