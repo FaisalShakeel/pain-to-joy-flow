@@ -30,6 +30,9 @@ const Nav = () => {
             alt="Availock"
             className="h-12 md:h-14 w-auto object-contain"
           />
+          <span className="ml-3 font-headline font-extrabold text-xl md:text-2xl text-primary tracking-tight">
+            Availock
+          </span>
         </a>
         <div className="hidden md:flex items-center gap-9 text-sm font-medium">
           <a href="#vault" className="text-muted-foreground hover:text-primary transition-colors">The Vault</a>
