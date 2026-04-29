@@ -19,7 +19,7 @@ import {
   UserCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import logoFull from "@/assets/availock-logo.svg";
+import logoIcon from "@/assets/availock-icon.svg";
 import { useRole } from "@/lib/role";
 import { me } from "@/lib/mockData";
 import { useNotifications } from "./NotificationsContext";
