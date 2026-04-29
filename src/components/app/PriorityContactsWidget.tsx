@@ -2,13 +2,14 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Search, Maximize2, X, Star, Pin, PinOff,
-  Users as UsersIcon, ArrowRight, Car,
+  Users as UsersIcon, ArrowRight, Car, Flame,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPill from "./StatusPill";
 import PingButton from "./PingButton";
 import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+import { useSpotlight } from "./SpotlightContext";
 
 type Filter = "all" | "available" | "busy" | "focus" | "driving" | "offline" | "pinned";
 
@@ -48,9 +49,23 @@ const ContactRow = ({
   if (!c) return null;
   const driving = drivingOverride[c.id];
   const effective: AvailabilityStatus | "driving" = driving ? "driving" : c.status;
+  const { unseenForContact, markSeen } = useSpotlight();
+  const unseen = unseenForContact(c.id);
 
   return (
     <div className="group relative p-3 rounded-2xl ghost-border bg-surface-low/50 hover:bg-surface-low transition">
+      {unseen > 0 && (
+        <button
+          onClick={() => markSeen(c.id)}
+          title={`${unseen} new spotlight ${unseen === 1 ? "post" : "posts"} — tap to mark seen`}
+          className="absolute -top-1.5 -left-1.5 z-10 grid place-items-center w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 text-white shadow-glass ring-2 ring-surface-lowest animate-pulse"
+        >
+          <Flame className="w-3 h-3" />
+          <span className="absolute -bottom-1 -right-1 grid place-items-center min-w-[14px] h-[14px] px-[3px] rounded-full bg-primary text-primary-foreground text-[8px] font-bold">
+            {unseen}
+          </span>
+        </button>
+      )}
       <div className="flex items-start gap-3">
         <Link to={`/app/contact/${c.id}`} className="shrink-0">
           <Avatar initials={c.initials} accent={c.accent} />
