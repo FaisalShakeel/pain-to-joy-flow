@@ -381,6 +381,119 @@ const SlotBuilder = () => {
   );
 };
 
+// ---------- Slot Card Compact ----------
+const SlotCardCompact = ({
+  slot, onEdit, onDelete, onClone,
+}: {
+  slot: Slot;
+  onEdit: () => void;
+  onDelete: () => void;
+  onClone: () => void;
+}) => {
+  const A = accessMeta[slot.access];
+  const channelLabel =
+    slot.mode === "hybrid" ? "Hybrid" :
+    slot.mode === "online" ? "Online" :
+    slot.mode === "onsite" ? "Onsite" : "Quick Sync";
+  const ChannelIcon =
+    slot.mode === "hybrid" ? Sparkles :
+    slot.mode === "online" ? Video :
+    slot.mode === "onsite" ? MapPin : Zap;
+  const typeLabel = slot.mode === "quicksync" ? "Quick Sync" : "Meeting";
+
+  // Status (lightweight)
+  let status: "active" | "upcoming" | "expired" | "full" = "upcoming";
+  if (slot.date) {
+    const d = new Date(slot.date);
+    const today = new Date(new Date().toDateString());
+    if (d < today) status = "expired";
+    else if (d.getTime() === today.getTime()) status = "active";
+  } else {
+    status = "active";
+  }
+
+  const statusCls =
+    status === "active"   ? "bg-emerald-500/15 text-emerald-700" :
+    status === "upcoming" ? "bg-sky-500/15 text-sky-700" :
+    status === "full"     ? "bg-amber-500/20 text-amber-800" :
+                            "bg-muted-foreground/15 text-muted-foreground";
+
+  return (
+    <article className="rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition">
+      {/* Top line: date + time range */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[12px] font-extrabold text-primary truncate flex items-center gap-1.5">
+            {slot.priority && <Crown className="w-3 h-3 text-amber-600 shrink-0" />}
+            {slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day}
+            <span className="text-muted-foreground font-bold">·</span>
+            {slot.start}:00–{slot.end}:00
+          </p>
+          <p className="text-[10px] text-muted-foreground truncate mt-0.5">{slot.title || "Untitled"}</p>
+        </div>
+        <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0", statusCls)}>
+          {status}
+        </span>
+      </div>
+
+      {/* Middle: type + duration/buffer */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-surface-lowest ghost-border font-bold text-primary">
+          {typeLabel}
+        </span>
+        <span className="text-muted-foreground font-semibold">
+          {slot.mode === "quicksync"
+            ? `${slot.quickSync?.callMin ?? slot.duration} min calls • ${slot.quickSync?.bufferMin ?? slot.buffer} min buffer`
+            : `${slot.duration} min meeting • ${slot.buffer} min buffer`}
+        </span>
+      </div>
+
+      {/* Channel + capacity */}
+      <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px]">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold">
+          <ChannelIcon className="w-2.5 h-2.5" /> {channelLabel}
+        </span>
+        <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold", A.cls)}>
+          <A.icon className="w-2.5 h-2.5" /> {A.label}
+        </span>
+      </div>
+
+      <div className="mt-1.5 text-[10px] text-muted-foreground font-semibold">
+        {slot.mode === "quicksync" && slot.quickSync
+          ? `${calcQuickSyncCapacity((slot.end - slot.start) * 60, slot.quickSync.callMin, slot.quickSync.bufferMin)} slots generated`
+          : `${Math.max(1, Math.floor(((slot.end - slot.start) * 60) / (slot.duration + (slot.buffer || 0))))} slots generated`}
+        {slot.recurring && " · recurring"}
+      </div>
+
+      {/* Actions */}
+      <div className="mt-2.5 flex items-center justify-end gap-1">
+        <button
+          onClick={onClone}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary text-[10px] font-bold"
+          aria-label="Clone schedule"
+          title="Clone schedule — extend forward"
+        >
+          <CopyPlus className="w-3 h-3" /> Clone
+        </button>
+        <button
+          onClick={onEdit}
+          className="grid place-items-center w-7 h-7 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary"
+          aria-label="Edit slot"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button
+          onClick={onDelete}
+          className="grid place-items-center w-7 h-7 rounded-lg ghost-border bg-surface-lowest hover:bg-destructive/10 text-destructive"
+          aria-label="Delete slot"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    </article>
+  );
+};
+
 // ---------- Slot Chip ----------
 const SlotChip = ({ slot, onClick, onClone }: { slot: Slot; onClick: () => void; onClone: (k: "tomorrow" | "nextweek" | "weekdays") => void }) => {
   const [menu, setMenu] = useState(false);
