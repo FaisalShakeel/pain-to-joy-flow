@@ -28,15 +28,54 @@ const statusMeta: Record<StatusKey, { label: string; activeBg: string; activeTex
   offline:   { label: "Offline",   activeBg: "bg-muted-foreground/70", activeText: "text-white", ring: "ring-muted-foreground/30", pillBg: "bg-muted",  pillText: "text-muted-foreground", dot: "bg-muted-foreground/60" },
 };
 
-const PRESET_MESSAGES = [
-  "Available for technical sync",
-  "Available for quick calls",
-  "In meetings",
-  "Focus mode — async only",
-  "Call only if urgent",
-  "Available for sync",
-  "Traveling — limited access",
-  "Offline — back tomorrow",
+// Auto status (Line 2) — system-synced based on current mode
+const AUTO_STATUS: Record<StatusKey, string> = {
+  available: "Available for technical sync",
+  busy:      "In a meeting",
+  focus:     "In deep work mode",
+  driving:   "Driving — hands-free only",
+  offline:   "Offline — back tomorrow",
+};
+
+// Quick context (Line 3) — categorized with personality
+const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
+  { label: "Practical", items: [
+    "Leave a message if urgent",
+    "Available for quick sync",
+    "Call only if urgent",
+    "Will respond shortly",
+    "Back soon",
+    "On the move",
+    "Offline for now",
+  ]},
+  { label: "Personal", items: [
+    "With guests",
+    "At prayers",
+    "Taking a short break",
+    "Stepping out",
+    "In between meetings",
+  ]},
+  { label: "Boundaries", items: [
+    "Do not call",
+    "Do not disturb",
+    "Messages only",
+    "Focus time — no interruptions",
+  ]},
+  { label: "Human", items: [
+    "Waiting 4 business",
+    "Brain loading…",
+    "Running on coffee ☕",
+    "Quick ping works best",
+    "Keep it short, I'm in flow",
+    "Silent but working",
+  ]},
+  { label: "Light humor", items: [
+    "Powder room break",
+    "On a mission 🚀",
+    "In a thinking loop",
+    "Available… mentally negotiating 😄",
+    "Multitasking like a pro",
+  ]},
 ];
 
 const Dashboard = () => {
