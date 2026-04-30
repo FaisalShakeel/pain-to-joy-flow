@@ -3,8 +3,13 @@ import {
   Plus, Video, MapPin, Zap, Crown, Lock, Globe, Users as UsersIcon, Star,
   Repeat, Copy, Trash2, Phone, MessageSquare, Link as LinkIcon, X, Check,
   ChevronRight, Sparkles, Clock, Calendar as CalIcon, Shield, Timer, Gauge,
-  CalendarPlus, ArrowLeft, Pencil,
+  CalendarPlus, ArrowLeft, Pencil, Briefcase, CopyPlus,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { addDays, addWeeks } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import AppShell from "@/components/app/AppShell";
 import { Switch } from "@/components/ui/switch";
@@ -46,13 +51,9 @@ const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const hours = Array.from({ length: 10 }, (_, i) => 9 + i); // 9..18
 
 // ---------- Templates ----------
-const templates = [
-  { id: "quick", name: "Quick Calls", icon: Zap, hint: "5-min sync hour" },
-  { id: "deep", name: "Deep Work Break", icon: Shield, hint: "Open 30 min" },
-  { id: "vip", name: "VIP Access Hour", icon: Crown, hint: "Priority only" },
-  { id: "sales", name: "Sales Consults", icon: Sparkles, hint: "30-min approval" },
-  { id: "network", name: "Networking", icon: UsersIcon, hint: "Public 15-min" },
-  { id: "family", name: "Family Only", icon: Star, hint: "Hidden invite" },
+const templates: { id: string; name: string; icon: React.ComponentType<any>; hint: string; route: string }[] = [
+  { id: "quicksync", name: "Quick Sync Relief Calls", icon: Zap,       hint: "Handle volume without stress",  route: "/app/availability/quick-sync" },
+  { id: "meetings",  name: "Meetings — Focus Work",  icon: Briefcase,  hint: "Protect deep conversations",     route: "/app/availability/focus-meetings" },
 ];
 
 // ---------- Seed slots ----------
@@ -107,16 +108,22 @@ const buffers: Buffer[] = [0, 5, 10, 15];
 const calcQuickSyncCapacity = (totalMin: number, callMin: number, bufferMin: number) =>
   Math.max(0, Math.floor(totalMin / (callMin + bufferMin)));
 
+// Channel filter (Hybrid / Online / Onsite) — Hybrid default
+type ChannelFilter = "hybrid" | "online" | "onsite";
+
 // ---------- Component ----------
 const SlotBuilder = () => {
   const navigate = useNavigate();
   const [slots, setSlots] = useState<Slot[]>(seed);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Slot | null>(null);
-  const [filter, setFilter] = useState<"all" | Mode>("all");
+  const [filter, setFilter] = useState<ChannelFilter>("hybrid");
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
+  // Show only hybrid/online/onsite slots in Slot Builder.
+  // Quick Sync slots are managed in the Quick Sync Builder.
   const filtered = useMemo(
-    () => (filter === "all" ? slots : slots.filter((s) => s.mode === filter)),
+    () => slots.filter((s) => s.mode === filter),
     [slots, filter],
   );
 
@@ -167,22 +174,20 @@ const SlotBuilder = () => {
     }
   };
 
-  const applyTemplate = (id: string) => {
-    const presets: Record<string, Partial<Slot>> = {
-      quick:   { title: "Quick Calls", mode: "quicksync", quickSync: { callMin: 5, bufferMin: 2 }, duration: 5, buffer: 0, bookingMode: "instant", access: "contacts" },
-      deep:    { title: "Deep Work Break", mode: "online", duration: 30, buffer: 10, bookingMode: "instant", access: "contacts", online: { channel: "video", capacity: 1, booking: "instant" } },
-      vip:     { title: "VIP Access Hour", mode: "online", duration: 15, buffer: 10, bookingMode: "approval", access: "priority", priority: true, online: { channel: "voice", capacity: 1, booking: "approval" } },
-      sales:   { title: "Sales Consult", mode: "online", duration: 30, buffer: 5, bookingMode: "approval", access: "approved", online: { channel: "video", capacity: 1, booking: "approval" } },
-      network: { title: "Networking", mode: "online", duration: 15, buffer: 5, bookingMode: "instant", access: "public", online: { channel: "video", capacity: 5, booking: "instant" } },
-      family:  { title: "Family Only", mode: "onsite", duration: 60, buffer: 0, bookingMode: "instant", access: "hidden", onsite: { location: "Home", capacity: 6, booking: "instant" } },
-    };
-    setEditing({
-      id: `s${Date.now()}`, day: "Mon", start: 14, end: 15, recurring: true, autoCloseAlternate: true,
-      title: "", mode: "online", duration: 30, buffer: 5, bookingMode: "instant", access: "public",
-      ...presets[id],
-    } as Slot);
-    setEditorOpen(true);
+  const cloneSchedule = (s: Slot) => {
+    // Clone Schedule: extend the same configuration forward.
+    // Default: start from the next cycle (next week, same weekday), preserving recurrence.
+    const base = s.date ? new Date(s.date) : new Date();
+    const nextDate = addWeeks(base, 1).toISOString().slice(0, 10);
+    setSlots((p) => [
+      ...p,
+      { ...s, id: `s${Date.now()}`, date: nextDate, recurring: true },
+    ]);
+    toast({ title: "Schedule cloned successfully and extended.", description: `Continues from ${format(new Date(nextDate), "EEE, MMM d")}` });
   };
+
+  const channelOf = (m: Mode): ChannelFilter | "quicksync" =>
+    m === "hybrid" ? "hybrid" : m === "online" ? "online" : m === "onsite" ? "onsite" : "quicksync";
 
   return (
     <AppShell
@@ -203,6 +208,12 @@ const SlotBuilder = () => {
             <Zap className="w-3.5 h-3.5" /> Quick Sync
           </button>
           <button
+            onClick={() => navigate("/app/availability/focus-meetings")}
+            className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-indigo-700 hover:bg-indigo-500/10"
+          >
+            <Briefcase className="w-3.5 h-3.5" /> Meetings
+          </button>
+          <button
             onClick={() => openNew()}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95"
           >
@@ -215,34 +226,44 @@ const SlotBuilder = () => {
         {/* LEFT PANEL */}
         <aside className="space-y-4">
           <section className="rounded-3xl bg-surface-lowest ghost-border p-4">
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Filters</h3>
-            <div className="flex flex-wrap gap-1.5">
-              {(["all", "hybrid", "online", "onsite", "quicksync"] as const).map((f) => (
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">Channel</h3>
+            <p className="text-[10px] text-muted-foreground mb-3">One slot, multiple ways to connect. If one is booked, the other auto-closes.</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {([
+                ["hybrid", "Hybrid", Sparkles],
+                ["online", "Online", Video],
+                ["onsite", "Onsite", MapPin],
+              ] as const).map(([k, l, Ic]) => (
                 <button
-                  key={f}
-                  onClick={() => setFilter(f)}
+                  key={k}
+                  onClick={() => setFilter(k)}
                   className={cn(
-                    "px-2.5 py-1.5 rounded-full text-[11px] font-semibold capitalize transition",
-                    filter === f ? "bg-primary text-primary-foreground" : "bg-surface-low text-muted-foreground hover:text-primary",
+                    "flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-[11px] font-bold transition",
+                    filter === k
+                      ? "bg-primary text-primary-foreground shadow-glass"
+                      : "bg-surface-low text-muted-foreground hover:text-primary",
                   )}
                 >
-                  {f === "quicksync" ? "Quick sync" : f}
+                  <Ic className="w-3.5 h-3.5" /> {l}
                 </button>
               ))}
             </div>
+            {filter === "hybrid" && (
+              <p className="mt-2 text-[10px] text-muted-foreground">Default. Slot offers both Online and Onsite.</p>
+            )}
           </section>
 
           <section className="rounded-3xl bg-surface-lowest ghost-border p-4">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Templates</h3>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {templates.map((t) => (
                 <li key={t.id}>
                   <button
-                    onClick={() => applyTemplate(t.id)}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-surface-low hover:bg-primary/5 transition text-left"
+                    onClick={() => navigate(t.route)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-surface-low hover:bg-primary/5 transition text-left"
                   >
-                    <span className="grid place-items-center w-7 h-7 rounded-lg bg-gradient-primary text-primary-foreground">
-                      <t.icon className="w-3.5 h-3.5" />
+                    <span className="grid place-items-center w-8 h-8 rounded-lg bg-gradient-primary text-primary-foreground">
+                      <t.icon className="w-4 h-4" />
                     </span>
                     <span className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-primary truncate">{t.name}</p>
@@ -312,50 +333,45 @@ const SlotBuilder = () => {
         {filtered.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">No slots yet. Click an empty cell or “New slot” to add one.</p>
         ) : (
-          <ul className="divide-y divide-border/50">
-            {filtered.map((s) => {
-              const A = accessMeta[s.access];
-              return (
-                <li key={s.id} className="py-3 flex items-center gap-3">
-                  <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary">
-                    {s.mode === "quicksync" ? <Zap className="w-4 h-4" /> :
-                     s.mode === "online" ? <Video className="w-4 h-4" /> :
-                     s.mode === "onsite" ? <MapPin className="w-4 h-4" /> :
-                     <Sparkles className="w-4 h-4" />}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-primary truncate flex items-center gap-1.5">
-                      {s.priority && <Crown className="w-3 h-3 text-amber-600" />}
-                      {s.title || "Untitled"}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {s.date ? format(new Date(s.date), "EEE, MMM d") : s.day} · {s.start}:00–{s.end}:00 · {s.duration}m
-                      {s.recurring && " · recurring"}
-                    </p>
-                  </div>
-                  <span className={cn("hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold", A.cls)}>
-                    <A.icon className="w-3 h-3" /> {A.label}
-                  </span>
-                  <button
-                    onClick={() => openEdit(s)}
-                    className="grid place-items-center w-8 h-8 rounded-lg ghost-border bg-surface-low hover:bg-primary/10 text-primary"
-                    aria-label="Edit slot"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => { setSlots((p) => p.filter((x) => x.id !== s.id)); toast({ title: "Slot removed" }); }}
-                    className="grid place-items-center w-8 h-8 rounded-lg ghost-border bg-surface-low hover:bg-destructive/10 text-destructive"
-                    aria-label="Delete slot"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-2.5">
+            {filtered.map((s) => (
+              <SlotCardCompact
+                key={s.id}
+                slot={s}
+                onEdit={() => openEdit(s)}
+                onDelete={() => setConfirmDelete(s.id)}
+                onClone={() => cloneSchedule(s)}
+              />
+            ))}
+          </div>
         )}
       </section>
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this slot schedule?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The slot and its configuration will be removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmDelete) {
+                  setSlots((p) => p.filter((x) => x.id !== confirmDelete));
+                  toast({ title: "Slot removed" });
+                }
+                setConfirmDelete(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* EDITOR DRAWER */}
       {editorOpen && editing && (
@@ -368,6 +384,119 @@ const SlotBuilder = () => {
         />
       )}
     </AppShell>
+  );
+};
+
+// ---------- Slot Card Compact ----------
+const SlotCardCompact = ({
+  slot, onEdit, onDelete, onClone,
+}: {
+  slot: Slot;
+  onEdit: () => void;
+  onDelete: () => void;
+  onClone: () => void;
+}) => {
+  const A = accessMeta[slot.access];
+  const channelLabel =
+    slot.mode === "hybrid" ? "Hybrid" :
+    slot.mode === "online" ? "Online" :
+    slot.mode === "onsite" ? "Onsite" : "Quick Sync";
+  const ChannelIcon =
+    slot.mode === "hybrid" ? Sparkles :
+    slot.mode === "online" ? Video :
+    slot.mode === "onsite" ? MapPin : Zap;
+  const typeLabel = slot.mode === "quicksync" ? "Quick Sync" : "Meeting";
+
+  // Status (lightweight)
+  let status: "active" | "upcoming" | "expired" | "full" = "upcoming";
+  if (slot.date) {
+    const d = new Date(slot.date);
+    const today = new Date(new Date().toDateString());
+    if (d < today) status = "expired";
+    else if (d.getTime() === today.getTime()) status = "active";
+  } else {
+    status = "active";
+  }
+
+  const statusCls: string =
+    status === "active"   ? "bg-emerald-500/15 text-emerald-700" :
+    status === "upcoming" ? "bg-sky-500/15 text-sky-700" :
+    status === "expired"  ? "bg-muted-foreground/15 text-muted-foreground" :
+                            "bg-amber-500/20 text-amber-800";
+
+  return (
+    <article className="rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition">
+      {/* Top line: date + time range */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[12px] font-extrabold text-primary truncate flex items-center gap-1.5">
+            {slot.priority && <Crown className="w-3 h-3 text-amber-600 shrink-0" />}
+            {slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day}
+            <span className="text-muted-foreground font-bold">·</span>
+            {slot.start}:00–{slot.end}:00
+          </p>
+          <p className="text-[10px] text-muted-foreground truncate mt-0.5">{slot.title || "Untitled"}</p>
+        </div>
+        <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0", statusCls)}>
+          {status}
+        </span>
+      </div>
+
+      {/* Middle: type + duration/buffer */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-surface-lowest ghost-border font-bold text-primary">
+          {typeLabel}
+        </span>
+        <span className="text-muted-foreground font-semibold">
+          {slot.mode === "quicksync"
+            ? `${slot.quickSync?.callMin ?? slot.duration} min calls • ${slot.quickSync?.bufferMin ?? slot.buffer} min buffer`
+            : `${slot.duration} min meeting • ${slot.buffer} min buffer`}
+        </span>
+      </div>
+
+      {/* Channel + capacity */}
+      <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px]">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold">
+          <ChannelIcon className="w-2.5 h-2.5" /> {channelLabel}
+        </span>
+        <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold", A.cls)}>
+          <A.icon className="w-2.5 h-2.5" /> {A.label}
+        </span>
+      </div>
+
+      <div className="mt-1.5 text-[10px] text-muted-foreground font-semibold">
+        {slot.mode === "quicksync" && slot.quickSync
+          ? `${calcQuickSyncCapacity((slot.end - slot.start) * 60, slot.quickSync.callMin, slot.quickSync.bufferMin)} slots generated`
+          : `${Math.max(1, Math.floor(((slot.end - slot.start) * 60) / (slot.duration + (slot.buffer || 0))))} slots generated`}
+        {slot.recurring && " · recurring"}
+      </div>
+
+      {/* Actions */}
+      <div className="mt-2.5 flex items-center justify-end gap-1">
+        <button
+          onClick={onClone}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary text-[10px] font-bold"
+          aria-label="Clone schedule"
+          title="Clone schedule — extend forward"
+        >
+          <CopyPlus className="w-3 h-3" /> Clone
+        </button>
+        <button
+          onClick={onEdit}
+          className="grid place-items-center w-7 h-7 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary"
+          aria-label="Edit slot"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button
+          onClick={onDelete}
+          className="grid place-items-center w-7 h-7 rounded-lg ghost-border bg-surface-lowest hover:bg-destructive/10 text-destructive"
+          aria-label="Delete slot"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    </article>
   );
 };
 
