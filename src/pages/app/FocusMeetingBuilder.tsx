@@ -490,7 +490,13 @@ const MeetingCard = ({
 }) => {
   const [dupOpen, setDupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const count = slotCount(slot);
+  const allSlots = useMemo(
+    () => buildTimeline(slot).filter((i) => i.kind === "call"),
+    [slot],
+  );
+  const visibleSlots = expanded ? allSlots : allSlots.slice(0, 3);
   const A = accessMeta[slot.access];
   const date = new Date(slot.date);
   const isPast = date < new Date(new Date().toDateString());
@@ -529,12 +535,40 @@ const MeetingCard = ({
 
       <div className="mt-3 grid grid-cols-2 gap-1.5 text-[11px]">
         <Chip>{slot.callMin}-min meetings</Chip>
-        <Chip>{slot.bufferMin}-min buffer</Chip>
-        <Chip>{count} meetings</Chip>
+        <Chip title="Participants may join early or extend slightly. Does not affect slot count.">
+          {slot.bufferMin}-min flexible buffer
+        </Chip>
+        <Chip>{count} meetings total</Chip>
         <Chip>
           <Repeat className="w-3 h-3" /> {slot.repeats === "none" ? "Once" : slot.repeats}
         </Chip>
       </div>
+
+      {allSlots.length > 0 && (
+        <div className="mt-3 rounded-xl bg-surface-lowest ghost-border p-2">
+          <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">
+            Slots
+          </p>
+          <ul className="space-y-0.5 text-[11px] font-mono">
+            {visibleSlots.map((it, i) => (
+              <li key={i} className="flex items-center justify-between px-1.5 py-1 rounded hover:bg-surface-low">
+                <span className="text-primary font-bold">
+                  {fmtTime(it.start)} – {fmtTime(it.end)}
+                </span>
+                <span className="text-[9px] text-muted-foreground font-sans">#{i + 1}</span>
+              </li>
+            ))}
+          </ul>
+          {allSlots.length > 3 && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-1 w-full text-[10px] font-bold text-accent hover:text-primary py-1"
+            >
+              {expanded ? "Show less" : `View All Slots (${allSlots.length})`}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="mt-3 flex items-center justify-between gap-2">
         <span className={cn(
@@ -613,8 +647,11 @@ const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => v
   >{children}</button>
 );
 
-const Chip = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-lowest ghost-border text-[10px] font-bold text-primary">
+const Chip = ({ children, title }: { children: React.ReactNode; title?: string }) => (
+  <span
+    title={title}
+    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-lowest ghost-border text-[10px] font-bold text-primary"
+  >
     {children}
   </span>
 );
