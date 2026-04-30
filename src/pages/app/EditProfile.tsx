@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock,
+  Radar, ChevronDown, ChevronUp, Clock, MessageCircle, Phone, Zap, UserPlus,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -17,11 +18,62 @@ const visibilityOptions: { value: Visibility; label: string; icon: typeof Eye; h
   { value: "hidden",   label: "Hidden",   icon: EyeOff, hint: "Only you" },
 ];
 
+/* ---------- Who Can Find Me — types & defaults ---------- */
+
+type DiscoveryMode = "public" | "restricted" | "private";
+type ScopeKey = "contacts" | "organization" | "groups" | "custom";
+type SeeLevel = "status" | "limited" | "full";
+type ActionKey = "request" | "message" | "call" | "bypass";
+
+interface DiscoverySettings {
+  mode: DiscoveryMode;
+  scope: Record<ScopeKey, boolean>;
+  see: SeeLevel;
+  actions: Record<ActionKey, boolean>;
+  timeBased: boolean;
+  publicFrom: string; // "HH:MM"
+  publicTo: string;
+}
+
+const DEFAULT_DISCOVERY: DiscoverySettings = {
+  mode: "restricted",
+  scope: { contacts: true, organization: false, groups: false, custom: false },
+  see: "limited",
+  actions: { request: true, message: false, call: false, bypass: false },
+  timeBased: false,
+  publicFrom: "09:00",
+  publicTo: "20:00",
+};
+
+const MODE_META: Record<DiscoveryMode, { label: string; icon: typeof Globe; tag: string; tone: string }> = {
+  public:     { label: "Public",     icon: Globe,  tag: "Anyone can find you",            tone: "text-emerald-600" },
+  restricted: { label: "Restricted", icon: Users,  tag: "Only your circles can find you", tone: "text-amber-600" },
+  private:    { label: "Private",    icon: Lock,   tag: "Hidden from search",             tone: "text-rose-600" },
+};
+
+// Demo math for the "live preview" reach number.
+const SCOPE_REACH: Record<ScopeKey, number> = {
+  contacts: 142,
+  organization: 318,
+  groups: 64,
+  custom: 12,
+};
+
+function estimateReach(s: DiscoverySettings): number {
+  if (s.mode === "private") return 0;
+  if (s.mode === "public") return 9999;
+  return (Object.keys(s.scope) as ScopeKey[])
+    .filter((k) => s.scope[k])
+    .reduce((sum, k) => sum + SCOPE_REACH[k], 0);
+}
+
 const EditProfile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<OwnerProfile>(myOwnerProfile);
   const [twoFa, setTwoFa] = useState(true);
   const [discoverable, setDiscoverable] = useState(false);
+  const [discovery, setDiscovery] = useState<DiscoverySettings>(DEFAULT_DISCOVERY);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const update = <K extends keyof OwnerProfile>(k: K, v: OwnerProfile[K]) =>
     setProfile((p) => ({ ...p, [k]: v }));
@@ -88,6 +140,14 @@ const EditProfile = () => {
               <input type="file" accept="image/*" className="text-sm text-muted-foreground" />
             </div>
           </Section>
+
+          {/* Who Can Find Me */}
+          <WhoCanFindMe
+            settings={discovery}
+            onChange={setDiscovery}
+            advancedOpen={advancedOpen}
+            onToggleAdvanced={() => setAdvancedOpen((o) => !o)}
+          />
 
           {/* Identity (always public) */}
           <Section title="Identity" hint="Always public — this is how people find you">
