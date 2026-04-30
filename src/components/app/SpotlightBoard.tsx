@@ -184,29 +184,9 @@ const SpotlightBoard = () => {
     && titleLeft >= 0 && bodyLeft >= 0;
 
   return (
-    <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gold/15 text-gold">
-            <Megaphone className="w-4 h-4" />
-          </span>
-          <div>
-            <h3 className="font-headline font-bold text-primary leading-tight">Spotlight & Signal</h3>
-            <p className="text-[11px] text-muted-foreground">
-              {totalMine} of yours · {totalUnread} new from your network
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => openNew()}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 transition"
-        >
-          <Plus className="w-3.5 h-3.5" /> New spotlight
-        </button>
-      </div>
-
+    <div className="">
       {/* ── Two aligned panes ── */}
-      <div className="mt-5 grid lg:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 gap-3">
         {/* SPOTLIGHT (mine) */}
         <SidePane
           kind="spotlight"
@@ -221,6 +201,14 @@ const SpotlightBoard = () => {
             (Object.keys(mineByAud) as AudienceTag[]).map((k) => [k, mineByAud[k].length]),
           ) as Record<AudienceTag, number>}
           showCounts
+          headerAction={
+            <button
+              onClick={() => openNew()}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-primary text-primary-foreground hover:opacity-95 transition"
+            >
+              <Plus className="w-3 h-3" /> New Spotlight
+            </button>
+          }
         >
           <Carousel
             items={mineByAud[spotlightAud]}
