@@ -2,6 +2,15 @@ import { createContext, useContext, useMemo, useState, ReactNode, useCallback } 
 
 export type Visibility = "public" | "contacts" | "private";
 export type Tone = "info" | "warn" | "offer";
+export type AudienceTag = "colleague" | "friend" | "client" | "family" | "other";
+
+export const AUDIENCE_TAGS: { id: AudienceTag; label: string; emoji: string }[] = [
+  { id: "colleague", label: "Office", emoji: "💼" },
+  { id: "friend",    label: "Friends", emoji: "🤝" },
+  { id: "client",    label: "Clients", emoji: "💎" },
+  { id: "family",    label: "Family", emoji: "🏠" },
+  { id: "other",     label: "Other",  emoji: "✨" },
+];
 
 export interface SpotlightPost {
   id: string;
@@ -15,6 +24,7 @@ export interface SpotlightPost {
   createdAt: number;
   audience?: string[]; // optional contact ids the post targets (for torch). empty = all contacts
   authorId?: string;   // who published the post. "me" = the logged-in user.
+  audienceTag?: AudienceTag; // which of the 5 audience filters this post belongs to
 }
 
 export const SPOTLIGHT_LIMITS = {
@@ -54,6 +64,7 @@ const seed: SpotlightPost[] = [
     tone: "warn",
     createdAt: Date.now() - 1000 * 60 * 30,
     authorId: "me",
+    audienceTag: "colleague",
   },
   {
     id: "s2",
@@ -65,6 +76,37 @@ const seed: SpotlightPost[] = [
     tone: "offer",
     createdAt: Date.now() - 1000 * 60 * 10,
     authorId: "me",
+    audienceTag: "client",
+  },
+  {
+    id: "s2b",
+    title: "Movie night Friday — count me in",
+    body: "Booked the 8 PM show. Reply if you're joining.",
+    visibility: "contacts",
+    tone: "offer",
+    createdAt: Date.now() - 1000 * 60 * 6,
+    authorId: "me",
+    audienceTag: "friend",
+  },
+  {
+    id: "s2c",
+    title: "Sunday lunch at mom's — 1 PM",
+    body: "Bringing dessert. Confirming the headcount tonight.",
+    visibility: "contacts",
+    tone: "info",
+    createdAt: Date.now() - 1000 * 60 * 4,
+    authorId: "me",
+    audienceTag: "family",
+  },
+  {
+    id: "s2d",
+    title: "Open for intros next week",
+    body: "Two slots Wed afternoon — DM if you'd like to connect.",
+    visibility: "public",
+    tone: "offer",
+    createdAt: Date.now() - 1000 * 60 * 8,
+    authorId: "me",
+    audienceTag: "other",
   },
   {
     id: "s3",
