@@ -3,13 +3,16 @@ import {
   Plus, Video, MapPin, Zap, Crown, Lock, Globe, Users as UsersIcon, Star,
   Repeat, Copy, Trash2, Phone, MessageSquare, Link as LinkIcon, X, Check,
   ChevronRight, Sparkles, Clock, Calendar as CalIcon, Shield, Timer, Gauge,
-  CalendarPlus, ArrowLeft,
+  CalendarPlus, ArrowLeft, Pencil,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "@/components/app/AppShell";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 // ---------- Types ----------
 type Mode = "online" | "onsite" | "hybrid" | "quicksync";
@@ -23,6 +26,7 @@ interface Slot {
   id: string;
   title: string;
   day: string; // Mon..Fri
+  date?: string; // ISO yyyy-mm-dd
   start: number; // hour (9..17)
   end: number;
   mode: Mode;
