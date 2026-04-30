@@ -134,14 +134,26 @@ const Dashboard = () => {
               {meta.label}
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-accent leading-none">Your status</p>
+              {/* Line 1 — Primary status (bold) */}
+              <p className={cn("font-headline font-extrabold text-sm md:text-base leading-tight", meta.pillText)}>
+                {meta.label}
+              </p>
+              {/* Line 2 — Auto status (system-synced) */}
+              <p className="text-xs md:text-[13px] font-semibold text-primary/80 leading-tight mt-0.5 truncate max-w-[60vw] md:max-w-[28rem]">
+                {autoStatus}
+              </p>
+              {/* Line 3 — Quick context (user-defined, lighter) */}
               <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
                 {editingCustom ? (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       const v = customDraft.trim();
-                      if (v) setStatusMessage(v.slice(0, 60));
+                      if (v) {
+                        const trimmed = v.slice(0, 60);
+                        setContextMessage(trimmed);
+                        setLastCustom(trimmed);
+                      }
                       setEditingCustom(false);
                     }}
                     className="flex items-center gap-1.5"
@@ -151,39 +163,56 @@ const Dashboard = () => {
                       value={customDraft}
                       onChange={(e) => setCustomDraft(e.target.value)}
                       maxLength={60}
-                      placeholder="Type a custom status…"
+                      placeholder="Type a custom context…"
                       className="h-7 text-xs w-56"
                     />
-                    <button type="submit" className="grid place-items-center w-7 h-7 rounded-md bg-primary text-primary-foreground hover:opacity-90" aria-label="Save status">
+                    <button type="submit" className="grid place-items-center w-7 h-7 rounded-md bg-primary text-primary-foreground hover:opacity-90" aria-label="Save context">
                       <Check className="w-3.5 h-3.5" />
                     </button>
                   </form>
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="inline-flex items-center gap-1.5 font-headline font-bold text-primary text-sm md:text-base truncate hover:opacity-90 transition">
-                        <span className="truncate max-w-[60vw] md:max-w-none">{statusMessage}</span>
-                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <button className="inline-flex items-center gap-1 italic text-[11px] md:text-xs text-muted-foreground hover:text-primary transition max-w-full">
+                        <span className="truncate max-w-[60vw] md:max-w-[28rem]">“{contextMessage}”</span>
+                        <ChevronDown className="w-3 h-3 shrink-0" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-64">
-                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Quick status</DropdownMenuLabel>
-                      {PRESET_MESSAGES.map((m) => (
-                        <DropdownMenuItem key={m} onClick={() => setStatusMessage(m)} className="text-xs">
-                          {statusMessage === m && <Check className="w-3 h-3 mr-1 text-primary" />}
-                          <span className={cn(statusMessage === m ? "font-semibold text-primary" : "")}>{m}</span>
-                        </DropdownMenuItem>
+                    <DropdownMenuContent align="start" className="w-72 max-h-[70vh] overflow-y-auto">
+                      {CONTEXT_GROUPS.map((group, gi) => (
+                        <div key={group.label}>
+                          {gi > 0 && <DropdownMenuSeparator />}
+                          <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            {group.label}
+                          </DropdownMenuLabel>
+                          {group.items.map((m) => (
+                            <DropdownMenuItem key={m} onClick={() => setContextMessage(m)} className="text-xs">
+                              {contextMessage === m && <Check className="w-3 h-3 mr-1 text-primary" />}
+                              <span className={cn(contextMessage === m ? "font-semibold text-primary" : "")}>{m}</span>
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
                       ))}
+                      {lastCustom && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Last custom</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => setContextMessage(lastCustom)} className="text-xs">
+                            {contextMessage === lastCustom && <Check className="w-3 h-3 mr-1 text-primary" />}
+                            <span className="italic truncate">{lastCustom}</span>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.preventDefault();
-                          setCustomDraft(statusMessage);
+                          setCustomDraft(contextMessage);
                           setEditingCustom(true);
                         }}
                         className="text-xs"
                       >
-                        <Pencil className="w-3 h-3 mr-1.5" /> Custom status…
+                        <Pencil className="w-3 h-3 mr-1.5" /> Write custom context…
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
