@@ -149,6 +149,8 @@
   .animate-rise { animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .animate-fade { animation: fade 1.2s ease-out both; }
   .animate-float { animation: float 6s ease-in-out infinite; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 @keyframes rise {
