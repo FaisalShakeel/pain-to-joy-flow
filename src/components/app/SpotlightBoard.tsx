@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
   Pencil, Trash2, Sparkles, AlertTriangle, Info, ChevronLeft, ChevronRight, Radio,
+  MoreHorizontal, Eye, EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   useSpotlight, SPOTLIGHT_LIMITS, AUDIENCE_TAGS,
   type SpotlightPost, type Visibility, type Tone, type AudienceTag,
@@ -82,6 +86,8 @@ const SpotlightBoard = () => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [viewPost, setViewPost] = useState<SpotlightPost | null>(null);
   // Per-side selected audience filter
   const [spotlightAud, setSpotlightAud] = useState<AudienceTag>("colleague");
   const [signalAud, setSignalAud] = useState<AudienceTag>("colleague");
@@ -224,8 +230,13 @@ const SpotlightBoard = () => {
             renderItem={(p) => (
               <MineCard
                 post={p}
+                onView={() => setViewPost(p)}
                 onEdit={() => openEdit(p)}
                 onDelete={() => setConfirmDelete(p.id)}
+                onUnpublish={() => {
+                  update(p.id, { visibility: "private" });
+                  toast.success("Spotlight unpublished");
+                }}
               />
             )}
           />
@@ -270,15 +281,18 @@ const SpotlightBoard = () => {
 
       {/* Editor */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{draft.id ? "Edit Spotlight" : "New Spotlight"}</DialogTitle>
-            <DialogDescription>
-              Tag the audience so it lands in the right filter — one Spotlight per audience.
+        <DialogContent className="max-w-lg p-0 gap-0 max-h-[90vh] flex flex-col">
+          <DialogHeader className="px-5 pt-5 pb-3 border-b border-border">
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Megaphone className="w-4 h-4 text-primary" />
+              {draft.id ? "Edit Spotlight" : "New Spotlight"}
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Share an update, instruction, or request — pick the audience filter to land it in the right place.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 px-5 py-4 overflow-y-auto flex-1">
             <div>
               <Label className="mb-1.5 block">Audience filter</Label>
               <div className="flex flex-wrap gap-1.5">
@@ -424,9 +438,96 @@ const SpotlightBoard = () => {
             </div>
           </div>
 
+          {/* Sticky action bar */}
+          <div className="sticky bottom-0 flex items-center justify-between gap-2 px-5 py-3 border-t border-border bg-background">
+            <div>
+              {draft.id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setConfirmDelete(draft.id!)}
+                >
+                  <Trash2 className="w-4 h-4" /> Delete
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setEditorOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewOpen(true)}
+                disabled={!valid}
+              >
+                <Eye className="w-4 h-4" /> Preview
+              </Button>
+              <Button size="sm" onClick={saveDraft} disabled={!valid}>
+                {draft.id ? "Update" : "Publish"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview modal */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-sm flex items-center gap-2">
+              <Eye className="w-4 h-4 text-primary" /> Spotlight preview
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              This is how your Spotlight will appear in the tile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="h-[235px]">
+            <MineCard
+              post={{
+                id: "preview",
+                title: draft.title || "Untitled",
+                body: draft.body || "Your message will appear here.",
+                visibility: draft.visibility,
+                tone: draft.tone,
+                pinned: draft.pinned,
+                expiresIn: draft.expiresIn,
+                cta: draft.ctaLabel && draft.ctaHref ? { label: draft.ctaLabel, href: draft.ctaHref } : undefined,
+                audienceTag: draft.audienceTag,
+                createdAt: Date.now(),
+                authorId: "me",
+              }}
+              preview
+            />
+          </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditorOpen(false)}>Cancel</Button>
-            <Button onClick={saveDraft} disabled={!valid}>{draft.id ? "Save changes" : "Publish"}</Button>
+            <Button variant="ghost" size="sm" onClick={() => setPreviewOpen(false)}>Close</Button>
+            <Button size="sm" onClick={() => { setPreviewOpen(false); saveDraft(); }} disabled={!valid}>
+              {draft.id ? "Update" : "Publish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View post modal (from tile menu) */}
+      <Dialog open={!!viewPost} onOpenChange={(o) => !o && setViewPost(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Spotlight</DialogTitle>
+          </DialogHeader>
+          {viewPost && (
+            <div className="h-[235px]">
+              <MineCard post={viewPost} preview />
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" size="sm" onClick={() => setViewPost(null)}>Close</Button>
+            {viewPost && (
+              <Button size="sm" onClick={() => { openEdit(viewPost); setViewPost(null); }}>
+                <Pencil className="w-4 h-4" /> Edit
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -442,7 +543,14 @@ const SpotlightBoard = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => { if (confirmDelete) remove(confirmDelete); setConfirmDelete(null); }}
+              onClick={() => {
+                if (confirmDelete) {
+                  remove(confirmDelete);
+                  if (draft.id === confirmDelete) setEditorOpen(false);
+                  toast.success("Spotlight deleted");
+                }
+                setConfirmDelete(null);
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -613,17 +721,64 @@ function Carousel<T extends { id: string }>({
 }
 
 /* ── Spotlight (mine) card ──────────────────────────────────────── */
-function MineCard({ post, onEdit, onDelete }: { post: SpotlightPost; onEdit: () => void; onDelete: () => void }) {
+function MineCard({
+  post, onView, onEdit, onDelete, onUnpublish, preview,
+}: {
+  post: SpotlightPost;
+  onView?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onUnpublish?: () => void;
+  preview?: boolean;
+}) {
   const Vis = visMeta[post.visibility];
   const Tn = toneMeta[post.tone];
   const aud = AUDIENCE_TAGS.find((a) => a.id === (post.audienceTag ?? "other"));
   return (
-    <div className="relative h-full p-4 rounded-2xl bg-primary text-primary-foreground border border-primary flex flex-col">
-      <div className="absolute top-2 right-2 flex items-center gap-1">
-        <button onClick={onEdit} className="p-1 rounded-full text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition" aria-label="Edit"><Pencil className="w-3 h-3" /></button>
-        <button onClick={onDelete} className="p-1 rounded-full text-primary-foreground/70 hover:bg-rose-500/20 hover:text-rose-200 transition" aria-label="Delete"><Trash2 className="w-3 h-3" /></button>
-      </div>
-      <div className="flex items-center gap-1.5 flex-wrap pr-14">
+    <div className="relative h-full p-4 rounded-2xl bg-primary text-primary-foreground shadow-md flex flex-col">
+      {!preview && (
+        <div className="absolute top-2 right-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 rounded-full text-primary-foreground/80 hover:bg-primary-foreground/15 transition"
+                aria-label="Spotlight actions"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {onView && (
+                <DropdownMenuItem onClick={onView}>
+                  <Eye className="w-4 h-4 mr-2" /> View
+                </DropdownMenuItem>
+              )}
+              {onEdit && (
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="w-4 h-4 mr-2" /> Edit
+                </DropdownMenuItem>
+              )}
+              {onUnpublish && post.visibility !== "private" && (
+                <DropdownMenuItem onClick={onUnpublish}>
+                  <EyeOff className="w-4 h-4 mr-2" /> Unpublish
+                </DropdownMenuItem>
+              )}
+              {onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={onDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+      <div className="flex items-center gap-1.5 flex-wrap pr-8">
         {aud && (
           <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gold text-background">
             {aud.emoji} {aud.label}
