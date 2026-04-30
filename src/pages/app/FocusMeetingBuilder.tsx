@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
-  ArrowLeft, Zap, Calendar as CalIcon, Clock, Timer, Repeat, Lock, Check,
+  ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Repeat, Lock, Check,
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
-  ChevronRight, X, CheckCircle2,
+  ChevronRight, X, CheckCircle2, CalendarPlus,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,13 +17,13 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 // ---------- Types ----------
-type CallMin = 3 | 5 | 8;
-type BufferMin = 1 | 2 | 3;
+type CallMin = 15 | 20 | 25 | 30 | 35;
+type BufferMin = 5 | 10;
 type Repeats = "none" | "daily" | "weekly" | "monthly";
 type Booking = "instant" | "approval";
 type Access = "public" | "contacts" | "priority" | "paid";
 
-interface QSSlot {
+interface MTSlot {
   id: string;
   date: string; // ISO yyyy-mm-dd
   startMin: number; // minutes from 00:00
@@ -73,35 +73,35 @@ const accessMeta: Record<Access, { label: string; icon: React.ComponentType<any>
 const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // ---------- Defaults ----------
-const blank = (): Omit<QSSlot, "id" | "createdAt"> => ({
+const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
   date: new Date().toISOString().slice(0, 10),
   startMin: 10 * 60,
-  endMin: 10 * 60 + 20,
-  callMin: 3,
-  bufferMin: 1,
+  endMin: 12 * 60,
+  callMin: 30,
+  bufferMin: 5,
   repeats: "none",
   weekdays: [],
-  booking: "instant",
+  booking: "approval",
   access: "contacts",
 });
 
-const seed: QSSlot[] = [
+const seed: MTSlot[] = [
   {
-    id: "qs1",
-    date: addDays(new Date(), 2).toISOString().slice(0, 10),
-    startMin: 10 * 60, endMin: 10 * 60 + 20,
-    callMin: 3, bufferMin: 1,
-    repeats: "weekly", weekdays: [6],
-    booking: "instant", access: "priority",
+    id: "mt1",
+    date: addDays(new Date(), 3).toISOString().slice(0, 10),
+    startMin: 10 * 60, endMin: 12 * 60,
+    callMin: 30, bufferMin: 5,
+    repeats: "weekly", weekdays: [2],
+    booking: "approval", access: "approved" as any,
     createdAt: Date.now() - 100000,
   },
 ];
 
 // ---------- Page ----------
-const QuickSyncBuilder = () => {
+const FocusMeetingBuilder = () => {
   const navigate = useNavigate();
-  const [slots, setSlots] = useState<QSSlot[]>(seed);
-  const [draft, setDraft] = useState<Omit<QSSlot, "id" | "createdAt"> & { id?: string }>(blank());
+  const [slots, setSlots] = useState<MTSlot[]>(seed);
+  const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
@@ -124,16 +124,16 @@ const QuickSyncBuilder = () => {
     }
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
-      toast({ title: "Quick Sync updated" });
+      toast({ title: "Meeting updated" });
     } else {
-      const next: QSSlot = { ...(draft as Omit<QSSlot, "id" | "createdAt">), id: `qs${Date.now()}`, createdAt: Date.now() };
+      const next: MTSlot = { ...(draft as Omit<MTSlot, "id" | "createdAt">), id: `mt${Date.now()}`, createdAt: Date.now() };
       setSlots((p) => [next, ...p]);
-      toast({ title: "Quick Sync created", description: `${count} mini-slots generated.` });
+      toast({ title: "Meeting block created", description: `${count} meeting slots generated.` });
     }
     reset();
   };
 
-  const editSlot = (s: QSSlot) => {
+  const editSlot = (s: MTSlot) => {
     setDraft({ ...s });
     setStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -142,23 +142,23 @@ const QuickSyncBuilder = () => {
   const deleteSlot = (id: string) => {
     setSlots((p) => p.filter((s) => s.id !== id));
     setConfirmDelete(null);
-    toast({ title: "Quick Sync deleted" });
+    toast({ title: "Meeting block deleted" });
   };
 
-  const duplicate = (s: QSSlot, kind: "tomorrow" | "nextweek" | "custom", customDate?: string) => {
+  const duplicate = (s: MTSlot, kind: "tomorrow" | "nextweek" | "custom", customDate?: string) => {
     const base = new Date(s.date);
     const nd =
       kind === "tomorrow" ? addDays(base, 1) :
       kind === "nextweek" ? addWeeks(base, 1) :
       customDate ? new Date(customDate) : base;
-    setSlots((p) => [{ ...s, id: `qs${Date.now()}`, date: nd.toISOString().slice(0, 10), createdAt: Date.now() }, ...p]);
-    toast({ title: "Quick Sync duplicated", description: format(nd, "EEE, MMM d") });
+    setSlots((p) => [{ ...s, id: `mt${Date.now()}`, date: nd.toISOString().slice(0, 10), createdAt: Date.now() }, ...p]);
+    toast({ title: "Schedule cloned successfully and extended.", description: format(nd, "EEE, MMM d") });
   };
 
   return (
     <AppShell
-      subtitle="Quick Sync Builder"
-      title="Create it. Manage it. Stay interruption-free."
+      subtitle="Meetings — Focus Work"
+      title="Protect deep conversations."
       actions={
         <button
           onClick={() => navigate("/app/availability/builder")}
@@ -172,11 +172,11 @@ const QuickSyncBuilder = () => {
       <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
         <div className="flex items-center gap-2 mb-4">
           <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground">
-            <Zap className="w-4 h-4" />
+            <Briefcase className="w-4 h-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "New"} Quick Sync</p>
-            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Quick Sync Builder</h2>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "New"} Meeting Block</p>
+            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Focus Meeting Builder</h2>
           </div>
           {isEditing && (
             <button onClick={reset} className="ml-auto text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
@@ -257,9 +257,9 @@ const QuickSyncBuilder = () => {
             )}
 
             {step === 3 && (
-              <Section title="Step 3 — Call Duration" icon={Timer} hint="How long is each mini-call?">
+              <Section title="Step 3 — Meeting Duration" icon={Timer} hint="How long is each meeting?">
                 <div className="flex flex-wrap gap-2">
-                  {([3, 5, 8] as CallMin[]).map((d) => (
+                  {([15, 20, 25, 30, 35] as CallMin[]).map((d) => (
                     <Pill key={d} active={draft.callMin === d} onClick={() => set("callMin", d)}>{d} minutes</Pill>
                   ))}
                 </div>
@@ -267,9 +267,9 @@ const QuickSyncBuilder = () => {
             )}
 
             {step === 4 && (
-              <Section title="Step 4 — Buffer Time" icon={Timer} hint="Cooldown between each call">
+              <Section title="Step 4 — Buffer Time" icon={Timer} hint="Cooldown between each meeting">
                 <div className="flex flex-wrap gap-2">
-                  {([1, 2, 3] as BufferMin[]).map((b) => (
+                  {([5, 10] as BufferMin[]).map((b) => (
                     <Pill key={b} active={draft.bufferMin === b} onClick={() => set("bufferMin", b)}>{b} minute{b > 1 ? "s" : ""}</Pill>
                   ))}
                 </div>
@@ -278,10 +278,10 @@ const QuickSyncBuilder = () => {
 
             {step === 5 && (
               <Section title="Step 5 — Auto Slot Generation" icon={Sparkles} hint="System calculates structured mini-slots">
-                <div className="rounded-2xl bg-gradient-to-r from-fuchsia-500/15 to-pink-500/15 p-4">
-                  <p className="text-[11px] uppercase tracking-wider text-fuchsia-900/70 font-bold">Total slots</p>
-                  <p className="font-headline font-extrabold text-fuchsia-900 text-3xl">{count}</p>
-                  <p className="text-[11px] text-fuchsia-900/70 mt-0.5">{draft.callMin}-min calls · {draft.bufferMin}-min buffer · {totalMin} min window</p>
+                <div className="rounded-2xl bg-gradient-to-r from-indigo-500/15 to-sky-500/15 p-4">
+                  <p className="text-[11px] uppercase tracking-wider text-indigo-900/70 font-bold">Total meetings</p>
+                  <p className="font-headline font-extrabold text-indigo-900 text-3xl">{count}</p>
+                  <p className="text-[11px] text-indigo-900/70 mt-0.5">{draft.callMin}-min meetings · {draft.bufferMin}-min buffer · {totalMin} min window</p>
                 </div>
                 <TimelineView items={timeline} />
               </Section>
@@ -402,7 +402,7 @@ const QuickSyncBuilder = () => {
                   onClick={save}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update Quick Sync" : "Create Quick Sync"}
+                  <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update Meeting Block" : "Create Meeting Block"}
                 </button>
               )}
             </div>
@@ -438,17 +438,17 @@ const QuickSyncBuilder = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Manage</p>
-            <h3 className="font-headline font-extrabold text-primary text-base md:text-lg">Active Quick Sync Slots</h3>
+          <h3 className="font-headline font-extrabold text-primary text-base md:text-lg">Active Meeting Blocks</h3>
           </div>
           <span className="text-[11px] text-muted-foreground">{slots.length} active</span>
         </div>
 
         {slots.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-10 text-center">No Quick Sync blocks yet — create one above.</p>
+          <p className="text-xs text-muted-foreground py-10 text-center">No meeting blocks yet — create one above.</p>
         ) : (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {slots.map((s) => (
-              <QuickSyncCard
+              <MeetingCard
                 key={s.id}
                 slot={s}
                 onEdit={() => editSlot(s)}
@@ -463,9 +463,9 @@ const QuickSyncBuilder = () => {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this Quick Sync schedule?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this slot schedule?</AlertDialogTitle>
             <AlertDialogDescription>
-              The full Quick Sync block and all generated mini-slots will be removed. This cannot be undone.
+              The full meeting block and all generated slots will be removed. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -483,11 +483,11 @@ const QuickSyncBuilder = () => {
   );
 };
 
-// ---------- QuickSync Card ----------
-const QuickSyncCard = ({
+// ---------- Meeting Card ----------
+const MeetingCard = ({
   slot, onEdit, onDelete, onDuplicate,
 }: {
-  slot: QSSlot;
+  slot: MTSlot;
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: (kind: "tomorrow" | "nextweek" | "custom", customDate?: string) => void;
@@ -513,7 +513,7 @@ const QuickSyncCard = ({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <Zap className={cn("w-3.5 h-3.5", status === "active" ? "text-primary" : "text-muted-foreground")} />
+            <Briefcase className={cn("w-3.5 h-3.5", status === "active" ? "text-primary" : "text-muted-foreground")} />
             <span className={cn(
               "text-[10px] font-bold uppercase tracking-wider",
               status === "active" ? "text-primary" : status === "expired" ? "text-muted-foreground" : "text-accent",
@@ -532,9 +532,9 @@ const QuickSyncCard = ({
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-1.5 text-[11px]">
-        <Chip>{slot.callMin}-min calls</Chip>
+        <Chip>{slot.callMin}-min meetings</Chip>
         <Chip>{slot.bufferMin}-min buffer</Chip>
-        <Chip>{count} slots</Chip>
+        <Chip>{count} meetings</Chip>
         <Chip>
           <Repeat className="w-3 h-3" /> {slot.repeats === "none" ? "Once" : slot.repeats}
         </Chip>
@@ -681,4 +681,4 @@ const TimelineView = ({ items }: { items: { kind: "call" | "buffer"; start: numb
   );
 };
 
-export default QuickSyncBuilder;
+export default FocusMeetingBuilder;
