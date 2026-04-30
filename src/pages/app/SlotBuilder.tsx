@@ -3,13 +3,16 @@ import {
   Plus, Video, MapPin, Zap, Crown, Lock, Globe, Users as UsersIcon, Star,
   Repeat, Copy, Trash2, Phone, MessageSquare, Link as LinkIcon, X, Check,
   ChevronRight, Sparkles, Clock, Calendar as CalIcon, Shield, Timer, Gauge,
-  CalendarPlus, ArrowLeft,
+  CalendarPlus, ArrowLeft, Pencil,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "@/components/app/AppShell";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 // ---------- Types ----------
 type Mode = "online" | "onsite" | "hybrid" | "quicksync";
@@ -23,6 +26,7 @@ interface Slot {
   id: string;
   title: string;
   day: string; // Mon..Fri
+  date?: string; // ISO yyyy-mm-dd
   start: number; // hour (9..17)
   end: number;
   mode: Mode;
@@ -293,6 +297,60 @@ const SlotBuilder = () => {
         </section>
       </div>
 
+      {/* CREATED SLOTS LIST */}
+      <section className="mt-5 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-headline font-bold text-primary text-sm">Created slots</h3>
+          <p className="text-[11px] text-muted-foreground">{filtered.length} total</p>
+        </div>
+        {filtered.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-6 text-center">No slots yet. Click an empty cell or “New slot” to add one.</p>
+        ) : (
+          <ul className="divide-y divide-border/50">
+            {filtered.map((s) => {
+              const A = accessMeta[s.access];
+              return (
+                <li key={s.id} className="py-3 flex items-center gap-3">
+                  <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary">
+                    {s.mode === "quicksync" ? <Zap className="w-4 h-4" /> :
+                     s.mode === "online" ? <Video className="w-4 h-4" /> :
+                     s.mode === "onsite" ? <MapPin className="w-4 h-4" /> :
+                     <Sparkles className="w-4 h-4" />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-primary truncate flex items-center gap-1.5">
+                      {s.priority && <Crown className="w-3 h-3 text-amber-600" />}
+                      {s.title || "Untitled"}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {s.date ? format(new Date(s.date), "EEE, MMM d") : s.day} · {s.start}:00–{s.end}:00 · {s.duration}m
+                      {s.recurring && " · recurring"}
+                    </p>
+                  </div>
+                  <span className={cn("hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold", A.cls)}>
+                    <A.icon className="w-3 h-3" /> {A.label}
+                  </span>
+                  <button
+                    onClick={() => openEdit(s)}
+                    className="grid place-items-center w-8 h-8 rounded-lg ghost-border bg-surface-low hover:bg-primary/10 text-primary"
+                    aria-label="Edit slot"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => { setSlots((p) => p.filter((x) => x.id !== s.id)); toast({ title: "Slot removed" }); }}
+                    className="grid place-items-center w-8 h-8 rounded-lg ghost-border bg-surface-low hover:bg-destructive/10 text-destructive"
+                    aria-label="Delete slot"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
       {/* EDITOR DRAWER */}
       {editorOpen && editing && (
         <SlotEditor
@@ -414,6 +472,34 @@ const SlotEditor = ({
               <Field label="Start"><HourPicker value={slot.start} onChange={(v) => set("start", v)} /></Field>
               <Field label="End"><HourPicker value={slot.end} onChange={(v) => set("end", v)} min={slot.start + 1} /></Field>
             </div>
+            <Field label="Date">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full inline-flex items-center justify-between px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none hover:bg-surface-low/80"
+                  >
+                    <span className={cn("truncate", !slot.date && "text-muted-foreground")}>
+                      {slot.date ? format(new Date(slot.date), "PPP") : "Pick a date"}
+                    </span>
+                    <CalIcon className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[60]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={slot.date ? new Date(slot.date) : undefined}
+                    onSelect={(d) => {
+                      if (!d) return;
+                      const dayName = days[(d.getDay() + 6) % 7] ?? slot.day;
+                      onChange({ ...slot, date: d.toISOString().slice(0, 10), day: days.includes(dayName) ? dayName : slot.day });
+                    }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </Field>
             <Toggle label="Recurring weekly" icon={Repeat} value={slot.recurring} onChange={(v) => set("recurring", v)} />
             <Toggle label="Priority slot (VIP / Fast lane)" icon={Crown} value={!!slot.priority} onChange={(v) => set("priority", v)} />
           </Section>
