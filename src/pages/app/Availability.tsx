@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Loader2, CalendarDays, Plus, Sparkles, History, Activity,
   Briefcase, Zap, Radio, Clock, TrendingUp, AlertTriangle, Shield, ChevronRight, X,
@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { useEffect } from "react";
 
 // ---------- Activity model ----------
 type ActivityKind = "meeting" | "quicksync" | "live";
