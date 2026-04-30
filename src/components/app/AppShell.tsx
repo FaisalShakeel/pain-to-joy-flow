@@ -217,6 +217,20 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
               </button>
             )}
 
+            <button
+              type="button"
+              onClick={() => navigate("/app/messages")}
+              className="relative grid place-items-center w-9 h-9 rounded-full ghost-border bg-surface-lowest hover:bg-surface-low transition"
+              aria-label="Messages"
+            >
+              <MessageSquare className="w-4 h-4 text-primary" />
+              {messagesUnread > 0 && (
+                <span className="absolute -top-1 -right-1 grid place-items-center min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
+                  {messagesUnread > 9 ? "9+" : messagesUnread}
+                </span>
+              )}
+            </button>
+
             <DropdownMenu>
               <DropdownMenuTrigger
                 aria-label="Account menu"
