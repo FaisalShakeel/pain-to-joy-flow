@@ -552,14 +552,15 @@ const QuickSyncCard = ({
         <div className="flex items-center gap-1">
           <Popover open={dupOpen} onOpenChange={setDupOpen}>
             <PopoverTrigger asChild>
-              <button className="grid place-items-center w-8 h-8 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary" aria-label="Duplicate">
-                <Copy className="w-3.5 h-3.5" />
+              <button className="inline-flex items-center gap-1 px-2 h-8 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary text-[10px] font-bold" aria-label="Clone schedule" title="Clone schedule — extend forward">
+                <Copy className="w-3 h-3" /> Clone
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-44 p-1 z-[60]" align="end">
-              <button onClick={() => { onDuplicate("tomorrow"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">To tomorrow</button>
-              <button onClick={() => { onDuplicate("nextweek"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">To next week</button>
-              <button onClick={() => { setDupOpen(false); setCustomOpen(true); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">Custom date…</button>
+              <p className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Clone schedule</p>
+              <button onClick={() => { onDuplicate("nextweek"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">Next cycle (recommended)</button>
+              <button onClick={() => { onDuplicate("tomorrow"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">Tomorrow</button>
+              <button onClick={() => { setDupOpen(false); setCustomOpen(true); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">Pick end date…</button>
             </PopoverContent>
           </Popover>
 
