@@ -418,6 +418,34 @@ const SlotEditor = ({
               <Field label="Start"><HourPicker value={slot.start} onChange={(v) => set("start", v)} /></Field>
               <Field label="End"><HourPicker value={slot.end} onChange={(v) => set("end", v)} min={slot.start + 1} /></Field>
             </div>
+            <Field label="Date">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full inline-flex items-center justify-between px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none hover:bg-surface-low/80"
+                  >
+                    <span className={cn("truncate", !slot.date && "text-muted-foreground")}>
+                      {slot.date ? format(new Date(slot.date), "PPP") : "Pick a date"}
+                    </span>
+                    <CalIcon className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[60]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={slot.date ? new Date(slot.date) : undefined}
+                    onSelect={(d) => {
+                      if (!d) return;
+                      const dayName = days[(d.getDay() + 6) % 7] ?? slot.day;
+                      onChange({ ...slot, date: d.toISOString().slice(0, 10), day: days.includes(dayName) ? dayName : slot.day });
+                    }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </Field>
             <Toggle label="Recurring weekly" icon={Repeat} value={slot.recurring} onChange={(v) => set("recurring", v)} />
             <Toggle label="Priority slot (VIP / Fast lane)" icon={Crown} value={!!slot.priority} onChange={(v) => set("priority", v)} />
           </Section>
