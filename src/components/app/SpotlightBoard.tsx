@@ -681,7 +681,7 @@ function OtherCard({
   return (
     <div className={cn(
       "relative h-full p-4 rounded-2xl border-2 flex flex-col bg-surface-lowest",
-      isUnseen ? "border-gold shadow-[0_0_0_3px_hsl(var(--gold)/0.12)]" : "border-border opacity-90",
+      isUnseen ? "border-gold shadow-[0_0_0_3px_hsl(var(--brand-gold)/0.12)]" : "border-border opacity-90",
     )}>
       <button
         onClick={onDismiss}
