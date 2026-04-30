@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp,
+  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -12,12 +12,42 @@ import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
 import { useState } from "react";
 import { useRole } from "@/lib/role";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
+
+const statusMeta: Record<StatusKey, { label: string; activeBg: string; activeText: string; ring: string; pillBg: string; pillText: string; dot: string }> = {
+  available: { label: "Available", activeBg: "bg-emerald-500",  activeText: "text-white", ring: "ring-emerald-500/30",  pillBg: "bg-emerald-500/10",  pillText: "text-emerald-700",  dot: "bg-emerald-500" },
+  busy:      { label: "Busy",      activeBg: "bg-rose-500",     activeText: "text-white", ring: "ring-rose-500/30",     pillBg: "bg-rose-500/10",     pillText: "text-rose-700",     dot: "bg-rose-500" },
+  focus:     { label: "Focus",     activeBg: "bg-violet-600",   activeText: "text-white", ring: "ring-violet-600/30",   pillBg: "bg-violet-600/10",   pillText: "text-violet-700",   dot: "bg-violet-600" },
+  driving:   { label: "Driving",   activeBg: "bg-orange-500",   activeText: "text-white", ring: "ring-orange-500/30",   pillBg: "bg-orange-500/10",   pillText: "text-orange-700",   dot: "bg-orange-500" },
+  offline:   { label: "Offline",   activeBg: "bg-muted-foreground/70", activeText: "text-white", ring: "ring-muted-foreground/30", pillBg: "bg-muted",  pillText: "text-muted-foreground", dot: "bg-muted-foreground/60" },
+};
+
+const PRESET_MESSAGES = [
+  "Available for technical sync",
+  "Available for quick calls",
+  "In meetings",
+  "Focus mode — async only",
+  "Call only if urgent",
+  "Available for sync",
+  "Traveling — limited access",
+  "Offline — back tomorrow",
+];
 
 const Dashboard = () => {
-  const [status, setStatus] = useState<"available" | "busy" | "focus">("available");
+  const [status, setStatus] = useState<StatusKey>("available");
+  const [statusMessage, setStatusMessage] = useState<string>("Available for technical sync");
+  const [editingCustom, setEditingCustom] = useState(false);
+  const [customDraft, setCustomDraft] = useState("");
   const [role] = useRole();
   const { list } = useRequests();
   const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
+  const meta = statusMeta[status];
 
   return (
     <AppShell
@@ -26,33 +56,98 @@ const Dashboard = () => {
       hideBell
       headerInline={
         <div className="inline-flex items-center gap-2 ml-2">
-          <span className="hidden sm:inline-flex p-0.5 rounded-full bg-surface-low">
-            {(["available", "busy", "focus"] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatus(s)}
-                className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition ${
-                  status === s ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary"
-                }`}
-              >
-                {s === "available" ? "Available" : s === "busy" ? "Busy" : "Focus"}
-              </button>
-            ))}
+          <span className={cn("hidden sm:inline-flex p-0.5 rounded-full bg-surface-low ring-1 transition-colors", meta.ring)}>
+            {(Object.keys(statusMeta) as StatusKey[]).map((s) => {
+              const m = statusMeta[s];
+              const active = status === s;
+              return (
+                <button
+                  key={s}
+                  onClick={() => setStatus(s)}
+                  className={cn(
+                    "px-2.5 py-1 text-[11px] font-semibold rounded-full transition inline-flex items-center gap-1.5",
+                    active ? cn(m.activeBg, m.activeText, "shadow-glass") : "text-muted-foreground hover:text-primary",
+                  )}
+                >
+                  <span className={cn("w-1.5 h-1.5 rounded-full", active ? "bg-current opacity-90" : m.dot)} />
+                  {m.label}
+                </button>
+              );
+            })}
           </span>
-          <StatusPill tone={status} className="text-[10px] sm:hidden" />
+          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold sm:hidden", meta.pillBg, meta.pillText)}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
+            {meta.label}
+          </span>
         </div>
       }
     >
       <div className="grid lg:grid-cols-3 gap-4">
         {/* Compact full-width Status pane */}
-        <div className="lg:col-span-3 rounded-2xl bg-surface-lowest ghost-border px-4 py-3 shadow-ambient flex items-center justify-between gap-4 flex-wrap">
+        <div className={cn(
+          "lg:col-span-3 rounded-2xl bg-surface-lowest ghost-border px-4 py-3 shadow-ambient flex items-center justify-between gap-4 flex-wrap border-l-4 transition-colors",
+        )} style={{ borderLeftColor: "currentColor" }}>
           <div className="flex items-center gap-3 min-w-0">
-            <StatusPill tone={status} className="text-[10px]" />
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
+              <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
+              {meta.label}
+            </span>
             <div className="min-w-0">
               <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-accent leading-none">Your status</p>
-              <h2 className="mt-0.5 font-headline font-bold text-primary text-sm md:text-base truncate">
-                {status === "available" ? "Available for technical syncs" : status === "busy" ? "Busy — async only" : "Deep focus until 17:00"}
-              </h2>
+              <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+                {editingCustom ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const v = customDraft.trim();
+                      if (v) setStatusMessage(v.slice(0, 60));
+                      setEditingCustom(false);
+                    }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <Input
+                      autoFocus
+                      value={customDraft}
+                      onChange={(e) => setCustomDraft(e.target.value)}
+                      maxLength={60}
+                      placeholder="Type a custom status…"
+                      className="h-7 text-xs w-56"
+                    />
+                    <button type="submit" className="grid place-items-center w-7 h-7 rounded-md bg-primary text-primary-foreground hover:opacity-90" aria-label="Save status">
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                  </form>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="inline-flex items-center gap-1.5 font-headline font-bold text-primary text-sm md:text-base truncate hover:opacity-90 transition">
+                        <span className="truncate max-w-[60vw] md:max-w-none">{statusMessage}</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-64">
+                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Quick status</DropdownMenuLabel>
+                      {PRESET_MESSAGES.map((m) => (
+                        <DropdownMenuItem key={m} onClick={() => setStatusMessage(m)} className="text-xs">
+                          {statusMessage === m && <Check className="w-3 h-3 mr-1 text-primary" />}
+                          <span className={cn(statusMessage === m ? "font-semibold text-primary" : "")}>{m}</span>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCustomDraft(statusMessage);
+                          setEditingCustom(true);
+                        }}
+                        className="text-xs"
+                      >
+                        <Pencil className="w-3 h-3 mr-1.5" /> Custom status…
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
