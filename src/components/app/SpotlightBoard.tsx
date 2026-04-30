@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Plus, X,
-  Pencil, Trash2, Sparkles, AlertTriangle, Info, ChevronDown,
+  Pencil, Trash2, Sparkles, AlertTriangle, Info, ChevronLeft, ChevronRight, Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -17,31 +17,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { useSpotlight, SPOTLIGHT_LIMITS, type SpotlightPost, type Visibility, type Tone } from "./SpotlightContext";
+  useSpotlight, SPOTLIGHT_LIMITS, AUDIENCE_TAGS,
+  type SpotlightPost, type Visibility, type Tone, type AudienceTag,
+} from "./SpotlightContext";
 import { toast } from "sonner";
 import { contacts, type Relationship } from "@/lib/mockData";
 
-// Maximum number of simultaneously-published spotlight posts the
-// logged-in user is allowed to keep live at once.
-const MAX_ACTIVE_BY_ME = 1;
-
-// In the "From others" feed, only the most recent post per author is shown
-// — keeps the surface light (one window per contact).
-const MAX_PER_OTHER_AUTHOR = 1;
-
-const visMeta: Record<Visibility, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
-  public:   { label: "Public",        icon: Globe,    cls: "bg-emerald-500/10 text-emerald-700" },
-  contacts: { label: "Contacts only", icon: UsersIcon, cls: "bg-sky-500/10 text-sky-700" },
-  private:  { label: "Private",       icon: Lock,     cls: "bg-muted text-muted-foreground" },
+const visMeta: Record<Visibility, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  public:   { label: "Public",        icon: Globe    },
+  contacts: { label: "Contacts only", icon: UsersIcon },
+  private:  { label: "Private",       icon: Lock     },
 };
 
-const toneMeta: Record<Tone, { label: string; icon: React.ComponentType<{ className?: string }>; bg: string }> = {
-  info:  { label: "Info",  icon: Info,           bg: "from-primary/10 to-accent/10 border-primary/20" },
-  warn:  { label: "Heads-up", icon: AlertTriangle, bg: "from-amber-500/15 to-rose-500/10 border-amber-400/30" },
-  offer: { label: "Offer", icon: Sparkles,       bg: "from-emerald-500/10 to-teal-500/10 border-emerald-400/30" },
+const toneMeta: Record<Tone, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  info:  { label: "Info",     icon: Info },
+  warn:  { label: "Heads-up", icon: AlertTriangle },
+  offer: { label: "Offer",    icon: Sparkles },
 };
 
 const expiryOptions = [
@@ -51,27 +42,14 @@ const expiryOptions = [
   { id: "7d",     label: "7 days",      value: "expires in 7 days" },
 ];
 
-// Audience filter buckets for the "From others" feed.
-// "client" / "colleague" map straight to Relationship; "friend" includes
-// friend + family + mentor; "other" catches anything that doesn't fit.
-type AudienceFilter = "all" | "colleague" | "friend" | "client" | "other";
-
-const audienceFilters: { id: AudienceFilter; label: string }[] = [
-  { id: "all",       label: "All" },
-  { id: "colleague", label: "Office colleagues" },
-  { id: "friend",    label: "Friends" },
-  { id: "client",    label: "Clients" },
-  { id: "other",     label: "Other" },
-];
-
-const matchesAudience = (rel: Relationship | undefined, f: AudienceFilter) => {
-  if (f === "all") return true;
-  if (!rel) return f === "other";
-  if (f === "colleague") return rel === "colleague";
-  if (f === "client") return rel === "client";
-  if (f === "friend") return rel === "friend" || rel === "family" || rel === "mentor";
-  if (f === "other") return rel === "investor";
-  return false;
+// Maps a contact relationship to one of the 5 audience filter buckets.
+const relToTag = (rel: Relationship | undefined): AudienceTag => {
+  if (!rel) return "other";
+  if (rel === "colleague") return "colleague";
+  if (rel === "client") return "client";
+  if (rel === "family") return "family";
+  if (rel === "friend" || rel === "mentor") return "friend";
+  return "other"; // investor & anything else
 };
 
 type Draft = {
@@ -84,6 +62,7 @@ type Draft = {
   expiresIn?: string;
   ctaLabel: string;
   ctaHref: string;
+  audienceTag: AudienceTag;
 };
 
 const emptyDraft: Draft = {
@@ -95,6 +74,7 @@ const emptyDraft: Draft = {
   expiresIn: undefined,
   ctaLabel: "",
   ctaHref: "",
+  audienceTag: "colleague",
 };
 
 const SpotlightBoard = () => {
@@ -102,20 +82,72 @@ const SpotlightBoard = () => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [audience, setAudience] = useState<AudienceFilter>("all");
-  const [activeOtherId, setActiveOtherId] = useState<string | null>(null);
+  // Per-side selected audience filter
+  const [spotlightAud, setSpotlightAud] = useState<AudienceTag>("colleague");
+  const [signalAud, setSignalAud] = useState<AudienceTag>("colleague");
 
-  const myActive = posts.filter((p) => !p.authorId || p.authorId === "me");
-  const atLimit = myActive.length >= MAX_ACTIVE_BY_ME;
+  // Contact lookups
+  const contactRel = useMemo(() => {
+    const m: Record<string, Relationship> = {};
+    contacts.forEach((c) => { m[c.id] = c.relationship; });
+    return m;
+  }, []);
+  const contactName = useMemo(() => {
+    const m: Record<string, string> = {};
+    contacts.forEach((c) => { m[c.id] = c.name; });
+    return m;
+  }, []);
 
-  const openNew = () => {
-    if (atLimit) {
-      toast.error(`Limit reached — ${MAX_ACTIVE_BY_ME} active posts max`, {
-        description: "Delete or edit one of your live spotlight posts to publish a new one.",
+  // ── Spotlight (mine) — grouped by audienceTag ────────────────────
+  const mineByAud = useMemo(() => {
+    const grp: Record<AudienceTag, SpotlightPost[]> = {
+      colleague: [], friend: [], client: [], family: [], other: [],
+    };
+    posts
+      .filter((p) => !p.authorId || p.authorId === "me")
+      .forEach((p) => {
+        const tag = (p.audienceTag ?? "other") as AudienceTag;
+        grp[tag].push(p);
       });
-      return;
-    }
-    setDraft(emptyDraft);
+    (Object.keys(grp) as AudienceTag[]).forEach((k) => {
+      grp[k].sort((a, b) => {
+        if (!!b.pinned !== !!a.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+        return b.createdAt - a.createdAt;
+      });
+    });
+    return grp;
+  }, [posts]);
+
+  // ── Signal (others) — grouped by audienceTag (derived from relationship) ──
+  const othersByAud = useMemo(() => {
+    const grp: Record<AudienceTag, SpotlightPost[]> = {
+      colleague: [], friend: [], client: [], family: [], other: [],
+    };
+    const sorted = posts
+      .filter((p) => p.authorId && p.authorId !== "me" && p.visibility !== "private" && !dismissedPosts.has(p.id))
+      .sort((a, b) => b.createdAt - a.createdAt);
+    sorted.forEach((p) => {
+      const tag = relToTag(contactRel[p.authorId!]);
+      grp[tag].push(p);
+    });
+    return grp;
+  }, [posts, dismissedPosts, contactRel]);
+
+  // Unread per audience for Signal side
+  const unreadByAud = useMemo(() => {
+    const out: Record<AudienceTag, number> = { colleague: 0, friend: 0, client: 0, family: 0, other: 0 };
+    (Object.keys(othersByAud) as AudienceTag[]).forEach((k) => {
+      out[k] = othersByAud[k].filter((p) => !viewedPosts.has(p.id)).length;
+    });
+    return out;
+  }, [othersByAud, viewedPosts]);
+
+  const totalMine = useMemo(() => Object.values(mineByAud).reduce((n, a) => n + a.length, 0), [mineByAud]);
+  const totalUnread = useMemo(() => Object.values(unreadByAud).reduce((n, x) => n + x, 0), [unreadByAud]);
+
+  // Editor
+  const openNew = (preTag?: AudienceTag) => {
+    setDraft({ ...emptyDraft, audienceTag: preTag ?? spotlightAud });
     setEditorOpen(true);
   };
   const openEdit = (p: SpotlightPost) => {
@@ -123,6 +155,7 @@ const SpotlightBoard = () => {
       id: p.id, title: p.title, body: p.body, visibility: p.visibility, tone: p.tone,
       pinned: !!p.pinned, expiresIn: p.expiresIn,
       ctaLabel: p.cta?.label ?? "", ctaHref: p.cta?.href ?? "",
+      audienceTag: (p.audienceTag ?? "other") as AudienceTag,
     });
     setEditorOpen(true);
   };
@@ -131,82 +164,24 @@ const SpotlightBoard = () => {
     const title = draft.title.trim().slice(0, SPOTLIGHT_LIMITS.title);
     const body = draft.body.trim().slice(0, SPOTLIGHT_LIMITS.body);
     if (!title || !body) return;
-    // Hard cap: only allow MAX_ACTIVE_BY_ME live posts authored by "me".
-    // Editing existing posts is always allowed.
-    if (!draft.id && atLimit) {
-      toast.error(`Limit reached — ${MAX_ACTIVE_BY_ME} active posts max`, {
-        description: "Delete or edit one of your live spotlight posts first.",
-      });
-      return;
-    }
     const cta = draft.ctaLabel.trim() && draft.ctaHref.trim()
       ? { label: draft.ctaLabel.trim().slice(0, SPOTLIGHT_LIMITS.ctaLabel), href: draft.ctaHref.trim() }
       : undefined;
     const payload = {
       title, body, visibility: draft.visibility, tone: draft.tone,
       pinned: draft.pinned, expiresIn: draft.expiresIn, cta,
+      audienceTag: draft.audienceTag,
     };
     if (draft.id) update(draft.id, payload);
     else create(payload);
     setEditorOpen(false);
+    toast.success(draft.id ? "Spotlight updated" : "Spotlight published");
   };
 
   const titleLeft = SPOTLIGHT_LIMITS.title - draft.title.length;
   const bodyLeft = SPOTLIGHT_LIMITS.body - draft.body.length;
   const valid = draft.title.trim().length > 0 && draft.body.trim().length > 0
     && titleLeft >= 0 && bodyLeft >= 0;
-
-  // ── My posts (cap = 2) ────────────────────────────────────────────
-  const mine = posts.filter((p) => !p.authorId || p.authorId === "me");
-  const orderedMine = [...mine].sort((a, b) => {
-    if (!!b.pinned !== !!a.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
-    return b.createdAt - a.createdAt;
-  });
-
-  // ── From others ───────────────────────────────────────────────────
-  // Build a quick lookup of contact -> relationship.
-  const contactRel: Record<string, Relationship> = {};
-  contacts.forEach((c) => { contactRel[c.id] = c.relationship; });
-  const contactName: Record<string, string> = {};
-  contacts.forEach((c) => { contactName[c.id] = c.name; });
-
-  const others = posts
-    .filter(
-      (p) =>
-        p.authorId &&
-        p.authorId !== "me" &&
-        p.visibility !== "private" &&
-        !dismissedPosts.has(p.id),
-    )
-    .sort((a, b) => b.createdAt - a.createdAt);
-
-  // Cap to 1 post per author (most recent wins)
-  const seenAuthors = new Set<string>();
-  const cappedOthers = others.filter((p) => {
-    if (!p.authorId) return false;
-    if (seenAuthors.has(p.authorId)) return false;
-    seenAuthors.add(p.authorId);
-    return true;
-  });
-
-  const filteredOthers = cappedOthers.filter((p) =>
-    matchesAudience(contactRel[p.authorId!], audience),
-  );
-
-  // Unread = filtered "from others" posts the user hasn't yet viewed.
-  const unreadOthers = filteredOthers.filter((p) => !viewedPosts.has(p.id)).length;
-
-  // Pick which "from others" post is currently visible. Default = newest in
-  // the filtered list. The dropdown lets the user switch to any other.
-  const visibleOther =
-    filteredOthers.find((p) => p.id === activeOtherId) ?? filteredOthers[0] ?? null;
-
-  // Viewing a contact's broadcast (it being the visible "other" post)
-  // counts as seen — extinguish the torch on that contact's profile.
-  useEffect(() => {
-    if (visibleOther?.authorId) markSeen(visibleOther.authorId);
-    if (visibleOther?.id) markPostViewed(visibleOther.id);
-  }, [visibleOther?.id, visibleOther?.authorId, markSeen, markPostViewed]);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -216,276 +191,132 @@ const SpotlightBoard = () => {
             <Megaphone className="w-4 h-4" />
           </span>
           <div>
-            <h3 className="font-headline font-bold text-primary leading-tight">Spotlight</h3>
+            <h3 className="font-headline font-bold text-primary leading-tight">Spotlight & Signal</h3>
             <p className="text-[11px] text-muted-foreground">
-              One live post from you · {unreadOthers} unread from your network
+              {totalMine} of yours · {totalUnread} new from your network
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {myActive.length}/{MAX_ACTIVE_BY_ME} windows
-          </span>
-          <button
-            onClick={openNew}
-            disabled={atLimit}
-            title={atLimit ? `Limit reached — only ${MAX_ACTIVE_BY_ME} active spotlight post at a time. Delete it to publish another.` : "New post"}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
-              atLimit
-                ? "bg-surface-low text-muted-foreground cursor-not-allowed"
-                : "bg-primary text-primary-foreground hover:opacity-95",
-            )}
-          >
-            <Plus className="w-3.5 h-3.5" /> New post
-          </button>
-        </div>
+        <button
+          onClick={() => openNew()}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 transition"
+        >
+          <Plus className="w-3.5 h-3.5" /> New spotlight
+        </button>
       </div>
 
-      {/* ── Two-window layout: [my single post] | [others feed] ── */}
+      {/* ── Two aligned panes ── */}
       <div className="mt-5 grid lg:grid-cols-2 gap-4">
-        {/* Window 1 — My post (cap = 1) */}
-        <div className="rounded-2xl ghost-border bg-surface-low/30 p-3">
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              My broadcast · {orderedMine.length}/{MAX_ACTIVE_BY_ME}
-            </h4>
-          </div>
-          {orderedMine.length === 0 ? (
-            <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
-              No spotlight post yet — share an update to light up your contacts.
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {orderedMine.slice(0, MAX_ACTIVE_BY_ME).map((p) => {
-              const Vis = visMeta[p.visibility];
-              const Tn = toneMeta[p.tone];
-              return (
-                <li key={p.id} className="relative p-4 rounded-2xl bg-primary text-primary-foreground border border-primary">
-                  <div className="absolute top-2 right-2 flex items-center gap-1">
-                    <button
-                      onClick={() => openEdit(p)}
-                      className="p-1 rounded-full text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition"
-                      aria-label="Edit"
-                      title="Edit"
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => setConfirmDelete(p.id)}
-                      className="p-1 rounded-full text-primary-foreground/70 hover:bg-rose-500/20 hover:text-rose-200 transition"
-                      aria-label="Delete"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-wrap pr-14">
-                    {p.pinned && (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
-                        <Pin className="w-2.5 h-2.5" /> Pinned
-                      </span>
-                    )}
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
-                      <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
-                      <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
-                    </span>
-                  </div>
-                  <h4 className="mt-2 font-headline font-bold text-primary-foreground text-sm leading-tight">{p.title}</h4>
-                  <p className="mt-1 text-xs text-primary-foreground/80 leading-relaxed line-clamp-3">{p.body}</p>
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    {p.expiresIn ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-primary-foreground/70">
-                        <Clock className="w-3 h-3" /> {p.expiresIn}
-                      </span>
-                    ) : <span />}
-                    {p.cta && (
-                      <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-gold hover:text-primary-foreground">
-                        {p.cta.label} <ArrowRight className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </li>
-              );
-              })}
-            </ul>
-          )}
-        </div>
+        {/* SPOTLIGHT (mine) */}
+        <SidePane
+          kind="spotlight"
+          title="Spotlight"
+          subtitle="What you publish"
+          icon={Megaphone}
+          accentClass="from-primary/15 to-primary/5 border-primary/30"
+          chipActiveClass="bg-primary text-primary-foreground"
+          selectedAud={spotlightAud}
+          onSelectAud={setSpotlightAud}
+          countByAud={Object.fromEntries(
+            (Object.keys(mineByAud) as AudienceTag[]).map((k) => [k, mineByAud[k].length]),
+          ) as Record<AudienceTag, number>}
+          showCounts
+        >
+          <Carousel
+            items={mineByAud[spotlightAud]}
+            empty={
+              <EmptyTile
+                label={`No Spotlight for ${AUDIENCE_TAGS.find((a) => a.id === spotlightAud)?.label}`}
+                cta="Publish one"
+                onCta={() => openNew(spotlightAud)}
+              />
+            }
+            renderItem={(p) => (
+              <MineCard
+                post={p}
+                onEdit={() => openEdit(p)}
+                onDelete={() => setConfirmDelete(p.id)}
+              />
+            )}
+          />
+        </SidePane>
 
-        {/* Window 2 — From others (with filter + unread badge + dismiss) */}
-        <div className="rounded-2xl ghost-border bg-surface-low/30 p-3">
-          <div className="flex items-center justify-between gap-2 mb-3 px-1">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2 shrink-0">
-              Their broadcast
-              {unreadOthers > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
-                  {unreadOthers}
-                </span>
-              )}
-            </h4>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface-lowest text-[10px] font-semibold text-primary hover:bg-surface-low transition"
-                >
-                  <span className="uppercase tracking-wider text-muted-foreground">Filter:</span>
-                  <span>
-                    {audienceFilters.find((f) => f.id === audience)?.label ?? "All"}
-                  </span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Audience
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {audienceFilters.map((f) => (
-                  <DropdownMenuItem
-                    key={f.id}
-                    onClick={() => setAudience(f.id)}
-                    className={cn(
-                      "text-xs",
-                      audience === f.id && "bg-accent/10 font-semibold text-primary",
-                    )}
-                  >
-                    {f.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        {visibleOther === null ? (
-          <div className="p-5 rounded-2xl ghost-border bg-surface-low/50 text-center text-xs text-muted-foreground">
-            All caught up — no new spotlight posts from this group.
-          </div>
-        ) : (
-          (() => {
-            const p = visibleOther;
-            const Vis = visMeta[p.visibility];
-            const Tn = toneMeta[p.tone];
-            const author = contactName[p.authorId!] ?? "Contact";
-            const rel = contactRel[p.authorId!];
-            return (
-              <div className="space-y-2">
-                <div className="relative p-4 rounded-2xl bg-primary text-primary-foreground border border-primary">
-                  <button
-                    onClick={() => {
-                      dismissPost(p.id);
-                      setActiveOtherId(null);
-                    }}
-                    className="absolute top-2 right-2 p-1 rounded-full text-primary-foreground/70 hover:bg-rose-500/20 hover:text-rose-200 transition"
-                    aria-label="Mark seen and dismiss"
-                    title="Mark seen and dismiss"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                  <div className="flex items-center gap-1.5 flex-wrap pr-7">
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
-                      <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
-                      <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
-                    </span>
-                    {rel && (
-                      <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gold/20 text-gold">
-                        {rel}
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="mt-2 font-headline font-bold text-primary-foreground text-sm leading-tight">{p.title}</h4>
-                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/70">
-                    {author}
-                  </p>
-                  <p className="mt-1 text-xs text-primary-foreground/80 leading-relaxed line-clamp-3">{p.body}</p>
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    {p.expiresIn ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-primary-foreground/70">
-                        <Clock className="w-3 h-3" /> {p.expiresIn}
-                      </span>
-                    ) : <span />}
-                    {p.cta && (
-                      <a href={p.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-gold hover:text-primary-foreground">
-                        {p.cta.label} <ArrowRight className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {filteredOthers.length > 1 && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-lowest text-[11px] font-semibold text-muted-foreground hover:text-primary transition">
-                        <span>Check more · {filteredOthers.length - 1} more</span>
-                        <ChevronDown className="w-3.5 h-3.5" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-72 max-h-80 overflow-y-auto">
-                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        From your network
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {filteredOthers.map((o) => {
-                        const oAuthor = contactName[o.authorId!] ?? "Contact";
-                        const isActive = o.id === p.id;
-                        const isUnseen = !viewedPosts.has(o.id);
-                        return (
-                          <DropdownMenuItem
-                            key={o.id}
-                            onClick={() => setActiveOtherId(o.id)}
-                            className={cn(
-                              "flex flex-col items-start gap-0.5",
-                              isActive && "bg-accent/10",
-                              !isUnseen && "opacity-60",
-                            )}
-                          >
-                            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                              {oAuthor}
-                              {isUnseen && (
-                                <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-full bg-primary text-primary-foreground">
-                                  <span className="w-1 h-1 rounded-full bg-primary-foreground" /> New
-                                </span>
-                              )}
-                            </span>
-                            <span className={cn(
-                              "text-xs line-clamp-1",
-                              isUnseen ? "font-bold text-primary" : "font-medium text-muted-foreground",
-                            )}>
-                              {o.title}
-                            </span>
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-            );
-          })()
-        )}
-        </div>
+        {/* SIGNAL (others) */}
+        <SidePane
+          kind="signal"
+          title="Signal"
+          subtitle="Received from your network"
+          icon={Radio}
+          accentClass="from-gold/15 to-gold/5 border-gold/30"
+          chipActiveClass="bg-gold text-background"
+          selectedAud={signalAud}
+          onSelectAud={setSignalAud}
+          countByAud={unreadByAud}
+          showCounts
+          showUnread
+        >
+          <Carousel
+            items={othersByAud[signalAud]}
+            onView={(p) => {
+              if (p.authorId) markSeen(p.authorId);
+              markPostViewed(p.id);
+            }}
+            empty={
+              <EmptyTile
+                label={`No Signal from ${AUDIENCE_TAGS.find((a) => a.id === signalAud)?.label}`}
+              />
+            }
+            renderItem={(p) => (
+              <OtherCard
+                post={p}
+                authorName={contactName[p.authorId!] ?? "Contact"}
+                isUnseen={!viewedPosts.has(p.id)}
+                onDismiss={() => dismissPost(p.id)}
+              />
+            )}
+          />
+        </SidePane>
       </div>
 
-      {/* Editor dialog */}
+      {/* Editor */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{draft.id ? "Edit spotlight post" : "New spotlight post"}</DialogTitle>
+            <DialogTitle>{draft.id ? "Edit Spotlight" : "New Spotlight"}</DialogTitle>
             <DialogDescription>
-              Short, sharp updates. Pinned posts stay on top. New posts light a torch on your contacts.
+              Tag the audience so it lands in the right filter — one Spotlight per audience.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
+              <Label className="mb-1.5 block">Audience filter</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {AUDIENCE_TAGS.map((a) => {
+                  const active = draft.audienceTag === a.id;
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => setDraft((d) => ({ ...d, audienceTag: a.id }))}
+                      className={cn(
+                        "px-2.5 py-1 rounded-full text-[11px] font-semibold border transition",
+                        active
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-surface-lowest text-muted-foreground hover:text-primary",
+                      )}
+                    >
+                      {a.emoji} {a.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="sp-title">Title</Label>
-                <span className={cn("text-[10px]", titleLeft < 0 ? "text-destructive" : "text-muted-foreground")}>
-                  {titleLeft} left
-                </span>
+                <span className={cn("text-[10px]", titleLeft < 0 ? "text-destructive" : "text-muted-foreground")}>{titleLeft} left</span>
               </div>
               <Input
                 id="sp-title"
@@ -499,9 +330,7 @@ const SpotlightBoard = () => {
             <div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="sp-body">Message</Label>
-                <span className={cn("text-[10px]", bodyLeft < 0 ? "text-destructive" : "text-muted-foreground")}>
-                  {bodyLeft} / {SPOTLIGHT_LIMITS.body}
-                </span>
+                <span className={cn("text-[10px]", bodyLeft < 0 ? "text-destructive" : "text-muted-foreground")}>{bodyLeft} / {SPOTLIGHT_LIMITS.body}</span>
               </div>
               <Textarea
                 id="sp-body"
@@ -509,7 +338,7 @@ const SpotlightBoard = () => {
                 value={draft.body}
                 maxLength={SPOTLIGHT_LIMITS.body + 50}
                 onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
-                placeholder="What should people know right now?"
+                placeholder="What should they know right now?"
               />
             </div>
 
@@ -536,7 +365,6 @@ const SpotlightBoard = () => {
                   })}
                 </div>
               </div>
-
               <div>
                 <Label className="mb-1.5 block">Tone</Label>
                 <div className="flex flex-col gap-1">
@@ -586,22 +414,11 @@ const SpotlightBoard = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="sp-cta-label">CTA label (optional)</Label>
-                <Input
-                  id="sp-cta-label"
-                  value={draft.ctaLabel}
-                  maxLength={SPOTLIGHT_LIMITS.ctaLabel}
-                  onChange={(e) => setDraft((d) => ({ ...d, ctaLabel: e.target.value }))}
-                  placeholder="Book a slot"
-                />
+                <Input id="sp-cta-label" value={draft.ctaLabel} maxLength={SPOTLIGHT_LIMITS.ctaLabel} onChange={(e) => setDraft((d) => ({ ...d, ctaLabel: e.target.value }))} placeholder="Book a slot" />
               </div>
               <div>
                 <Label htmlFor="sp-cta-href">CTA link</Label>
-                <Input
-                  id="sp-cta-href"
-                  value={draft.ctaHref}
-                  onChange={(e) => setDraft((d) => ({ ...d, ctaHref: e.target.value }))}
-                  placeholder="/app/availability"
-                />
+                <Input id="sp-cta-href" value={draft.ctaHref} onChange={(e) => setDraft((d) => ({ ...d, ctaHref: e.target.value }))} placeholder="/app/availability" />
               </div>
             </div>
 
@@ -610,7 +427,7 @@ const SpotlightBoard = () => {
                 <Pin className="w-4 h-4 text-primary" />
                 <div>
                   <p className="text-xs font-semibold text-primary">Pin to top</p>
-                  <p className="text-[10px] text-muted-foreground">Keeps this post above others.</p>
+                  <p className="text-[10px] text-muted-foreground">Keeps this post above others in its audience.</p>
                 </div>
               </div>
               <Switch checked={draft.pinned} onCheckedChange={(v) => setDraft((d) => ({ ...d, pinned: v }))} />
@@ -619,9 +436,7 @@ const SpotlightBoard = () => {
 
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditorOpen(false)}>Cancel</Button>
-            <Button onClick={saveDraft} disabled={!valid}>
-              {draft.id ? "Save changes" : "Publish post"}
-            </Button>
+            <Button onClick={saveDraft} disabled={!valid}>{draft.id ? "Save changes" : "Publish"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -629,9 +444,9 @@ const SpotlightBoard = () => {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this Spotlight?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the spotlight post for everyone who could see it. This can't be undone.
+              This removes the post for everyone who could see it. This can't be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -645,11 +460,284 @@ const SpotlightBoard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Hidden helper to silence unused import warnings if any */}
-      <span className="hidden"><X /></span>
     </div>
   );
 };
+
+/* ── Side pane wrapper with audience filter chips ───────────────── */
+function SidePane({
+  kind, title, subtitle, icon: Icon, accentClass, chipActiveClass,
+  selectedAud, onSelectAud, countByAud, showCounts, showUnread, children,
+}: {
+  kind: "spotlight" | "signal";
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentClass: string;
+  chipActiveClass: string;
+  selectedAud: AudienceTag;
+  onSelectAud: (a: AudienceTag) => void;
+  countByAud: Record<AudienceTag, number>;
+  showCounts?: boolean;
+  showUnread?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={cn("rounded-2xl bg-gradient-to-br ghost-border p-3 flex flex-col h-[360px]", accentClass)}>
+      <div className="flex items-center justify-between gap-2 mb-2 px-1">
+        <div className="flex items-center gap-1.5">
+          <Icon className={cn("w-3.5 h-3.5", kind === "spotlight" ? "text-primary" : "text-gold")} />
+          <h4 className="text-[10px] font-bold uppercase tracking-wider text-primary">{title}</h4>
+          <span className="text-[10px] text-muted-foreground">· {subtitle}</span>
+        </div>
+      </div>
+      {/* Audience chips */}
+      <div className="flex items-center gap-1 mb-2 px-1 overflow-x-auto no-scrollbar">
+        {AUDIENCE_TAGS.map((a) => {
+          const active = selectedAud === a.id;
+          const count = countByAud[a.id] ?? 0;
+          return (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => onSelectAud(a.id)}
+              className={cn(
+                "shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border transition",
+                active
+                  ? cn("border-transparent", chipActiveClass)
+                  : "border-border bg-surface-lowest text-muted-foreground hover:text-primary",
+              )}
+            >
+              <span>{a.emoji}</span>
+              <span>{a.label}</span>
+              {showCounts && count > 0 && (
+                <span className={cn(
+                  "ml-0.5 inline-flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full text-[9px] font-bold",
+                  active
+                    ? "bg-background/20 text-current"
+                    : showUnread
+                    ? "bg-gold text-background"
+                    : "bg-primary/15 text-primary",
+                )}>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <div className="flex-1 min-h-0">{children}</div>
+    </div>
+  );
+}
+
+/* ── Horizontal carousel with snap + arrows ─────────────────────── */
+function Carousel<T extends { id: string }>({
+  items, renderItem, empty, onView,
+}: {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+  empty: React.ReactNode;
+  onView?: (item: T) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [idx, setIdx] = useState(0);
+
+  // Notify view when index changes
+  useEffect(() => {
+    if (items[idx] && onView) onView(items[idx]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, items.length]);
+
+  // Reset to 0 when item set changes
+  useEffect(() => { setIdx(0); }, [items.map((i) => i.id).join("|")]);
+
+  const scrollTo = (next: number) => {
+    const clamped = Math.max(0, Math.min(items.length - 1, next));
+    setIdx(clamped);
+    const el = ref.current;
+    if (!el) return;
+    const child = el.children[clamped] as HTMLElement | undefined;
+    child?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+  };
+
+  if (items.length === 0) {
+    return <div className="h-full">{empty}</div>;
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      <div
+        ref={ref}
+        className="flex-1 flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const w = el.clientWidth;
+          const i = Math.round(el.scrollLeft / w);
+          if (i !== idx) setIdx(i);
+        }}
+      >
+        {items.map((it) => (
+          <div key={it.id} className="snap-start shrink-0 w-full h-full">
+            {renderItem(it)}
+          </div>
+        ))}
+      </div>
+      {items.length > 1 && (
+        <div className="mt-2 flex items-center justify-between px-1">
+          <button
+            type="button"
+            onClick={() => scrollTo(idx - 1)}
+            disabled={idx === 0}
+            className="grid place-items-center w-6 h-6 rounded-full bg-surface-lowest ghost-border text-primary disabled:opacity-40 hover:bg-surface-low transition"
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <div className="flex items-center gap-1">
+            {items.map((_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  i === idx ? "w-4 bg-primary" : "w-1.5 bg-border",
+                )}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => scrollTo(idx + 1)}
+            disabled={idx === items.length - 1}
+            className="grid place-items-center w-6 h-6 rounded-full bg-surface-lowest ghost-border text-primary disabled:opacity-40 hover:bg-surface-low transition"
+            aria-label="Next"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Spotlight (mine) card ──────────────────────────────────────── */
+function MineCard({ post, onEdit, onDelete }: { post: SpotlightPost; onEdit: () => void; onDelete: () => void }) {
+  const Vis = visMeta[post.visibility];
+  const Tn = toneMeta[post.tone];
+  const aud = AUDIENCE_TAGS.find((a) => a.id === (post.audienceTag ?? "other"));
+  return (
+    <div className="relative h-full p-4 rounded-2xl bg-primary text-primary-foreground border border-primary flex flex-col">
+      <div className="absolute top-2 right-2 flex items-center gap-1">
+        <button onClick={onEdit} className="p-1 rounded-full text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition" aria-label="Edit"><Pencil className="w-3 h-3" /></button>
+        <button onClick={onDelete} className="p-1 rounded-full text-primary-foreground/70 hover:bg-rose-500/20 hover:text-rose-200 transition" aria-label="Delete"><Trash2 className="w-3 h-3" /></button>
+      </div>
+      <div className="flex items-center gap-1.5 flex-wrap pr-14">
+        {aud && (
+          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gold text-background">
+            {aud.emoji} {aud.label}
+          </span>
+        )}
+        {post.pinned && (
+          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
+            <Pin className="w-2.5 h-2.5" /> Pinned
+          </span>
+        )}
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
+          <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
+        </span>
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
+          <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
+        </span>
+      </div>
+      <h4 className="mt-2 font-headline font-bold text-primary-foreground text-sm leading-tight">{post.title}</h4>
+      <p className="mt-1 text-xs text-primary-foreground/80 leading-relaxed line-clamp-4 flex-1">{post.body}</p>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        {post.expiresIn ? (
+          <span className="inline-flex items-center gap-1 text-[10px] text-primary-foreground/70">
+            <Clock className="w-3 h-3" /> {post.expiresIn}
+          </span>
+        ) : <span />}
+        {post.cta && (
+          <a href={post.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-gold hover:text-primary-foreground">
+            {post.cta.label} <ArrowRight className="w-3 h-3" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Signal (others) card — visually distinct (gold-trim, lighter) ── */
+function OtherCard({
+  post, authorName, isUnseen, onDismiss,
+}: {
+  post: SpotlightPost;
+  authorName: string;
+  isUnseen: boolean;
+  onDismiss: () => void;
+}) {
+  const Vis = visMeta[post.visibility];
+  const Tn = toneMeta[post.tone];
+  return (
+    <div className={cn(
+      "relative h-full p-4 rounded-2xl border-2 flex flex-col bg-surface-lowest",
+      isUnseen ? "border-gold shadow-[0_0_0_3px_hsl(var(--brand-gold)/0.12)]" : "border-border opacity-90",
+    )}>
+      <button
+        onClick={onDismiss}
+        className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 transition"
+        aria-label="Mark seen and dismiss"
+      >
+        <X className="w-3 h-3" />
+      </button>
+      <div className="flex items-center gap-1.5 flex-wrap pr-7">
+        {isUnseen && (
+          <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gold text-background">
+            New Signal
+          </span>
+        )}
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
+          <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
+        </span>
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
+          <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
+        </span>
+      </div>
+      <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-gold">{authorName}</p>
+      <h4 className="mt-0.5 font-headline font-bold text-primary text-sm leading-tight">{post.title}</h4>
+      <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-4 flex-1">{post.body}</p>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        {post.expiresIn ? (
+          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Clock className="w-3 h-3" /> {post.expiresIn}
+          </span>
+        ) : <span />}
+        {post.cta && (
+          <a href={post.cta.href} className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent">
+            {post.cta.label} <ArrowRight className="w-3 h-3" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmptyTile({ label, cta, onCta }: { label: string; cta?: string; onCta?: () => void }) {
+  return (
+    <div className="h-full grid place-items-center rounded-2xl ghost-border bg-surface-lowest/60 p-5 text-center">
+      <div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        {cta && onCta && (
+          <button
+            onClick={onCta}
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-primary text-primary-foreground hover:opacity-95 transition"
+          >
+            <Plus className="w-3 h-3" /> {cta}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default SpotlightBoard;

@@ -15,6 +15,7 @@ import { SpotlightProvider } from "./components/app/SpotlightContext.tsx";
 import { NotificationsProvider } from "./components/app/NotificationsContext.tsx";
 import { MessagesProvider } from "./components/app/MessagesContext.tsx";
 import { RequestsProvider } from "./components/app/RequestsContext.tsx";
+import { BypassProvider } from "./components/app/BypassContext.tsx";
 
 // Marketing extras
 import Pricing from "./pages/Pricing.tsx";
@@ -62,6 +63,7 @@ const App = () => (
         <NotificationsProvider>
         <MessagesProvider>
         <RequestsProvider>
+        <BypassProvider>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -101,6 +103,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </BypassProvider>
         </RequestsProvider>
         </MessagesProvider>
         </NotificationsProvider>

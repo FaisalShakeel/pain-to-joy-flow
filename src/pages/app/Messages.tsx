@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, Zap } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import EmptyState from "@/components/app/EmptyState";
 import BroadcastsRail from "@/components/app/BroadcastsRail";
+import PriorityBypassButton from "@/components/app/PriorityBypassButton";
 import { contacts } from "@/lib/mockData";
 import { useMessages } from "@/components/app/MessagesContext";
 import { toast } from "@/hooks/use-toast";
@@ -110,10 +111,15 @@ const Messages = () => {
             <>
               <header className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
                 <Avatar initials={contact.initials} accent={contact.accent} />
-                <div>
+                <div className="flex-1">
                   <p className="font-headline font-bold text-primary">{contact.name}</p>
                   <p className="text-xs text-muted-foreground">{contact.title}</p>
                 </div>
+                <PriorityBypassButton
+                  contactId={contact.id}
+                  contactName={contact.name.split(" ")[0]}
+                  kind="message"
+                />
               </header>
               <div className="flex-1 overflow-y-auto p-5 space-y-3">
                 {current.messages.map((m) => (
