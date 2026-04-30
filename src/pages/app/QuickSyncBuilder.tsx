@@ -277,7 +277,8 @@ const QuickSyncBuilder = () => {
                 <div className="rounded-2xl bg-gradient-to-r from-fuchsia-500/15 to-pink-500/15 p-4">
                   <p className="text-[11px] uppercase tracking-wider text-fuchsia-900/70 font-bold">Total slots</p>
                   <p className="font-headline font-extrabold text-fuchsia-900 text-3xl">{count}</p>
-                  <p className="text-[11px] text-fuchsia-900/70 mt-0.5">{draft.callMin}-min calls · {draft.bufferMin}-min buffer · {totalMin} min window</p>
+                  <p className="text-[11px] text-fuchsia-900/70 mt-0.5">{draft.callMin}-min calls · {draft.bufferMin}-min flexible buffer · {totalMin} min window</p>
+                  <p className="text-[10px] text-fuchsia-900/60 mt-1 italic">Buffer lets participants join early or extend slightly — it does not reduce slot count.</p>
                 </div>
                 <TimelineView items={timeline} />
               </Section>

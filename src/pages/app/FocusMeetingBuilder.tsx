@@ -277,7 +277,8 @@ const FocusMeetingBuilder = () => {
                 <div className="rounded-2xl bg-gradient-to-r from-indigo-500/15 to-sky-500/15 p-4">
                   <p className="text-[11px] uppercase tracking-wider text-indigo-900/70 font-bold">Total meetings</p>
                   <p className="font-headline font-extrabold text-indigo-900 text-3xl">{count}</p>
-                  <p className="text-[11px] text-indigo-900/70 mt-0.5">{draft.callMin}-min meetings · {draft.bufferMin}-min buffer · {totalMin} min window</p>
+                  <p className="text-[11px] text-indigo-900/70 mt-0.5">{draft.callMin}-min meetings · {draft.bufferMin}-min flexible buffer · {totalMin} min window</p>
+                  <p className="text-[10px] text-indigo-900/60 mt-1 italic">Buffer lets participants join early or extend slightly — it does not reduce slot count.</p>
                 </div>
                 <TimelineView items={timeline} />
               </Section>
