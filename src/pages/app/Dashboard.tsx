@@ -80,13 +80,15 @@ const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
-  const [statusMessage, setStatusMessage] = useState<string>("Available for technical sync");
+  const [contextMessage, setContextMessage] = useState<string>("Leave a message if urgent");
+  const [lastCustom, setLastCustom] = useState<string>("");
   const [editingCustom, setEditingCustom] = useState(false);
   const [customDraft, setCustomDraft] = useState("");
   const [role] = useRole();
   const { list } = useRequests();
   const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
   const meta = statusMeta[status];
+  const autoStatus = AUTO_STATUS[status];
 
   return (
     <AppShell
