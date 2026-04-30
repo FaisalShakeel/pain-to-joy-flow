@@ -52,10 +52,6 @@ const buildTimeline = (s: { startMin: number; endMin: number; callMin: number; b
   while (t + s.callMin <= s.endMin) {
     items.push({ kind: "call", start: t, end: t + s.callMin });
     t += s.callMin;
-    if (t + s.bufferMin <= s.endMin) {
-      items.push({ kind: "buffer", start: t, end: t + s.bufferMin });
-      t += s.bufferMin;
-    } else break;
   }
   return items;
 };
