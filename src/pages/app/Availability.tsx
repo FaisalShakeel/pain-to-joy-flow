@@ -10,8 +10,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 // ---------- Activity model ----------
-type ActivityKind = "meeting" | "quicksync" | "live";
-
 interface DayActivity {
   date: string; // yyyy-mm-dd
   meetings: { count: number; minutes: number };
