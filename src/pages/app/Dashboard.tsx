@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, ShieldCheck, Sparkles, Clock, Users, TrendingUp,
+  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -23,59 +23,57 @@ const Dashboard = () => {
     <AppShell
       subtitle="Control center"
       title={`Good morning, ${me.name.split(" ")[0]}`}
-      actions={
-        <Link
-          to="/app/share"
-          className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-glass hover:opacity-95 transition"
-        >
-          <Sparkles className="w-4 h-4" /> Share my vault
-        </Link>
-      }
-    >
-      <div className="grid lg:grid-cols-3 gap-5">
-        {/* Spotlight board (moved above status) */}
-        <div className="lg:col-span-3">
-          <SpotlightBoard />
-        </div>
-
-        {/* Status card */}
-        <div className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-6 md:p-7 shadow-ambient">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent">Your status</p>
-              <h2 className="mt-1 font-headline font-extrabold text-primary text-2xl md:text-3xl">
-                {status === "available" ? "Available for technical syncs" : status === "busy" ? "Busy — async only" : "Deep focus until 17:00"}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                Your status is what seekers see first. It updates automatically with your activity and appointments—or you can change it instantly, without explanation.
-              </p>
-            </div>
-            <StatusPill tone={status} className="text-xs" />
-          </div>
-
-          <div className="mt-5 inline-flex p-1 rounded-full bg-surface-low">
+      hideBell
+      headerInline={
+        <div className="inline-flex items-center gap-2 ml-2">
+          <span className="hidden sm:inline-flex p-0.5 rounded-full bg-surface-low">
             {(["available", "busy", "focus"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setStatus(s)}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-full transition ${
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition ${
                   status === s ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary"
                 }`}
               >
                 {s === "available" ? "Available" : s === "busy" ? "Busy" : "Focus"}
               </button>
             ))}
+          </span>
+          <StatusPill tone={status} className="text-[10px] sm:hidden" />
+        </div>
+      }
+    >
+      <div className="grid lg:grid-cols-3 gap-4">
+        {/* Compact full-width Status pane */}
+        <div className="lg:col-span-3 rounded-2xl bg-surface-lowest ghost-border px-4 py-3 shadow-ambient flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <StatusPill tone={status} className="text-[10px]" />
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-accent leading-none">Your status</p>
+              <h2 className="mt-0.5 font-headline font-bold text-primary text-sm md:text-base truncate">
+                {status === "available" ? "Available for technical syncs" : status === "busy" ? "Busy — async only" : "Deep focus until 17:00"}
+              </h2>
+            </div>
           </div>
-
-          <div className="mt-6 grid sm:grid-cols-3 gap-3">
-            <Stat label="Streak" value={`${me.streak} days`} hint="of protected focus" icon={<TrendingUp className="w-4 h-4" />} />
-            <Stat label="Saved this week" value={`${me.interruptionsSavedThisWeek}`} hint="interruptions filtered" icon={<ShieldCheck className="w-4 h-4" />} />
-            <Stat label="Vault contacts" value={`${contacts.length}`} hint="approved syncs" icon={<Users className="w-4 h-4" />} />
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Chip icon={<TrendingUp className="w-3 h-3" />} label="Streak" value={`${me.streak}d`} />
+            <Chip icon={<ShieldCheck className="w-3 h-3" />} label="Saved" value={`${me.interruptionsSavedThisWeek}`} />
+            <Chip icon={<Users className="w-3 h-3" />} label="Vault" value={`${contacts.length}`} />
           </div>
         </div>
 
+        {/* Spotlight + Signal (no outer title; new spotlight inside tile) */}
+        <div className="lg:col-span-3">
+          <SpotlightBoard />
+        </div>
+
+        {/* Priority Contacts */}
+        <div className="lg:col-span-3">
+          <PriorityContactsWidget />
+        </div>
+
         {/* Reserved Time */}
-        <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
               <CalendarDays className="w-4 h-4 text-accent" />
@@ -83,14 +81,14 @@ const Dashboard = () => {
             </h3>
             <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
           </div>
-          <ul className="mt-4 space-y-2.5">
+          <ul className="mt-3 grid md:grid-cols-3 gap-2.5">
             {[
               { t: "10:00", who: "Sarah Jenkins", kind: "Board prep" },
               { t: "13:30", who: "Rashid Al-Amir", kind: "Technical sync" },
               { t: "16:00", who: "Open window", kind: "2 slots free" },
             ].map((s) => (
-              <li key={s.t} className="flex items-center gap-3 p-3 rounded-xl ghost-border bg-surface-low/50">
-                <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary text-xs font-bold">
+              <li key={s.t} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
+                <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary text-xs font-bold shrink-0">
                   {s.t}
                 </span>
                 <div className="flex-1 min-w-0">
@@ -102,18 +100,13 @@ const Dashboard = () => {
           </ul>
         </div>
 
-        {/* Priority Contacts (6) */}
-        <div className="lg:col-span-3">
-          <PriorityContactsWidget />
-        </div>
-
         {/* Messages panel */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-3">
           <MessagesPanel />
         </div>
 
         {/* Access requests */}
-        <div className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary">Access requests</h3>
             <Link to="/app/requests" className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
@@ -215,6 +208,16 @@ function Stat({ label, value, hint, icon }: { label: string; value: string; hint
       <p className="mt-1.5 font-headline font-extrabold text-primary text-2xl leading-none">{value}</p>
       <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
     </div>
+  );
+}
+
+function Chip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px]">
+      <span className="text-accent">{icon}</span>
+      <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">{label}</span>
+      <span className="font-bold text-primary">{value}</span>
+    </span>
   );
 }
 

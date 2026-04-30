@@ -78,9 +78,11 @@ interface Props {
   title?: string;
   subtitle?: string;
   actions?: ReactNode;
+  headerInline?: ReactNode;
+  hideBell?: boolean;
 }
 
-const AppShell = ({ children, title, subtitle, actions }: Props) => {
+const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const navigate = useNavigate();
@@ -187,7 +189,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
       <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border/50">
-          <div className="px-4 md:px-8 py-3.5 flex items-center gap-3">
+          <div className="px-4 md:px-8 py-2 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileNav(true)}
@@ -199,19 +201,21 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
 
             <div className="flex-1" />
 
-            <button
-              type="button"
-              onClick={() => navigate("/app/notifications")}
-              className="relative grid place-items-center w-9 h-9 rounded-full ghost-border bg-surface-lowest hover:bg-surface-low transition"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4 text-primary" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 grid place-items-center w-4 h-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            {!hideBell && (
+              <button
+                type="button"
+                onClick={() => navigate("/app/notifications")}
+                className="relative grid place-items-center w-9 h-9 rounded-full ghost-border bg-surface-lowest hover:bg-surface-low transition"
+                aria-label="Notifications"
+              >
+                <Bell className="w-4 h-4 text-primary" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 grid place-items-center w-4 h-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -246,24 +250,25 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
             </DropdownMenu>
           </div>
 
-          {(title || actions) && (
-            <div className="px-4 md:px-8 pb-5 pt-1 flex flex-wrap items-end justify-between gap-3">
-              <div>
+          {(title || actions || headerInline) && (
+            <div className="px-4 md:px-8 pb-3 pt-0.5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 {subtitle && (
-                  <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-1.5">{subtitle}</p>
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent mr-1">{subtitle}</p>
                 )}
                 {title && (
-                  <h1 className="font-headline font-extrabold text-primary text-2xl md:text-3xl leading-tight">
+                  <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight">
                     {title}
                   </h1>
                 )}
+                {headerInline}
               </div>
               {actions && <div className="flex items-center gap-2">{actions}</div>}
             </div>
           )}
         </header>
 
-        <main className="flex-1 px-4 md:px-8 py-6 md:py-8">{children}</main>
+        <main className="flex-1 px-4 md:px-8 py-4 md:py-5">{children}</main>
       </div>
 
       {/* Mobile drawer */}
