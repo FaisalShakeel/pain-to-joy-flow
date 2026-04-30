@@ -3,6 +3,7 @@ import { useState } from "react";
 import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio, Clock, CalendarDays, Globe2, MapPin, Building2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
+import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
 import { me, transactions, myOwnerProfile } from "@/lib/mockData";
 import { useRole, setRole } from "@/lib/role";
 import { toast } from "@/hooks/use-toast";
