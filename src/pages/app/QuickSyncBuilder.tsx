@@ -152,7 +152,7 @@ const QuickSyncBuilder = () => {
       kind === "nextweek" ? addWeeks(base, 1) :
       customDate ? new Date(customDate) : base;
     setSlots((p) => [{ ...s, id: `qs${Date.now()}`, date: nd.toISOString().slice(0, 10), createdAt: Date.now() }, ...p]);
-    toast({ title: "Quick Sync duplicated", description: format(nd, "EEE, MMM d") });
+    toast({ title: "Schedule cloned successfully and extended.", description: format(nd, "EEE, MMM d") });
   };
 
   return (
