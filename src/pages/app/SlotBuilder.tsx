@@ -208,6 +208,12 @@ const SlotBuilder = () => {
             <Zap className="w-3.5 h-3.5" /> Quick Sync
           </button>
           <button
+            onClick={() => navigate("/app/availability/focus-meetings")}
+            className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-indigo-700 hover:bg-indigo-500/10"
+          >
+            <Briefcase className="w-3.5 h-3.5" /> Meetings
+          </button>
+          <button
             onClick={() => openNew()}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95"
           >
