@@ -721,17 +721,64 @@ function Carousel<T extends { id: string }>({
 }
 
 /* ── Spotlight (mine) card ──────────────────────────────────────── */
-function MineCard({ post, onEdit, onDelete }: { post: SpotlightPost; onEdit: () => void; onDelete: () => void }) {
+function MineCard({
+  post, onView, onEdit, onDelete, onUnpublish, preview,
+}: {
+  post: SpotlightPost;
+  onView?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onUnpublish?: () => void;
+  preview?: boolean;
+}) {
   const Vis = visMeta[post.visibility];
   const Tn = toneMeta[post.tone];
   const aud = AUDIENCE_TAGS.find((a) => a.id === (post.audienceTag ?? "other"));
   return (
-    <div className="relative h-full p-4 rounded-2xl bg-primary text-primary-foreground border border-primary flex flex-col">
-      <div className="absolute top-2 right-2 flex items-center gap-1">
-        <button onClick={onEdit} className="p-1 rounded-full text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition" aria-label="Edit"><Pencil className="w-3 h-3" /></button>
-        <button onClick={onDelete} className="p-1 rounded-full text-primary-foreground/70 hover:bg-rose-500/20 hover:text-rose-200 transition" aria-label="Delete"><Trash2 className="w-3 h-3" /></button>
-      </div>
-      <div className="flex items-center gap-1.5 flex-wrap pr-14">
+    <div className="relative h-full p-4 rounded-2xl bg-primary text-primary-foreground shadow-md flex flex-col">
+      {!preview && (
+        <div className="absolute top-2 right-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 rounded-full text-primary-foreground/80 hover:bg-primary-foreground/15 transition"
+                aria-label="Spotlight actions"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {onView && (
+                <DropdownMenuItem onClick={onView}>
+                  <Eye className="w-4 h-4 mr-2" /> View
+                </DropdownMenuItem>
+              )}
+              {onEdit && (
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="w-4 h-4 mr-2" /> Edit
+                </DropdownMenuItem>
+              )}
+              {onUnpublish && post.visibility !== "private" && (
+                <DropdownMenuItem onClick={onUnpublish}>
+                  <EyeOff className="w-4 h-4 mr-2" /> Unpublish
+                </DropdownMenuItem>
+              )}
+              {onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={onDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+      <div className="flex items-center gap-1.5 flex-wrap pr-8">
         {aud && (
           <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gold text-background">
             {aud.emoji} {aud.label}
