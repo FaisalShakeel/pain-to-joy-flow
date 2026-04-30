@@ -105,8 +105,9 @@ const channelMeta: Record<Channel, { label: string; icon: React.ComponentType<an
 const durations: Duration[] = [5, 10, 15, 30, 60];
 const buffers: Buffer[] = [0, 5, 10, 15];
 
-const calcQuickSyncCapacity = (totalMin: number, callMin: number, bufferMin: number) =>
-  Math.max(0, Math.floor(totalMin / (callMin + bufferMin)));
+// Buffer is metadata (early-join / soft extension). It does NOT reduce slot count.
+const calcQuickSyncCapacity = (totalMin: number, callMin: number, _bufferMin: number) =>
+  Math.max(0, Math.floor(totalMin / Math.max(1, callMin)));
 
 // Channel filter (Hybrid / Online / Onsite) — Hybrid default
 type ChannelFilter = "hybrid" | "online" | "onsite";
@@ -200,18 +201,6 @@ const SlotBuilder = () => {
             className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Calendar
-          </button>
-          <button
-            onClick={() => navigate("/app/availability/quick-sync")}
-            className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-500/10"
-          >
-            <Zap className="w-3.5 h-3.5" /> Quick Sync
-          </button>
-          <button
-            onClick={() => navigate("/app/availability/focus-meetings")}
-            className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-indigo-700 hover:bg-indigo-500/10"
-          >
-            <Briefcase className="w-3.5 h-3.5" /> Meetings
           </button>
           <button
             onClick={() => openNew()}
