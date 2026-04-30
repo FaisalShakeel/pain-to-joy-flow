@@ -455,7 +455,7 @@ const SpotlightBoard = () => {
 /* ── Side pane wrapper with audience filter chips ───────────────── */
 function SidePane({
   kind, title, subtitle, icon: Icon, accentClass, chipActiveClass,
-  selectedAud, onSelectAud, countByAud, showCounts, showUnread, children,
+  selectedAud, onSelectAud, countByAud, showCounts, showUnread, children, headerAction,
 }: {
   kind: "spotlight" | "signal";
   title: string;
@@ -469,15 +469,17 @@ function SidePane({
   showCounts?: boolean;
   showUnread?: boolean;
   children: React.ReactNode;
+  headerAction?: React.ReactNode;
 }) {
   return (
-    <div className={cn("rounded-2xl bg-gradient-to-br ghost-border p-3 flex flex-col h-[360px]", accentClass)}>
-      <div className="flex items-center justify-between gap-2 mb-2 px-1">
+    <div className={cn("rounded-2xl bg-gradient-to-br ghost-border p-2.5 flex flex-col h-[235px]", accentClass)}>
+      <div className="flex items-center justify-between gap-2 mb-1.5 px-1">
         <div className="flex items-center gap-1.5">
           <Icon className={cn("w-3.5 h-3.5", kind === "spotlight" ? "text-primary" : "text-gold")} />
           <h4 className="text-[10px] font-bold uppercase tracking-wider text-primary">{title}</h4>
           <span className="text-[10px] text-muted-foreground">· {subtitle}</span>
         </div>
+        {headerAction}
       </div>
       {/* Audience chips */}
       <div className="flex items-center gap-1 mb-2 px-1 overflow-x-auto no-scrollbar">
