@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -87,11 +87,23 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
   const location = useLocation();
   const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
   const { unreadCount } = useNotifications();
-  const { unreadCount: messagesUnread } = useMessages();
+  const { unreadCount: messagesUnread, markAllRead: markAllMessagesRead } = useMessages();
   const { pendingIncomingCount } = useRequests();
 
+  useEffect(() => {
+    if (location.pathname.startsWith("/app/messages") && messagesUnread > 0) {
+      markAllMessagesRead();
+    }
+  }, [location.pathname, markAllMessagesRead, messagesUnread]);
+
+  const handleNavClick = (to: string) => {
+    if (to === "/app/messages") markAllMessagesRead();
+  };
+
   const itemsWithBadges = items.map((i) => {
-    if (i.to === "/app/messages") return { ...i, badge: messagesUnread || undefined };
+    if (i.to === "/app/messages") {
+      return { ...i, badge: location.pathname.startsWith("/app/messages") ? undefined : messagesUnread || undefined };
+    }
     if (i.to === "/app/requests") return { ...i, badge: pendingIncomingCount || undefined };
     return i;
   });
@@ -117,6 +129,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
                 <NavLink
                   to={item.to}
                   end={item.end}
+                  onClick={() => handleNavClick(item.to)}
                   className={() => {
                     const isActive = isItemActive(item.to, item.end, location.pathname);
                     return cn(
@@ -278,7 +291,10 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
                   <NavLink
                     to={item.to}
                     end={item.end}
-                    onClick={() => setMobileNav(false)}
+                    onClick={() => {
+                      handleNavClick(item.to);
+                      setMobileNav(false);
+                    }}
                     className={() => {
                       const isActive = isItemActive(item.to, item.end, location.pathname);
                       return cn(
@@ -327,6 +343,7 @@ const AppShell = ({ children, title, subtitle, actions }: Props) => {
               <NavLink
                 to={item.to}
                 end={item.end}
+                onClick={() => handleNavClick(item.to)}
                 className={() => {
                   const isActive = isItemActive(item.to, item.end, location.pathname);
                   return cn(
