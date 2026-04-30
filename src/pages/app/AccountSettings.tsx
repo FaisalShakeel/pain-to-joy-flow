@@ -135,6 +135,9 @@ const AccountSettings = () => {
             </div>
           </div>
 
+          {/* Priority Bypass settings */}
+          <BypassSettingsPanel />
+
           {/* Payment */}
           <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
             <div className="flex items-center justify-between">
