@@ -211,4 +211,14 @@ function Stat({ label, value, hint, icon }: { label: string; value: string; hint
   );
 }
 
+function Chip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px]">
+      <span className="text-accent">{icon}</span>
+      <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">{label}</span>
+      <span className="font-bold text-primary">{value}</span>
+    </span>
+  );
+}
+
 export default Dashboard;
