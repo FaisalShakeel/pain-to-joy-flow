@@ -412,11 +412,11 @@ const SlotCardCompact = ({
     status = "active";
   }
 
-  const statusCls =
+  const statusCls: string =
     status === "active"   ? "bg-emerald-500/15 text-emerald-700" :
     status === "upcoming" ? "bg-sky-500/15 text-sky-700" :
-    status === "full"     ? "bg-amber-500/20 text-amber-800" :
-                            "bg-muted-foreground/15 text-muted-foreground";
+    status === "expired"  ? "bg-muted-foreground/15 text-muted-foreground" :
+                            "bg-amber-500/20 text-amber-800";
 
   return (
     <article className="rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition">
