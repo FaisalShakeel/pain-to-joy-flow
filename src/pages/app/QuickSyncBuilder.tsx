@@ -263,12 +263,15 @@ const QuickSyncBuilder = () => {
             )}
 
             {step === 4 && (
-              <Section title="Step 4 — Buffer Time" icon={Timer} hint="Cooldown between each call">
+              <Section title="Step 4 — Flexible Buffer" icon={Timer} hint="Allows early-join and soft extension. Does NOT add gaps between slots.">
                 <div className="flex flex-wrap gap-2">
                   {([1, 2, 3] as BufferMin[]).map((b) => (
                     <Pill key={b} active={draft.bufferMin === b} onClick={() => set("bufferMin", b)}>{b} minute{b > 1 ? "s" : ""}</Pill>
                   ))}
                 </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Participants may join up to <strong className="text-primary">{draft.bufferMin} min</strong> early or run <strong className="text-primary">{draft.bufferMin} min</strong> over. Slot timing stays back-to-back.
+                </p>
               </Section>
             )}
 
