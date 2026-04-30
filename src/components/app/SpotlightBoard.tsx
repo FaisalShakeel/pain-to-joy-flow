@@ -114,6 +114,8 @@ const SpotlightBoard = () => {
         if (!!b.pinned !== !!a.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
         return b.createdAt - a.createdAt;
       });
+      // Landing display rule: max 2 visible spotlight items per audience.
+      grp[k] = grp[k].slice(0, 2);
     });
     return grp;
   }, [posts]);
