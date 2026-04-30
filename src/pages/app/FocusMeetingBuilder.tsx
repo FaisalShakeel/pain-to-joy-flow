@@ -52,10 +52,6 @@ const buildTimeline = (s: { startMin: number; endMin: number; callMin: number; b
   while (t + s.callMin <= s.endMin) {
     items.push({ kind: "call", start: t, end: t + s.callMin });
     t += s.callMin;
-    if (t + s.bufferMin <= s.endMin) {
-      items.push({ kind: "buffer", start: t, end: t + s.bufferMin });
-      t += s.bufferMin;
-    } else break;
   }
   return items;
 };
@@ -267,12 +263,15 @@ const FocusMeetingBuilder = () => {
             )}
 
             {step === 4 && (
-              <Section title="Step 4 — Buffer Time" icon={Timer} hint="Cooldown between each meeting">
+              <Section title="Step 4 — Flexible Buffer" icon={Timer} hint="Allows early-join and soft extension. Does NOT add gaps between slots.">
                 <div className="flex flex-wrap gap-2">
                   {([5, 10] as BufferMin[]).map((b) => (
                     <Pill key={b} active={draft.bufferMin === b} onClick={() => set("bufferMin", b)}>{b} minute{b > 1 ? "s" : ""}</Pill>
                   ))}
                 </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Participants may join up to <strong className="text-primary">{draft.bufferMin} min</strong> early or run <strong className="text-primary">{draft.bufferMin} min</strong> over. Slot timing stays back-to-back.
+                </p>
               </Section>
             )}
 
@@ -281,7 +280,8 @@ const FocusMeetingBuilder = () => {
                 <div className="rounded-2xl bg-gradient-to-r from-indigo-500/15 to-sky-500/15 p-4">
                   <p className="text-[11px] uppercase tracking-wider text-indigo-900/70 font-bold">Total meetings</p>
                   <p className="font-headline font-extrabold text-indigo-900 text-3xl">{count}</p>
-                  <p className="text-[11px] text-indigo-900/70 mt-0.5">{draft.callMin}-min meetings · {draft.bufferMin}-min buffer · {totalMin} min window</p>
+                  <p className="text-[11px] text-indigo-900/70 mt-0.5">{draft.callMin}-min meetings · {draft.bufferMin}-min flexible buffer · {totalMin} min window</p>
+                  <p className="text-[10px] text-indigo-900/60 mt-1 italic">Buffer lets participants join early or extend slightly — it does not reduce slot count.</p>
                 </div>
                 <TimelineView items={timeline} />
               </Section>
@@ -494,7 +494,13 @@ const MeetingCard = ({
 }) => {
   const [dupOpen, setDupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const count = slotCount(slot);
+  const allSlots = useMemo(
+    () => buildTimeline(slot).filter((i) => i.kind === "call"),
+    [slot],
+  );
+  const visibleSlots = expanded ? allSlots : allSlots.slice(0, 3);
   const A = accessMeta[slot.access];
   const date = new Date(slot.date);
   const isPast = date < new Date(new Date().toDateString());
@@ -533,12 +539,40 @@ const MeetingCard = ({
 
       <div className="mt-3 grid grid-cols-2 gap-1.5 text-[11px]">
         <Chip>{slot.callMin}-min meetings</Chip>
-        <Chip>{slot.bufferMin}-min buffer</Chip>
-        <Chip>{count} meetings</Chip>
+        <Chip title="Participants may join early or extend slightly. Does not affect slot count.">
+          {slot.bufferMin}-min flexible buffer
+        </Chip>
+        <Chip>{count} meetings total</Chip>
         <Chip>
           <Repeat className="w-3 h-3" /> {slot.repeats === "none" ? "Once" : slot.repeats}
         </Chip>
       </div>
+
+      {allSlots.length > 0 && (
+        <div className="mt-3 rounded-xl bg-surface-lowest ghost-border p-2">
+          <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">
+            Slots
+          </p>
+          <ul className="space-y-0.5 text-[11px] font-mono">
+            {visibleSlots.map((it, i) => (
+              <li key={i} className="flex items-center justify-between px-1.5 py-1 rounded hover:bg-surface-low">
+                <span className="text-primary font-bold">
+                  {fmtTime(it.start)} – {fmtTime(it.end)}
+                </span>
+                <span className="text-[9px] text-muted-foreground font-sans">#{i + 1}</span>
+              </li>
+            ))}
+          </ul>
+          {allSlots.length > 3 && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-1 w-full text-[10px] font-bold text-accent hover:text-primary py-1"
+            >
+              {expanded ? "Show less" : `View All Slots (${allSlots.length})`}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="mt-3 flex items-center justify-between gap-2">
         <span className={cn(
@@ -617,8 +651,11 @@ const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => v
   >{children}</button>
 );
 
-const Chip = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-lowest ghost-border text-[10px] font-bold text-primary">
+const Chip = ({ children, title }: { children: React.ReactNode; title?: string }) => (
+  <span
+    title={title}
+    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-lowest ghost-border text-[10px] font-bold text-primary"
+  >
     {children}
   </span>
 );
