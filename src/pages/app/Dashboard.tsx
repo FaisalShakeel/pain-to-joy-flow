@@ -47,7 +47,7 @@ const Dashboard = () => {
                 {status === "available" ? "Available for technical syncs" : status === "busy" ? "Busy — async only" : "Deep focus until 17:00"}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                Your status is what every Seeker sees first. Change it any time without explaining yourself.
+                Your status is what seekers see first. It updates automatically with your activity and appointments—or you can change it instantly, without explanation.
               </p>
             </div>
             <StatusPill tone={status} className="text-xs" />
