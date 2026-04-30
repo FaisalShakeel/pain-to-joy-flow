@@ -10,6 +10,7 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import AccessRequestComposer from "@/components/app/AccessRequestComposer";
 import PingButton from "@/components/app/PingButton";
+import PriorityBypassButton from "@/components/app/PriorityBypassButton";
 import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -349,6 +350,37 @@ const ContactProfile = () => {
                   to={isApproved ? `/app/schedule/${contact.id}` : null}
                   variant="default"
                 />
+              </div>
+
+              {/* Priority Bypass — controlled privilege */}
+              <div className="rounded-2xl bg-white/5 border border-gold/30 backdrop-blur-md p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="grid place-items-center w-8 h-8 rounded-lg bg-gold/20 text-gold">
+                      <Zap className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Priority Bypass</p>
+                      <p className="text-[11px] text-primary-foreground/60">Reach through when it truly matters</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <PriorityBypassButton
+                    contactId={contact.id}
+                    contactName={firstName}
+                    kind="call"
+                    variant="tile"
+                    to={`/app/contact/${contact.id}/call`}
+                  />
+                  <PriorityBypassButton
+                    contactId={contact.id}
+                    contactName={firstName}
+                    kind="message"
+                    variant="tile"
+                    to="/app/messages"
+                  />
+                </div>
               </div>
 
               {/* Identity selector */}
