@@ -224,7 +224,34 @@ const Dashboard = () => {
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Set your context</p>
                         <p className="text-xs text-primary/80 mt-0.5">Tell people how to approach you.</p>
                       </div>
-                      {CONTEXT_GROUPS.map((group, gi) => {
+                      {/* Custom input at top — write-first priority */}
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const v = customDraft.trim();
+                          if (!v) return;
+                          const trimmed = v.slice(0, 60);
+                          setContextMessage(trimmed);
+                          setLastCustom(trimmed);
+                          setContextTouched(true);
+                          setCustomDraft("");
+                        }}
+                        className="flex items-center gap-1.5 px-2 pb-2"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        <Input
+                          value={customDraft}
+                          onChange={(e) => setCustomDraft(e.target.value)}
+                          maxLength={60}
+                          placeholder="Write your own status…"
+                          className="h-8 text-xs"
+                        />
+                        <button type="submit" className="grid place-items-center w-8 h-8 rounded-md bg-primary text-primary-foreground hover:opacity-90 shrink-0" aria-label="Save context">
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                      </form>
+                      {CONTEXT_BY_MODE[status].map((group, gi) => {
                         const accent = ["bg-emerald-500", "bg-violet-500", "bg-rose-500", "bg-amber-500", "bg-sky-500"][gi % 5];
                         return (
                           <div key={group.label} className="mb-1">
