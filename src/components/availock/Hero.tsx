@@ -22,7 +22,7 @@ const Hero = () => {
         aria-hidden="true"
       >
         <source
-          src="https://cdn.coverr.co/videos/coverr-a-quiet-morning-at-the-office-3962/1080p.mp4"
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
           type="video/mp4"
         />
       </video>
