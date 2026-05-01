@@ -173,6 +173,7 @@ const Dashboard = () => {
                         const trimmed = v.slice(0, 60);
                         setContextMessage(trimmed);
                         setLastCustom(trimmed);
+                        setContextTouched(true);
                       }
                       setEditingCustom(false);
                     }}
@@ -222,7 +223,7 @@ const Dashboard = () => {
                                 return (
                                   <DropdownMenuItem
                                     key={m}
-                                    onClick={() => setContextMessage(m)}
+                                    onClick={() => handleContextSelect(m)}
                                     className={cn(
                                       "text-xs rounded-lg px-2.5 py-1.5 cursor-pointer transition-colors",
                                       active ? "bg-primary/10 text-primary font-semibold" : "hover:bg-surface-low text-foreground/85",
@@ -245,7 +246,7 @@ const Dashboard = () => {
                             <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Last custom</span>
                           </div>
                           <DropdownMenuItem
-                            onClick={() => setContextMessage(lastCustom)}
+                            onClick={() => handleContextSelect(lastCustom)}
                             className="text-xs italic rounded-lg px-2.5 py-1.5 hover:bg-surface-low cursor-pointer"
                           >
                             <span className="truncate flex-1">“{lastCustom}”</span>
