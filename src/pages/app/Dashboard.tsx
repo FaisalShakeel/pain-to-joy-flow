@@ -314,7 +314,27 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
+            {SYNC_WINDOWS.length > 0 && (
+              <Chip
+                icon={<CalendarClock className="w-3 h-3" />}
+                label="Sync Window"
+                value={SYNC_WINDOWS.map((w) => `${w.start}–${w.end}`).join(" | ")}
+              />
+            )}
             <Chip icon={<TrendingUp className="w-3 h-3" />} label="Streak" value={`${me.streak}d`} />
+            <a
+              href="#reserved-time"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
+              aria-label="Jump to reserved time"
+            >
+              <span className="text-accent"><CalendarDays className="w-3 h-3" /></span>
+              <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
+              <span className="font-bold text-primary">{RESERVED_COUNT}</span>
+            </a>
             <Chip icon={<ShieldCheck className="w-3 h-3" />} label="Saved" value={`${me.interruptionsSavedThisWeek}`} />
             <Chip icon={<Users className="w-3 h-3" />} label="Vault" value={`${contacts.length}`} />
           </div>
