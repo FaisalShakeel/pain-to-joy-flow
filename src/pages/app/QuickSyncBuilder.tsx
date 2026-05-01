@@ -71,8 +71,8 @@ const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 // ---------- Defaults ----------
 const blank = (): Omit<QSSlot, "id" | "createdAt"> => ({
   date: new Date().toISOString().slice(0, 10),
-  startMin: 10 * 60,
-  endMin: 10 * 60 + 20,
+  startMin: 10 * 60,        // 10:00 default suggested window
+  endMin: 11 * 60,          // 11:00
   callMin: 3,
   bufferMin: 1,
   repeats: "none",
@@ -81,14 +81,24 @@ const blank = (): Omit<QSSlot, "id" | "createdAt"> => ({
   access: "contacts",
 });
 
+// Default suggested Quick Sync windows (editable, removable, customizable)
 const seed: QSSlot[] = [
   {
-    id: "qs1",
-    date: addDays(new Date(), 2).toISOString().slice(0, 10),
-    startMin: 10 * 60, endMin: 10 * 60 + 20,
+    id: "qs-default-morning",
+    date: new Date().toISOString().slice(0, 10),
+    startMin: 10 * 60, endMin: 11 * 60,
     callMin: 3, bufferMin: 1,
-    repeats: "weekly", weekdays: [6],
-    booking: "instant", access: "priority",
+    repeats: "daily", weekdays: [],
+    booking: "instant", access: "contacts",
+    createdAt: Date.now() - 200000,
+  },
+  {
+    id: "qs-default-afternoon",
+    date: new Date().toISOString().slice(0, 10),
+    startMin: 14 * 60, endMin: 15 * 60,
+    callMin: 3, bufferMin: 1,
+    repeats: "daily", weekdays: [],
+    booking: "instant", access: "contacts",
     createdAt: Date.now() - 100000,
   },
 ];

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check,
+  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -46,46 +46,61 @@ const DEFAULT_CONTEXT: Record<StatusKey, string> = {
   offline:   "OFFLINE — back tomorrow.",
 };
 
-// Quick context (Line 3) — categorized with personality
-const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
-  { label: "Practical", items: [
-    "Leave a message if urgent",
-    "Available for quick sync",
-    "Call only if urgent",
-    "Will respond shortly",
-    "Back soon",
-    "On the move",
-    "Offline for now",
-  ]},
-  { label: "Personal", items: [
-    "With guests",
-    "At prayers",
-    "Taking a short break",
-    "Stepping out",
-    "In between meetings",
-  ]},
-  { label: "Boundaries", items: [
-    "Do not call",
-    "Do not disturb",
-    "Messages only",
-    "Focus time — no interruptions",
-  ]},
-  { label: "Human", items: [
-    "Waiting 4 business",
-    "Brain loading…",
-    "Running on coffee ☕",
-    "Quick ping works best",
-    "Keep it short, I'm in flow",
-    "Silent but working",
-  ]},
-  { label: "Light humor", items: [
-    "Powder room break",
-    "On a mission 🚀",
-    "In a thinking loop",
-    "Available… mentally negotiating 😄",
-    "Multitasking like a pro",
-  ]},
+// Quick context (Line 3) — grouped by current status mode
+const CONTEXT_BY_MODE: Record<StatusKey, { label: string; items: string[] }[]> = {
+  available: [
+    { label: "Available", items: [
+      "HOPEN 4 Business.",
+      "Available for quick sync",
+      "Ping me anytime",
+      "Open for a 3-min call",
+      "Quick ping works best",
+    ]},
+  ],
+  busy: [
+    { label: "Busy", items: [
+      "In a meeting — back soon",
+      "Leave a message if urgent",
+      "Messages only right now",
+      "Will revert back",
+      "Between meetings",
+    ]},
+  ],
+  focus: [
+    { label: "Focus — Professional", items: [
+      "Will revert back",
+      "Ping or leave a note if urgent",
+      "With my boss",
+      "Will notify when available",
+      "In deep focus",
+    ]},
+  ],
+  driving: [
+    { label: "Driving — Playful + Boundary", items: [
+      "Call, but traffic fine is on you",
+      "Only boss or wife can call 😄",
+      "Don't call if you love me",
+      "One can wait a bit",
+      "Don't rush me",
+      "Avoid calling",
+    ]},
+  ],
+  offline: [
+    { label: "Offline — Fun / Personal", items: [
+      "Let me have fun",
+      "Free bird for two days",
+      "Replenishing my batteries",
+      "Family time",
+    ]},
+  ],
+};
+
+// Mock sync windows derived from calendar — empty array hides the header chip
+const SYNC_WINDOWS: { start: string; end: string }[] = [
+  { start: "10:00", end: "11:00" },
+  { start: "14:00", end: "15:00" },
 ];
+const RESERVED_COUNT = 5;
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
@@ -102,7 +117,15 @@ const Dashboard = () => {
 
   const handleStatusChange = (s: StatusKey) => {
     setStatus(s);
-    if (!contextTouched) setContextMessage(DEFAULT_CONTEXT[s]);
+    // Keep custom user-written messages; otherwise sync to the new mode's default
+    const allPresets = new Set<string>([
+      ...Object.values(DEFAULT_CONTEXT),
+      ...Object.values(CONTEXT_BY_MODE).flatMap((groups) => groups.flatMap((g) => g.items)),
+    ]);
+    if (!contextTouched || allPresets.has(contextMessage)) {
+      setContextMessage(DEFAULT_CONTEXT[s]);
+      setContextTouched(false);
+    }
   };
 
   const handleContextSelect = (m: string) => {
@@ -209,7 +232,34 @@ const Dashboard = () => {
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Set your context</p>
                         <p className="text-xs text-primary/80 mt-0.5">Tell people how to approach you.</p>
                       </div>
-                      {CONTEXT_GROUPS.map((group, gi) => {
+                      {/* Custom input at top — write-first priority */}
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const v = customDraft.trim();
+                          if (!v) return;
+                          const trimmed = v.slice(0, 60);
+                          setContextMessage(trimmed);
+                          setLastCustom(trimmed);
+                          setContextTouched(true);
+                          setCustomDraft("");
+                        }}
+                        className="flex items-center gap-1.5 px-2 pb-2"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        <Input
+                          value={customDraft}
+                          onChange={(e) => setCustomDraft(e.target.value)}
+                          maxLength={60}
+                          placeholder="Write your own status…"
+                          className="h-8 text-xs"
+                        />
+                        <button type="submit" className="grid place-items-center w-8 h-8 rounded-md bg-primary text-primary-foreground hover:opacity-90 shrink-0" aria-label="Save context">
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                      </form>
+                      {CONTEXT_BY_MODE[status].map((group, gi) => {
                         const accent = ["bg-emerald-500", "bg-violet-500", "bg-rose-500", "bg-amber-500", "bg-sky-500"][gi % 5];
                         return (
                           <div key={group.label} className="mb-1">
@@ -272,7 +322,27 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
+            {SYNC_WINDOWS.length > 0 && (
+              <Chip
+                icon={<CalendarClock className="w-3 h-3" />}
+                label="Sync Window"
+                value={SYNC_WINDOWS.map((w) => `${w.start}–${w.end}`).join(" | ")}
+              />
+            )}
             <Chip icon={<TrendingUp className="w-3 h-3" />} label="Streak" value={`${me.streak}d`} />
+            <a
+              href="#reserved-time"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
+              aria-label="Jump to reserved time"
+            >
+              <span className="text-accent"><CalendarDays className="w-3 h-3" /></span>
+              <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
+              <span className="font-bold text-primary">{RESERVED_COUNT}</span>
+            </a>
             <Chip icon={<ShieldCheck className="w-3 h-3" />} label="Saved" value={`${me.interruptionsSavedThisWeek}`} />
             <Chip icon={<Users className="w-3 h-3" />} label="Vault" value={`${contacts.length}`} />
           </div>
@@ -289,7 +359,7 @@ const Dashboard = () => {
         </div>
 
         {/* Reserved Time */}
-        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
+        <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
               <CalendarDays className="w-4 h-4 text-accent" />
