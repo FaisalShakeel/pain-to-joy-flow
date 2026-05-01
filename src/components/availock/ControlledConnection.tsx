@@ -32,7 +32,7 @@ const ControlledConnection = () => {
             eyebrow="Hybrid Slot"
             icon={Layers}
             headline="One slot. Two ways to connect."
-            description="Offer both online and onsite options in the same time window."
+            description="Offer both online and onsite options in the same time window, allowing selection of one channel."
             visual={<HybridSlotVisual />}
             benefits={[
               "No duplicate scheduling",
@@ -121,7 +121,7 @@ function HybridSlotVisual() {
     <div className="rounded-xl bg-surface-lowest ghost-border p-4 md:p-5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Today</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Hybrid Slot</p>
           <p className="font-headline font-extrabold text-primary text-2xl md:text-3xl">3:00 PM</p>
           <p className="text-xs text-muted-foreground">30 min · Hybrid window</p>
         </div>
@@ -130,21 +130,22 @@ function HybridSlotVisual() {
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2.5">
-        <div className="rounded-lg bg-surface-low ghost-border p-3">
-          <div className="flex items-center gap-1.5 text-primary">
+      {/* Merged unified slot card — both channels in one block, pick one */}
+      <div className="mt-4 rounded-lg bg-surface-low ghost-border p-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
+          Choose one channel
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <button className="flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground px-2.5 py-2 text-xs font-semibold shadow-glass">
             <Globe2 className="w-3.5 h-3.5" />
-            <span className="text-xs font-semibold">Online</span>
-          </div>
-          <p className="mt-1 text-[10px] text-muted-foreground">Video call · auto link</p>
-        </div>
-        <div className="rounded-lg bg-surface-low ghost-border p-3">
-          <div className="flex items-center gap-1.5 text-primary">
+            Online
+          </button>
+          <button className="flex items-center justify-center gap-1.5 rounded-md bg-surface-lowest ghost-border text-primary px-2.5 py-2 text-xs font-semibold hover:bg-surface-high transition">
             <MapPin className="w-3.5 h-3.5" />
-            <span className="text-xs font-semibold">Onsite</span>
-          </div>
-          <p className="mt-1 text-[10px] text-muted-foreground">Office · 5th floor</p>
+            Onsite
+          </button>
         </div>
+        <p className="mt-2 text-[10px] text-muted-foreground">Video link auto-generated · Office · 5th floor</p>
       </div>
     </div>
   );
