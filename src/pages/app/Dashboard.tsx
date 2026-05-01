@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check,
+  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -46,46 +46,61 @@ const DEFAULT_CONTEXT: Record<StatusKey, string> = {
   offline:   "OFFLINE — back tomorrow.",
 };
 
-// Quick context (Line 3) — categorized with personality
-const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
-  { label: "Practical", items: [
-    "Leave a message if urgent",
-    "Available for quick sync",
-    "Call only if urgent",
-    "Will respond shortly",
-    "Back soon",
-    "On the move",
-    "Offline for now",
-  ]},
-  { label: "Personal", items: [
-    "With guests",
-    "At prayers",
-    "Taking a short break",
-    "Stepping out",
-    "In between meetings",
-  ]},
-  { label: "Boundaries", items: [
-    "Do not call",
-    "Do not disturb",
-    "Messages only",
-    "Focus time — no interruptions",
-  ]},
-  { label: "Human", items: [
-    "Waiting 4 business",
-    "Brain loading…",
-    "Running on coffee ☕",
-    "Quick ping works best",
-    "Keep it short, I'm in flow",
-    "Silent but working",
-  ]},
-  { label: "Light humor", items: [
-    "Powder room break",
-    "On a mission 🚀",
-    "In a thinking loop",
-    "Available… mentally negotiating 😄",
-    "Multitasking like a pro",
-  ]},
+// Quick context (Line 3) — grouped by current status mode
+const CONTEXT_BY_MODE: Record<StatusKey, { label: string; items: string[] }[]> = {
+  available: [
+    { label: "Available", items: [
+      "HOPEN 4 Business.",
+      "Available for quick sync",
+      "Ping me anytime",
+      "Open for a 3-min call",
+      "Quick ping works best",
+    ]},
+  ],
+  busy: [
+    { label: "Busy", items: [
+      "In a meeting — back soon",
+      "Leave a message if urgent",
+      "Messages only right now",
+      "Will revert back",
+      "Between meetings",
+    ]},
+  ],
+  focus: [
+    { label: "Focus — Professional", items: [
+      "Will revert back",
+      "Ping or leave a note if urgent",
+      "With my boss",
+      "Will notify when available",
+      "In deep focus",
+    ]},
+  ],
+  driving: [
+    { label: "Driving — Playful + Boundary", items: [
+      "Call, but traffic fine is on you",
+      "Only boss or wife can call 😄",
+      "Don't call if you love me",
+      "One can wait a bit",
+      "Don't rush me",
+      "Avoid calling",
+    ]},
+  ],
+  offline: [
+    { label: "Offline — Fun / Personal", items: [
+      "Let me have fun",
+      "Free bird for two days",
+      "Replenishing my batteries",
+      "Family time",
+    ]},
+  ],
+};
+
+// Mock sync windows derived from calendar — empty array hides the header chip
+const SYNC_WINDOWS: { start: string; end: string }[] = [
+  { start: "10:00", end: "11:00" },
+  { start: "14:00", end: "15:00" },
 ];
+const RESERVED_COUNT = 5;
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
