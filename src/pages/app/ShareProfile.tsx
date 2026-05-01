@@ -1,10 +1,14 @@
-import { Link2, Share2, Copy } from "lucide-react";
+import { Link2, Share2, Copy, CalendarClock } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { me } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
 const link = "availock.com/v/alistair-finch";
+const SYNC_WINDOWS: { start: string; end: string }[] = [
+  { start: "10:00", end: "11:00" },
+  { start: "14:00", end: "15:00" },
+];
 
 const ShareProfile = () => {
   const copy = () => {
@@ -18,6 +22,15 @@ const ShareProfile = () => {
           <Avatar initials={me.initials} size="xl" className="mx-auto" />
           <p className="mt-3 font-headline font-bold text-primary">{me.name}</p>
           <p className="text-xs text-muted-foreground">{me.title}</p>
+          {SYNC_WINDOWS.length > 0 && (
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 ghost-border text-[11px]">
+              <CalendarClock className="w-3.5 h-3.5 text-accent" />
+              <span className="font-bold uppercase tracking-wider text-[9px] text-muted-foreground">Sync Window</span>
+              <span className="font-semibold text-primary">
+                {SYNC_WINDOWS.map((w) => `${w.start}–${w.end}`).join(" | ")}
+              </span>
+            </div>
+          )}
           <div className="mt-5 mx-auto w-44 h-44 rounded-2xl bg-primary text-primary-foreground grid place-items-center">
             {/* simple QR placeholder */}
             <div className="grid grid-cols-8 gap-px p-3 bg-primary-foreground/10 rounded-xl">
