@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import StatusContextPanel from "@/components/app/StatusContextPanel";
 
 type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
