@@ -39,7 +39,7 @@ const Nav = () => {
           <a href="#how" className="text-muted-foreground hover:text-primary transition-colors">How it works</a>
           <a href="#video" className="text-muted-foreground hover:text-primary transition-colors">Video</a>
           <a href="#manifesto" className="text-muted-foreground hover:text-primary transition-colors">Manifesto</a>
-          <Link to="/pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+          <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</a>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
           <Link
