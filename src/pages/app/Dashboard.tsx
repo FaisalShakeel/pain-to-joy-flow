@@ -173,12 +173,11 @@ const Dashboard = () => {
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="inline-flex items-center gap-1.5 text-[11px] md:text-xs font-bold tracking-[0.14em] uppercase hover:opacity-80 transition max-w-full">
-                        <span className="w-1 h-1 rounded-full bg-accent shrink-0" />
-                        <span className="truncate max-w-[60vw] md:max-w-[28rem] bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                      <button className="inline-flex items-center gap-1.5 text-xs md:text-[13px] font-medium italic text-muted-foreground hover:text-primary transition max-w-full">
+                        <span className="truncate max-w-[60vw] md:max-w-[28rem]">
                           {contextMessage}
                         </span>
-                        <ChevronDown className="w-3 h-3 shrink-0 text-primary/70" />
+                        <ChevronDown className="w-3 h-3 shrink-0 opacity-70" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
