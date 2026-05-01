@@ -12,6 +12,7 @@ import Manifesto from "@/components/availock/Manifesto";
 import Pricing from "@/components/availock/Pricing";
 import Claim from "@/components/availock/Claim";
 import TimeProtectors from "@/components/availock/TimeProtectors";
+import Feedback from "@/components/availock/Feedback";
 import Footer from "@/components/availock/Footer";
 import WhatsAppChat from "@/components/availock/WhatsAppChat";
 
@@ -33,6 +34,7 @@ const Index = () => {
         <Pricing />
         <Claim />
         <TimeProtectors />
+        <Feedback />
       </main>
       <Footer />
       <WhatsAppChat />
