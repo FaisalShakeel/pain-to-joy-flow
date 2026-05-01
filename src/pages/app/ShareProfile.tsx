@@ -1,8 +1,9 @@
-import { Link2, Share2, Copy, CalendarClock } from "lucide-react";
+import { Link2, Share2, Copy, CalendarClock, Zap } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { me } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 const link = "availock.com/v/alistair-finch";
 const SYNC_WINDOWS: { start: string; end: string }[] = [
@@ -19,18 +20,47 @@ const ShareProfile = () => {
     <AppShell subtitle="Vault sharing" title="Share your vault">
       <div className="grid lg:grid-cols-[360px_1fr] gap-5 items-start">
         <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient text-center">
-          <Avatar initials={me.initials} size="xl" className="mx-auto" />
+          <div className="relative inline-block mx-auto">
+            <Avatar initials={me.initials} size="xl" />
+            {SYNC_WINDOWS.length > 0 && (
+              <HoverCard openDelay={120} closeDelay={80}>
+                <HoverCardTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Quick Sync availability"
+                    className="absolute -bottom-2 -right-3 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary text-primary-foreground shadow-elevated ring-2 ring-surface-lowest hover:scale-[1.04] active:scale-[0.97] transition-transform"
+                  >
+                    <Zap className="w-3 h-3 text-gold" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.14em]">Quick Sync</span>
+                    <span className="text-[10px] font-semibold tabular-nums">
+                      {SYNC_WINDOWS.slice(0, 2).map((w) => `${w.start}–${w.end}`).join(" | ")}
+                    </span>
+                  </button>
+                </HoverCardTrigger>
+                <HoverCardContent align="start" className="w-64 rounded-xl ghost-border bg-surface-lowest/95 backdrop-blur shadow-elevated p-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <CalendarClock className="w-3.5 h-3.5 text-accent" />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Quick Sync today</p>
+                  </div>
+                  <ul className="space-y-1">
+                    {SYNC_WINDOWS.map((w) => (
+                      <li key={`${w.start}-${w.end}`} className="text-xs text-primary tabular-nums font-semibold">
+                        {w.start} – {w.end}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => toast({ title: "Quick Sync requested" })}
+                    className="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold hover:opacity-95"
+                  >
+                    <Zap className="w-3 h-3 text-gold" /> Book Quick Sync
+                  </button>
+                </HoverCardContent>
+              </HoverCard>
+            )}
+          </div>
           <p className="mt-3 font-headline font-bold text-primary">{me.name}</p>
           <p className="text-xs text-muted-foreground">{me.title}</p>
-          {SYNC_WINDOWS.length > 0 && (
-            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 ghost-border text-[11px]">
-              <CalendarClock className="w-3.5 h-3.5 text-accent" />
-              <span className="font-bold uppercase tracking-wider text-[9px] text-muted-foreground">Sync Window</span>
-              <span className="font-semibold text-primary">
-                {SYNC_WINDOWS.map((w) => `${w.start}–${w.end}`).join(" | ")}
-              </span>
-            </div>
-          )}
           <div className="mt-5 mx-auto w-44 h-44 rounded-2xl bg-primary text-primary-foreground grid place-items-center">
             {/* simple QR placeholder */}
             <div className="grid grid-cols-8 gap-px p-3 bg-primary-foreground/10 rounded-xl">
