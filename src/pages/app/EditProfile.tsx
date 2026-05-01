@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock,
+  ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock, Camera, X,
   Radar, ChevronDown, ChevronUp, Clock, MessageCircle, Phone, Zap, UserPlus,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -131,15 +131,30 @@ const EditProfile = () => {
         <ArrowLeft className="w-4 h-4" /> Back to settings
       </Link>
 
-      <form onSubmit={save} className="grid lg:grid-cols-3 gap-5">
+      <form onSubmit={save} className="grid lg:grid-cols-3 gap-5 pb-28">
         <div className="lg:col-span-2 space-y-5">
-          {/* Avatar */}
-          <Section title="Avatar">
-            <div className="flex items-center gap-4">
-              <Avatar initials={profile.initials} size="xl" />
-              <input type="file" accept="image/*" className="text-sm text-muted-foreground" />
+          {/* Profile header */}
+          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="relative shrink-0">
+                <Avatar initials={profile.initials} size="xl" />
+                <label className="absolute -bottom-1 -right-1 grid place-items-center w-8 h-8 rounded-full bg-primary text-primary-foreground shadow-sm cursor-pointer hover:opacity-90 transition" title="Change photo">
+                  <Camera className="w-3.5 h-3.5" />
+                  <input type="file" accept="image/*" className="sr-only" />
+                </label>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Profile</p>
+                <p className="font-headline font-extrabold text-primary text-xl truncate mt-0.5">{profile.name || "Unnamed"}</p>
+                <p className="text-sm text-muted-foreground truncate">{profile.title}{profile.org ? ` · ${profile.org}` : ""}</p>
+                <p className="text-xs text-muted-foreground mt-1">{me.email}</p>
+              </div>
+              <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full ghost-border bg-surface-low text-xs font-semibold text-primary hover:bg-surface transition cursor-pointer shrink-0">
+                <Camera className="w-3.5 h-3.5" /> Edit photo
+                <input type="file" accept="image/*" className="sr-only" />
+              </label>
             </div>
-          </Section>
+          </div>
 
           {/* Who Can Find Me */}
           <WhoCanFindMe
@@ -288,19 +303,36 @@ const EditProfile = () => {
                 <li className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-rose-500" /> Hidden — only you</li>
               </ul>
             </div>
+
+            <p className="mt-5 text-[11px] text-muted-foreground text-center">
+              Signed in as <span className="font-semibold text-primary">{me.email}</span>
+            </p>
           </div>
-
-          <button
-            type="submit"
-            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-gradient-primary text-primary-foreground font-semibold shadow-elevated hover:opacity-95 transition"
-          >
-            <Save className="w-4 h-4" /> Save changes
-          </button>
-
-          <p className="text-[11px] text-muted-foreground text-center">
-            Signed in as <span className="font-semibold text-primary">{me.email}</span>
-          </p>
         </aside>
+
+        {/* Sticky action bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-outline-variant/30 bg-surface-lowest/95 backdrop-blur supports-[backdrop-filter]:bg-surface-lowest/80">
+          <div className="mx-auto max-w-7xl px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+            <p className="hidden sm:block text-xs text-muted-foreground">
+              Changes apply to your contact card immediately after save.
+            </p>
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                type="button"
+                onClick={() => navigate("/app/settings")}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full ghost-border bg-surface-low text-sm font-semibold text-primary hover:bg-surface transition"
+              >
+                <X className="w-4 h-4" /> Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
+              >
+                <Save className="w-4 h-4" /> Save changes
+              </button>
+            </div>
+          </div>
+        </div>
       </form>
     </AppShell>
   );
