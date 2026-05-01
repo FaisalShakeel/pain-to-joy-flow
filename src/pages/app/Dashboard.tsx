@@ -95,12 +95,41 @@ const CONTEXT_BY_MODE: Record<StatusKey, { label: string; items: string[] }[]> =
   ],
 };
 
-// Mock sync windows derived from calendar — empty array hides the header chip
-const SYNC_WINDOWS: { start: string; end: string }[] = [
-  { start: "10:00", end: "11:00" },
-  { start: "14:00", end: "15:00" },
+// Mock raw Quick Sync slots from calendar (small granular slots)
+const QUICK_SYNC_SLOTS: { start: string; end: string }[] = [
+  { start: "10:00", end: "10:15" },
+  { start: "10:15", end: "10:30" },
+  { start: "14:00", end: "14:15" },
+  { start: "14:15", end: "14:30" },
 ];
 const RESERVED_COUNT = 5;
+
+// Convert "HH:MM" -> minutes
+const toMin = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+
+// Group slots into accumulative windows. New window when gap between
+// previous slot end and next slot start is >= 60 minutes.
+const groupSyncWindows = (slots: { start: string; end: string }[]) => {
+  if (!slots.length) return [];
+  const sorted = [...slots].sort((a, b) => toMin(a.start) - toMin(b.start));
+  const windows: { start: string; end: string }[] = [];
+  let cur = { ...sorted[0] };
+  for (let i = 1; i < sorted.length; i++) {
+    const s = sorted[i];
+    const gap = toMin(s.start) - toMin(cur.end);
+    if (gap >= 60) {
+      windows.push(cur);
+      cur = { ...s };
+    } else {
+      if (toMin(s.end) > toMin(cur.end)) cur.end = s.end;
+    }
+  }
+  windows.push(cur);
+  return windows;
+};
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
