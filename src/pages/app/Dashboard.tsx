@@ -37,6 +37,15 @@ const AUTO_STATUS: Record<StatusKey, string> = {
   offline:   "Offline — back tomorrow",
 };
 
+// Default context (Line 3) — switches with status mode, brand-flavored
+const DEFAULT_CONTEXT: Record<StatusKey, string> = {
+  available: "HOPEN 4 Business.",
+  busy:      "BUSY — Ping, don't call.",
+  focus:     "FOCUS mode — no interruptions.",
+  driving:   "DRIVING — hands-free only.",
+  offline:   "OFFLINE — back tomorrow.",
+};
+
 // Quick context (Line 3) — categorized with personality
 const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
   { label: "Practical", items: [
@@ -80,7 +89,8 @@ const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
-  const [contextMessage, setContextMessage] = useState<string>("HOPEN 4 Business.");
+  const [contextMessage, setContextMessage] = useState<string>(DEFAULT_CONTEXT.available);
+  const [contextTouched, setContextTouched] = useState(false);
   const [lastCustom, setLastCustom] = useState<string>("");
   const [editingCustom, setEditingCustom] = useState(false);
   const [customDraft, setCustomDraft] = useState("");
@@ -89,6 +99,16 @@ const Dashboard = () => {
   const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
   const meta = statusMeta[status];
   const autoStatus = AUTO_STATUS[status];
+
+  const handleStatusChange = (s: StatusKey) => {
+    setStatus(s);
+    if (!contextTouched) setContextMessage(DEFAULT_CONTEXT[s]);
+  };
+
+  const handleContextSelect = (m: string) => {
+    setContextMessage(m);
+    setContextTouched(true);
+  };
 
   return (
     <AppShell
@@ -104,7 +124,7 @@ const Dashboard = () => {
               return (
                 <button
                   key={s}
-                  onClick={() => setStatus(s)}
+                  onClick={() => handleStatusChange(s)}
                   className={cn(
                     "px-2.5 py-1 text-[11px] font-semibold rounded-full transition inline-flex items-center gap-1.5",
                     active ? cn(m.activeBg, m.activeText, "shadow-glass") : "text-muted-foreground hover:text-primary",
