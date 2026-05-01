@@ -256,95 +256,22 @@ const Dashboard = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
-                      className="w-80 max-h-[70vh] overflow-y-auto p-2 rounded-2xl border border-outline-variant/40 bg-surface-lowest/95 backdrop-blur shadow-elevated"
+                      className="w-[min(92vw,28rem)] max-h-[75vh] overflow-y-auto p-3 rounded-2xl border border-outline-variant/40 bg-surface-lowest/95 backdrop-blur shadow-elevated"
                     >
-                      <div className="px-2 pt-1 pb-2">
+                      <div className="px-1 pt-0.5 pb-2">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Set your context</p>
-                        <p className="text-xs text-primary/80 mt-0.5">Tell people how to approach you.</p>
+                        <p className="text-xs text-primary/80 mt-0.5">Write your own — or tap a preset.</p>
                       </div>
-                      {/* Custom input at top — write-first priority */}
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          const v = customDraft.trim();
-                          if (!v) return;
-                          const trimmed = v.slice(0, 60);
-                          setContextMessage(trimmed);
-                          setLastCustom(trimmed);
+                      <StatusContextPanel
+                        active={contextMessage}
+                        lastCustom={lastCustom}
+                        onSelect={(m) => handleContextSelect(m)}
+                        onCustom={(m) => {
+                          setContextMessage(m);
+                          setLastCustom(m);
                           setContextTouched(true);
-                          setCustomDraft("");
                         }}
-                        className="flex items-center gap-1.5 px-2 pb-2"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => e.stopPropagation()}
-                      >
-                        <Input
-                          value={customDraft}
-                          onChange={(e) => setCustomDraft(e.target.value)}
-                          maxLength={60}
-                          placeholder="Write your own status…"
-                          className="h-8 text-xs"
-                        />
-                        <button type="submit" className="grid place-items-center w-8 h-8 rounded-md bg-primary text-primary-foreground hover:opacity-90 shrink-0" aria-label="Save context">
-                          <Check className="w-3.5 h-3.5" />
-                        </button>
-                      </form>
-                      {CONTEXT_BY_MODE[status].map((group, gi) => {
-                        const accent = ["bg-emerald-500", "bg-violet-500", "bg-rose-500", "bg-amber-500", "bg-sky-500"][gi % 5];
-                        return (
-                          <div key={group.label} className="mb-1">
-                            <div className="flex items-center gap-1.5 px-2 pt-2 pb-1">
-                              <span className={cn("w-1.5 h-1.5 rounded-full", accent)} />
-                              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{group.label}</span>
-                            </div>
-                            <div className="grid grid-cols-1 gap-0.5">
-                              {group.items.map((m) => {
-                                const active = contextMessage === m;
-                                return (
-                                  <DropdownMenuItem
-                                    key={m}
-                                    onClick={() => handleContextSelect(m)}
-                                    className={cn(
-                                      "text-xs rounded-lg px-2.5 py-1.5 cursor-pointer transition-colors",
-                                      active ? "bg-primary/10 text-primary font-semibold" : "hover:bg-surface-low text-foreground/85",
-                                    )}
-                                  >
-                                    <span className="flex-1 truncate">{m}</span>
-                                    {active && <Check className="w-3.5 h-3.5 ml-2 text-primary shrink-0" />}
-                                  </DropdownMenuItem>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {lastCustom && (
-                        <>
-                          <DropdownMenuSeparator className="my-1.5" />
-                          <div className="flex items-center gap-1.5 px-2 pt-1 pb-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Last custom</span>
-                          </div>
-                          <DropdownMenuItem
-                            onClick={() => handleContextSelect(lastCustom)}
-                            className="text-xs italic rounded-lg px-2.5 py-1.5 hover:bg-surface-low cursor-pointer"
-                          >
-                            <span className="truncate flex-1">“{lastCustom}”</span>
-                            {contextMessage === lastCustom && <Check className="w-3.5 h-3.5 ml-2 text-primary shrink-0" />}
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuSeparator className="my-1.5" />
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCustomDraft(contextMessage);
-                          setEditingCustom(true);
-                        }}
-                        className="text-xs rounded-lg px-2.5 py-2 cursor-pointer bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/15 hover:to-accent/15 text-primary font-semibold"
-                      >
-                        <Pencil className="w-3.5 h-3.5 mr-2" /> Write custom context…
-                      </DropdownMenuItem>
+                      />
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
