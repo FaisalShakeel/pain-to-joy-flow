@@ -80,7 +80,7 @@ const CONTEXT_GROUPS: { label: string; items: string[] }[] = [
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
-  const [contextMessage, setContextMessage] = useState<string>("Leave a message if urgent");
+  const [contextMessage, setContextMessage] = useState<string>("HOPEN 4 Business.");
   const [lastCustom, setLastCustom] = useState<string>("");
   const [editingCustom, setEditingCustom] = useState(false);
   const [customDraft, setCustomDraft] = useState("");
@@ -142,12 +142,7 @@ const Dashboard = () => {
               <p className="text-xs md:text-[13px] font-semibold text-primary/80 leading-tight mt-0.5 truncate max-w-[60vw] md:max-w-[28rem]">
                 {autoStatus}
               </p>
-              {/* Line 3 — Brand tagline */}
-              <p className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] md:text-xs font-bold tracking-[0.14em] uppercase bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                <span className="w-1 h-1 rounded-full bg-accent" />
-                HOPEN 4 Business.
-              </p>
-              {/* Line 4 — Quick context (user-defined, lighter) */}
+              {/* Line 3 — Quick context (styled like brand tagline) */}
               <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
                 {editingCustom ? (
                   <form
@@ -178,9 +173,12 @@ const Dashboard = () => {
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="inline-flex items-center gap-1 italic text-[11px] md:text-xs text-muted-foreground hover:text-primary transition max-w-full">
-                        <span className="truncate max-w-[60vw] md:max-w-[28rem]">“{contextMessage}”</span>
-                        <ChevronDown className="w-3 h-3 shrink-0" />
+                      <button className="inline-flex items-center gap-1.5 text-[11px] md:text-xs font-bold tracking-[0.14em] uppercase hover:opacity-80 transition max-w-full">
+                        <span className="w-1 h-1 rounded-full bg-accent shrink-0" />
+                        <span className="truncate max-w-[60vw] md:max-w-[28rem] bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                          {contextMessage}
+                        </span>
+                        <ChevronDown className="w-3 h-3 shrink-0 text-primary/70" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
