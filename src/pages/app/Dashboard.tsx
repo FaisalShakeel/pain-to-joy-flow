@@ -117,7 +117,15 @@ const Dashboard = () => {
 
   const handleStatusChange = (s: StatusKey) => {
     setStatus(s);
-    if (!contextTouched) setContextMessage(DEFAULT_CONTEXT[s]);
+    // Keep custom user-written messages; otherwise sync to the new mode's default
+    const allPresets = new Set<string>([
+      ...Object.values(DEFAULT_CONTEXT),
+      ...Object.values(CONTEXT_BY_MODE).flatMap((groups) => groups.flatMap((g) => g.items)),
+    ]);
+    if (!contextTouched || allPresets.has(contextMessage)) {
+      setContextMessage(DEFAULT_CONTEXT[s]);
+      setContextTouched(false);
+    }
   };
 
   const handleContextSelect = (m: string) => {
