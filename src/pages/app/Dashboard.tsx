@@ -142,7 +142,12 @@ const Dashboard = () => {
               <p className="text-xs md:text-[13px] font-semibold text-primary/80 leading-tight mt-0.5 truncate max-w-[60vw] md:max-w-[28rem]">
                 {autoStatus}
               </p>
-              {/* Line 3 — Quick context (user-defined, lighter) */}
+              {/* Line 3 — Brand tagline */}
+              <p className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] md:text-xs font-bold tracking-[0.14em] uppercase bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                <span className="w-1 h-1 rounded-full bg-accent" />
+                HOPEN 4 Business.
+              </p>
+              {/* Line 4 — Quick context (user-defined, lighter) */}
               <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
                 {editingCustom ? (
                   <form
