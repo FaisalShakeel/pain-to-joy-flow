@@ -4,8 +4,8 @@ type Tone = "available" | "busy" | "focus" | "offline" | "locked" | "pending" | 
 
 const tones: Record<Tone, { label: string; cls: string; dot: string }> = {
   available: { label: "Available", cls: "bg-emerald-500/10 text-emerald-700", dot: "bg-emerald-500" },
-  busy: { label: "Busy", cls: "bg-amber-500/10 text-amber-700", dot: "bg-amber-500" },
-  focus: { label: "Deep focus", cls: "bg-primary/10 text-primary", dot: "bg-primary" },
+  busy: { label: "Busy", cls: "bg-orange-500/10 text-orange-700", dot: "bg-orange-500" },
+  focus: { label: "Deep focus", cls: "bg-rose-500/10 text-rose-700", dot: "bg-rose-500" },
   offline: { label: "Offline", cls: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/50" },
   locked: { label: "Locked", cls: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/60" },
   pending: { label: "Pending", cls: "bg-amber-500/10 text-amber-700", dot: "bg-amber-500" },

@@ -6,6 +6,7 @@ import Protocols from "@/components/availock/Protocols";
 import HowItWorks from "@/components/availock/HowItWorks";
 import ExplainerVideo from "@/components/availock/ExplainerVideo";
 import ControlledConnection from "@/components/availock/ControlledConnection";
+import FeatureMicroGrid from "@/components/availock/FeatureMicroGrid";
 import Cost from "@/components/availock/Cost";
 import Audience from "@/components/availock/Audience";
 import Manifesto from "@/components/availock/Manifesto";
@@ -27,6 +28,7 @@ const Index = () => {
         <Protocols />
         <HowItWorks />
         <ControlledConnection />
+        <FeatureMicroGrid />
         <ExplainerVideo />
         <Cost />
         <Audience />

@@ -22,9 +22,9 @@ type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
 const statusMeta: Record<StatusKey, { label: string; activeBg: string; activeText: string; ring: string; pillBg: string; pillText: string; dot: string }> = {
   available: { label: "Available", activeBg: "bg-emerald-500",  activeText: "text-white", ring: "ring-emerald-500/30",  pillBg: "bg-emerald-500/10",  pillText: "text-emerald-700",  dot: "bg-emerald-500" },
-  busy:      { label: "Busy",      activeBg: "bg-rose-500",     activeText: "text-white", ring: "ring-rose-500/30",     pillBg: "bg-rose-500/10",     pillText: "text-rose-700",     dot: "bg-rose-500" },
-  focus:     { label: "Focus",     activeBg: "bg-violet-600",   activeText: "text-white", ring: "ring-violet-600/30",   pillBg: "bg-violet-600/10",   pillText: "text-violet-700",   dot: "bg-violet-600" },
-  driving:   { label: "Driving",   activeBg: "bg-orange-500",   activeText: "text-white", ring: "ring-orange-500/30",   pillBg: "bg-orange-500/10",   pillText: "text-orange-700",   dot: "bg-orange-500" },
+  busy:      { label: "Busy",      activeBg: "bg-orange-500",   activeText: "text-white", ring: "ring-orange-500/30",   pillBg: "bg-orange-500/10",   pillText: "text-orange-700",   dot: "bg-orange-500" },
+  focus:     { label: "Focus",     activeBg: "bg-rose-500",     activeText: "text-white", ring: "ring-rose-500/30",     pillBg: "bg-rose-500/10",     pillText: "text-rose-700",     dot: "bg-rose-500" },
+  driving:   { label: "Driving",   activeBg: "bg-violet-600",   activeText: "text-white", ring: "ring-violet-600/30",   pillBg: "bg-violet-600/10",   pillText: "text-violet-700",   dot: "bg-violet-600" },
   offline:   { label: "Offline",   activeBg: "bg-muted-foreground/70", activeText: "text-white", ring: "ring-muted-foreground/30", pillBg: "bg-muted",  pillText: "text-muted-foreground", dot: "bg-muted-foreground/60" },
 };
 
