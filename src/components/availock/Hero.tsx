@@ -1,13 +1,37 @@
 import heroCard from "@/assets/hero-card.jpg";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, PlayCircle, ShieldCheck } from "lucide-react";
+import { useState } from "react";
 
 const Hero = () => {
+  const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <section
       id="top"
       className="relative pt-40 md:pt-48 pb-24 md:pb-32 overflow-hidden"
     >
-      {/* atmospheric backdrop */}
+      {/* Background video — desktop/tablet only, with poster fallback */}
+      <video
+        className="hidden md:block absolute inset-0 w-full h-full object-cover pointer-events-none"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster={heroCard}
+        aria-hidden="true"
+      >
+        <source
+          src="https://cdn.coverr.co/videos/coverr-a-quiet-morning-at-the-office-3962/1080p.mp4"
+          type="video/mp4"
+        />
+      </video>
+
+      {/* Readability overlay over the video */}
+      <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/55 pointer-events-none" />
+      <div className="hidden md:block absolute inset-0 bg-background/30 pointer-events-none" />
+
+      {/* atmospheric backdrop (mobile fallback + extra depth on desktop) */}
       <div className="absolute inset-0 bg-gradient-mist pointer-events-none" />
       <div className="absolute -top-40 -right-32 w-[36rem] h-[36rem] rounded-full bg-accent-soft/30 blur-3xl pointer-events-none" />
       <div className="absolute top-60 -left-40 w-[30rem] h-[30rem] rounded-full bg-primary-fixed/40 blur-3xl pointer-events-none" />
@@ -37,12 +61,14 @@ const Hero = () => {
               Claim your Vault ID
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a
-              href="#manifesto"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-surface-lowest ghost-border text-primary font-semibold hover:bg-surface-low transition"
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-surface-lowest ghost-border text-primary font-semibold hover:bg-surface-low transition"
             >
-              Read the Manifesto
-            </a>
+              <PlayCircle className="w-4 h-4" />
+              Watch how it works
+            </button>
           </div>
           <div className="mt-10 flex items-center gap-6 text-xs text-muted-foreground">
             <div className="flex -space-x-2">
@@ -92,6 +118,36 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      {/* Watch-how-it-works modal */}
+      {videoOpen && (
+        <div
+          className="fixed inset-0 z-[100] grid place-items-center bg-foreground/70 backdrop-blur-sm p-4"
+          onClick={() => setVideoOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden shadow-elevated"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/8WOYDy9OBJI?start=8&autoplay=1"
+              title="Availock — How it works"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+            <button
+              type="button"
+              onClick={() => setVideoOpen(false)}
+              className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-background/90 ghost-border text-xs font-semibold text-primary hover:bg-background transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
