@@ -389,6 +389,12 @@ const FocusMeetingBuilder = () => {
               </Section>
             )}
 
+            {step === 9 && (
+              <Section title="Step 9 — Pricing" icon={Sparkles} hint="Free by default. Switch to Paid to charge per booking.">
+                <PricingField value={draft.pricing} onChange={(p) => set("pricing", p)} />
+              </Section>
+            )}
+
             {/* Step nav */}
             <div className="flex items-center justify-between pt-2">
               <button
@@ -398,9 +404,9 @@ const FocusMeetingBuilder = () => {
               >
                 Back
               </button>
-              {step < 8 ? (
+              {step < 9 ? (
                 <button
-                  onClick={() => setStep((s) => Math.min(8, s + 1))}
+                  onClick={() => setStep((s) => Math.min(9, s + 1))}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
                 >
                   Next <ChevronRight className="w-3.5 h-3.5" />
