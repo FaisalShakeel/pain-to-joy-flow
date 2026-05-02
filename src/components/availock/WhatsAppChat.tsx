@@ -2,8 +2,8 @@ import { MessageCircle, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // TODO: Replace with your real WhatsApp business number in international format (no +, no spaces)
-const WHATSAPP_NUMBER = "10000000000";
-const DEFAULT_MESSAGE = "Hi Availock! I'd like to ask the AI assistant a question about how Availock works.";
+const WHATSAPP_NUMBER = "971585958373";
+const DEFAULT_MESSAGE = "Hi, I want to know more about Availock!";
 
 const WhatsAppChat = () => {
   const [open, setOpen] = useState(false);
