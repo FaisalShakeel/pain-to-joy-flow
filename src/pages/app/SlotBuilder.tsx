@@ -452,9 +452,12 @@ const SlotCardCompact = ({
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold">
           <ChannelIcon className="w-2.5 h-2.5" /> {channelLabel}
         </span>
-        <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold", A.cls)}>
-          <A.icon className="w-2.5 h-2.5" /> {A.label}
-        </span>
+        <div className="flex items-center gap-1">
+          <PriceTag pricing={slot.pricing} />
+          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold", A.cls)}>
+            <A.icon className="w-2.5 h-2.5" /> {A.label}
+          </span>
+        </div>
       </div>
 
       <div className="mt-1.5 text-[10px] text-muted-foreground font-semibold">
