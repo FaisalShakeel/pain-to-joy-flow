@@ -154,7 +154,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       {!guestMode && (
         <button
           onClick={goBack}
-          className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
+          className="inline-flex items-center gap-2 mb-3 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
           aria-label="Back to contacts"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to contacts
