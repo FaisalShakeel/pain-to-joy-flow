@@ -91,7 +91,7 @@ const seed: MTSlot[] = [
     startMin: 10 * 60, endMin: 12 * 60,
     callMin: 30, bufferMin: 5,
     repeats: "weekly", weekdays: [2],
-    booking: "approval", access: "approved" as any,
+    booking: "approval", access: "contacts",
     pricing: { mode: "free" },
     createdAt: Date.now() - 100000,
   },
