@@ -161,8 +161,11 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </button>
       )}
 
-      {/* TOP SECTION — Editorial profile (matches uploaded design) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* TOP SECTION — Profile identity (white) */}
+      <section
+        id="profile-identity"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start bg-white rounded-3xl p-4 md:p-6 shadow-ambient scroll-mt-4"
+      >
         {/* LEFT (4): Portrait + Spotlight */}
         <div className="lg:col-span-4 flex flex-col gap-5">
           {/* Portrait card — gold ring + status dot + QuickSync overlay */}
@@ -260,11 +263,6 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 )}
               </div>
 
-              {/* Smart action panel — sits inside hero (stays visible above the fold) */}
-              <div className="-mt-1">
-                <ActionPanel status={contact.status} actions={actions} stickyMobile />
-              </div>
-
               {/* Operations Center */}
               {(show("operationDays") || show("operationHours") || show("headquarters")) && (
                 <div className="pt-5 border-t border-surface-container">
@@ -316,58 +314,6 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
             </div>
           )}
 
-          {/* Availability alerts (compact) + Quick Ping row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 px-1">
-            <div className="md:col-span-2 rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient">
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Availability alerts</p>
-                <h3 className="mt-0.5 font-headline font-bold text-primary text-xs">
-                  Notify me when {firstName} is reachable
-                </h3>
-              </div>
-              <span className={`grid place-items-center w-9 h-9 rounded-xl ${Object.values(alerts).some(Boolean) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                {Object.values(alerts).some(Boolean) ? <BellRing className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { key: "callback" as const, icon: PhoneCall, label: "Callback" },
-                { key: "message" as const, icon: MessageSquare, label: "Message" },
-                { key: "calendar" as const, icon: CalendarDays, label: "Calendar" },
-              ].map(({ key, icon: Icon, label }) => {
-                const on = alerts[key];
-                return (
-                  <button
-                    key={key}
-                    onClick={() => toggleAlert(key)}
-                    className={`flex items-center justify-between gap-2 p-2.5 rounded-xl ghost-border text-left transition ${on ? "bg-primary/5" : "bg-surface-low hover:bg-surface"}`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className={`grid place-items-center w-7 h-7 rounded-lg ${on ? "bg-primary text-primary-foreground" : "bg-surface text-primary"}`}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </span>
-                      <p className="text-xs font-semibold text-primary truncate">{label}</p>
-                    </div>
-                    <span className={`relative inline-flex h-4 w-7 items-center rounded-full transition ${on ? "bg-primary" : "bg-muted"}`} aria-hidden>
-                      <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            </div>
-
-            {/* Quick Ping pillar */}
-            <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient flex flex-col items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Quick Ping</p>
-                <p className="text-xs font-semibold text-primary mt-0.5">Tap to nudge {firstName}</p>
-              </div>
-              <PingButton contact={contact} size="md" />
-            </div>
-          </div>
-
           {/* Demo QR (compact in registered view) */}
           {!guestMode && (
             <div className="px-1">
@@ -377,12 +323,52 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </div>
       </section>
 
-      {/* BOTTOM: Connection Portal — Secure Interaction Layer */}
-      <section className="mt-4 rounded-2xl overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
+      {/* Soft gradient divider + scroll affordance */}
+      <div className="relative h-10 md:h-12 bg-gradient-to-b from-white to-primary/90 rounded-b-2xl flex items-end justify-center">
+        <a
+          href="#contact-actions"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("contact-actions")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="absolute -bottom-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-[0.2em] shadow-elevated hover:opacity-95"
+          aria-label="Jump to contact actions"
+        >
+          Connect <ArrowRight className="w-3 h-3 rotate-90" />
+        </a>
+      </div>
+
+      {/* BOTTOM: Connection Portal — Secure Interaction Layer (blue contact/sync) */}
+      <section
+        id="contact-actions"
+        className="rounded-2xl overflow-hidden relative bg-primary text-primary-foreground shadow-elevated scroll-mt-4"
+      >
         <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.4),transparent_60%)]" />
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 p-5 md:p-6">
+          {/* Smart action row — Connect / Book / Quick Sync / Ping / Request Access */}
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            {actions.map((a) => (
+              <button
+                key={a.key}
+                onClick={a.onClick}
+                disabled={a.disabled}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition disabled:opacity-50 ${
+                  a.variant === "primary"
+                    ? "bg-white text-primary hover:bg-white/90"
+                    : a.variant === "warn"
+                    ? "bg-amber-500 text-white hover:bg-amber-400"
+                    : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                }`}
+              >
+                <a.icon className="w-3.5 h-3.5" />
+                {a.label}
+              </button>
+            ))}
+            <PingButton contact={contact} size="md" className="ml-auto" />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             {/* Left: Portal */}
             <div className="lg:col-span-8 space-y-5">
