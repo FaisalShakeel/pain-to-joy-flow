@@ -91,7 +91,7 @@ const seed: MTSlot[] = [
     startMin: 10 * 60, endMin: 12 * 60,
     callMin: 30, bufferMin: 5,
     repeats: "weekly", weekdays: [2],
-    booking: "approval", access: "approved" as any,
+    booking: "approval", access: "contacts",
     pricing: { mode: "free" },
     createdAt: Date.now() - 100000,
   },
@@ -516,7 +516,7 @@ const MeetingCard = ({
     [slot],
   );
   const visibleSlots = expanded ? allSlots : allSlots.slice(0, 3);
-  const A = accessMeta[slot.access];
+  const A = accessMeta[slot.access] ?? accessMeta.contacts;
   const date = new Date(slot.date);
   const isPast = date < new Date(new Date().toDateString());
   const isToday = format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
