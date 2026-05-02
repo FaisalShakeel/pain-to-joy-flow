@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -34,6 +35,7 @@ interface MTSlot {
   weekdays?: number[]; // 0..6 if weekly
   booking: Booking;
   access: Access;
+  pricing: Pricing;
   createdAt: number;
 }
 
@@ -79,6 +81,7 @@ const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
   weekdays: [],
   booking: "approval",
   access: "contacts",
+  pricing: defaultPricing,
 });
 
 const seed: MTSlot[] = [
@@ -89,6 +92,7 @@ const seed: MTSlot[] = [
     callMin: 30, bufferMin: 5,
     repeats: "weekly", weekdays: [2],
     booking: "approval", access: "approved" as any,
+    pricing: { mode: "free" },
     createdAt: Date.now() - 100000,
   },
 ];
@@ -116,6 +120,10 @@ const FocusMeetingBuilder = () => {
     }
     if (count === 0) {
       toast({ title: "Window too short", description: "Increase window or reduce call/buffer length." });
+      return;
+    }
+    if (draft.pricing?.mode === "paid" && (!draft.pricing.amount || draft.pricing.amount <= 0)) {
+      toast({ title: "Set a price", description: "Paid meetings must have a price greater than zero." });
       return;
     }
     if (isEditing) {
@@ -184,7 +192,7 @@ const FocusMeetingBuilder = () => {
         {/* Stepper */}
         <div className="flex items-center gap-1 mb-5 overflow-x-auto pb-1">
           {[
-            "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access",
+            "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access", "Pricing",
           ].map((label, i) => {
             const n = i + 1;
             const active = step === n;
@@ -381,6 +389,12 @@ const FocusMeetingBuilder = () => {
               </Section>
             )}
 
+            {step === 9 && (
+              <Section title="Step 9 — Pricing" icon={Sparkles} hint="Free by default. Switch to Paid to charge per booking.">
+                <PricingField value={draft.pricing} onChange={(p) => set("pricing", p)} />
+              </Section>
+            )}
+
             {/* Step nav */}
             <div className="flex items-center justify-between pt-2">
               <button
@@ -390,9 +404,9 @@ const FocusMeetingBuilder = () => {
               >
                 Back
               </button>
-              {step < 8 ? (
+              {step < 9 ? (
                 <button
-                  onClick={() => setStep((s) => Math.min(8, s + 1))}
+                  onClick={() => setStep((s) => Math.min(9, s + 1))}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
                 >
                   Next <ChevronRight className="w-3.5 h-3.5" />
@@ -428,6 +442,7 @@ const FocusMeetingBuilder = () => {
               <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
                 {accessMeta[draft.access].label}
               </span>
+              <PriceTag pricing={draft.pricing} />
             </div>
           </aside>
         </div>
@@ -535,6 +550,10 @@ const MeetingCard = ({
         <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold shrink-0", A.cls)}>
           <A.icon className="w-3 h-3" /> {A.label}
         </span>
+      </div>
+
+      <div className="mt-2">
+        <PriceTag pricing={slot.pricing} />
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-1.5 text-[11px]">

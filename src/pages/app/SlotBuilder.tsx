@@ -3,7 +3,7 @@ import {
   Plus, Video, MapPin, Zap, Crown, Lock, Globe, Users as UsersIcon, Star,
   Repeat, Copy, Trash2, Phone, MessageSquare, Link as LinkIcon, X, Check,
   ChevronRight, Sparkles, Clock, Calendar as CalIcon, Shield, Timer, Gauge,
-  CalendarPlus, ArrowLeft, Pencil, Briefcase, CopyPlus,
+  CalendarPlus, ArrowLeft, Pencil, Briefcase, CopyPlus, Radio,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 
 // ---------- Types ----------
 type Mode = "online" | "onsite" | "hybrid" | "quicksync";
@@ -45,6 +46,7 @@ interface Slot {
   onsite?: { location: string; capacity: number; booking: Booking; queue?: boolean };
   quickSync?: { callMin: 3 | 5 | 8 | 10; bufferMin: 1 | 2 | 5 };
   autoCloseAlternate?: boolean;
+  pricing?: Pricing;
 }
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
@@ -54,6 +56,7 @@ const hours = Array.from({ length: 10 }, (_, i) => 9 + i); // 9..18
 const templates: { id: string; name: string; icon: React.ComponentType<any>; hint: string; route: string }[] = [
   { id: "quicksync", name: "Quick Sync Relief Calls", icon: Zap,       hint: "Handle volume without stress",  route: "/app/availability/quick-sync" },
   { id: "meetings",  name: "Meetings — Focus Work",  icon: Briefcase,  hint: "Protect deep conversations",     route: "/app/availability/focus-meetings" },
+  { id: "webinars",  name: "Group Session / Webinar", icon: Radio,     hint: "Multi-attendee · capacity & waitlist", route: "/app/availability/webinars" },
 ];
 
 // ---------- Seed slots ----------
@@ -137,6 +140,7 @@ const SlotBuilder = () => {
       online: { channel: "video", capacity: 1, booking: "approval" },
       onsite: { location: "", capacity: 1, booking: "approval" },
       quickSync: { callMin: 5, bufferMin: 2 },
+      pricing: defaultPricing,
     });
     setEditorOpen(true);
   };
@@ -448,9 +452,12 @@ const SlotCardCompact = ({
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold">
           <ChannelIcon className="w-2.5 h-2.5" /> {channelLabel}
         </span>
-        <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold", A.cls)}>
-          <A.icon className="w-2.5 h-2.5" /> {A.label}
-        </span>
+        <div className="flex items-center gap-1">
+          <PriceTag pricing={slot.pricing} />
+          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold", A.cls)}>
+            <A.icon className="w-2.5 h-2.5" /> {A.label}
+          </span>
+        </div>
       </div>
 
       <div className="mt-1.5 text-[10px] text-muted-foreground font-semibold">
@@ -773,6 +780,15 @@ const SlotEditor = ({
                 );
               })}
             </div>
+          </Section>
+
+          {/* Pricing */}
+          <Section title="Pricing" icon={Sparkles} hint="Free by default. Switch to Paid to charge per booking.">
+            <PricingField
+              value={slot.pricing ?? defaultPricing}
+              onChange={(p) => set("pricing", p)}
+              compact
+            />
           </Section>
 
           {/* Footer */}
