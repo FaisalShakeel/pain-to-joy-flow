@@ -552,6 +552,10 @@ const MeetingCard = ({
         </span>
       </div>
 
+      <div className="mt-2">
+        <PriceTag pricing={slot.pricing} />
+      </div>
+
       <div className="mt-3 grid grid-cols-2 gap-1.5 text-[11px]">
         <Chip>{slot.callMin}-min meetings</Chip>
         <Chip title="Participants may join early or extend slightly. Does not affect slot count.">
