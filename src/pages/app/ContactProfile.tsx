@@ -661,14 +661,12 @@ const PortalTile = ({
       : "bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20";
   const iconBox = variant === "emerald" ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-white";
 
-  const button = (
-    <button
-      disabled={!to}
-      className={`w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`}
-    >
+  const ctaContent = (
+    <>
       <CtaIcon className="w-3.5 h-3.5" /> {cta}
-    </button>
+    </>
   );
+  const ctaClassName = `w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
 
   return (
     <div className={`relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
@@ -700,7 +698,15 @@ const PortalTile = ({
           <p className="text-primary-foreground/60 text-[11px] mt-1 leading-relaxed">{desc}</p>
         </div>
       </div>
-      {to ? <Link to={to} className="relative z-10">{button}</Link> : <div className="relative z-10">{button}</div>}
+      {to ? (
+        <Link to={to} className={`${ctaClassName} relative z-10`}>
+          {ctaContent}
+        </Link>
+      ) : (
+        <button disabled className={`${ctaClassName} relative z-10`}>
+          {ctaContent}
+        </button>
+      )}
       <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/5 rounded-full blur-3xl" />
     </div>
   );
