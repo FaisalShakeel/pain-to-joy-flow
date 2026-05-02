@@ -70,17 +70,6 @@ const Hero = () => {
               Watch how it works
             </button>
           </div>
-          <div className="mt-10 flex items-center gap-6 text-xs text-muted-foreground">
-            <div className="flex -space-x-2">
-              {["#15196c", "#644ead", "#2d3282"].map((c) => (
-                <div key={c} className="w-7 h-7 rounded-full ring-2 ring-surface-lowest" style={{ background: c }} />
-              ))}
-            </div>
-            <p>
-              <span className="text-primary font-semibold">3,200+</span> early
-              vault holders already protected
-            </p>
-          </div>
         </div>
 
         <div className="lg:col-span-5 relative animate-fade">
