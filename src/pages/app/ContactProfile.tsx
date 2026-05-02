@@ -323,12 +323,12 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
             </div>
           )}
 
-          {/* Availability alerts */}
-          <div className="rounded-2xl bg-surface-lowest ghost-border p-5 shadow-ambient">
-            <div className="flex items-center justify-between gap-3 mb-4">
+          {/* Availability alerts (compact) */}
+          <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient">
+            <div className="flex items-center justify-between gap-3 mb-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Availability alerts</p>
-                <h3 className="mt-1 font-headline font-bold text-primary text-sm">
+                <h3 className="mt-0.5 font-headline font-bold text-primary text-xs">
                   Notify me when {firstName} is reachable
                 </h3>
               </div>
