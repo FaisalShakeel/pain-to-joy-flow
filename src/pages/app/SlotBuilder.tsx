@@ -140,6 +140,7 @@ const SlotBuilder = () => {
       online: { channel: "video", capacity: 1, booking: "approval" },
       onsite: { location: "", capacity: 1, booking: "approval" },
       quickSync: { callMin: 5, bufferMin: 2 },
+      pricing: defaultPricing,
     });
     setEditorOpen(true);
   };
