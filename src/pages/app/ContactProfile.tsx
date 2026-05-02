@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Mail, Smartphone,
@@ -14,6 +14,10 @@ import PriorityBypassButton from "@/components/app/PriorityBypassButton";
 import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import AuthGateDialog, { isGuestAuthed } from "@/components/guest/AuthGateDialog";
+import QuickSyncBadge, { type SyncWindow } from "@/components/app/QuickSyncBadge";
+import ActionPanel, { type ActionItem } from "@/components/app/ActionPanel";
+import DemoQRCard from "@/components/app/DemoQRCard";
+import PreviewModeBanner from "@/components/app/PreviewModeBanner";
 
 interface ContactProfileProps {
   guestMode?: boolean;
