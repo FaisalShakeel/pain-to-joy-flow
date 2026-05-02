@@ -402,7 +402,7 @@ const Explore = () => {
                   className="mt-4 w-full rounded-full"
                   asChild
                 >
-                  <Link to={`/v/${contacts0Id()}`} onClick={() => setQrOpen(false)}>
+                  <Link to="/v/julian-vane" onClick={() => setQrOpen(false)}>
                     <UserPlus className="w-4 h-4" /> Open guest profile
                   </Link>
                 </Button>
