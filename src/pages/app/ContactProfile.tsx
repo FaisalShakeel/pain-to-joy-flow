@@ -36,6 +36,14 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
   });
   const [authOpen, setAuthOpen] = useState(false);
 
+  // Registered seeker detection: if user lands on /v/:id but is already authed,
+  // promote them straight to the interactive in-app profile view.
+  useEffect(() => {
+    if (guestMode && isGuestAuthed() && id) {
+      navigate(`/app/contact/${id}`, { replace: true });
+    }
+  }, [guestMode, id, navigate]);
+
   // In guest mode, intercept clicks on any interactive element and gate them behind auth.
   const handleGuestCapture = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!guestMode) return;
