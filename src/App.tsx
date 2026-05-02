@@ -39,6 +39,7 @@ import SlotBuilder from "./pages/app/SlotBuilder.tsx";
 import QuickSyncBuilder from "./pages/app/QuickSyncBuilder.tsx";
 import FocusMeetingBuilder from "./pages/app/FocusMeetingBuilder.tsx";
 import WebinarBuilder from "./pages/app/WebinarBuilder.tsx";
+import VenueBuilder from "./pages/app/VenueBuilder.tsx";
 import ScheduleCall from "./pages/app/ScheduleCall.tsx";
 import AccessRequests from "./pages/app/AccessRequests.tsx";
 import ApprovalFlow from "./pages/app/ApprovalFlow.tsx";
@@ -95,6 +96,7 @@ const App = () => (
           <Route path="/app/availability/quick-sync" element={<QuickSyncBuilder />} />
           <Route path="/app/availability/focus-meetings" element={<FocusMeetingBuilder />} />
           <Route path="/app/availability/webinars" element={<WebinarBuilder />} />
+          <Route path="/app/availability/venue" element={<VenueBuilder />} />
           <Route path="/app/schedule/:id" element={<ScheduleCall />} />
           <Route path="/app/requests" element={<AccessRequests />} />
           <Route path="/app/requests/manage" element={<ApprovalFlow />} />
