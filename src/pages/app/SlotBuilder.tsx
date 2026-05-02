@@ -3,7 +3,7 @@ import {
   Plus, Video, MapPin, Zap, Crown, Lock, Globe, Users as UsersIcon, Star,
   Repeat, Copy, Trash2, Phone, MessageSquare, Link as LinkIcon, X, Check,
   ChevronRight, Sparkles, Clock, Calendar as CalIcon, Shield, Timer, Gauge,
-  CalendarPlus, ArrowLeft, Pencil, Briefcase, CopyPlus,
+  CalendarPlus, ArrowLeft, Pencil, Briefcase, CopyPlus, Radio,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -54,6 +54,7 @@ const hours = Array.from({ length: 10 }, (_, i) => 9 + i); // 9..18
 const templates: { id: string; name: string; icon: React.ComponentType<any>; hint: string; route: string }[] = [
   { id: "quicksync", name: "Quick Sync Relief Calls", icon: Zap,       hint: "Handle volume without stress",  route: "/app/availability/quick-sync" },
   { id: "meetings",  name: "Meetings — Focus Work",  icon: Briefcase,  hint: "Protect deep conversations",     route: "/app/availability/focus-meetings" },
+  { id: "webinars",  name: "Group Session / Webinar", icon: Radio,     hint: "Multi-attendee · capacity & waitlist", route: "/app/availability/webinars" },
 ];
 
 // ---------- Seed slots ----------
