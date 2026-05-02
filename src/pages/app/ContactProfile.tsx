@@ -570,16 +570,19 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back
             </button>
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-              <ShieldCheck className="w-3 h-3" /> Public profile preview
-            </div>
+            <PreviewModeBanner />
             <Link data-guest-allow to="/login" className="text-xs font-semibold text-primary hover:underline">
               Sign in
             </Link>
           </div>
         </header>
-        <div onClickCapture={handleGuestCapture} className="max-w-6xl mx-auto px-4 py-6">
+        <div onClickCapture={handleGuestCapture} className="max-w-6xl mx-auto px-4 py-4 space-y-4">
           {body}
+          {/* Demo QR — prominent in preview mode for viral conversion */}
+          <div data-guest-allow>
+            <DemoQRCard to="/v/elena-vance" variant="prominent" />
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">See availability. Sign up to connect.</p>
+          </div>
         </div>
         <AuthGateDialog
           open={authOpen}
