@@ -122,6 +122,10 @@ const FocusMeetingBuilder = () => {
       toast({ title: "Window too short", description: "Increase window or reduce call/buffer length." });
       return;
     }
+    if (draft.pricing?.mode === "paid" && (!draft.pricing.amount || draft.pricing.amount <= 0)) {
+      toast({ title: "Set a price", description: "Paid meetings must have a price greater than zero." });
+      return;
+    }
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Meeting updated" });
@@ -188,7 +192,7 @@ const FocusMeetingBuilder = () => {
         {/* Stepper */}
         <div className="flex items-center gap-1 mb-5 overflow-x-auto pb-1">
           {[
-            "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access",
+            "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access", "Pricing",
           ].map((label, i) => {
             const n = i + 1;
             const active = step === n;
