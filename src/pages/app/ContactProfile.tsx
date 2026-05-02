@@ -555,6 +555,9 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         contact={contact}
         onSubmitted={() => setContact({ ...contact, syncStatus: "pending" })}
       />
+
+      {/* Spacer to keep the sticky mobile CTA from covering content */}
+      <div className="md:hidden h-20" aria-hidden />
     </>
   );
 
