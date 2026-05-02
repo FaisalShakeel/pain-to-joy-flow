@@ -50,7 +50,7 @@ import AccountSettings from "./pages/app/AccountSettings.tsx";
 import EditProfile from "./pages/app/EditProfile.tsx";
 import Upgrade from "./pages/app/Upgrade.tsx";
 import Explore from "./pages/app/Explore.tsx";
-import GuestProfile from "./pages/GuestProfile.tsx";
+import ContactProfile from "./pages/app/ContactProfile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -69,7 +69,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           {/* Public guest profile (QR / share link landing) */}
-          <Route path="/v/:id" element={<GuestProfile />} />
+          <Route path="/v/:id" element={<ContactProfile guestMode />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/encryption" element={<Encryption />} />
