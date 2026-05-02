@@ -49,6 +49,7 @@ import ShareProfile from "./pages/app/ShareProfile.tsx";
 import AccountSettings from "./pages/app/AccountSettings.tsx";
 import EditProfile from "./pages/app/EditProfile.tsx";
 import Upgrade from "./pages/app/Upgrade.tsx";
+import Explore from "./pages/app/Explore.tsx";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           {/* App */}
           <Route path="/app" element={<Dashboard />} />
+          <Route path="/app/explore" element={<Explore />} />
           <Route path="/app/contacts" element={<Contacts />} />
           <Route path="/app/contact/:id" element={<ContactProfile />} />
           <Route path="/app/contact/:id/log" element={<ContactLog />} />
