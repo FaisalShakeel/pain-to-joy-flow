@@ -50,7 +50,6 @@ import AccountSettings from "./pages/app/AccountSettings.tsx";
 import EditProfile from "./pages/app/EditProfile.tsx";
 import Upgrade from "./pages/app/Upgrade.tsx";
 import Explore from "./pages/app/Explore.tsx";
-import ContactProfile from "./pages/app/ContactProfile.tsx";
 
 const queryClient = new QueryClient();
 
