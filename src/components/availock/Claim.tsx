@@ -23,7 +23,10 @@ const Claim = () => {
         let message = `Request failed (${res.status})`;
         try {
           const data = await res.json();
-          if (data?.message) message = data.message;
+          if (typeof data === "string") message = data;
+          else if (data?.error) message = data.error;
+          else if (data?.message) message = data.message;
+          else if (data?.detail) message = data.detail;
         } catch {
           // ignore JSON parse errors
         }
