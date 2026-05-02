@@ -8,6 +8,8 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
+import { PriceTag, formatPrice, type Pricing } from "@/components/app/PricingField";
+import MockPaymentDialog from "@/components/app/MockPaymentDialog";
 
 // =============================================================================
 //  Availock Calendar — Book the right time, in the right format, instantly.
@@ -28,6 +30,7 @@ interface MeetingSlot {
   approval?: boolean;
   taken?: HybridPick;    // for hybrid: which side already booked
   full?: boolean;
+  pricing?: Pricing;
 }
 interface QuickSlot {
   id: string;
@@ -37,6 +40,7 @@ interface QuickSlot {
   duration: 3 | 5 | 8;
   approval?: boolean;
   full?: boolean;
+  pricing?: Pricing;
 }
 type Slot = MeetingSlot | QuickSlot;
 
@@ -49,9 +53,9 @@ const todayISO = (offset = 0) => {
 
 const SLOTS: Slot[] = [
   // Day +0
-  { id: "m1", kind: "meeting", date: todayISO(0), time: "10:00", durations: [15,20,30], channel: "hybrid", location: "Studio · DIFC L12", approval: true },
+  { id: "m1", kind: "meeting", date: todayISO(0), time: "10:00", durations: [15,20,30], channel: "hybrid", location: "Studio · DIFC L12", approval: true, pricing: { mode: "paid", amount: 75, currency: "USD", note: "Includes recording" } },
   { id: "m2", kind: "meeting", date: todayISO(0), time: "11:30", durations: [15,20,25,30,35], channel: "online" },
-  { id: "m3", kind: "meeting", date: todayISO(0), time: "14:00", durations: [25,30,35], channel: "onsite", location: "Atlas HQ Reception" },
+  { id: "m3", kind: "meeting", date: todayISO(0), time: "14:00", durations: [25,30,35], channel: "onsite", location: "Atlas HQ Reception", pricing: { mode: "paid", amount: 120, currency: "USD" } },
   { id: "q1", kind: "quick",   date: todayISO(0), time: "16:10", duration: 5 },
   { id: "q2", kind: "quick",   date: todayISO(0), time: "16:20", duration: 3 },
   { id: "q3", kind: "quick",   date: todayISO(0), time: "16:35", duration: 8, full: true },
@@ -59,7 +63,7 @@ const SLOTS: Slot[] = [
   { id: "m4", kind: "meeting", date: todayISO(1), time: "09:30", durations: [15,20], channel: "online" },
   { id: "m5", kind: "meeting", date: todayISO(1), time: "13:00", durations: [25,30,35], channel: "hybrid", location: "Studio · DIFC L12", taken: "onsite" },
   { id: "q4", kind: "quick",   date: todayISO(1), time: "11:00", duration: 5 },
-  { id: "q5", kind: "quick",   date: todayISO(1), time: "11:08", duration: 3 },
+  { id: "q5", kind: "quick",   date: todayISO(1), time: "11:08", duration: 3, pricing: { mode: "paid", amount: 9, currency: "USD" } },
   // Day +2
   { id: "m6", kind: "meeting", date: todayISO(2), time: "15:00", durations: [20,25,30], channel: "onsite", location: "Atlas HQ Reception", approval: true },
   { id: "q6", kind: "quick",   date: todayISO(2), time: "10:00", duration: 8 },
@@ -97,6 +101,7 @@ const ScheduleCall = () => {
   const [hybridPick, setHybridPick] = useState<HybridPick>("online");
   const [notes, setNotes] = useState("");
   const [tz] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   // 14-day strip
   const dayStrip = useMemo(() => Array.from({ length: 14 }, (_, i) => todayISO(i)), []);
@@ -139,8 +144,23 @@ const ScheduleCall = () => {
   const confirm = () => {
     if (!selected || !duration) return;
     const needsApproval = selected.approval;
+    const isPaid = selected.pricing?.mode === "paid";
+    if (isPaid) {
+      setPaymentOpen(true);
+      return;
+    }
     toast({
       title: needsApproval ? "Booking requested" : "Booked",
+      description: `${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration} min · ${channelLabelForSelected()}`,
+    });
+    navigate("/app");
+  };
+
+  const finalizeAfterPayment = () => {
+    if (!selected || !duration) return;
+    const needsApproval = selected.approval;
+    toast({
+      title: needsApproval ? "Paid · booking requested" : "Paid · booked",
       description: `${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration} min · ${channelLabelForSelected()}`,
     });
     navigate("/app");
