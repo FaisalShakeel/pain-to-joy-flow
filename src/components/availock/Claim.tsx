@@ -6,21 +6,44 @@ const Claim = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       toast({ title: "Enter a valid email", description: "We need it to reserve your vault ID.", variant: "destructive" });
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/leads/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (!res.ok) {
+        let message = `Request failed (${res.status})`;
+        try {
+          const data = await res.json();
+          if (data?.message) message = data.message;
+        } catch {
+          // ignore JSON parse errors
+        }
+        throw new Error(message);
+      }
       setEmail("");
       toast({
         title: "You're on the early supporter list",
         description: "We'll email you the moment we go live on Kickstarter — your 40% lifetime discount is reserved.",
       });
-    }, 700);
+    } catch (err) {
+      const description = err instanceof Error ? err.message : "Please try again in a moment.";
+      toast({
+        title: "Couldn't reserve your spot",
+        description,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
