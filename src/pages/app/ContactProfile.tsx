@@ -13,8 +13,13 @@ import PingButton from "@/components/app/PingButton";
 import PriorityBypassButton from "@/components/app/PriorityBypassButton";
 import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
+import AuthGateDialog, { isGuestAuthed } from "@/components/guest/AuthGateDialog";
 
-const ContactProfile = () => {
+interface ContactProfileProps {
+  guestMode?: boolean;
+}
+
+const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const goBack = () => (window.history.length > 1 ? navigate(-1) : navigate("/app/contacts"));
@@ -25,12 +30,31 @@ const ContactProfile = () => {
   const [alerts, setAlerts] = useState<{ callback: boolean; message: boolean; calendar: boolean }>({
     callback: false, message: false, calendar: false,
   });
+  const [authOpen, setAuthOpen] = useState(false);
+
+  // In guest mode, intercept clicks on any interactive element and gate them behind auth.
+  const handleGuestCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!guestMode) return;
+    if (isGuestAuthed()) return;
+    const target = e.target as HTMLElement;
+    // Allow the back button + sign-in link in the public header to behave normally
+    if (target.closest("[data-guest-allow]")) return;
+    const interactive = target.closest("a, button, [role='button']");
+    if (!interactive) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setAuthOpen(true);
+  };
 
   if (!contact) {
     return (
-      <AppShell title="Contact not found">
-        <Link to="/app/contacts" className="text-accent hover:underline">← Back to contacts</Link>
-      </AppShell>
+      guestMode ? (
+        <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Profile not found.</div>
+      ) : (
+        <AppShell title="Contact not found">
+          <Link to="/app/contacts" className="text-accent hover:underline">← Back to contacts</Link>
+        </AppShell>
+      )
     );
   }
 
@@ -82,15 +106,17 @@ const ContactProfile = () => {
     });
   };
 
-  return (
-    <AppShell subtitle="Contact profile" title={contact.name}>
-      <button
-        onClick={goBack}
-        className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
-        aria-label="Back to contacts"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Back to contacts
-      </button>
+  const body = (
+    <>
+      {!guestMode && (
+        <button
+          onClick={goBack}
+          className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low transition"
+          aria-label="Back to contacts"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to contacts
+        </button>
+      )}
 
       {/* TOP: Profile Window */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -475,6 +501,45 @@ const ContactProfile = () => {
         contact={contact}
         onSubmitted={() => setContact({ ...contact, syncStatus: "pending" })}
       />
+    </>
+  );
+
+  if (guestMode) {
+    return (
+      <div className="min-h-screen bg-surface-low">
+        <header className="sticky top-0 z-30 bg-surface-lowest/80 backdrop-blur border-b border-border/60">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <button
+              data-guest-allow
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back
+            </button>
+            <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+              <ShieldCheck className="w-3 h-3" /> Public profile preview
+            </div>
+            <Link data-guest-allow to="/login" className="text-xs font-semibold text-primary hover:underline">
+              Sign in
+            </Link>
+          </div>
+        </header>
+        <div onClickCapture={handleGuestCapture} className="max-w-6xl mx-auto px-4 py-6">
+          {body}
+        </div>
+        <AuthGateDialog
+          open={authOpen}
+          onOpenChange={setAuthOpen}
+          actionLabel="Continue on Availock"
+          onAuthenticated={() => navigate("/app")}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <AppShell subtitle="Contact profile" title={contact.name}>
+      {body}
     </AppShell>
   );
 };
