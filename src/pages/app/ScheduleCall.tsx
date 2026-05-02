@@ -441,6 +441,17 @@ const ScheduleCall = () => {
           </button>
         </div>
       </div>
+
+      {selected?.pricing?.mode === "paid" && (
+        <MockPaymentDialog
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          pricing={selected.pricing}
+          title={`Pay for ${selected.kind === "quick" ? "Quick Call" : "Meeting"}`}
+          description={`${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration ?? ""} min`}
+          onSuccess={finalizeAfterPayment}
+        />
+      )}
     </AppShell>
   );
 };
@@ -532,6 +543,9 @@ function MeetingCard({
         {slot.durations[0]}–{slot.durations[slot.durations.length - 1]} min
         {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
       </p>
+      <div className="mt-1.5">
+        <PriceTag pricing={slot.pricing} />
+      </div>
       <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
         <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> 3-min buffer</span>
         {slot.approval && <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>}
