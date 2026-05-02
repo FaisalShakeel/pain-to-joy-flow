@@ -442,6 +442,7 @@ const FocusMeetingBuilder = () => {
               <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
                 {accessMeta[draft.access].label}
               </span>
+              <PriceTag pricing={draft.pricing} />
             </div>
           </aside>
         </div>
