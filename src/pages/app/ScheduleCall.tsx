@@ -620,6 +620,9 @@ function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean;
       <p className={`mt-1 text-[11px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
         <Video className="w-3 h-3" /> Online · one-tap
       </p>
+      <div className="mt-1.5">
+        <PriceTag pricing={slot.pricing} />
+      </div>
       <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
         {slot.approval ? <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>
           : <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> Instant</span>}
