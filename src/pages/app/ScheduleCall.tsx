@@ -8,6 +8,8 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
+import { PriceTag, formatPrice, type Pricing } from "@/components/app/PricingField";
+import MockPaymentDialog from "@/components/app/MockPaymentDialog";
 
 // =============================================================================
 //  Availock Calendar — Book the right time, in the right format, instantly.
@@ -28,6 +30,7 @@ interface MeetingSlot {
   approval?: boolean;
   taken?: HybridPick;    // for hybrid: which side already booked
   full?: boolean;
+  pricing?: Pricing;
 }
 interface QuickSlot {
   id: string;
@@ -37,6 +40,7 @@ interface QuickSlot {
   duration: 3 | 5 | 8;
   approval?: boolean;
   full?: boolean;
+  pricing?: Pricing;
 }
 type Slot = MeetingSlot | QuickSlot;
 
@@ -49,9 +53,9 @@ const todayISO = (offset = 0) => {
 
 const SLOTS: Slot[] = [
   // Day +0
-  { id: "m1", kind: "meeting", date: todayISO(0), time: "10:00", durations: [15,20,30], channel: "hybrid", location: "Studio · DIFC L12", approval: true },
+  { id: "m1", kind: "meeting", date: todayISO(0), time: "10:00", durations: [15,20,30], channel: "hybrid", location: "Studio · DIFC L12", approval: true, pricing: { mode: "paid", amount: 75, currency: "USD", note: "Includes recording" } },
   { id: "m2", kind: "meeting", date: todayISO(0), time: "11:30", durations: [15,20,25,30,35], channel: "online" },
-  { id: "m3", kind: "meeting", date: todayISO(0), time: "14:00", durations: [25,30,35], channel: "onsite", location: "Atlas HQ Reception" },
+  { id: "m3", kind: "meeting", date: todayISO(0), time: "14:00", durations: [25,30,35], channel: "onsite", location: "Atlas HQ Reception", pricing: { mode: "paid", amount: 120, currency: "USD" } },
   { id: "q1", kind: "quick",   date: todayISO(0), time: "16:10", duration: 5 },
   { id: "q2", kind: "quick",   date: todayISO(0), time: "16:20", duration: 3 },
   { id: "q3", kind: "quick",   date: todayISO(0), time: "16:35", duration: 8, full: true },
@@ -59,7 +63,7 @@ const SLOTS: Slot[] = [
   { id: "m4", kind: "meeting", date: todayISO(1), time: "09:30", durations: [15,20], channel: "online" },
   { id: "m5", kind: "meeting", date: todayISO(1), time: "13:00", durations: [25,30,35], channel: "hybrid", location: "Studio · DIFC L12", taken: "onsite" },
   { id: "q4", kind: "quick",   date: todayISO(1), time: "11:00", duration: 5 },
-  { id: "q5", kind: "quick",   date: todayISO(1), time: "11:08", duration: 3 },
+  { id: "q5", kind: "quick",   date: todayISO(1), time: "11:08", duration: 3, pricing: { mode: "paid", amount: 9, currency: "USD" } },
   // Day +2
   { id: "m6", kind: "meeting", date: todayISO(2), time: "15:00", durations: [20,25,30], channel: "onsite", location: "Atlas HQ Reception", approval: true },
   { id: "q6", kind: "quick",   date: todayISO(2), time: "10:00", duration: 8 },
@@ -97,6 +101,7 @@ const ScheduleCall = () => {
   const [hybridPick, setHybridPick] = useState<HybridPick>("online");
   const [notes, setNotes] = useState("");
   const [tz] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   // 14-day strip
   const dayStrip = useMemo(() => Array.from({ length: 14 }, (_, i) => todayISO(i)), []);
@@ -139,8 +144,23 @@ const ScheduleCall = () => {
   const confirm = () => {
     if (!selected || !duration) return;
     const needsApproval = selected.approval;
+    const isPaid = selected.pricing?.mode === "paid";
+    if (isPaid) {
+      setPaymentOpen(true);
+      return;
+    }
     toast({
       title: needsApproval ? "Booking requested" : "Booked",
+      description: `${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration} min · ${channelLabelForSelected()}`,
+    });
+    navigate("/app");
+  };
+
+  const finalizeAfterPayment = () => {
+    if (!selected || !duration) return;
+    const needsApproval = selected.approval;
+    toast({
+      title: needsApproval ? "Paid · booking requested" : "Paid · booked",
       description: `${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration} min · ${channelLabelForSelected()}`,
     });
     navigate("/app");
@@ -373,6 +393,13 @@ const ScheduleCall = () => {
                 {selected.approval ? <Lock className="w-3.5 h-3.5 text-gold" /> : <Check className="w-3.5 h-3.5 text-gold" />}
                 {selected.approval ? "Requires approval" : "Instant booking"}
               </li>
+              <li className="flex items-center gap-2 text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-gold" />
+                <span className="font-bold">{formatPrice(selected.pricing)}</span>
+                {selected.pricing?.mode === "paid" && (
+                  <span className="text-[10px] uppercase tracking-wider text-gold/80">Paid</span>
+                )}
+              </li>
               {notes && (
                 <li className="flex items-start gap-2 text-xs text-primary-foreground/80">
                   <MessageSquare className="w-3.5 h-3.5 text-gold mt-0.5" /> {notes}
@@ -390,7 +417,10 @@ const ScheduleCall = () => {
             disabled={!selected || !duration}
             className="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-gold text-primary font-bold hover:bg-gold/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Check className="w-4 h-4" /> {selected?.approval ? "Request booking" : "Confirm booking"}
+            <Check className="w-4 h-4" />
+            {selected?.pricing?.mode === "paid"
+              ? `Pay ${formatPrice(selected.pricing)} & ${selected.approval ? "request" : "book"}`
+              : selected?.approval ? "Request booking" : "Confirm booking"}
           </button>
           <Link to={`/app/contact/${contact.id}/call`} className="mt-3 block text-center text-xs font-semibold text-gold hover:underline">
             Or try Live Call now <ArrowRight className="w-3 h-3 inline" />
@@ -421,6 +451,17 @@ const ScheduleCall = () => {
           </button>
         </div>
       </div>
+
+      {selected?.pricing?.mode === "paid" && (
+        <MockPaymentDialog
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          pricing={selected.pricing}
+          title={`Pay for ${selected.kind === "quick" ? "Quick Call" : "Meeting"}`}
+          description={`${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration ?? ""} min`}
+          onSuccess={finalizeAfterPayment}
+        />
+      )}
     </AppShell>
   );
 };
@@ -512,6 +553,9 @@ function MeetingCard({
         {slot.durations[0]}–{slot.durations[slot.durations.length - 1]} min
         {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
       </p>
+      <div className="mt-1.5">
+        <PriceTag pricing={slot.pricing} />
+      </div>
       <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
         <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> 3-min buffer</span>
         {slot.approval && <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>}
@@ -586,6 +630,9 @@ function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean;
       <p className={`mt-1 text-[11px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
         <Video className="w-3 h-3" /> Online · one-tap
       </p>
+      <div className="mt-1.5">
+        <PriceTag pricing={slot.pricing} />
+      </div>
       <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
         {slot.approval ? <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>
           : <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> Instant</span>}
