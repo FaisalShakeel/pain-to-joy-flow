@@ -161,136 +161,129 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </button>
       )}
 
-      {/* COMPACT HEADER — identity + status + Quick Sync + actions, all above the fold */}
-      <section className="rounded-2xl bg-surface-lowest ghost-border shadow-ambient p-4 md:p-5 mb-4">
-        <div className="flex items-start gap-4">
-          {/* Avatar with status dot + Quick Sync badge overlay */}
-          <div className="relative flex-shrink-0">
-            <div className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-gradient-to-br ${contact.accent} shadow-elevated ring-4 ${statusData.ringClass} relative grid place-items-center`}>
-              <span className="text-white font-headline font-extrabold text-2xl md:text-3xl tracking-tight drop-shadow-lg">
-                {contact.initials}
-              </span>
-              <div className={`absolute top-1.5 right-1.5 h-2.5 w-2.5 ${statusData.dotClass} rounded-full ring-2 ring-white shadow-lg z-10 animate-pulse`} />
-            </div>
+      {/* TOP SECTION — Editorial profile (matches uploaded design) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT (4): Portrait + Spotlight */}
+        <div className="lg:col-span-4 flex flex-col gap-5">
+          {/* Portrait card — gold ring + status dot + QuickSync overlay */}
+          <div className={`aspect-[4/5] rounded-xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} relative grid place-items-center`}>
+            <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-2xl select-none">
+              {contact.initials}
+            </span>
+            <div className={`absolute top-3 right-3 h-3.5 w-3.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg z-10 animate-pulse`} />
             {syncWindows.length > 0 && (
-              <QuickSyncBadge
-                windows={syncWindows}
-                onBook={goSchedule}
-                className="absolute -bottom-2 -right-2"
-              />
+              <div className="absolute bottom-3 left-3 right-3 flex justify-end">
+                <QuickSyncBadge windows={syncWindows} onBook={goSchedule} size="md" />
+              </div>
             )}
           </div>
 
-          {/* Identity + status + ops chips */}
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="text-xl md:text-2xl font-extrabold font-headline tracking-tight text-primary leading-tight truncate">
-                  {firstName}
-                </h1>
-                {show("title") && (
-                  <p className="text-xs md:text-sm font-light text-foreground/80 leading-snug truncate">{owner.title}</p>
-                )}
-                {show("org") && (
-                  <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground font-semibold">
-                    <Building2 className="w-3 h-3 text-primary" />
-                    <span className="truncate">{owner.org}</span>
-                  </div>
-                )}
+          {/* Spotlight card */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-primary/5 to-primary/30 rounded-3xl blur opacity-75 transition" />
+            <div className="relative bg-surface-lowest rounded-3xl p-5 ghost-border overflow-hidden shadow-ambient">
+              <div className="absolute top-0 right-0 p-3 opacity-10">
+                <Building2 className="w-12 h-12 text-primary" />
               </div>
-              <div className={`${statusData.chipClass} border px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5 flex-shrink-0`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
+              </div>
+              <p className="text-base md:text-lg font-headline font-light italic leading-snug text-foreground">
+                "{contact.bio}"
+              </p>
+              <div className="mt-3 pt-3 border-t border-primary/5 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">Security Layer</span>
+                  <span className="text-[10px] font-mono text-primary/60">v2.4 handshake active</span>
+                </div>
+                <Zap className="w-4 h-4 text-primary/40" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT (8): Hero info card + Comms grid */}
+        <div className="lg:col-span-8 flex flex-col gap-5">
+          {/* Hero info card — name, title, org + Operations Center; status floats top-right */}
+          <div className="bg-surface-lowest rounded-3xl p-6 md:p-7 shadow-ambient ghost-border relative overflow-hidden">
+            {/* Status — absolutely positioned top right (per design) */}
+            <div className="absolute top-5 right-5 flex flex-col gap-2 items-end">
+              <div className={`${statusData.chipClass} border px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2`}>
                 <span className="relative flex h-2 w-2">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusData.pingClass} opacity-75`} />
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${statusData.dotClass}`} />
                 </span>
                 <span className="text-[10px] font-bold tracking-wider uppercase font-headline">{statusData.label}</span>
-              </div>
-            </div>
-            {/* 3-line status system: state + context + sub */}
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
-              <span className={`inline-flex items-center gap-1 ${statusData.subClass} font-bold uppercase tracking-wider`}>
-                <Zap className="w-3 h-3" /> {statusData.subLabel}
-              </span>
-              {show("availabilityContext") && (
-                <span className="inline-flex items-center gap-1 text-muted-foreground">
-                  <Clock className="w-3 h-3" /> {owner.availabilityContext}
+                <span className={`ml-1 inline-flex items-center gap-1 ${statusData.subClass} bg-white/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider`}>
+                  <Zap className="w-2.5 h-2.5" /> {statusData.subLabel}
                 </span>
-              )}
-              <span className="inline-flex items-center gap-1 text-muted-foreground">
-                Responds in <span className="font-semibold text-primary">{contact.responseTime}</span>
-              </span>
-            </div>
-
-            {/* Action panel — desktop inline (mobile becomes sticky bottom CTA) */}
-            <div className="mt-3">
-              <ActionPanel status={contact.status} actions={actions} stickyMobile />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECONDARY: Spotlight + Ops Center + Quick Ping (compact two-column) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        <div className="lg:col-span-4 flex flex-col gap-3">
-          {/* Spotlight */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-primary/5 to-primary/30 rounded-3xl blur opacity-75 transition" />
-            <div className="relative bg-surface-lowest rounded-2xl p-4 ghost-border overflow-hidden shadow-ambient">
-              <div className="absolute top-0 right-0 p-3 opacity-10">
-                <Building2 className="w-10 h-10 text-primary" />
               </div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Spotlight</h4>
-              </div>
-              <p className="text-[13px] font-headline font-light italic leading-snug text-foreground/90">
-                "{contact.bio}"
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Ping */}
-          <div className="rounded-2xl bg-surface-lowest ghost-border p-3 shadow-ambient flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Quick Ping</p>
-              <p className="text-xs font-semibold text-primary mt-0.5">Tap to nudge {firstName}</p>
-            </div>
-            <PingButton contact={contact} size="md" />
-          </div>
-
-          {/* Demo QR (compact in registered view; prominent in guest preview) */}
-          {!guestMode && (
-            <DemoQRCard to="/v/elena-vance" variant="compact" />
-          )}
-        </div>
-
-        {/* Right: Profile info */}
-        <div className="lg:col-span-8 flex flex-col gap-3">
-          {/* Tags + Operations Center (compact) */}
-          {(show("tags") || show("operationDays") || show("operationHours") || show("headquarters")) && (
-            <div className="bg-surface-lowest rounded-2xl p-4 shadow-ambient ghost-border">
-              {show("tags") && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {owner.tags.map((t) => (
-                    <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/5 text-primary">
-                      {t}
-                    </span>
-                  ))}
+              {show("availabilityContext") && (
+                <div className="flex items-center gap-2">
+                  <div className={`h-7 w-7 rounded-full ${statusData.chipClass} border grid place-items-center flex-shrink-0`}>
+                    <Clock className={`w-3.5 h-3.5 ${statusData.subClass}`} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Current Availability</span>
+                    <span className={`text-[11px] font-bold ${statusData.subClass}`}>{owner.availabilityContext}</span>
+                  </div>
                 </div>
               )}
+            </div>
+
+            <div className="space-y-6">
+              {/* Core bio */}
+              <div className="space-y-2 max-w-xl pr-32">
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+                    {firstName}
+                  </h1>
+                  {show("org") && (
+                    <div className="flex items-center gap-1.5 text-foreground/70 font-semibold tracking-wide mt-1 text-sm">
+                      <Building2 className="w-4 h-4 text-primary" />
+                      <span>{owner.org}</span>
+                    </div>
+                  )}
+                </div>
+                {show("title") && (
+                  <p className="text-base md:text-lg font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+                )}
+                {show("tags") && owner.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {owner.tags.map((t) => (
+                      <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/5 text-primary">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Smart action panel — sits inside hero (stays visible above the fold) */}
+              <div className="-mt-1">
+                <ActionPanel status={contact.status} actions={actions} stickyMobile />
+              </div>
+
+              {/* Operations Center */}
               {(show("operationDays") || show("operationHours") || show("headquarters")) && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
-                  {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
-                  {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
+                <div className="pt-5 border-t border-surface-container">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4 flex items-center gap-2">
+                    <span className="h-px w-8 bg-border" /> Operations Center
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
+                    {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
+                    {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
+                  </div>
                 </div>
               )}
             </div>
-          )}
+          </div>
 
-          {/* Comms grid */}
+          {/* Comms grid — Primary + Social side by side */}
           {(visiblePrimaryComms.length > 0 || visibleSocials.length > 0 || isLocked || isPending) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
               {(visiblePrimaryComms.length > 0 || isLocked || isPending) && (
                 <CommsCard
                   title="Primary Comms"
@@ -323,8 +316,9 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
             </div>
           )}
 
-          {/* Availability alerts (compact) */}
-          <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient">
+          {/* Availability alerts (compact) + Quick Ping row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 px-1">
+            <div className="md:col-span-2 rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Availability alerts</p>
@@ -336,7 +330,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 {Object.values(alerts).some(Boolean) ? <BellRing className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { key: "callback" as const, icon: PhoneCall, label: "Callback" },
                 { key: "message" as const, icon: MessageSquare, label: "Message" },
@@ -362,7 +356,24 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 );
               })}
             </div>
+            </div>
+
+            {/* Quick Ping pillar */}
+            <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient flex flex-col items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Quick Ping</p>
+                <p className="text-xs font-semibold text-primary mt-0.5">Tap to nudge {firstName}</p>
+              </div>
+              <PingButton contact={contact} size="md" />
+            </div>
           </div>
+
+          {/* Demo QR (compact in registered view) */}
+          {!guestMode && (
+            <div className="px-1">
+              <DemoQRCard to="/v/elena-vance" variant="compact" />
+            </div>
+          )}
         </div>
       </section>
 
