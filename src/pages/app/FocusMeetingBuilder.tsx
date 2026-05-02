@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -34,6 +35,7 @@ interface MTSlot {
   weekdays?: number[]; // 0..6 if weekly
   booking: Booking;
   access: Access;
+  pricing: Pricing;
   createdAt: number;
 }
 
@@ -79,6 +81,7 @@ const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
   weekdays: [],
   booking: "approval",
   access: "contacts",
+  pricing: defaultPricing,
 });
 
 const seed: MTSlot[] = [
@@ -89,6 +92,7 @@ const seed: MTSlot[] = [
     callMin: 30, bufferMin: 5,
     repeats: "weekly", weekdays: [2],
     booking: "approval", access: "approved" as any,
+    pricing: { mode: "free" },
     createdAt: Date.now() - 100000,
   },
 ];
