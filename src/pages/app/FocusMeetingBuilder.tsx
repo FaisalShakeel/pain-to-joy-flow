@@ -516,7 +516,7 @@ const MeetingCard = ({
     [slot],
   );
   const visibleSlots = expanded ? allSlots : allSlots.slice(0, 3);
-  const A = accessMeta[slot.access];
+  const A = accessMeta[slot.access] ?? accessMeta.contacts;
   const date = new Date(slot.date);
   const isPast = date < new Date(new Date().toDateString());
   const isToday = format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
