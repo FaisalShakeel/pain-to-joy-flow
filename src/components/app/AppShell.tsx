@@ -356,9 +356,9 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           {[
             baseItems[0],
             baseItems[1],
-            baseItems[3],
-            baseItems[4],
-            baseItems[7],
+            baseItems[2],
+            baseItems[5],
+            baseItems[8],
           ].map((item) => (
             <li key={item.to}>
               <NavLink
