@@ -323,8 +323,20 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </div>
       </section>
 
-      {/* Soft gradient divider — intentional transition between identity and action */}
-      <div aria-hidden className="h-6 md:h-8 bg-gradient-to-b from-white to-primary/90 rounded-b-2xl" />
+      {/* Soft gradient divider + scroll affordance */}
+      <div className="relative h-10 md:h-12 bg-gradient-to-b from-white to-primary/90 rounded-b-2xl flex items-end justify-center">
+        <a
+          href="#contact-actions"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("contact-actions")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="absolute -bottom-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-[0.2em] shadow-elevated hover:opacity-95"
+          aria-label="Jump to contact actions"
+        >
+          Connect <ArrowRight className="w-3 h-3 rotate-90" />
+        </a>
+      </div>
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer (blue contact/sync) */}
       <section
