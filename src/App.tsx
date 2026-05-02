@@ -50,6 +50,7 @@ import AccountSettings from "./pages/app/AccountSettings.tsx";
 import EditProfile from "./pages/app/EditProfile.tsx";
 import Upgrade from "./pages/app/Upgrade.tsx";
 import Explore from "./pages/app/Explore.tsx";
+import GuestProfile from "./pages/GuestProfile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,8 @@ const App = () => (
         <BypassProvider>
         <Routes>
           <Route path="/" element={<Index />} />
+          {/* Public guest profile (QR / share link landing) */}
+          <Route path="/v/:id" element={<GuestProfile />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/encryption" element={<Encryption />} />

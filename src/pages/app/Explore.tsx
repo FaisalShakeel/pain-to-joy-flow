@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 type Person = {
   id: string;
@@ -399,12 +400,11 @@ const Explore = () => {
                 </div>
                 <Button
                   className="mt-4 w-full rounded-full"
-                  onClick={() => {
-                    setQrOpen(false);
-                    toast({ title: "Login required", description: "Sign in to send a connection request." });
-                  }}
+                  asChild
                 >
-                  <UserPlus className="w-4 h-4" /> Request to connect
+                  <Link to="/v/julian-vane" onClick={() => setQrOpen(false)}>
+                    <UserPlus className="w-4 h-4" /> Open guest profile
+                  </Link>
                 </Button>
                 <button
                   onClick={() => setQrOpen(false)}
