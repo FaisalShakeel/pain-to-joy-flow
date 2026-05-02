@@ -161,121 +161,132 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </button>
       )}
 
-      {/* TOP: Profile Window */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: Portrait + Spotlight */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <div className={`aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br ${contact.accent} shadow-elevated ring-8 ${statusData.ringClass} relative grid place-items-center`}>
-            <span className="text-white font-headline font-extrabold text-6xl tracking-tight drop-shadow-lg">
-              {contact.initials}
-            </span>
-            <div className={`absolute top-3 right-3 h-3.5 w-3.5 ${statusData.dotClass} rounded-full ring-4 ring-white shadow-lg z-10 animate-pulse`} />
-          </div>
-
-          {/* Spotlight */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-primary/5 to-primary/30 rounded-3xl blur opacity-75 transition" />
-            <div className="relative bg-surface-lowest rounded-2xl p-5 ghost-border overflow-hidden shadow-ambient">
-              <div className="absolute top-0 right-0 p-3 opacity-10">
-                <Building2 className="w-10 h-10 text-primary" />
-              </div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Spotlight</h4>
-              </div>
-              <p className="text-sm font-headline font-light italic leading-relaxed text-foreground/90">
-                "{contact.bio}"
-              </p>
-              <div className="mt-4 pt-3 border-t border-primary/5 flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Security Layer</span>
-                  <span className="text-[11px] font-mono text-primary/70">v2.4 handshake active</span>
-                </div>
-                <Zap className="w-4 h-4 text-primary/40" />
-              </div>
+      {/* COMPACT HEADER — identity + status + Quick Sync + actions, all above the fold */}
+      <section className="rounded-2xl bg-surface-lowest ghost-border shadow-ambient p-4 md:p-5 mb-4">
+        <div className="flex items-start gap-4">
+          {/* Avatar with status dot + Quick Sync badge overlay */}
+          <div className="relative flex-shrink-0">
+            <div className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-gradient-to-br ${contact.accent} shadow-elevated ring-4 ${statusData.ringClass} relative grid place-items-center`}>
+              <span className="text-white font-headline font-extrabold text-2xl md:text-3xl tracking-tight drop-shadow-lg">
+                {contact.initials}
+              </span>
+              <div className={`absolute top-1.5 right-1.5 h-2.5 w-2.5 ${statusData.dotClass} rounded-full ring-2 ring-white shadow-lg z-10 animate-pulse`} />
             </div>
+            {syncWindows.length > 0 && (
+              <QuickSyncBadge
+                windows={syncWindows}
+                onBook={goSchedule}
+                className="absolute -bottom-2 -right-2"
+              />
+            )}
           </div>
 
-          {/* Quick Ping */}
-          <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Quick Ping</p>
-              <p className="text-sm font-semibold text-primary mt-0.5">Tap to nudge {firstName}</p>
-            </div>
-            <PingButton contact={contact} size="md" />
-          </div>
-        </div>
-
-        {/* Right: Profile info */}
-        <div className="lg:col-span-8 flex flex-col gap-4">
-          {/* Hero card */}
-          <div className="bg-surface-lowest rounded-2xl p-6 md:p-8 shadow-ambient ghost-border relative overflow-hidden">
-            {/* Status block (top-right) */}
-            <div className="absolute top-5 right-5 md:top-6 md:right-6 flex flex-col items-end gap-2">
-              <div className={`${statusData.chipClass} border px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5`}>
+          {/* Identity + status + ops chips */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="text-xl md:text-2xl font-extrabold font-headline tracking-tight text-primary leading-tight truncate">
+                  {firstName}
+                </h1>
+                {show("title") && (
+                  <p className="text-xs md:text-sm font-light text-foreground/80 leading-snug truncate">{owner.title}</p>
+                )}
+                {show("org") && (
+                  <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground font-semibold">
+                    <Building2 className="w-3 h-3 text-primary" />
+                    <span className="truncate">{owner.org}</span>
+                  </div>
+                )}
+              </div>
+              <div className={`${statusData.chipClass} border px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5 flex-shrink-0`}>
                 <span className="relative flex h-2 w-2">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusData.pingClass} opacity-75`} />
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${statusData.dotClass}`} />
                 </span>
                 <span className="text-[10px] font-bold tracking-wider uppercase font-headline">{statusData.label}</span>
-                <span className={`ml-0.5 hidden sm:flex items-center gap-1 ${statusData.subClass} bg-white/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider`}>
-                  <Zap className="w-3 h-3" /> {statusData.subLabel}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`grid place-items-center w-6 h-6 rounded-full ${statusData.chipClass}`}>
-                  <Clock className="w-3 h-3" />
-                </span>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Current availability</span>
-                  <span className={`text-[10px] font-bold ${statusData.subClass}`}>
-                    {show("availabilityContext") ? owner.availabilityContext : "Hidden by owner"}
-                  </span>
-                </div>
               </div>
             </div>
-
-            {/* Bio */}
-            <div className="space-y-2.5 max-w-2xl pr-28 md:pr-44">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-extrabold font-headline tracking-tight text-primary leading-tight">
-                  {firstName}
-                </h1>
-                {show("org") && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold tracking-wide mt-1">
-                  <Building2 className="w-3.5 h-3.5 text-primary" />
-                  <span className="truncate">{owner.org}</span>
-                </div>
-                )}
-              </div>
-              {show("title") && (
-                <p className="text-sm md:text-base font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+            {/* 3-line status system: state + context + sub */}
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+              <span className={`inline-flex items-center gap-1 ${statusData.subClass} font-bold uppercase tracking-wider`}>
+                <Zap className="w-3 h-3" /> {statusData.subLabel}
+              </span>
+              {show("availabilityContext") && (
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <Clock className="w-3 h-3" /> {owner.availabilityContext}
+                </span>
               )}
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                Responds in <span className="font-semibold text-primary">{contact.responseTime}</span>
+              </span>
+            </div>
+
+            {/* Action panel — desktop inline (mobile becomes sticky bottom CTA) */}
+            <div className="mt-3">
+              <ActionPanel status={contact.status} actions={actions} stickyMobile />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECONDARY: Spotlight + Ops Center + Quick Ping (compact two-column) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div className="lg:col-span-4 flex flex-col gap-3">
+          {/* Spotlight */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-primary/5 to-primary/30 rounded-3xl blur opacity-75 transition" />
+            <div className="relative bg-surface-lowest rounded-2xl p-4 ghost-border overflow-hidden shadow-ambient">
+              <div className="absolute top-0 right-0 p-3 opacity-10">
+                <Building2 className="w-10 h-10 text-primary" />
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Spotlight</h4>
+              </div>
+              <p className="text-[13px] font-headline font-light italic leading-snug text-foreground/90">
+                "{contact.bio}"
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Ping */}
+          <div className="rounded-2xl bg-surface-lowest ghost-border p-3 shadow-ambient flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Quick Ping</p>
+              <p className="text-xs font-semibold text-primary mt-0.5">Tap to nudge {firstName}</p>
+            </div>
+            <PingButton contact={contact} size="md" />
+          </div>
+
+          {/* Demo QR (compact in registered view; prominent in guest preview) */}
+          {!guestMode && (
+            <DemoQRCard to="/v/elena-vance" variant="compact" />
+          )}
+        </div>
+
+        {/* Right: Profile info */}
+        <div className="lg:col-span-8 flex flex-col gap-3">
+          {/* Tags + Operations Center (compact) */}
+          {(show("tags") || show("operationDays") || show("operationHours") || show("headquarters")) && (
+            <div className="bg-surface-lowest rounded-2xl p-4 shadow-ambient ghost-border">
               {show("tags") && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
+                <div className="flex flex-wrap gap-1.5 mb-3">
                   {owner.tags.map((t) => (
-                    <span key={t} className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/5 text-primary">
+                    <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/5 text-primary">
                       {t}
                     </span>
                   ))}
                 </div>
               )}
+              {(show("operationDays") || show("operationHours") || show("headquarters")) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
+                  {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
+                  {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
+                </div>
+              )}
             </div>
-
-            {/* Operations Center */}
-            {(show("operationDays") || show("operationHours") || show("headquarters")) && (
-            <div className="pt-5 mt-5 border-t border-surface-container">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-4 flex items-center gap-2">
-                <span className="h-px w-6 bg-surface-container" /> Operations Center
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
-                {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
-                {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
-              </div>
-            </div>
-            )}
-          </div>
+          )}
 
           {/* Comms grid */}
           {(visiblePrimaryComms.length > 0 || visibleSocials.length > 0 || isLocked || isPending) && (
