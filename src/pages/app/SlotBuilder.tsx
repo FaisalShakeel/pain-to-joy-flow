@@ -779,6 +779,15 @@ const SlotEditor = ({
             </div>
           </Section>
 
+          {/* Pricing */}
+          <Section title="Pricing" icon={Sparkles} hint="Free by default. Switch to Paid to charge per booking.">
+            <PricingField
+              value={slot.pricing ?? defaultPricing}
+              onChange={(p) => set("pricing", p)}
+              compact
+            />
+          </Section>
+
           {/* Footer */}
           <div className="flex items-center justify-between pt-2">
             <button onClick={onDelete} className="inline-flex items-center gap-1.5 text-xs font-bold text-destructive hover:opacity-80">
