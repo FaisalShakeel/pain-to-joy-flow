@@ -17,6 +17,7 @@ import {
   LogOut,
   Pencil,
   UserCircle2,
+  Compass,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
@@ -46,6 +47,7 @@ interface NavItem {
 
 const baseItems: NavItem[] = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/app/explore", label: "Explore", icon: Compass },
   { to: "/app/contacts", label: "Contacts", icon: Users },
   { to: "/app/availability", label: "Availability", icon: CalendarDays },
   { to: "/app/requests", label: "Requests", icon: Inbox },
@@ -354,9 +356,9 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           {[
             baseItems[0],
             baseItems[1],
-            baseItems[3],
-            baseItems[4],
-            baseItems[7],
+            baseItems[2],
+            baseItems[5],
+            baseItems[8],
           ].map((item) => (
             <li key={item.to}>
               <NavLink
