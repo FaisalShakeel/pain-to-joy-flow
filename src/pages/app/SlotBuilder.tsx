@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 
 // ---------- Types ----------
 type Mode = "online" | "onsite" | "hybrid" | "quicksync";
@@ -45,6 +46,7 @@ interface Slot {
   onsite?: { location: string; capacity: number; booking: Booking; queue?: boolean };
   quickSync?: { callMin: 3 | 5 | 8 | 10; bufferMin: 1 | 2 | 5 };
   autoCloseAlternate?: boolean;
+  pricing?: Pricing;
 }
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
