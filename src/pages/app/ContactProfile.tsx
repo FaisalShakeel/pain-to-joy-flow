@@ -108,6 +108,37 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
     ? { dotColor: "bg-amber-400", textColor: "text-amber-400", chipBg: "bg-amber-500/10 border-amber-500/20", icon: Clock, label: "Sync Pending Approval" }
     : { dotColor: "bg-rose-400", textColor: "text-rose-300", chipBg: "bg-rose-500/10 border-rose-500/20", icon: Lock, label: "Sync Locked" };
 
+  // Derive Quick Sync windows (mock): only when status is "available" or "focus".
+  const syncWindows: SyncWindow[] = (() => {
+    if (contact.status === "available") return [{ start: "10:00", end: "10:30" }, { start: "14:00", end: "14:30" }];
+    if (contact.status === "focus") return [{ start: "16:30", end: "17:00" }];
+    return [];
+  })();
+
+  // Smart-CTA action list — Book Meeting / Quick Sync / Ping / Request Access.
+  const goSchedule = () => navigate(`/app/schedule/${contact.id}`);
+  const goMessage = () => navigate("/app/messages");
+  const onPing = () => toast({ title: "Ping sent", description: `${firstName} will see your nudge.` });
+
+  const actions: ActionItem[] = (() => {
+    const a: ActionItem[] = [];
+    if (contact.status === "available") {
+      a.push({ key: "connect", label: "Connect Now", icon: Phone, onClick: () => navigate(`/app/contact/${contact.id}/call`), variant: "primary" });
+    }
+    a.push({ key: "book", label: "Book Meeting", icon: CalendarDays, onClick: goSchedule, variant: contact.status === "available" ? "secondary" : "primary" });
+    if (syncWindows.length > 0) {
+      a.push({ key: "qsync", label: "Quick Sync", icon: Zap, onClick: goSchedule, variant: "secondary" });
+    }
+    a.push({ key: "ping", label: "Ping", icon: BellRing, onClick: onPing, variant: contact.status === "busy" || contact.status === "focus" ? "primary" : "ghost" });
+    if (isLocked) {
+      a.push({ key: "request", label: "Request Access", icon: ShieldCheck, onClick: () => setOpenSent(true), variant: "warn" });
+    }
+    if (isApproved) {
+      a.push({ key: "msg", label: "Message", icon: MessageSquare, onClick: goMessage, variant: "ghost" });
+    }
+    return a;
+  })();
+
   const toggleAlert = (k: "callback" | "message" | "calendar") => {
     const next = { ...alerts, [k]: !alerts[k] };
     setAlerts(next);
