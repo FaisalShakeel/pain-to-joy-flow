@@ -367,11 +367,11 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       </section>
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer */}
-      <section className="mt-6 rounded-2xl overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
+      <section className="mt-4 rounded-2xl overflow-hidden relative bg-primary text-primary-foreground shadow-elevated">
         <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.4),transparent_60%)]" />
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 p-6 md:p-8">
+        <div className="relative z-10 p-5 md:p-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             {/* Left: Portal */}
             <div className="lg:col-span-8 space-y-5">
