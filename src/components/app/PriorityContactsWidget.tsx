@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Search, Maximize2, X, Star, Pin, PinOff,
-  Users as UsersIcon, ArrowRight, Car, Flame,
+  Users as UsersIcon, ArrowRight, Car, Sparkles,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPill from "./StatusPill";
@@ -61,7 +61,7 @@ const ContactRow = ({
           title={`${unseen} new spotlight ${unseen === 1 ? "post" : "posts"} — open profile`}
           className="absolute -top-1.5 -left-1.5 z-10 grid place-items-center w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 text-white shadow-glass ring-2 ring-surface-lowest animate-pulse"
         >
-          <Flame className="w-3 h-3" />
+          <Sparkles className="w-3 h-3" />
           <span className="absolute -bottom-1 -right-1 grid place-items-center min-w-[14px] h-[14px] px-[3px] rounded-full bg-primary text-primary-foreground text-[8px] font-bold">
             {unseen}
           </span>

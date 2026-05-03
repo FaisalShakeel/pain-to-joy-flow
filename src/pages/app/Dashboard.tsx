@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
+import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
 
 type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
@@ -134,6 +135,7 @@ const groupSyncWindows = (slots: { start: string; end: string }[]) => {
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
+  const [quickSyncOpen, setQuickSyncOpen] = useState(false);
   const [contextMessage, setContextMessage] = useState<string>(DEFAULT_CONTEXT.available);
   const [contextTouched, setContextTouched] = useState(false);
   const [lastCustom, setLastCustom] = useState<string>("");
@@ -280,10 +282,17 @@ const Dashboard = () => {
           </div>
           <div className="flex flex-col items-end gap-1.5 min-w-0">
             {(() => {
-              const windows = groupSyncWindows(QUICK_SYNC_SLOTS);
+              const windows = [
+                { start: "10:00", end: "10:30" },
+                { start: "14:00", end: "14:30" },
+              ];
               if (!windows.length) return null;
               return (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ghost-border bg-surface-low/70">
+                <button
+                  type="button"
+                  onClick={() => setQuickSyncOpen(true)}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ghost-border bg-surface-low/70 hover:bg-surface-low transition"
+                >
                   <CalendarClock className="w-3.5 h-3.5 text-accent" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                     Quick Sync
@@ -291,7 +300,7 @@ const Dashboard = () => {
                   <span className="text-[11px] font-semibold text-primary tabular-nums">
                     {windows.map((w) => `${w.start}–${w.end}`).join(" | ")}
                   </span>
-                </div>
+                </button>
               );
             })()}
             <div className="flex items-center gap-1.5 flex-wrap justify-end">
@@ -314,6 +323,16 @@ const Dashboard = () => {
             </a>
           </div>
         </div>
+
+        <QuickSyncSlotsDialog
+          open={quickSyncOpen}
+          onOpenChange={setQuickSyncOpen}
+          contactName={me.name.split(" ")[0]}
+          windows={[
+            { start: "10:00", end: "10:30" },
+            { start: "14:00", end: "14:30" },
+          ]}
+        />
 
         {/* Spotlight + Signal (no outer title; new spotlight inside tile) */}
         <div className="lg:col-span-3">
