@@ -1,6 +1,7 @@
 import heroCard from "@/assets/hero-card.jpg";
 import { ArrowRight, PlayCircle, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   const [videoOpen, setVideoOpen] = useState(false);
@@ -90,21 +91,35 @@ const Hero = () => {
               </p>
             </div>
           </div>
-          {/* floating credential card */}
-          <div className="hidden md:block absolute -bottom-8 -left-10 w-64 glass shadow-glass rounded-2xl p-5 ghost-border animate-float">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-md bg-gradient-primary grid place-items-center">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary-foreground" />
+          {/* floating credential card — scannable QR linking to Julian's vault */}
+          <Link
+            to="/v/julian-vane"
+            aria-label="Open Julian Thorne's vault"
+            className="hidden md:flex absolute -bottom-8 -left-10 w-72 items-center gap-4 glass shadow-glass rounded-2xl p-4 ghost-border animate-float hover:shadow-elevated hover:-translate-y-0.5 transition-all"
+          >
+            <div className="w-20 h-20 rounded-xl bg-primary text-primary-foreground grid place-items-center flex-shrink-0 ring-1 ring-primary/20">
+              <div className="grid grid-cols-8 gap-px p-1.5 bg-primary-foreground/10 rounded-md">
+                {Array.from({ length: 64 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`w-1 h-1 ${
+                      [0, 7, 56, 63].includes(i) || (i * 11) % 7 < 3
+                        ? "bg-primary-foreground"
+                        : "bg-transparent"
+                    }`}
+                  />
+                ))}
               </div>
-              <span className="font-headline font-bold text-primary text-sm tracking-tight">AVAILOCK</span>
             </div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Vault Holder</p>
-            <p className="font-headline font-extrabold text-primary text-lg">Julian Thorne</p>
-            <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-[10px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-on-primary-fixed animate-pulse" />
-              Open · 2 windows today
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 mb-1">
+                <ShieldCheck className="w-3 h-3 text-accent" />
+                <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Vault Holder</span>
+              </div>
+              <p className="font-headline font-extrabold text-primary text-lg leading-tight">Julian Thorne</p>
+              <p className="mt-1 text-[10px] text-muted-foreground font-medium">Tap or scan to open vault</p>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
