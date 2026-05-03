@@ -176,7 +176,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
             <div className={`absolute top-3 right-3 h-3.5 w-3.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg z-10 animate-pulse`} />
             {syncWindows.length > 0 && (
               <div className="absolute bottom-3 left-3 right-3 flex justify-end">
-                <QuickSyncBadge windows={syncWindows} onBook={goSchedule} size="md" />
+                <QuickSyncBadge windows={syncWindows} contactName={contact.name} size="md" />
               </div>
             )}
           </div>
