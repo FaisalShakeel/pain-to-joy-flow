@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -11,10 +11,12 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 type View = "grid" | "list";
-type Filter = "all" | "favorites" | "frequent" | Relationship;
+type StatusFilter = "available" | "busy" | "focus" | "offline";
+type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
 type Density = 6 | 10 | 16;
 
 const PINNED_KEY = "availock.pinnedContacts";
+const FAV_KEY = "availock.favoriteContacts";
 
 const relationshipMeta: Record<Relationship, { label: string; cls: string }> = {
   client:    { label: "Client",    cls: "bg-sky-500/10 text-sky-700" },
@@ -28,6 +30,10 @@ const relationshipMeta: Record<Relationship, { label: string; cls: string }> = {
 const filters: { id: Filter; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "all",       label: "All",        icon: Users },
   { id: "favorites", label: "Favorites",  icon: Star },
+  { id: "available", label: "Available",  icon: Circle },
+  { id: "busy",      label: "Busy",       icon: Dot },
+  { id: "focus",     label: "Focus",      icon: FocusIcon },
+  { id: "offline",   label: "Offline",    icon: Moon },
   { id: "frequent",  label: "Frequent",   icon: TrendingUp },
   { id: "client",    label: "Clients",    icon: Briefcase },
   { id: "colleague", label: "Colleagues", icon: UserCheck },
@@ -63,7 +69,7 @@ const Contacts = () => {
   const [q, setQ] = useState("");
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
-  const [density, setDensity] = useState<Density>(6);
+  const [density, setDensity] = useState<Density>(16);
   const birdsEye = true;
   const [searchOpen, setSearchOpen] = useState(false);
   const searchWrapRef = useRef<HTMLDivElement>(null);
@@ -77,6 +83,15 @@ const Contacts = () => {
       return [];
     }
   });
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(FAV_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     try {
@@ -85,6 +100,14 @@ const Contacts = () => {
       /* ignore */
     }
   }, [pinned]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+    } catch {
+      /* ignore */
+    }
+  }, [favorites]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -122,12 +145,34 @@ const Contacts = () => {
     });
   };
 
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) => {
+      const has = prev.includes(id);
+      if (has) return prev.filter((x) => x !== id);
+      return [id, ...prev];
+    });
+  };
+
+  const isFavorite = (id: string, baseFavorite?: boolean) =>
+    favorites.includes(id) || (baseFavorite && !favorites.includes(`__unfav_${id}`));
+
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     const list = contacts.filter((c) => {
-      if (filter === "favorites" && !c.favorite) return false;
+      const fav = favorites.includes(c.id) || c.favorite;
+      if (filter === "favorites" && !fav) return false;
       if (filter === "frequent" && !c.frequent) return false;
-      if (filter !== "all" && filter !== "favorites" && filter !== "frequent" && c.relationship !== filter) return false;
+      if (
+        filter !== "all" &&
+        filter !== "favorites" &&
+        filter !== "frequent" &&
+        filter !== "available" &&
+        filter !== "busy" &&
+        filter !== "focus" &&
+        filter !== "offline" &&
+        c.relationship !== filter
+      ) return false;
+      if ((filter === "available" || filter === "busy" || filter === "focus" || filter === "offline") && c.status !== filter) return false;
       if (!s) return true;
       return (
         c.name.toLowerCase().includes(s) ||
@@ -143,7 +188,7 @@ const Contacts = () => {
       .filter((c): c is (typeof list)[number] => Boolean(c));
     const rest = list.filter((c) => !pinSet.has(c.id));
     return [...pinnedList, ...rest];
-  }, [q, filter, pinned]);
+  }, [q, filter, pinned, favorites]);
 
   // Search-only matches (ignore filter chip), used for the dropdown preview.
   const searchMatches = useMemo(() => {
@@ -183,9 +228,9 @@ const Contacts = () => {
   };
 
   const densityCols: Record<Density, string> = {
-    6:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3",
+    6:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
     10: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
-    16: "grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
+    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
   };
 
   // Approximate per-tile heights (px) used to compute the visible window height.
@@ -345,7 +390,8 @@ const Contacts = () => {
       </div>
 
       {/* Quick filters + bird's-eye density (always visible) */}
-      <div className={cn("flex flex-wrap items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
+      <div className={cn("mt-3 flex items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
+        <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto scrollbar-none -mx-1 px-1 py-1">
         {filters.map((f) => {
           const Icon = f.icon;
           const active = filter === f.id;
@@ -354,7 +400,7 @@ const Contacts = () => {
               key={f.id}
               onClick={() => setFilter(f.id)}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ghost-border transition",
+                "inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ghost-border transition",
                 active
                   ? "bg-primary text-primary-foreground border-transparent shadow-elevated"
                   : "bg-surface-lowest text-primary hover:bg-surface-low",
@@ -364,8 +410,9 @@ const Contacts = () => {
             </button>
           );
         })}
+        </div>
 
-        <div className="ml-auto inline-flex items-center gap-2">
+        <div className="shrink-0 inline-flex items-center gap-2">
           <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <Eye className="w-3.5 h-3.5" /> Bird&apos;s-eye
           </span>
@@ -417,6 +464,7 @@ const Contacts = () => {
           <ul className={cn("grid", density === 6 ? "gap-4" : density === 10 ? "gap-3" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
+              const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
               const compact = density === 16;
               const roomy = density === 6;
               const medium = density === 10;
@@ -460,6 +508,25 @@ const Contacts = () => {
                           )}
                         >
                           {isPinned ? <PinOff className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} /> : <Pin className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleFavorite(c.id);
+                          }}
+                          title={fav ? "Remove from favorites" : "Mark as favorite"}
+                          aria-label={fav ? "Remove from favorites" : "Mark as favorite"}
+                          className={cn(
+                            "inline-flex items-center justify-center rounded-full transition shrink-0",
+                            roomy ? "w-5 h-5" : "w-4 h-4",
+                            fav
+                              ? "text-amber-500"
+                              : "text-muted-foreground hover:text-amber-500 opacity-60 group-hover:opacity-100",
+                          )}
+                        >
+                          <Star className={cn(roomy ? "w-3 h-3" : "w-2.5 h-2.5", fav && "fill-amber-500")} />
                         </button>
                         <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : medium ? "text-xs" : "text-[11px]")}>
                           {c.name}
