@@ -1,4 +1,5 @@
 import { ShieldAlert, ShieldCheck, Phone, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const AccessControl = () => (
   <section id="protocol" className="py-24 md:py-32 bg-surface-low/40 relative overflow-hidden">
@@ -63,29 +64,37 @@ const AccessControl = () => (
           <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[9px] font-bold tracking-wider">EXPOSED</div>
         </div>
 
-        {/* Availock card */}
-        <div className="relative w-80 md:w-96 h-56 glass rounded-2xl p-7 rotate-[5deg] shadow-elevated ghost-border overflow-hidden">
+        {/* Availock card — scannable QR linking to Julian's vault */}
+        <Link
+          to="/v/julian-vane"
+          aria-label="Open Julian Thorne's vault"
+          className="relative w-80 md:w-96 h-56 glass rounded-2xl p-6 rotate-[5deg] shadow-elevated ghost-border overflow-hidden flex items-center gap-5 hover:shadow-glass hover:-translate-y-0.5 transition-all"
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-primary-fixed/40 via-transparent to-accent-soft/30" />
-          <div className="relative flex flex-col h-full justify-between">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-primary rounded-lg grid place-items-center">
-                  <ShieldCheck className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <span className="font-headline font-extrabold text-primary tracking-tight">AVAILOCK</span>
-              </div>
-              <div className="text-[9px] font-bold tracking-[0.2em] text-on-primary-fixed bg-primary-fixed px-2 py-1 rounded-full">VAULT · 2048</div>
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Vault Holder</div>
-              <div className="text-2xl font-headline font-extrabold text-primary">Julian Thorne</div>
-              <div className="mt-3 inline-flex items-center gap-1.5 text-[10px] text-primary font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Available · Tue 14:00 – 16:00
-              </div>
+          <div className="relative w-32 h-32 rounded-xl bg-primary text-primary-foreground grid place-items-center flex-shrink-0 ring-1 ring-primary/20">
+            <div className="grid grid-cols-10 gap-px p-2 bg-primary-foreground/10 rounded-md">
+              {Array.from({ length: 100 }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-1.5 h-1.5 ${
+                    [0, 9, 90, 99].includes(i) || (i * 13) % 7 < 3
+                      ? "bg-primary-foreground"
+                      : "bg-transparent"
+                  }`}
+                />
+              ))}
             </div>
           </div>
-        </div>
+          <div className="relative min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mb-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Vault Holder</span>
+            </div>
+            <div className="text-xl font-headline font-extrabold text-primary leading-tight">Julian Thorne</div>
+            <div className="mt-1 text-[10px] text-on-primary-fixed bg-primary-fixed inline-block px-2 py-0.5 rounded-full font-bold tracking-[0.18em]">VAULT · 2048</div>
+            <p className="mt-2 text-[10px] text-muted-foreground font-medium">Tap or scan to open vault</p>
+          </div>
+        </Link>
       </div>
     </div>
   </section>
