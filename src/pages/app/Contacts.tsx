@@ -390,7 +390,8 @@ const Contacts = () => {
       </div>
 
       {/* Quick filters + bird's-eye density (always visible) */}
-      <div className={cn("flex flex-wrap items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
+      <div className={cn("mt-3 flex items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
+        <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto scrollbar-none -mx-1 px-1 py-1">
         {filters.map((f) => {
           const Icon = f.icon;
           const active = filter === f.id;
@@ -399,7 +400,7 @@ const Contacts = () => {
               key={f.id}
               onClick={() => setFilter(f.id)}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ghost-border transition",
+                "inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ghost-border transition",
                 active
                   ? "bg-primary text-primary-foreground border-transparent shadow-elevated"
                   : "bg-surface-lowest text-primary hover:bg-surface-low",
@@ -409,8 +410,9 @@ const Contacts = () => {
             </button>
           );
         })}
+        </div>
 
-        <div className="ml-auto inline-flex items-center gap-2">
+        <div className="shrink-0 inline-flex items-center gap-2">
           <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <Eye className="w-3.5 h-3.5" /> Bird&apos;s-eye
           </span>
@@ -462,6 +464,7 @@ const Contacts = () => {
           <ul className={cn("grid", density === 6 ? "gap-4" : density === 10 ? "gap-3" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
+              const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
               const compact = density === 16;
               const roomy = density === 6;
               const medium = density === 10;
@@ -505,6 +508,25 @@ const Contacts = () => {
                           )}
                         >
                           {isPinned ? <PinOff className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} /> : <Pin className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleFavorite(c.id);
+                          }}
+                          title={fav ? "Remove from favorites" : "Mark as favorite"}
+                          aria-label={fav ? "Remove from favorites" : "Mark as favorite"}
+                          className={cn(
+                            "inline-flex items-center justify-center rounded-full transition shrink-0",
+                            roomy ? "w-5 h-5" : "w-4 h-4",
+                            fav
+                              ? "text-amber-500"
+                              : "text-muted-foreground hover:text-amber-500 opacity-60 group-hover:opacity-100",
+                          )}
+                        >
+                          <Star className={cn(roomy ? "w-3 h-3" : "w-2.5 h-2.5", fav && "fill-amber-500")} />
                         </button>
                         <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : medium ? "text-xs" : "text-[11px]")}>
                           {c.name}
