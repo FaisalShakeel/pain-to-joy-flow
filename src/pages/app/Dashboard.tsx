@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
+  CalendarDays, ArrowRight, Inbox, Clock, ChevronDown, Check, CalendarClock, Users, Zap, CheckCircle2, Timer,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -19,8 +19,9 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
-import MetricsStrip from "@/components/app/MetricsStrip";
 import QuickSyncWaitingList from "@/components/app/QuickSyncWaitingList";
+import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
+import { formatProtected } from "@/lib/metrics";
 
 type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
