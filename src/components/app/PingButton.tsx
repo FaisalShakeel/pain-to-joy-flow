@@ -3,6 +3,7 @@ import { Bell, PhoneCall, MessageSquare, Check, Car, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Contact, AvailabilityStatus } from "@/lib/mockData";
+import { trackMetric } from "@/lib/metrics";
 
 type PingKind = "callback" | "message";
 
@@ -93,6 +94,10 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
     writeRecord(contact.id, next);
     setRecord(next);
     setSentKind(kind);
+    trackMetric("ping_used", {
+      actor: contact.id,
+      dedupeKey: `ping:${contact.id}:${kind}:${today()}`,
+    });
     const copy = statusCopy(status, contact.name.split(" ")[0], kind);
     toast({ title: copy.title, description: copy.body });
     setTimeout(() => { setOpen(false); setSentKind(null); }, 1400);

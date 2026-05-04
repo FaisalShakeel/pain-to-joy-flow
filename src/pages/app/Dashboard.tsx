@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
+import MetricsStrip from "@/components/app/MetricsStrip";
+import QuickSyncWaitingList from "@/components/app/QuickSyncWaitingList";
 
 type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
@@ -337,6 +339,16 @@ const Dashboard = () => {
         {/* Spotlight + Signal (no outer title; new spotlight inside tile) */}
         <div className="lg:col-span-3">
           <SpotlightBoard />
+        </div>
+
+        {/* Real impact metrics */}
+        <div className="lg:col-span-3">
+          <MetricsStrip />
+        </div>
+
+        {/* Quick Sync waiting list */}
+        <div className="lg:col-span-3">
+          <QuickSyncWaitingList />
         </div>
 
         {/* Priority Contacts */}

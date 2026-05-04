@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Zap, Lock, CalendarClock } from "lucide-react";
+import { Zap, Lock, CalendarClock, Hourglass } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { SyncWindow } from "./QuickSyncBadge";
+import { joinWaitingList, trackMetric } from "@/lib/metrics";
 
 interface Props {
   open: boolean;
@@ -57,9 +58,22 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
       next.add(slot);
       return next;
     });
+    trackMetric("quick_sync_completed", { dedupeKey: `qs:${slot}` });
+    trackMetric("qs_batched", { dedupeKey: `qs-batch:${slot}` });
     toast({
       title: "Quick Sync booked",
       description: `${contactName} · 3-min call at ${slot} today.`,
+    });
+  };
+
+  const joinQueue = (windowLabel: string) => {
+    joinWaitingList({
+      name: contactName,
+      note: `Wants Quick Sync in ${windowLabel} window`,
+    });
+    toast({
+      title: "You're on the waiting list",
+      description: `${contactName} will manually approve and offer you a slot if one opens.`,
     });
   };
 
@@ -121,6 +135,16 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                     );
                   })}
                 </div>
+                {free === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => joinQueue(`${w.start}–${w.end}`)}
+                    className="mt-2 w-full inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[11px] font-semibold bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 transition"
+                  >
+                    <Hourglass className="w-3 h-3" />
+                    Window full · Join waiting list
+                  </button>
+                )}
               </div>
             );
           })}
