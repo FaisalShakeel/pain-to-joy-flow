@@ -18,6 +18,7 @@ import QuickSyncBadge, { type SyncWindow } from "@/components/app/QuickSyncBadge
 import ActionPanel, { type ActionItem } from "@/components/app/ActionPanel";
 import DemoQRCard from "@/components/app/DemoQRCard";
 import PreviewModeBanner from "@/components/app/PreviewModeBanner";
+import { trackMetric } from "@/lib/metrics";
 
 interface ContactProfileProps {
   guestMode?: boolean;
@@ -43,6 +44,22 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       navigate(`/app/contact/${id}`, { replace: true });
     }
   }, [guestMode, id, navigate]);
+
+  // Track profile view (counts as an interruption avoided —
+  // seeker opened profile instead of dialing).
+  useEffect(() => {
+    if (!id) return;
+    trackMetric("profile_viewed", {
+      actor: id,
+      dedupeKey: `profile:${id}:${guestMode ? "guest" : "app"}`,
+    });
+    if (baseContact && baseContact.status !== "available") {
+      trackMetric("access_blocked", {
+        actor: id,
+        dedupeKey: `blocked:${id}:${baseContact.status}`,
+      });
+    }
+  }, [id, guestMode, baseContact]);
 
   // In guest mode, intercept clicks on any interactive element and gate them behind auth.
   const handleGuestCapture = (e: React.MouseEvent<HTMLDivElement>) => {
