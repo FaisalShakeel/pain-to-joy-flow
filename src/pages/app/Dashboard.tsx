@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, Clock, ChevronDown, Check, CalendarClock, Users, Zap, CheckCircle2, Timer,
+  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -19,9 +19,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
+import MetricsStrip from "@/components/app/MetricsStrip";
 import QuickSyncWaitingList from "@/components/app/QuickSyncWaitingList";
-import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
-import { formatProtected } from "@/lib/metrics";
 
 type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
@@ -149,16 +148,6 @@ const Dashboard = () => {
   const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
   const meta = statusMeta[status];
   const autoStatus = AUTO_STATUS[status];
-  const metrics = useMetrics("week");
-  const waiting = useWaitingList().filter((w) => w.status === "waiting");
-
-  const scrollToWaiting = () => {
-    const el = document.getElementById("qs-waiting-list");
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    el.classList.add("ring-2", "ring-accent/60");
-    setTimeout(() => el.classList.remove("ring-2", "ring-accent/60"), 1800);
-  };
 
   const handleStatusChange = (s: StatusKey) => {
     setStatus(s);
@@ -291,18 +280,6 @@ const Dashboard = () => {
                   </DropdownMenu>
                 )}
               </div>
-              {/* Impact metrics — aligned with end of "Sync" via the same min-w-0 column */}
-              <div className="mt-2 flex items-center gap-3 flex-wrap text-[11px]">
-                <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
-                  <Zap className="w-3 h-3" /> {metrics.avoided} avoided
-                </span>
-                <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-                  <CheckCircle2 className="w-3 h-3" /> {metrics.connected} connected
-                </span>
-                <span className="inline-flex items-center gap-1 font-semibold text-sky-700">
-                  <Timer className="w-3 h-3" /> {formatProtected(metrics.protectedMinutes)} protected
-                </span>
-              </div>
             </div>
           </div>
           <div className="flex flex-col items-end gap-1.5 min-w-0">
@@ -329,34 +306,23 @@ const Dashboard = () => {
               );
             })()}
             <div className="flex items-center gap-1.5 flex-wrap justify-end">
-              <a
-                href="#reserved-time"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
-                aria-label="Jump to reserved time"
-              >
-                <CalendarDays className="w-3 h-3 text-accent" />
-                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
-                <span className="font-bold text-primary">{RESERVED_COUNT}</span>
-              </a>
-              <span className="w-px h-4 bg-border/70" aria-hidden />
-              <button
-                type="button"
-                onClick={scrollToWaiting}
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px] transition",
-                  waiting.length ? "bg-amber-500/10 hover:bg-amber-500/20" : "bg-surface-low/60 hover:bg-surface-low",
-                )}
-                aria-label="Jump to Quick Sync waiting list"
-              >
-                <Users className="w-3 h-3 text-accent" />
-                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">QS Wait</span>
-                <span className="font-bold text-primary">{waiting.length}</span>
-              </button>
+              <Chip icon={<TrendingUp className="w-3 h-3" />} label="Streak" value={`${me.streak}d`} />
+              <Chip icon={<ShieldCheck className="w-3 h-3" />} label="Saved" value={`${me.interruptionsSavedThisWeek}`} />
+              <Chip icon={<Users className="w-3 h-3" />} label="Vault" value={`${contacts.length}`} />
             </div>
+            <a
+              href="#reserved-time"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
+              aria-label="Jump to reserved time"
+            >
+              <CalendarDays className="w-3 h-3 text-accent" />
+              <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
+              <span className="font-bold text-primary">{RESERVED_COUNT}</span>
+            </a>
           </div>
         </div>
 
@@ -375,8 +341,13 @@ const Dashboard = () => {
           <SpotlightBoard />
         </div>
 
+        {/* Real impact metrics */}
+        <div className="lg:col-span-3">
+          <MetricsStrip />
+        </div>
+
         {/* Quick Sync waiting list */}
-        <div id="qs-waiting-list" className="lg:col-span-3 rounded-2xl scroll-mt-24 transition-shadow">
+        <div className="lg:col-span-3">
           <QuickSyncWaitingList />
         </div>
 
