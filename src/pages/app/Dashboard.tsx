@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
-  Zap, CheckCircle2, Timer,
+  Zap, CheckCircle2, Timer, Radio, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
-import QuickSyncWaitingList from "@/components/app/QuickSyncWaitingList";
+import WaitingList from "@/components/app/WaitingList";
 import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
 
@@ -110,6 +110,38 @@ const QUICK_SYNC_SLOTS: { start: string; end: string }[] = [
 ];
 const RESERVED_COUNT = 5;
 
+// Reserved — confirmed-only mock data, channel-grouped (fixed channel order).
+type ReservedChannel = "Quick Sync" | "Meeting" | "Webinar" | "Venue";
+const RESERVED_CHANNELS: ReservedChannel[] = ["Quick Sync", "Meeting", "Webinar", "Venue"];
+const RESERVED_BY_CHANNEL: Record<ReservedChannel, { t: string; who: string; kind: string }[]> = {
+  "Quick Sync": [
+    { t: "10:00", who: "Sarah Jenkins", kind: "Board prep · 3 min" },
+    { t: "14:15", who: "Priya Mehta",   kind: "Pricing check-in · 3 min" },
+  ],
+  "Meeting": [
+    { t: "11:30", who: "Rashid Al-Amir", kind: "Technical sync · 30 min" },
+    { t: "15:00", who: "David Cho",      kind: "Account review · 45 min" },
+  ],
+  "Webinar": [
+    { t: "17:00", who: "Product Q&A",    kind: "Live audience · 60 min" },
+  ],
+  "Venue": [
+    { t: "18:30", who: "Studio B — Tribe meet", kind: "On-site · 90 min" },
+  ],
+};
+const CHANNEL_TONE: Record<ReservedChannel, string> = {
+  "Quick Sync": "bg-amber-500/15 text-amber-700",
+  "Meeting":    "bg-sky-500/15 text-sky-700",
+  "Webinar":    "bg-violet-500/15 text-violet-700",
+  "Venue":      "bg-emerald-500/15 text-emerald-700",
+};
+const CHANNEL_ICON: Record<ReservedChannel, JSX.Element> = {
+  "Quick Sync": <Zap className="w-2.5 h-2.5" />,
+  "Meeting":    <CalendarDays className="w-2.5 h-2.5" />,
+  "Webinar":    <Radio className="w-2.5 h-2.5" />,
+  "Venue":      <Building2 className="w-2.5 h-2.5" />,
+};
+
 // Convert "HH:MM" -> minutes
 const toMin = (t: string) => {
   const [h, m] = t.split(":").map(Number);
@@ -152,10 +184,12 @@ const Dashboard = () => {
   const autoStatus = AUTO_STATUS[status];
   const metrics = useMetrics("week");
   const waitingList = useWaitingList();
-  const waitingCount = waitingList.filter((w) => w.status === "waiting").length;
+  const qsWaitCount = waitingList.filter((w) => w.status === "waiting").length;
+  const pendingApprovalCount = list.filter((r) => r.direction === "incoming" && r.state === "pending").length;
+  const waitingCount = qsWaitCount + pendingApprovalCount;
 
   const scrollToWaiting = () => {
-    document.getElementById("qs-waiting-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("waiting-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleStatusChange = (s: StatusKey) => {
@@ -314,7 +348,7 @@ const Dashboard = () => {
                 </button>
               );
             })()}
-            {/* Line 2: Reserved + QS Waiting shortcut */}
+            {/* Line 2: Reserved + Waiting List shortcut */}
             <div className="flex items-center gap-1.5">
               <a
                 href="#reserved-time"
@@ -338,10 +372,10 @@ const Dashboard = () => {
                     ? "bg-amber-500/15 hover:bg-amber-500/25"
                     : "bg-surface-low/60 hover:bg-surface-low",
                 )}
-                aria-label="Jump to Quick Sync waiting list"
+                aria-label="Jump to Waiting List"
               >
                 <Users className="w-3 h-3 text-accent" />
-                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">QS Waiting</span>
+                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Waiting List</span>
                 <span className="font-bold text-primary tabular-nums">{waitingCount}</span>
               </button>
             </div>
@@ -376,37 +410,101 @@ const Dashboard = () => {
           <PriorityContactsWidget />
         </div>
 
-        {/* Quick Sync waiting list — placed AFTER Priority Contacts */}
-        <div id="qs-waiting-list" className="lg:col-span-3 scroll-mt-24">
-          <QuickSyncWaitingList />
+        {/* Unified Waiting List — placed AFTER Priority Contacts */}
+        <div id="waiting-list" className="lg:col-span-3 scroll-mt-24">
+          <WaitingList />
         </div>
 
-        {/* Reserved Time */}
-        <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
+        {/* Impact Metrics — body section (placed after Waiting List) */}
+        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-accent" />
+              Impact Metrics
+            </h3>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">This week</span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <ImpactTile icon={<Zap className="w-4 h-4" />} tone="bg-amber-500/15 text-amber-700" label="avoided" value={`${metrics.avoided}`} />
+            <ImpactTile icon={<CheckCircle2 className="w-4 h-4" />} tone="bg-emerald-500/15 text-emerald-700" label="connected" value={`${metrics.connected}`} />
+            <ImpactTile icon={<Timer className="w-4 h-4" />} tone="bg-sky-500/15 text-sky-700" label="protected" value={formatProtected(metrics.protectedMinutes)} />
+          </div>
+        </div>
+
+        {/* Quick Sync Section */}
+        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-accent" />
-              Reserved Time <span aria-hidden>📅</span>
+              <Zap className="w-4 h-4 text-accent" />
+              Quick Sync
             </h3>
-            <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
+            <button
+              type="button"
+              onClick={() => setQuickSyncOpen(true)}
+              className="text-xs font-semibold text-accent hover:underline"
+            >
+              Manage windows
+            </button>
           </div>
-          <ul className="mt-3 grid md:grid-cols-3 gap-2.5">
+          <ul className="mt-3 grid md:grid-cols-2 gap-2.5">
             {[
-              { t: "10:00", who: "Sarah Jenkins", kind: "Board prep" },
-              { t: "13:30", who: "Rashid Al-Amir", kind: "Technical sync" },
-              { t: "16:00", who: "Open window", kind: "2 slots free" },
-            ].map((s) => (
-              <li key={s.t} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
-                <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary text-xs font-bold shrink-0">
-                  {s.t}
+              { start: "10:00", end: "10:30" },
+              { start: "14:00", end: "14:30" },
+            ].map((w) => (
+              <li key={w.start} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
+                <span className="grid place-items-center w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700">
+                  <CalendarClock className="w-4 h-4" />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-primary truncate">{s.who}</p>
-                  <p className="text-xs text-muted-foreground truncate">{s.kind}</p>
+                  <p className="text-sm font-semibold text-primary tabular-nums">{w.start}–{w.end}</p>
+                  <p className="text-xs text-muted-foreground">3-min batched windows</p>
                 </div>
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Reserved — confirmed only, grouped by channel in fixed order */}
+        <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-accent" />
+              Reserved <span aria-hidden>📅</span>
+              <span className="ml-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Confirmed only</span>
+            </h3>
+            <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
+          </div>
+          {RESERVED_CHANNELS.map((ch) => {
+            const items = RESERVED_BY_CHANNEL[ch].sort((a, b) => toMin(a.t) - toMin(b.t));
+            return (
+              <div key={ch} className="mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider", CHANNEL_TONE[ch])}>
+                    {CHANNEL_ICON[ch]}
+                    {ch}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">{items.length} confirmed</span>
+                </div>
+                {items.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic px-1">No confirmed {ch.toLowerCase()} bookings.</p>
+                ) : (
+                  <ul className="grid md:grid-cols-3 gap-2.5">
+                    {items.map((s) => (
+                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
+                        <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/10 text-primary text-[11px] font-bold shrink-0 tabular-nums">
+                          {s.t}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-primary truncate">{s.who}</p>
+                          <p className="text-xs text-muted-foreground truncate">{s.kind}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Messages panel */}
@@ -537,6 +635,18 @@ function MiniMetric({ icon, label, value, tone }: { icon: React.ReactNode; label
       <span className="font-bold text-primary tabular-nums">{value}</span>
       <span className="text-muted-foreground">{label}</span>
     </span>
+  );
+}
+
+function ImpactTile({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: string }) {
+  return (
+    <div className="p-3 rounded-2xl ghost-border bg-surface-low/50 flex items-center gap-3">
+      <span className={cn("grid place-items-center w-9 h-9 rounded-xl", tone)}>{icon}</span>
+      <div className="min-w-0">
+        <p className="font-headline font-extrabold text-primary text-xl leading-none tabular-nums">{value}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">{label}</p>
+      </div>
+    </div>
   );
 }
 
