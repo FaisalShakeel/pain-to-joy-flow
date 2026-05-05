@@ -19,9 +19,6 @@ import {
 } from "@/components/ui/sheet";
 
 type Channel = "voice" | "message" | "calendar" | "quicksync";
-type Lane = "priority" | "standard" | "scheduled" | "silent";
-type Duration = "once" | "30m" | "1h" | "today" | "custom";
-type Visibility = "status" | "limited" | "full" | "contact";
 type Venue = "online" | "onsite" | "hybrid";
 type ActState = "approved" | "denied" | "scheduled";
 
@@ -31,28 +28,6 @@ const channelMeta: Record<Channel, { icon: typeof Mic; label: string }> = {
   calendar: { icon: CalendarDays, label: "Meeting" },
   quicksync: { icon: Zap, label: "Quick Sync" },
 };
-
-const laneOptions: { id: Lane; label: string; hint: string; icon: typeof Shield }[] = [
-  { id: "priority", label: "Priority Lane", hint: "Bypass rules", icon: AlertTriangle },
-  { id: "standard", label: "Standard Lane", hint: "Normal flow", icon: ListChecks },
-  { id: "scheduled", label: "Scheduled Only", hint: "Booking required", icon: CalendarDays },
-  { id: "silent", label: "Silent / Message First", hint: "Async first", icon: MessageSquare },
-];
-
-const durationOptions: { id: Duration; label: string }[] = [
-  { id: "once", label: "One-time" },
-  { id: "30m", label: "30 min" },
-  { id: "1h", label: "1 hour" },
-  { id: "today", label: "Today only" },
-  { id: "custom", label: "Custom" },
-];
-
-const visibilityOptions: { id: Visibility; label: string; icon: typeof Eye }[] = [
-  { id: "status", label: "Status only", icon: Eye },
-  { id: "limited", label: "Limited availability", icon: Layers },
-  { id: "full", label: "Full availability", icon: CalendarDays },
-  { id: "contact", label: "Contact details", icon: Phone },
-];
 
 const venueMeta: Record<Venue, { icon: typeof Globe; label: string }> = {
   online: { icon: Globe, label: "Online" },
