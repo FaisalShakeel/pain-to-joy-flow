@@ -231,7 +231,7 @@ const DecisionInterface = ({
 
   // Source classification — what type of incoming request this is.
   const source: { label: string; icon: typeof Mic; tone: string } = (() => {
-    switch (request.channel) {
+    switch (request.channel as Channel | undefined) {
       case "voice":
         return { label: "Call Sync", icon: Phone, tone: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20" };
       case "message":
