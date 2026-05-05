@@ -229,6 +229,25 @@ const DecisionInterface = ({
   const channelLabel = request.channel ? channelMeta[request.channel as Channel].label : "Message";
   const VenueIcon = venueMeta[venue].icon;
 
+  // Source classification — what type of incoming request this is.
+  const source: { label: string; icon: typeof Mic; tone: string } = (() => {
+    switch (request.channel as Channel | undefined) {
+      case "voice":
+        return { label: "Call Sync", icon: Phone, tone: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20" };
+      case "message":
+        return { label: "Instant Message", icon: MessageSquare, tone: "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20" };
+      case "calendar":
+        return { label: "Scheduled Booking", icon: CalendarDays, tone: "bg-sky-500/10 text-sky-700 ring-1 ring-sky-500/20" };
+      case "quicksync":
+        return { label: "Quick Sync", icon: Zap, tone: "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20" };
+      default:
+        return { label: "Message", icon: MessageSquare, tone: "bg-surface-low text-primary ring-1 ring-border" };
+    }
+  })();
+  const SourceIcon = source.icon;
+  const isPriorityBypass =
+    request.urgency === "high" && (request.channel === "voice" || request.channel === "message");
+
   const urgencyTone =
     request.urgency === "high" ? "bg-rose-500/10 text-rose-700"
     : request.urgency === "medium" ? "bg-amber-500/10 text-amber-700"
@@ -265,11 +284,23 @@ const DecisionInterface = ({
         </div>
       </header>
 
-      {/* Essentials row */}
-      <div className="mt-4 flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-low text-xs font-semibold text-primary">
-          <ChannelIcon className="w-3.5 h-3.5" /> {channelLabel}
+      {/* Source highlight + date/time */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${source.tone}`}>
+          <SourceIcon className="w-3.5 h-3.5" /> {source.label}
         </span>
+        {isPriorityBypass && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/15 to-rose-500/15 text-amber-800 ring-1 ring-amber-500/30">
+            <Zap className="w-3.5 h-3.5" /> Priority Bypass
+          </span>
+        )}
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/5 text-primary ring-1 ring-primary/10">
+          <Clock3 className="w-3.5 h-3.5" /> {request.receivedAt}
+        </span>
+      </div>
+
+      {/* Essentials row */}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-low text-xs font-semibold text-primary">
           <VenueIcon className="w-3.5 h-3.5" /> {venueMeta[venue].label}
         </span>
@@ -301,7 +332,7 @@ const DecisionInterface = ({
       )}
 
       {/* Actions */}
-      <div className="mt-5 grid grid-cols-3 gap-2">
+      <div className="mt-5 grid grid-cols-2 gap-2">
         <button
           onClick={() => onAct(request.id, "approved")}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-gradient-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition"
@@ -309,14 +340,8 @@ const DecisionInterface = ({
           <Check className="w-4 h-4" /> Approve
         </button>
         <button
-          onClick={() => onAct(request.id, "scheduled")}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl ghost-border bg-surface-low text-sm font-semibold text-primary hover:bg-surface transition"
-        >
-          <CalendarDays className="w-4 h-4" /> Schedule
-        </button>
-        <button
           onClick={() => onAct(request.id, "denied")}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-sm font-bold text-rose-600 hover:bg-rose-500/5 transition"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl ghost-border bg-surface-low text-sm font-bold text-rose-600 hover:bg-rose-500/5 transition"
         >
           <X className="w-4 h-4" /> Decline
         </button>

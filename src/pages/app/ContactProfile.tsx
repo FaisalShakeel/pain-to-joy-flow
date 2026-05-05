@@ -364,28 +364,6 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 p-5 md:p-6">
-          {/* Smart action row — Connect / Book / Quick Sync / Ping / Request Access */}
-          <div className="mb-5 flex flex-wrap items-center gap-2">
-            {actions.map((a) => (
-              <button
-                key={a.key}
-                onClick={a.onClick}
-                disabled={a.disabled}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition disabled:opacity-50 ${
-                  a.variant === "primary"
-                    ? "bg-white text-primary hover:bg-white/90"
-                    : a.variant === "warn"
-                    ? "bg-amber-500 text-white hover:bg-amber-400"
-                    : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
-                }`}
-              >
-                <a.icon className="w-3.5 h-3.5" />
-                {a.label}
-              </button>
-            ))}
-            <PingButton contact={contact} size="md" className="ml-auto" />
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             {/* Left: Portal */}
             <div className="lg:col-span-8 space-y-5">
