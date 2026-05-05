@@ -8,6 +8,9 @@ import { Link } from "react-router-dom";
 import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { useMetrics } from "@/hooks/use-metrics";
+import { formatProtected } from "@/lib/metrics";
+import { CheckCircle2, Timer } from "lucide-react";
 
 // ---------- Activity model ----------
 interface DayActivity {
@@ -68,6 +71,7 @@ const Availability = () => {
   const [view, setView] = useState<"week" | "month">("week");
   const [mode, setMode] = useState<"live" | "history">("live");
   const [selected, setSelected] = useState<string | null>(null);
+  const perf = useMetrics("week");
 
   useEffect(() => {
     const t = setTimeout(() => setConnecting(false), 600);
@@ -181,6 +185,35 @@ const Availability = () => {
       }
     >
       {/* SUMMARY STRIP */}
+      <section className="mb-4 rounded-2xl ghost-border bg-surface-lowest p-4 shadow-ambient">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-headline font-bold text-primary text-sm inline-flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-accent" />
+            Communication Performance
+          </h3>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Synced with dashboard</span>
+        </div>
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="inline-flex items-baseline gap-1.5 text-sm">
+            <Zap className="w-3.5 h-3.5 text-amber-700 self-center" />
+            <span className="font-bold text-primary tabular-nums">{perf.avoided}</span>
+            <span className="text-muted-foreground text-xs">avoided</span>
+          </span>
+          <span className="w-px h-4 bg-border/60" aria-hidden />
+          <span className="inline-flex items-baseline gap-1.5 text-sm">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 self-center" />
+            <span className="font-bold text-primary tabular-nums">{perf.connected}</span>
+            <span className="text-muted-foreground text-xs">connected</span>
+          </span>
+          <span className="w-px h-4 bg-border/60" aria-hidden />
+          <span className="inline-flex items-baseline gap-1.5 text-sm">
+            <Timer className="w-3.5 h-3.5 text-sky-700 self-center" />
+            <span className="font-bold text-primary tabular-nums">{formatProtected(perf.protectedMinutes)}</span>
+            <span className="text-muted-foreground text-xs">protected</span>
+          </span>
+        </div>
+      </section>
+
       <section className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
         <SummaryTile
           icon={Briefcase}
