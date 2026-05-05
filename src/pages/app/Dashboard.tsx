@@ -530,4 +530,14 @@ function Chip({ icon, label, value }: { icon: React.ReactNode; label: string; va
   );
 }
 
+function MiniMetric({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-1 text-[11px]">
+      <span className={cn("inline-flex items-center", tone)}>{icon}</span>
+      <span className="font-bold text-primary tabular-nums">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+    </span>
+  );
+}
+
 export default Dashboard;
