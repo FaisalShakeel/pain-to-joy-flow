@@ -158,9 +158,9 @@ const PriorityContactsWidget = () => {
               <UsersIcon className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="font-headline font-bold text-primary leading-tight">Priority Contacts</h3>
+              <h3 className="font-headline font-bold text-primary leading-tight">The Vault</h3>
               <p className="text-[11px] text-muted-foreground">
-                Pinned circle · {priority.length} of 6 · live status
+                Priority Contacts · {priority.length} of 6 · live status
               </p>
             </div>
           </div>

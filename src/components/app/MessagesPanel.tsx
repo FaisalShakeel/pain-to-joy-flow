@@ -1,15 +1,12 @@
 import { Link } from "react-router-dom";
-import { MessageSquare, ArrowRight, Inbox, Zap, AlertTriangle } from "lucide-react";
+import { MessageSquare, ArrowRight, Inbox, Zap } from "lucide-react";
 import Avatar from "./Avatar";
 import { contacts } from "@/lib/mockData";
 import { useMessages } from "./MessagesContext";
-import { useRequests } from "./RequestsContext";
 import { cn } from "@/lib/utils";
 
 const MessagesPanel = () => {
   const { threads, unreadCount: totalUnread } = useMessages();
-  const { list } = useRequests();
-  const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -21,7 +18,7 @@ const MessagesPanel = () => {
           <div>
             <h3 className="font-headline font-bold text-primary leading-tight">Messages</h3>
             <p className="text-[11px] text-muted-foreground">
-              {totalUnread} unread · {incoming.length} access {incoming.length === 1 ? "request" : "requests"}
+              {totalUnread} unread
             </p>
           </div>
         </div>
@@ -68,21 +65,6 @@ const MessagesPanel = () => {
           );
         })}
       </ul>
-
-      {/* Access requests strip */}
-      {incoming.length > 0 && (
-        <div className="mt-4 p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 to-rose-500/10 ghost-border">
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-amber-700">
-            <AlertTriangle className="w-3 h-3" /> {incoming.length} pending access request{incoming.length === 1 ? "" : "s"}
-          </div>
-          <Link
-            to="/app/requests"
-            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-accent"
-          >
-            Review now <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-      )}
 
       {/* Quick reply */}
       <Link

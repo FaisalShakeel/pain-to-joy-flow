@@ -415,55 +415,6 @@ const Dashboard = () => {
           <WaitingList />
         </div>
 
-        {/* Impact Metrics — body section (placed after Waiting List) */}
-        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-accent" />
-              Impact Metrics
-            </h3>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">This week</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <ImpactTile icon={<Zap className="w-4 h-4" />} tone="bg-amber-500/15 text-amber-700" label="avoided" value={`${metrics.avoided}`} />
-            <ImpactTile icon={<CheckCircle2 className="w-4 h-4" />} tone="bg-emerald-500/15 text-emerald-700" label="connected" value={`${metrics.connected}`} />
-            <ImpactTile icon={<Timer className="w-4 h-4" />} tone="bg-sky-500/15 text-sky-700" label="protected" value={formatProtected(metrics.protectedMinutes)} />
-          </div>
-        </div>
-
-        {/* Quick Sync Section */}
-        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
-          <div className="flex items-center justify-between">
-            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
-              <Zap className="w-4 h-4 text-accent" />
-              Quick Sync
-            </h3>
-            <button
-              type="button"
-              onClick={() => setQuickSyncOpen(true)}
-              className="text-xs font-semibold text-accent hover:underline"
-            >
-              Manage windows
-            </button>
-          </div>
-          <ul className="mt-3 grid md:grid-cols-2 gap-2.5">
-            {[
-              { start: "10:00", end: "10:30" },
-              { start: "14:00", end: "14:30" },
-            ].map((w) => (
-              <li key={w.start} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
-                <span className="grid place-items-center w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700">
-                  <CalendarClock className="w-4 h-4" />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-primary tabular-nums">{w.start}–{w.end}</p>
-                  <p className="text-xs text-muted-foreground">3-min batched windows</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
         <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
           <div className="flex items-center justify-between">
