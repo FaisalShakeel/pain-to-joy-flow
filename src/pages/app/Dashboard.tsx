@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
-  Zap, CheckCircle2, Timer,
+  Zap, CheckCircle2, Timer, Radio, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -383,32 +383,96 @@ const Dashboard = () => {
           <WaitingList />
         </div>
 
-        {/* Reserved Time */}
-        <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
+        {/* Impact Metrics — body section (placed after Waiting List) */}
+        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-accent" />
+              Impact Metrics
+            </h3>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">This week</span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <ImpactTile icon={<Zap className="w-4 h-4" />} tone="bg-amber-500/15 text-amber-700" label="avoided" value={`${metrics.avoided}`} />
+            <ImpactTile icon={<CheckCircle2 className="w-4 h-4" />} tone="bg-emerald-500/15 text-emerald-700" label="connected" value={`${metrics.connected}`} />
+            <ImpactTile icon={<Timer className="w-4 h-4" />} tone="bg-sky-500/15 text-sky-700" label="protected" value={formatProtected(metrics.protectedMinutes)} />
+          </div>
+        </div>
+
+        {/* Quick Sync Section */}
+        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-accent" />
-              Reserved Time <span aria-hidden>📅</span>
+              <Zap className="w-4 h-4 text-accent" />
+              Quick Sync
             </h3>
-            <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
+            <button
+              type="button"
+              onClick={() => setQuickSyncOpen(true)}
+              className="text-xs font-semibold text-accent hover:underline"
+            >
+              Manage windows
+            </button>
           </div>
-          <ul className="mt-3 grid md:grid-cols-3 gap-2.5">
+          <ul className="mt-3 grid md:grid-cols-2 gap-2.5">
             {[
-              { t: "10:00", who: "Sarah Jenkins", kind: "Board prep" },
-              { t: "13:30", who: "Rashid Al-Amir", kind: "Technical sync" },
-              { t: "16:00", who: "Open window", kind: "2 slots free" },
-            ].map((s) => (
-              <li key={s.t} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
-                <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary text-xs font-bold shrink-0">
-                  {s.t}
+              { start: "10:00", end: "10:30" },
+              { start: "14:00", end: "14:30" },
+            ].map((w) => (
+              <li key={w.start} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
+                <span className="grid place-items-center w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700">
+                  <CalendarClock className="w-4 h-4" />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-primary truncate">{s.who}</p>
-                  <p className="text-xs text-muted-foreground truncate">{s.kind}</p>
+                  <p className="text-sm font-semibold text-primary tabular-nums">{w.start}–{w.end}</p>
+                  <p className="text-xs text-muted-foreground">3-min batched windows</p>
                 </div>
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Reserved — confirmed only, grouped by channel in fixed order */}
+        <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-accent" />
+              Reserved <span aria-hidden>📅</span>
+              <span className="ml-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Confirmed only</span>
+            </h3>
+            <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
+          </div>
+          {RESERVED_CHANNELS.map((ch) => {
+            const items = RESERVED_BY_CHANNEL[ch].sort((a, b) => toMin(a.t) - toMin(b.t));
+            return (
+              <div key={ch} className="mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider", CHANNEL_TONE[ch])}>
+                    {CHANNEL_ICON[ch]}
+                    {ch}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">{items.length} confirmed</span>
+                </div>
+                {items.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic px-1">No confirmed {ch.toLowerCase()} bookings.</p>
+                ) : (
+                  <ul className="grid md:grid-cols-3 gap-2.5">
+                    {items.map((s) => (
+                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
+                        <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/10 text-primary text-[11px] font-bold shrink-0 tabular-nums">
+                          {s.t}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-primary truncate">{s.who}</p>
+                          <p className="text-xs text-muted-foreground truncate">{s.kind}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Messages panel */}
