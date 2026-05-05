@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
+  CalendarDays, ArrowRight, Inbox, Clock, Users, ChevronDown, Check, CalendarClock,
   Zap, CheckCircle2, Timer, Radio, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -586,18 +586,6 @@ function MiniMetric({ icon, label, value, tone }: { icon: React.ReactNode; label
       <span className="font-bold text-primary tabular-nums">{value}</span>
       <span className="text-muted-foreground">{label}</span>
     </span>
-  );
-}
-
-function ImpactTile({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: string }) {
-  return (
-    <div className="p-3 rounded-2xl ghost-border bg-surface-low/50 flex items-center gap-3">
-      <span className={cn("grid place-items-center w-9 h-9 rounded-xl", tone)}>{icon}</span>
-      <div className="min-w-0">
-        <p className="font-headline font-extrabold text-primary text-xl leading-none tabular-nums">{value}</p>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">{label}</p>
-      </div>
-    </div>
   );
 }
 
