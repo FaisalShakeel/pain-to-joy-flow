@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
-import QuickSyncWaitingList from "@/components/app/QuickSyncWaitingList";
+import WaitingList from "@/components/app/WaitingList";
 import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
 
@@ -152,10 +152,12 @@ const Dashboard = () => {
   const autoStatus = AUTO_STATUS[status];
   const metrics = useMetrics("week");
   const waitingList = useWaitingList();
-  const waitingCount = waitingList.filter((w) => w.status === "waiting").length;
+  const qsWaitCount = waitingList.filter((w) => w.status === "waiting").length;
+  const pendingApprovalCount = list.filter((r) => r.direction === "incoming" && r.state === "pending").length;
+  const waitingCount = qsWaitCount + pendingApprovalCount;
 
   const scrollToWaiting = () => {
-    document.getElementById("qs-waiting-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("waiting-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleStatusChange = (s: StatusKey) => {
@@ -314,7 +316,7 @@ const Dashboard = () => {
                 </button>
               );
             })()}
-            {/* Line 2: Reserved + QS Waiting shortcut */}
+            {/* Line 2: Reserved + Waiting List shortcut */}
             <div className="flex items-center gap-1.5">
               <a
                 href="#reserved-time"
@@ -338,10 +340,10 @@ const Dashboard = () => {
                     ? "bg-amber-500/15 hover:bg-amber-500/25"
                     : "bg-surface-low/60 hover:bg-surface-low",
                 )}
-                aria-label="Jump to Quick Sync waiting list"
+                aria-label="Jump to Waiting List"
               >
                 <Users className="w-3 h-3 text-accent" />
-                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">QS Waiting</span>
+                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Waiting List</span>
                 <span className="font-bold text-primary tabular-nums">{waitingCount}</span>
               </button>
             </div>
@@ -376,9 +378,9 @@ const Dashboard = () => {
           <PriorityContactsWidget />
         </div>
 
-        {/* Quick Sync waiting list — placed AFTER Priority Contacts */}
-        <div id="qs-waiting-list" className="lg:col-span-3 scroll-mt-24">
-          <QuickSyncWaitingList />
+        {/* Unified Waiting List — placed AFTER Priority Contacts */}
+        <div id="waiting-list" className="lg:col-span-3 scroll-mt-24">
+          <WaitingList />
         </div>
 
         {/* Reserved Time */}
