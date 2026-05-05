@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   CalendarDays, ArrowRight, Inbox, ShieldCheck, Clock, Users, TrendingUp, ChevronDown, Pencil, Check, CalendarClock,
+  Zap, CheckCircle2, Timer,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -19,8 +20,9 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
-import MetricsStrip from "@/components/app/MetricsStrip";
 import QuickSyncWaitingList from "@/components/app/QuickSyncWaitingList";
+import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
+import { formatProtected } from "@/lib/metrics";
 
 type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 
@@ -148,6 +150,13 @@ const Dashboard = () => {
   const incoming = list.filter((r) => r.direction === "incoming" && r.state === "pending");
   const meta = statusMeta[status];
   const autoStatus = AUTO_STATUS[status];
+  const metrics = useMetrics("week");
+  const waitingList = useWaitingList();
+  const waitingCount = waitingList.filter((w) => w.status === "waiting").length;
+
+  const scrollToWaiting = () => {
+    document.getElementById("qs-waiting-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const handleStatusChange = (s: StatusKey) => {
     setStatus(s);
@@ -305,24 +314,45 @@ const Dashboard = () => {
                 </button>
               );
             })()}
-            <div className="flex items-center gap-1.5 flex-wrap justify-end">
-              <Chip icon={<TrendingUp className="w-3 h-3" />} label="Streak" value={`${me.streak}d`} />
-              <Chip icon={<ShieldCheck className="w-3 h-3" />} label="Saved" value={`${me.interruptionsSavedThisWeek}`} />
-              <Chip icon={<Users className="w-3 h-3" />} label="Vault" value={`${contacts.length}`} />
+            {/* Line 2: Reserved + QS Waiting shortcut */}
+            <div className="flex items-center gap-1.5">
+              <a
+                href="#reserved-time"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
+                aria-label="Jump to reserved time"
+              >
+                <CalendarDays className="w-3 h-3 text-accent" />
+                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
+                <span className="font-bold text-primary">{RESERVED_COUNT}</span>
+              </a>
+              <button
+                type="button"
+                onClick={scrollToWaiting}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px] transition",
+                  waitingCount > 0
+                    ? "bg-amber-500/15 hover:bg-amber-500/25"
+                    : "bg-surface-low/60 hover:bg-surface-low",
+                )}
+                aria-label="Jump to Quick Sync waiting list"
+              >
+                <Users className="w-3 h-3 text-accent" />
+                <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">QS Waiting</span>
+                <span className="font-bold text-primary tabular-nums">{waitingCount}</span>
+              </button>
             </div>
-            <a
-              href="#reserved-time"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
-              aria-label="Jump to reserved time"
-            >
-              <CalendarDays className="w-3 h-3 text-accent" />
-              <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
-              <span className="font-bold text-primary">{RESERVED_COUNT}</span>
-            </a>
+            {/* Line 3: Impact metrics row — compact horizontal */}
+            <div className="flex items-center gap-3">
+              <MiniMetric icon={<Zap className="w-3 h-3" />} tone="text-amber-700" label="avoided" value={`${metrics.avoided}`} />
+              <span className="w-px h-4 bg-border/60" aria-hidden />
+              <MiniMetric icon={<CheckCircle2 className="w-3 h-3" />} tone="text-emerald-700" label="connected" value={`${metrics.connected}`} />
+              <span className="w-px h-4 bg-border/60" aria-hidden />
+              <MiniMetric icon={<Timer className="w-3 h-3" />} tone="text-sky-700" label="protected" value={formatProtected(metrics.protectedMinutes)} />
+            </div>
           </div>
         </div>
 
@@ -341,19 +371,14 @@ const Dashboard = () => {
           <SpotlightBoard />
         </div>
 
-        {/* Real impact metrics */}
-        <div className="lg:col-span-3">
-          <MetricsStrip />
-        </div>
-
-        {/* Quick Sync waiting list */}
-        <div className="lg:col-span-3">
-          <QuickSyncWaitingList />
-        </div>
-
         {/* Priority Contacts */}
         <div className="lg:col-span-3">
           <PriorityContactsWidget />
+        </div>
+
+        {/* Quick Sync waiting list — placed AFTER Priority Contacts */}
+        <div id="qs-waiting-list" className="lg:col-span-3 scroll-mt-24">
+          <QuickSyncWaitingList />
         </div>
 
         {/* Reserved Time */}
@@ -501,6 +526,16 @@ function Chip({ icon, label, value }: { icon: React.ReactNode; label: string; va
       <span className="text-accent">{icon}</span>
       <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">{label}</span>
       <span className="font-bold text-primary">{value}</span>
+    </span>
+  );
+}
+
+function MiniMetric({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-1 text-[11px]">
+      <span className={cn("inline-flex items-center", tone)}>{icon}</span>
+      <span className="font-bold text-primary tabular-nums">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
     </span>
   );
 }
