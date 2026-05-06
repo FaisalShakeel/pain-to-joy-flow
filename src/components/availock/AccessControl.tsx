@@ -14,7 +14,7 @@ const AccessControl = () => (
         </h2>
         <p className="mt-6 text-lg text-muted-foreground max-w-lg leading-relaxed">
           <span className="text-primary font-semibold">Share your availability instead.</span>{" "}
-          With Availock, you aren't handing over a static digit — you're offering a
+          With Availock, your number stays private — you're offering a
           dynamic, intentional entry point to your time.
         </p>
 
