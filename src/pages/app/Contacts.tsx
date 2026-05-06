@@ -257,185 +257,126 @@ const Contacts = () => {
     <AppShell
       subtitle="Vault directory"
       title="Your contacts"
-      actions={
-        <button
-          onClick={handleAddNewContact}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
-        >
-          <Plus className="w-4 h-4" /> Add contact
-        </button>
-      }
-    >
-      {/* Smart unified search: filters vault + offers Add / Invite when no match */}
-      <div ref={searchWrapRef} className="relative max-w-xl">
-        <div
-          className={cn(
-            "flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface-lowest ghost-border transition",
-            searchOpen && "shadow-elevated ring-1 ring-accent/40",
-          )}
-        >
-          <Search className="w-4 h-4 text-muted-foreground" />
-          <input
-            ref={inputRef}
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setSearchOpen(true);
-            }}
-            onFocus={() => setSearchOpen(true)}
-            placeholder="Search vault, or type a name / email to add…"
-            className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
-          />
-          {q ? (
-            <button
-              type="button"
-              onClick={() => { setQ(""); inputRef.current?.focus(); }}
-              className="text-muted-foreground hover:text-primary"
-              aria-label="Clear search"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-muted-foreground bg-surface-low rounded px-1.5 py-0.5 ghost-border">
-              ⌘K
-            </kbd>
-          )}
-        </div>
-
-        {searchOpen && trimmedQ.length > 0 && (
-          <div className="absolute z-30 left-0 right-0 mt-2 rounded-2xl bg-surface-lowest ghost-border shadow-elevated overflow-hidden">
-            {/* In-vault matches */}
-            <div className="px-3 pt-3 pb-1 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                In your vault
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                {searchMatches.length} {searchMatches.length === 1 ? "match" : "matches"}
-              </span>
-            </div>
-            {searchMatches.length > 0 ? (
-              <ul className="max-h-64 overflow-y-auto px-2 pb-2">
-                {searchMatches.slice(0, 6).map((c) => (
-                  <li key={c.id}>
-                    <Link
-                      to={`/app/contact/${c.id}`}
-                      onClick={() => setSearchOpen(false)}
-                      className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition"
-                    >
-                      <Avatar initials={c.initials} accent={c.accent} size="sm" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">{c.title} · {c.org}</p>
-                      </div>
-                      <CornerDownLeft className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="px-4 pb-3 text-xs text-muted-foreground">
-                No one in your vault matches “{trimmedQ}”.
-              </p>
-            )}
-
-            {/* Not-in-vault actions */}
-            {showNotInVault && (
-              <>
-                <div className="h-px bg-border" />
-                <div className="px-3 pt-2 pb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Not in your vault
-                  </span>
-                </div>
-                <div className="px-2 pb-2 grid gap-1">
-                  <button
-                    type="button"
-                    onClick={handleAddNewContact}
-                    className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition text-left"
-                  >
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent/15 text-accent">
-                      <UserPlus className="w-4 h-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-primary truncate">
-                        Add “{trimmedQ}” as a new contact
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        Save details to your vault — no invite needed.
-                      </p>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSendInvite}
-                    className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition text-left"
-                  >
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
-                      <Send className="w-4 h-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-primary truncate">
-                        Send invite link to “{trimmedQ}”
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        They join Availock and connect back to you.
-                      </p>
-                    </div>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Quick filters + bird's-eye density (always visible) */}
-      <div className={cn("mt-3 flex items-center gap-2", birdsEye ? "mt-0" : "mt-4")}>
-        <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto scrollbar-none -mx-1 px-1 py-1">
-        {filters.map((f) => {
-          const Icon = f.icon;
-          const active = filter === f.id;
-          return (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
+      headerInline={
+        <div className="flex flex-1 items-center gap-2 flex-wrap w-full">
+          <div ref={searchWrapRef} className="relative flex-1 min-w-[220px] max-w-md">
+            <div
               className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ghost-border transition",
-                active
-                  ? "bg-primary text-primary-foreground border-transparent shadow-elevated"
-                  : "bg-surface-lowest text-primary hover:bg-surface-low",
+                "flex items-center gap-2 px-3 py-2 rounded-full bg-surface-lowest ghost-border transition",
+                searchOpen && "shadow-elevated ring-1 ring-accent/40",
               )}
             >
-              <Icon className="w-3.5 h-3.5" /> {f.label}
-            </button>
-          );
-        })}
-        </div>
-
-        <div className="shrink-0 inline-flex items-center gap-2">
-          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            <Eye className="w-3.5 h-3.5" /> Bird&apos;s-eye
-          </span>
-          <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
-            {([6, 10, 16] as Density[]).map((d) => (
-              <button
-                key={d}
-                onClick={() => setDensity(d)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-semibold transition min-w-[2.25rem]",
-                  density === d
-                    ? "bg-gradient-primary text-primary-foreground shadow-elevated"
-                    : "text-muted-foreground hover:text-primary",
+              <Search className="w-3.5 h-3.5 text-muted-foreground" />
+              <input
+                ref={inputRef}
+                value={q}
+                onChange={(e) => { setQ(e.target.value); setSearchOpen(true); }}
+                onFocus={() => setSearchOpen(true)}
+                placeholder="Search vault…"
+                className="flex-1 bg-transparent outline-none text-sm text-primary placeholder:text-muted-foreground"
+              />
+              {q ? (
+                <button type="button" onClick={() => { setQ(""); inputRef.current?.focus(); }} className="text-muted-foreground hover:text-primary" aria-label="Clear search">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-muted-foreground bg-surface-low rounded px-1.5 py-0.5 ghost-border">⌘K</kbd>
+              )}
+            </div>
+            {searchOpen && trimmedQ.length > 0 && (
+              <div className="absolute z-30 left-0 right-0 mt-2 rounded-2xl bg-surface-lowest ghost-border shadow-elevated overflow-hidden">
+                <div className="px-3 pt-3 pb-1 flex items-center justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">In your vault</span>
+                  <span className="text-[10px] text-muted-foreground">{searchMatches.length} {searchMatches.length === 1 ? "match" : "matches"}</span>
+                </div>
+                {searchMatches.length > 0 ? (
+                  <ul className="max-h-64 overflow-y-auto px-2 pb-2">
+                    {searchMatches.slice(0, 6).map((c) => (
+                      <li key={c.id}>
+                        <Link to={`/app/contact/${c.id}`} onClick={() => setSearchOpen(false)} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition">
+                          <Avatar initials={c.initials} accent={c.accent} size="sm" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{c.title} · {c.org}</p>
+                          </div>
+                          <CornerDownLeft className="w-3.5 h-3.5 text-muted-foreground" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="px-4 pb-3 text-xs text-muted-foreground">No one in your vault matches “{trimmedQ}”.</p>
                 )}
-                aria-label={`Show ${d} contacts`}
-              >
-                {d}
-              </button>
-            ))}
+                {showNotInVault && (
+                  <>
+                    <div className="h-px bg-border" />
+                    <div className="px-3 pt-2 pb-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Not in your vault</span>
+                    </div>
+                    <div className="px-2 pb-2 grid gap-1">
+                      <button type="button" onClick={handleAddNewContact} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition text-left">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent/15 text-accent"><UserPlus className="w-4 h-4" /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-primary truncate">Add “{trimmedQ}” as a new contact</p>
+                          <p className="text-[11px] text-muted-foreground">Save details to your vault — no invite needed.</p>
+                        </div>
+                      </button>
+                      <button type="button" onClick={handleSendInvite} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition text-left">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary"><Send className="w-4 h-4" /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-primary truncate">Send invite link to “{trimmedQ}”</p>
+                          <p className="text-[11px] text-muted-foreground">They join Availock and connect back to you.</p>
+                        </div>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-1 min-w-0 py-1">
+            {filters.map((f) => {
+              const Icon = f.icon;
+              const active = filter === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setFilter(f.id)}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold ghost-border transition",
+                    active ? "bg-primary text-primary-foreground border-transparent shadow-elevated" : "bg-surface-lowest text-primary hover:bg-surface-low",
+                  )}
+                >
+                  <Icon className="w-3 h-3" /> {f.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="shrink-0 inline-flex items-center gap-1.5">
+            <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <Eye className="w-3 h-3" /> View
+            </span>
+            <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
+              {([6, 10, 16] as Density[]).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDensity(d)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-[11px] font-semibold transition min-w-[2rem]",
+                    density === d ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
+                  )}
+                  aria-label={`Show ${d} contacts`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-
+      }
+    >
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
