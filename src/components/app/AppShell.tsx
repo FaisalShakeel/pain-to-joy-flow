@@ -18,6 +18,8 @@ import {
   Pencil,
   UserCircle2,
   Compass,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
@@ -87,6 +89,7 @@ interface Props {
 const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
@@ -115,7 +118,12 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
   return (
     <div className="min-h-screen bg-surface text-foreground flex">
       {/* Sidebar (desktop / tablet) */}
-      <aside className="hidden md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen">
+      <aside
+        className={cn(
+          "md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen transition-all",
+          sidebarHidden ? "hidden" : "hidden md:flex",
+        )}
+      >
         <Link to="/app" className="flex items-center px-6 py-6" aria-label="Availock home">
           <img src={logoIcon} alt="Availock" className="h-12 md:h-14 w-auto object-contain" />
           <span className="ml-3 font-headline font-extrabold text-xl text-primary tracking-tight">
@@ -200,6 +208,15 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
             >
               <Menu className="w-4 h-4 text-primary" />
             </button>
+            <button
+              type="button"
+              onClick={() => setSidebarHidden((v) => !v)}
+              className="hidden md:grid place-items-center w-9 h-9 rounded-lg ghost-border bg-surface-lowest hover:bg-surface-low transition"
+              aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+              title={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+            >
+              {sidebarHidden ? <PanelLeftOpen className="w-4 h-4 text-primary" /> : <PanelLeftClose className="w-4 h-4 text-primary" />}
+            </button>
 
             <div className="flex-1" />
 
@@ -267,19 +284,23 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           </div>
 
           {(title || actions || headerInline) && (
-            <div className="px-4 md:px-8 pb-3 pt-0.5 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-wrap">
+            <div className="px-4 md:px-8 pb-3 pt-0.5 flex flex-col gap-2">
+              <div className="flex flex-col gap-0.5">
                 {subtitle && (
-                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent mr-1">{subtitle}</p>
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
                 )}
                 {title && (
                   <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight">
                     {title}
                   </h1>
                 )}
-                {headerInline}
               </div>
-              {actions && <div className="flex items-center gap-2">{actions}</div>}
+              {(headerInline || actions) && (
+                <div className="flex flex-wrap items-center gap-2 justify-between">
+                  <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">{headerInline}</div>
+                  {actions && <div className="flex items-center gap-2">{actions}</div>}
+                </div>
+              )}
             </div>
           )}
         </header>
