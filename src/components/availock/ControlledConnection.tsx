@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CalendarClock, Layers, MapPin, Video, Phone, Sparkles, Calendar } from "lucide-react";
 
 const ControlledConnection = () => {
@@ -142,7 +143,7 @@ function HybridSlotVisual() {
 }
 
 function HybridChannelToggle() {
-  const [selected, setSelected] = (require("react") as typeof import("react")).useState<"onsite" | "online" | null>(null);
+  const [selected, setSelected] = useState<"onsite" | "online" | null>(null);
   const Option = ({
     value,
     label,
