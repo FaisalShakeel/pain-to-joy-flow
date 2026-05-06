@@ -21,9 +21,6 @@ const ControlledConnection = () => {
             <br />
             <span className="italic font-medium text-outline-variant">connect with you.</span>
           </h2>
-          <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-            Not every conversation needs 30 minutes. Not every interruption is welcome.
-          </p>
         </div>
 
         {/* Two-column feature grid */}
@@ -120,6 +117,9 @@ function FeatureCard({
 function HybridSlotVisual() {
   return (
     <div className="rounded-xl bg-surface-lowest ghost-border p-4 md:p-5">
+      <p className="text-center text-[11px] font-semibold tracking-[0.12em] uppercase text-accent mb-3">
+        One slot — double the exposure
+      </p>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Hybrid Slot</p>
@@ -182,6 +182,9 @@ function QuickSyncVisual() {
   // 10 × 3-min slots inside one 30-min window
   return (
     <div className="rounded-xl bg-surface-lowest ghost-border p-4 md:p-5">
+      <p className="text-center text-[11px] font-semibold tracking-[0.12em] uppercase text-accent mb-3">
+        Short call — focused conversation
+      </p>
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Quick Sync</p>
