@@ -68,31 +68,35 @@ const AccessControl = () => (
         <Link
           to="/v/julian-vane"
           aria-label="Open Julian Thorne's vault"
-          className="relative w-80 md:w-96 h-56 glass rounded-2xl p-6 rotate-[5deg] shadow-elevated ghost-border overflow-hidden flex items-center gap-5 hover:shadow-glass hover:-translate-y-0.5 transition-all"
+          className="relative w-80 md:w-96 glass rounded-2xl p-6 rotate-[5deg] shadow-elevated ghost-border overflow-hidden hover:shadow-glass hover:-translate-y-0.5 transition-all"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary-fixed/40 via-transparent to-accent-soft/30" />
-          <div className="relative w-32 h-32 rounded-xl bg-primary text-primary-foreground grid place-items-center flex-shrink-0 ring-1 ring-primary/20">
-            <div className="grid grid-cols-10 gap-px p-2 bg-primary-foreground/10 rounded-md">
-              {Array.from({ length: 100 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`w-1.5 h-1.5 ${
-                    [0, 9, 90, 99].includes(i) || (i * 13) % 7 < 3
-                      ? "bg-primary-foreground"
-                      : "bg-transparent"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="relative min-w-0 flex-1">
+          <div className="relative">
             <div className="flex items-center gap-1.5 mb-1">
               <ShieldCheck className="w-3.5 h-3.5 text-accent" />
               <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Vault Holder</span>
             </div>
-            <div className="text-xl font-headline font-extrabold text-primary leading-tight">Julian Thorne</div>
-            <div className="mt-1 text-[10px] text-on-primary-fixed bg-primary-fixed inline-block px-2 py-0.5 rounded-full font-bold tracking-[0.18em]">VAULT · 2048</div>
-            <p className="mt-2 text-[10px] text-muted-foreground font-medium">Tap or scan to open vault</p>
+            <div className="text-2xl font-headline font-extrabold text-primary leading-tight">Julian Thorne</div>
+            <div className="mt-1 text-sm font-headline font-semibold text-primary/70 tracking-wide">Vane &amp; Co.</div>
+            <div className="mt-5 flex items-end justify-between gap-4">
+              <p className="text-[11px] text-muted-foreground font-medium leading-snug max-w-[60%]">
+                Scan to check my availability before reaching out
+              </p>
+              <div className="w-20 h-20 rounded-md bg-primary text-primary-foreground grid place-items-center flex-shrink-0 ring-1 ring-primary/20 p-1.5">
+                <div className="grid grid-cols-10 gap-px bg-primary-foreground/10 rounded-sm w-full h-full">
+                  {Array.from({ length: 100 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className={`${
+                        [0, 9, 90, 99].includes(i) || (i * 13) % 7 < 3
+                          ? "bg-primary-foreground"
+                          : "bg-transparent"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </Link>
       </div>
