@@ -16,7 +16,6 @@ import { toast } from "@/hooks/use-toast";
 import AuthGateDialog, { isGuestAuthed } from "@/components/guest/AuthGateDialog";
 import QuickSyncBadge, { type SyncWindow } from "@/components/app/QuickSyncBadge";
 import ActionPanel, { type ActionItem } from "@/components/app/ActionPanel";
-import DemoQRCard from "@/components/app/DemoQRCard";
 import PreviewModeBanner from "@/components/app/PreviewModeBanner";
 import { trackMetric } from "@/lib/metrics";
 
@@ -331,17 +330,11 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
             </div>
           )}
 
-          {/* Demo QR (compact in registered view) */}
-          {!guestMode && (
-            <div className="px-1">
-              <DemoQRCard to="/v/elena-vance" variant="compact" />
-            </div>
-          )}
         </div>
       </section>
 
       {/* Soft gradient divider + scroll affordance */}
-      <div className="relative h-10 md:h-12 bg-gradient-to-b from-white to-primary/90 rounded-b-2xl flex items-end justify-center">
+      <div className="relative h-8 md:h-10 bg-gradient-to-b from-white via-primary/40 to-primary rounded-b-2xl flex items-end justify-center transition-all">
         <a
           href="#contact-actions"
           onClick={(e) => {
@@ -505,11 +498,11 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
 
                 {isApproved && (
                   <button
-                    onClick={() => toast({ title: "Brief downloaded", description: `${firstName}'s engagement brief saved.` })}
+                    onClick={() => toast({ title: "Access approved", description: `You have full access to ${firstName}'s channels.` })}
                     className="group w-full bg-emerald-500 text-white py-2.5 rounded-xl font-headline font-bold text-sm shadow-lg shadow-emerald-900/40 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 relative z-10"
                   >
-                    DOWNLOAD BRIEF
-                    <Download className="w-3.5 h-3.5" />
+                    ACCESS APPROVED
+                    <BadgeCheck className="w-3.5 h-3.5" />
                   </button>
                 )}
                 {isLocked && (
@@ -573,11 +566,6 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </header>
         <div onClickCapture={handleGuestCapture} className="max-w-6xl mx-auto px-4 py-4 space-y-4">
           {body}
-          {/* Demo QR — prominent in preview mode for viral conversion */}
-          <div data-guest-allow>
-            <DemoQRCard to="/v/elena-vance" variant="prominent" />
-            <p className="mt-2 text-center text-[11px] text-muted-foreground">See availability. Sign up to connect.</p>
-          </div>
         </div>
         <AuthGateDialog
           open={authOpen}
