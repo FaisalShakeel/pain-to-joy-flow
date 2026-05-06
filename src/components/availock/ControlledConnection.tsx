@@ -14,10 +14,10 @@ const ControlledConnection = () => {
         {/* Header */}
         <div className="max-w-2xl mb-14 md:mb-20">
           <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-4 inline-flex items-center gap-2">
-            <Sparkles className="w-4 h-4" /> Controlled connection
+            <Sparkles className="w-4 h-4" /> Smart connections
           </p>
           <h2 className="font-headline font-extrabold text-primary text-4xl md:text-6xl leading-[1.05] text-balance">
-            Control how people
+            Reinvent how people
             <br />
             <span className="italic font-medium text-outline-variant">connect with you.</span>
           </h2>
