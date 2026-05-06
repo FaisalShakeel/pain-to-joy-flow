@@ -1,4 +1,4 @@
-import { CalendarClock, Layers, MapPin, Globe2, Phone, Sparkles } from "lucide-react";
+import { CalendarClock, Layers, MapPin, Video, Phone, Sparkles, Calendar } from "lucide-react";
 
 const ControlledConnection = () => {
   return (
@@ -125,28 +125,54 @@ function HybridSlotVisual() {
           <p className="font-headline font-extrabold text-primary text-2xl md:text-3xl">3:00 PM</p>
           <p className="text-xs text-muted-foreground">30 min · Hybrid window</p>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-[10px] font-bold uppercase tracking-wider">
-          Open
+        <span className="grid place-items-center w-9 h-9 rounded-full bg-accent/10 text-accent" aria-label="Scheduled">
+          <Calendar className="w-4 h-4" />
         </span>
       </div>
 
-      {/* Merged unified slot card — both channels in one block, pick one */}
+      {/* Single hybrid slot — choose one channel */}
       <div className="mt-4 rounded-lg bg-surface-low ghost-border p-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
           Choose one channel
         </p>
-        <div className="grid grid-cols-2 gap-2">
-          <button className="flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground px-2.5 py-2 text-xs font-semibold shadow-glass">
-            <Globe2 className="w-3.5 h-3.5" />
-            Online
-          </button>
-          <button className="flex items-center justify-center gap-1.5 rounded-md bg-surface-lowest ghost-border text-primary px-2.5 py-2 text-xs font-semibold hover:bg-surface-high transition">
-            <MapPin className="w-3.5 h-3.5" />
-            Onsite
-          </button>
-        </div>
-        <p className="mt-2 text-[10px] text-muted-foreground">Video link auto-generated · Office · 5th floor</p>
+        <HybridChannelToggle />
       </div>
+    </div>
+  );
+}
+
+function HybridChannelToggle() {
+  const [selected, setSelected] = (require("react") as typeof import("react")).useState<"onsite" | "online" | null>(null);
+  const Option = ({
+    value,
+    label,
+    Icon,
+  }: {
+    value: "onsite" | "online";
+    label: string;
+    Icon: React.ComponentType<{ className?: string }>;
+  }) => {
+    const active = selected === value;
+    return (
+      <button
+        type="button"
+        onClick={() => setSelected(value)}
+        aria-pressed={active}
+        className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-2 text-xs font-semibold transition ${
+          active
+            ? "bg-primary text-primary-foreground shadow-glass"
+            : "bg-surface-lowest ghost-border text-primary hover:bg-surface-high"
+        }`}
+      >
+        <Icon className="w-3.5 h-3.5" />
+        {label}
+      </button>
+    );
+  };
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <Option value="onsite" label="Onsite" Icon={MapPin} />
+      <Option value="online" label="Online" Icon={Video} />
     </div>
   );
 }
