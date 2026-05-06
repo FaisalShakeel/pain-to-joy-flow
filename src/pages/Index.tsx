@@ -2,7 +2,6 @@ import Nav from "@/components/availock/Nav";
 import Hero from "@/components/availock/Hero";
 import WhatChanged from "@/components/availock/WhatChanged";
 import AccessControl from "@/components/availock/AccessControl";
-import Protocols from "@/components/availock/Protocols";
 import HowItWorks from "@/components/availock/HowItWorks";
 import ExplainerVideo from "@/components/availock/ExplainerVideo";
 import ControlledConnection from "@/components/availock/ControlledConnection";
@@ -25,7 +24,6 @@ const Index = () => {
         <Hero />
         <WhatChanged />
         <AccessControl />
-        <Protocols />
         <HowItWorks />
         <ControlledConnection />
         <FeatureMicroGrid />
