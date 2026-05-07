@@ -142,7 +142,7 @@ const SlotBuilder = () => {
         mode,
         duration: dur,
         buffer,
-        bookingMode: w.accessRule === "public" ? "instant" : "approval",
+        bookingMode: w.requireApproval || w.accessRule !== "public" ? "approval" : "instant",
         access,
         recurring: w.dates.length > 1,
         pricing: defaultPricing,
