@@ -179,10 +179,10 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       )}
 
       {/* TOP SECTION — Profile identity */}
-      <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start scroll-mt-4">
+      <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
-        <div className="lg:col-span-4">
-          <div className={`aspect-[4/5] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} relative grid place-items-center`}>
+        <div className="lg:col-span-3">
+          <div className={`aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} relative grid place-items-center`}>
             <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
@@ -191,7 +191,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         </div>
 
         {/* Hero info card */}
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-9">
           <div className="bg-surface-lowest rounded-2xl p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
             {/* Status pills + meta — top right */}
             <div className="absolute top-5 right-5 flex flex-col gap-2 items-end">
