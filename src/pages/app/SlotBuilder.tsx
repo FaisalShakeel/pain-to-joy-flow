@@ -20,35 +20,23 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import SlotWizardDialog, { WizardSlot } from "@/components/app/SlotWizardDialog";
+import { slotsStore, useSlots, type StoredSlot } from "@/lib/slotsStore";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog as UIDialog, DialogContent as UIDialogContent, DialogHeader as UIDialogHeader,
+  DialogTitle as UIDialogTitle, DialogDescription as UIDialogDescription, DialogFooter as UIDialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 // ---------- Types ----------
-type Mode = "online" | "onsite" | "hybrid" | "quicksync";
+type Mode = "online" | "onsite" | "hybrid" | "quicksync" | "webinar";
 type Channel = "voice" | "video" | "message" | "inperson" | "appcall" | "link";
 type Access = "public" | "contacts" | "approved" | "priority" | "paid" | "hidden";
 type Booking = "instant" | "approval";
 type Buffer = 0 | 5 | 10 | 15;
 type Duration = 5 | 10 | 15 | 30 | 60;
 
-interface Slot {
-  id: string;
-  title: string;
-  day: string; // Mon..Fri
-  date?: string; // ISO yyyy-mm-dd
-  start: number; // hour (9..17)
-  end: number;
-  mode: Mode;
-  duration: Duration;
-  buffer: Buffer;
-  bookingMode: Booking;
-  access: Access;
-  recurring: boolean;
-  priority?: boolean;
-  online?: { channel: Channel; capacity: number; booking: Booking; link?: string };
-  onsite?: { location: string; capacity: number; booking: Booking; queue?: boolean };
-  quickSync?: { callMin: 3 | 5 | 8 | 10; bufferMin: 1 | 2 | 5 };
-  autoCloseAlternate?: boolean;
-  pricing?: Pricing;
-}
+type Slot = StoredSlot;
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const hours = Array.from({ length: 10 }, (_, i) => 9 + i); // 9..18
@@ -59,33 +47,6 @@ const templates: { id: string; name: string; icon: React.ComponentType<any>; hin
   { id: "meetings",  name: "Meetings — Focus Work",  icon: Briefcase,  hint: "Protect deep conversations",     route: "/app/availability/focus-meetings" },
   { id: "webinars",  name: "Group Session / Webinar", icon: Radio,     hint: "Multi-attendee · capacity & waitlist", route: "/app/availability/webinars" },
   { id: "venue",     name: "Venue Session",            icon: Building2, hint: "Physical, capacity-based gathering",   route: "/app/availability/venue" },
-];
-
-// ---------- Seed slots ----------
-const seed: Slot[] = [
-  {
-    id: "s1", title: "Hybrid Consult", day: "Mon", start: 15, end: 16,
-    mode: "hybrid", duration: 30, buffer: 5, bookingMode: "approval", access: "contacts",
-    recurring: true, autoCloseAlternate: true,
-    online: { channel: "video", capacity: 1, booking: "approval", link: "meet/availock/jv" },
-    onsite: { location: "Studio · DIFC Lvl 12", capacity: 1, booking: "approval", queue: false },
-  },
-  {
-    id: "s2", title: "Quick Sync Hour", day: "Tue", start: 10, end: 11,
-    mode: "quicksync", duration: 5, buffer: 5, bookingMode: "instant", access: "public",
-    recurring: true, quickSync: { callMin: 5, bufferMin: 2 },
-  },
-  {
-    id: "s3", title: "VIP Fast Lane", day: "Wed", start: 14, end: 15,
-    mode: "online", duration: 15, buffer: 10, bookingMode: "approval", access: "priority",
-    recurring: false, priority: true,
-    online: { channel: "voice", capacity: 1, booking: "approval" },
-  },
-  {
-    id: "s4", title: "Office Hours", day: "Thu", start: 11, end: 12,
-    mode: "onsite", duration: 30, buffer: 5, bookingMode: "instant", access: "approved",
-    recurring: true, onsite: { location: "Atlas HQ Reception", capacity: 4, booking: "instant", queue: true },
-  },
 ];
 
 // ---------- Helpers ----------
@@ -120,12 +81,16 @@ type ChannelFilter = "hybrid" | "online" | "onsite";
 // ---------- Component ----------
 const SlotBuilder = () => {
   const navigate = useNavigate();
-  const [slots, setSlots] = useState<Slot[]>(seed);
+  const slots = useSlots();
+  const setSlots = (n: Slot[] | ((p: Slot[]) => Slot[])) => slotsStore.set(n as any);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Slot | null>(null);
   const [filter, setFilter] = useState<ChannelFilter>("hybrid");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   // Show only hybrid/online/onsite slots in Slot Builder.
   // Quick Sync slots are managed in the Quick Sync Builder.
@@ -133,6 +98,10 @@ const SlotBuilder = () => {
     () => slots.filter((s) => s.mode === filter),
     [slots, filter],
   );
+
+  const toggleSelected = (id: string) =>
+    setSelectedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const clearSelection = () => { setSelectedIds([]); setSelectMode(false); };
 
   const openNew = (day = "Mon", start = 14) => {
     setEditing({
@@ -193,6 +162,13 @@ const SlotBuilder = () => {
     setSlots((p) => p.filter((s) => s.id !== id));
     setEditorOpen(false);
     toast({ title: "Slot removed" });
+  };
+
+  const applyBulk = (patch: Partial<Slot>) => {
+    setSlots((p) => p.map((s) => (selectedIds.includes(s.id) ? { ...s, ...patch } : s)));
+    toast({ title: `${selectedIds.length} slot${selectedIds.length === 1 ? "" : "s"} updated` });
+    clearSelection();
+    setBulkOpen(false);
   };
 
   const clone = (s: Slot, kind: "tomorrow" | "nextweek" | "weekdays") => {
