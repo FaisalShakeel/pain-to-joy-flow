@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Mail, Smartphone,
@@ -16,6 +16,7 @@ import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/m
 import { toast } from "@/hooks/use-toast";
 import AuthGateDialog, { isGuestAuthed } from "@/components/guest/AuthGateDialog";
 import QuickSyncBadge, { type SyncWindow } from "@/components/app/QuickSyncBadge";
+import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
 import ActionPanel, { type ActionItem } from "@/components/app/ActionPanel";
 import PreviewModeBanner from "@/components/app/PreviewModeBanner";
 import { trackMetric } from "@/lib/metrics";
@@ -36,6 +37,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
     callback: false, message: false, calendar: false,
   });
   const [authOpen, setAuthOpen] = useState(false);
+  const [qsOpen, setQsOpen] = useState(false);
 
   // Registered seeker detection: if user lands on /v/:id but is already authed,
   // promote them straight to the interactive in-app profile view.
@@ -458,7 +460,6 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 {/* Schedule */}
                 <PortalTile
                   icon={CalendarDays}
-                  badge={isApproved ? { label: "QS", color: "bg-amber-500" } : null}
                   title="Schedule"
                   desc="Review availability and book sessions"
                   dots
@@ -467,6 +468,20 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                   ctaClass={isApproved ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? `/app/schedule/${contact.id}` : null}
                   variant="default"
+                  topRight={
+                    isApproved && syncWindows.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQsOpen(true); }}
+                        title="Open Quick Sync slots"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/90 hover:bg-amber-400 text-white text-[9px] font-bold uppercase tracking-wider shadow-lg shadow-amber-900/30 transition"
+                      >
+                        <Zap className="w-3 h-3" />
+                        <PhoneCall className="w-3 h-3" />
+                        QS
+                      </button>
+                    ) : null
+                  }
                 />
                 {/* Ping */}
                 <PortalTile
@@ -513,6 +528,13 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         onOpenChange={setOpenSent}
         contact={contact}
         onSubmitted={() => setContact({ ...contact, syncStatus: "pending" })}
+      />
+
+      <QuickSyncSlotsDialog
+        open={qsOpen}
+        onOpenChange={setQsOpen}
+        contactName={contact.name}
+        windows={syncWindows}
       />
 
       {/* Spacer to keep the sticky mobile CTA from covering content */}
@@ -655,10 +677,10 @@ const CommsCard = ({
 );
 
 const PortalTile = ({
-  icon: Icon, badge, title, desc, preview, dots, cta, ctaIcon: CtaIcon, ctaClass, to, onClick, variant,
+  icon: Icon, badge, title, desc, preview, dots, cta, ctaIcon: CtaIcon, ctaClass, to, onClick, variant, topRight,
 }: {
   icon: any;
-  badge: { label: string; color: string } | null;
+  badge?: { label: string; color: string } | null;
   title: string;
   desc: string;
   preview?: string;
@@ -669,6 +691,7 @@ const PortalTile = ({
   to: string | null;
   onClick?: () => void;
   variant: "default" | "emerald";
+  topRight?: ReactNode;
 }) => {
   const wrapperBase =
     variant === "emerald"
@@ -690,7 +713,7 @@ const PortalTile = ({
           <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
             <Icon className="w-4 h-4" />
           </div>
-          {badge && (
+          {topRight ? topRight : badge && (
             <span className={`${badge.color} text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
               {badge.label}
             </span>
