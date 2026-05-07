@@ -654,24 +654,32 @@ const modeMeta: Record<StoredSlot["mode"], { label: string; icon: any; cls: stri
   webinar:   { label: "Webinar",    icon: Radio,    cls: "bg-emerald-500/15 text-emerald-700" },
 };
 
-const CreatedSlotRow = ({ slot, onEdit }: { slot: StoredSlot; onEdit: () => void }) => {
+const CreatedSlotRow = ({ slot, onEdit, selectable, selected, onToggleSelect }: {
+  slot: StoredSlot; onEdit: () => void;
+  selectable?: boolean; selected?: boolean; onToggleSelect?: () => void;
+}) => {
   const M = modeMeta[slot.mode];
-  const venue =
-    slot.mode === "onsite" ? slot.onsite?.location :
-    slot.mode === "webinar" && slot.webinar?.format !== "online" ? slot.webinar?.venue :
-    undefined;
+  const venue = slotVenue(slot);
   const cap = slotCapacity(slot);
   const when = slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day;
   return (
     <li>
       <button
-        onClick={onEdit}
-        className="w-full text-left rounded-2xl ghost-border bg-surface-low hover:bg-primary/5 p-3 transition group"
+        onClick={() => (selectable ? onToggleSelect?.() : onEdit())}
+        className={cn(
+          "w-full text-left rounded-2xl ghost-border bg-surface-low hover:bg-primary/5 p-3 transition group",
+          selected && "ring-2 ring-primary bg-primary/5",
+        )}
       >
         <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold", M.cls)}>
-            <M.icon className="w-2.5 h-2.5" /> {M.label}
-          </span>
+          <div className="flex items-center gap-2 min-w-0">
+            {selectable && (
+              <Checkbox checked={!!selected} onCheckedChange={() => onToggleSelect?.()} onClick={(e) => e.stopPropagation()} />
+            )}
+            <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold", M.cls)}>
+              <M.icon className="w-2.5 h-2.5" /> {M.label}
+            </span>
+          </div>
           <span className="text-[10px] font-bold tabular-nums text-muted-foreground">
             {when} · {slot.start}:00–{slot.end}:00
           </span>
@@ -681,7 +689,7 @@ const CreatedSlotRow = ({ slot, onEdit }: { slot: StoredSlot; onEdit: () => void
           {slot.title || "Untitled"}
         </p>
         <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
-          {slot.duration}m · {slot.buffer}m buffer · {cap} seat{cap === 1 ? "" : "s"}
+          {slot.duration}m · join +{slot.joinEarly ?? 0}m · gap {slot.providerDelay ?? slot.buffer}m · {slotSeats(slot)} seat{slotSeats(slot) === 1 ? "" : "s"}
           {venue ? ` · ${venue}` : ""}
         </p>
         <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
@@ -691,5 +699,31 @@ const CreatedSlotRow = ({ slot, onEdit }: { slot: StoredSlot; onEdit: () => void
         </div>
       </button>
     </li>
+  );
+};
+
+const BulkAssignMenu = ({ onAssign }: { onAssign: (m: SlotModule) => void }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[11px] font-bold shadow-elevated">
+        <Pencil className="w-3 h-3" /> Assign module
+      </button>
+      {open && (
+        <div className="absolute right-0 top-9 z-30 w-44 rounded-xl bg-popover ghost-border shadow-elevated p-1.5 text-xs">
+          {([
+            ["meeting",   "Meeting",    BriefcaseIcon],
+            ["webinar",   "Webinar",    Radio],
+            ["quicksync", "Quick Sync", Zap],
+          ] as const).map(([k, l, Ic]) => (
+            <button key={k} onClick={() => { onAssign(k); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-low text-foreground">
+              <Ic className="w-3.5 h-3.5" /> {l}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
