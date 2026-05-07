@@ -250,6 +250,29 @@ const Availability = () => {
       </section>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
+        {/* CREATED SLOTS — refined list */}
+        <section className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Currently created</p>
+              <h3 className="font-headline font-extrabold text-primary text-base">Active slots ({slots.length})</h3>
+            </div>
+            <Link
+              to="/app/availability/builder"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-primary text-[11px] font-bold hover:bg-primary/10"
+            >
+              <Pencil className="w-3 h-3" /> Manage
+            </Link>
+          </div>
+          {slots.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-4 text-center">No slots yet. Open the slot builder to create one.</p>
+          ) : (
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {slots.map((s) => <CreatedSlotRow key={s.id} slot={s} onEdit={() => navigate("/app/availability/builder")} />)}
+            </ul>
+          )}
+        </section>
+
         {/* DAILY ACTIVITY GRID */}
         <div className={cn(
           "rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient",
