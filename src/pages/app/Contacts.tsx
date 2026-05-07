@@ -9,6 +9,7 @@ import PingButton from "@/components/app/PingButton";
 import { contacts, type Relationship, type AlertKind } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import AccessChip from "@/components/app/ui/AccessChip";
 
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
@@ -483,6 +484,11 @@ const Contacts = () => {
                       <p className={cn("mt-1 text-foreground/80 leading-snug", roomy ? "text-[11px] line-clamp-3" : medium ? "text-[10px] line-clamp-2" : "text-[9px] line-clamp-2")}>
                         {c.availabilityContext}
                       </p>
+                      {roomy && (
+                        <div className="mt-2">
+                          <AccessChip state={c.syncStatus} size="sm" />
+                        </div>
+                      )}
                     </div>
                   </Link>
                   <div className={cn("absolute", roomy ? "bottom-2 right-2" : medium ? "bottom-1.5 right-1.5" : "bottom-1 right-1")}>
