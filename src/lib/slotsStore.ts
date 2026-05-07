@@ -9,6 +9,10 @@ export type SlotBooking = "instant" | "approval";
 export type SlotBuffer = 0 | 5 | 10 | 15;
 export type SlotDuration = 5 | 10 | 15 | 30 | 60;
 
+export type SlotModule = "meeting" | "webinar" | "quicksync";
+export type SlotFormat = "online" | "onsite" | "hybrid";
+export type SlotAccessRule = "public" | "private" | "invite";
+
 export interface StoredSlot {
   id: string;
   title: string;
@@ -29,6 +33,15 @@ export interface StoredSlot {
   webinar?: { format: "online" | "onsite" | "both"; venue?: string; capacity: number };
   autoCloseAlternate?: boolean;
   pricing?: Pricing;
+  // New scheduling-engine fields
+  module?: SlotModule;
+  format?: SlotFormat;
+  venue?: string;
+  seats?: number;
+  joinEarly?: number;       // minutes client can join early
+  providerDelay?: number;   // minutes provider grace
+  accessRule?: SlotAccessRule;
+  qsCallMin?: 3 | 5 | 8;
 }
 
 const seed: StoredSlot[] = [
@@ -79,6 +92,42 @@ export const slotsStore = {
 export const useSlots = () => useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
 // Helpers
+export const slotModule = (s: StoredSlot): SlotModule =>
+  s.module ?? (s.mode === "quicksync" ? "quicksync" : s.mode === "webinar" ? "webinar" : "meeting");
+
+export const slotFormat = (s: StoredSlot): SlotFormat | null => {
+  if (s.format) return s.format;
+  if (s.mode === "online") return "online";
+  if (s.mode === "onsite") return "onsite";
+  if (s.mode === "hybrid") return "hybrid";
+  if (s.mode === "webinar" && s.webinar) {
+    return s.webinar.format === "both" ? "hybrid" : s.webinar.format;
+  }
+  return null;
+};
+
+export const slotVenue = (s: StoredSlot): string | undefined =>
+  s.venue ?? s.onsite?.location ?? s.webinar?.venue;
+
+export const slotSeats = (s: StoredSlot): number =>
+  s.seats ?? s.webinar?.capacity ?? s.onsite?.capacity ?? s.online?.capacity ?? 1;
+
+/** Real scheduling generator. Returns generated time slots inside window. */
+export const generateSlotTimes = (
+  startHour: number, endHour: number, duration: number, buffer: number,
+): { start: string; end: string }[] => {
+  const winStart = startHour * 60;
+  const winEnd = endHour * 60;
+  const step = Math.max(1, duration + buffer);
+  const out: { start: string; end: string }[] = [];
+  // Intelligent fit: ((window + buffer) / step) — last slot needs no trailing buffer.
+  for (let t = winStart; t + duration <= winEnd; t += step) {
+    const h = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+    out.push({ start: h(t), end: h(t + duration) });
+  }
+  return out;
+};
+
 export const slotCapacity = (s: StoredSlot): number => {
   const totalMin = (s.end - s.start) * 60;
   if (s.mode === "quicksync" && s.quickSync) {

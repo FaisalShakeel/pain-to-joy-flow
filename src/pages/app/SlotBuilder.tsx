@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
-import SlotWizardDialog, { WizardSlot } from "@/components/app/SlotWizardDialog";
+import SlotWizardDialog, { type WizardOutput } from "@/components/app/SlotWizardDialog";
 import { slotsStore, useSlots, type StoredSlot } from "@/lib/slotsStore";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -119,33 +119,59 @@ const SlotBuilder = () => {
 
   const openEdit = (s: Slot) => { setEditing({ ...s }); setEditorOpen(true); };
 
-  const handleWizardSave = (w: WizardSlot) => {
-    const dayName =
-      w.date ? days[(new Date(w.date).getDay() + 6) % 7] ?? "Mon" : "Mon";
+  const handleWizardSave = (w: WizardOutput) => {
     const mode: Mode =
-      w.category === "venue" ? "onsite" :
-      w.category === "sync" ? "quicksync" :
-      w.category === "meeting" ? "hybrid" : "online";
-    const newSlot: Slot = {
-      id: `s${Date.now()}`,
-      title: `${w.category[0].toUpperCase()}${w.category.slice(1)} session`,
-      day: days.includes(dayName) ? dayName : "Mon",
-      date: w.date,
-      start: w.windowStart,
-      end: w.windowEnd,
-      mode,
-      duration: w.duration,
-      buffer: w.bufferMin,
-      bookingMode: w.booking,
-      access: w.access === "approved" ? "approved" : w.access,
-      recurring: w.repeat !== "none",
-      pricing: defaultPricing,
-      ...(mode === "quicksync"
-        ? { quickSync: { callMin: (w.duration <= 10 ? w.duration : 5) as 3 | 5 | 8 | 10, bufferMin: (w.bufferMin === 0 ? 1 : Math.min(w.bufferMin, 5)) as 1 | 2 | 5 } }
-        : {}),
-    };
-    setSlots((p) => [...p, newSlot]);
-    toast({ title: "Slot created", description: `${newSlot.title} · ${dayName} ${newSlot.start}:00` });
+      w.module === "quicksync" ? "quicksync" :
+      w.module === "webinar"   ? "webinar"   :
+      w.format === "online" ? "online" : w.format === "onsite" ? "onsite" : "hybrid";
+    const access: Access =
+      w.accessRule === "public" ? "public" :
+      w.accessRule === "invite" ? "approved" : "contacts";
+    const buffer = (Math.min(15, Math.max(0, w.providerDelay)) as Buffer);
+    const dur: Duration = ([5, 10, 15, 30, 60].includes(w.duration) ? w.duration : 30) as Duration;
+
+    const newSlots: Slot[] = w.dates.map((iso, i) => {
+      const dayName = days[(new Date(iso).getDay() + 6) % 7] ?? "Mon";
+      return {
+        id: `s${Date.now()}_${i}`,
+        title: `${w.module[0].toUpperCase()}${w.module.slice(1)} session`,
+        day: days.includes(dayName) ? dayName : "Mon",
+        date: iso,
+        start: w.windowStart,
+        end: w.windowEnd,
+        mode,
+        duration: dur,
+        buffer,
+        bookingMode: w.accessRule === "public" ? "instant" : "approval",
+        access,
+        recurring: w.dates.length > 1,
+        pricing: defaultPricing,
+        module: w.module,
+        format: w.module === "quicksync" ? "online" : w.format,
+        venue: w.venue,
+        seats: w.seats,
+        joinEarly: w.joinEarly,
+        providerDelay: w.providerDelay,
+        accessRule: w.accessRule,
+        ...(w.module === "quicksync" ? { qsCallMin: w.qsCallMin } : {}),
+        ...(w.module === "quicksync" ? {
+          quickSync: { callMin: w.qsCallMin as 3 | 5 | 8, bufferMin: 2 },
+        } : {}),
+        ...(w.module === "webinar" ? {
+          webinar: {
+            format: w.format === "hybrid" ? "both" : w.format,
+            venue: w.venue,
+            capacity: w.seats,
+          },
+        } : {}),
+        ...((w.format === "onsite" || w.format === "hybrid") && w.module !== "quicksync" ? {
+          onsite: { location: w.venue ?? "", capacity: w.seats, booking: w.accessRule === "public" ? "instant" : "approval" },
+        } : {}),
+      };
+    });
+    setSlots((p) => [...p, ...newSlots]);
+    const moduleLabel = w.module === "quicksync" ? "Quick Sync" : w.module === "webinar" ? "Webinar" : "Meeting";
+    toast({ title: `${newSlots.length} slot${newSlots.length === 1 ? "" : "s"} created`, description: `${moduleLabel} · ${w.windowStart}:00–${w.windowEnd}:00` });
   };
 
   const save = () => {

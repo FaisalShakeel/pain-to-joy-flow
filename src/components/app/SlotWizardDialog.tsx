@@ -1,228 +1,235 @@
 import { useMemo, useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
-  Calendar as CalIcon, Repeat, Timer, Phone, Zap, Video, MapPin,
-  Sparkles, Shield, Globe, Users as UsersIcon, Crown, Lock, Check,
-  ChevronLeft, ChevronRight, CalendarPlus, Eye,
+  Calendar as CalIcon, Briefcase, Radio, Zap, Video, MapPin, Sparkles,
+  Globe, Lock, Users as UsersIcon, Timer, ChevronLeft, ChevronRight, CalendarPlus,
+  Eye, Shield,
 } from "lucide-react";
+import { generateSlotTimes, type SlotModule, type SlotFormat, type SlotAccessRule } from "@/lib/slotsStore";
 
-export type WizardCategory = "call" | "sync" | "meeting" | "venue";
-export type WizardAccess = "public" | "contacts" | "approved" | "priority";
-export type WizardBooking = "instant" | "approval";
+export type DateMode = "single" | "multi" | "range";
 
-export interface WizardSlot {
-  date?: string;        // ISO yyyy-mm-dd
-  repeat: "none" | "daily" | "weekdays" | "weekly";
-  windowStart: number;  // hour
-  windowEnd: number;    // hour
-  bufferMin: 0 | 5 | 10 | 15;
-  category: WizardCategory;
-  duration: 5 | 10 | 15 | 30 | 60;
-  access: WizardAccess;
-  booking: WizardBooking;
-  maxBookings: number;
+export interface WizardOutput {
+  dates: string[];                 // ISO yyyy-mm-dd
+  windowStart: number;             // hour
+  windowEnd: number;               // hour
+  module: SlotModule;
+  format: SlotFormat;              // online/onsite/hybrid (for meeting & webinar)
+  venue?: string;
+  qsCallMin: 3 | 5 | 8;            // for quick sync
+  duration: number;                // minutes — derived for meeting/webinar
+  seats: number;
+  accessRule: SlotAccessRule;
+  joinEarly: number;               // minutes
+  providerDelay: number;           // minutes
 }
 
-const DEFAULTS: WizardSlot = {
-  date: new Date().toISOString().slice(0, 10),
-  repeat: "none",
-  windowStart: 10,
-  windowEnd: 12,
-  bufferMin: 5,
-  category: "call",
-  duration: 15,
-  access: "contacts",
-  booking: "instant",
-  maxBookings: 8,
+const DEFAULTS: WizardOutput = {
+  dates: [new Date().toISOString().slice(0, 10)],
+  windowStart: 9,
+  windowEnd: 18,
+  module: "meeting",
+  format: "online",
+  venue: "",
+  qsCallMin: 5,
+  duration: 30,
+  seats: 1,
+  accessRule: "public",
+  joinEarly: 5,
+  providerDelay: 5,
 };
+
+const STEPS = [
+  { id: "date",    label: "Date",    icon: CalIcon },
+  { id: "window",  label: "Window",  icon: Timer },
+  { id: "module",  label: "Module",  icon: Sparkles },
+  { id: "rules",   label: "Rules",   icon: Shield },
+  { id: "buffer",  label: "Buffer",  icon: Timer },
+  { id: "preview", label: "Preview", icon: Eye },
+] as const;
+
+const moduleMeta: Record<SlotModule, { label: string; icon: any; hint: string }> = {
+  meeting:   { label: "Meeting",   icon: Briefcase, hint: "1:1 or small team session" },
+  webinar:   { label: "Webinar",   icon: Radio,     hint: "Group session with capacity" },
+  quicksync: { label: "Quick Sync",icon: Zap,       hint: "3 / 5 / 8 minute calls" },
+};
+
+const accessMeta: Record<SlotAccessRule, { label: string; icon: any; cls: string }> = {
+  public:  { label: "Public",      icon: Globe,    cls: "bg-emerald-500/15 text-emerald-700" },
+  private: { label: "Private",     icon: Lock,     cls: "bg-slate-500/15 text-slate-700" },
+  invite:  { label: "Invite Only", icon: UsersIcon,cls: "bg-indigo-500/15 text-indigo-700" },
+};
+
+const SEAT_PRESETS = [1, 5, 10];
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onSave: (slot: WizardSlot) => void;
-}
-
-const STEPS = [
-  { id: "schedule", label: "Schedule", icon: CalIcon },
-  { id: "window",   label: "Window",   icon: Timer },
-  { id: "type",     label: "Type",     icon: Sparkles },
-  { id: "rules",    label: "Rules",    icon: Shield },
-  { id: "preview",  label: "Preview",  icon: Eye },
-] as const;
-
-const categoryMeta: Record<WizardCategory, { label: string; icon: any; hint: string; durations: WizardSlot["duration"][] }> = {
-  call:    { label: "Call",    icon: Phone,    hint: "1:1 voice / video",        durations: [10, 15, 30] },
-  sync:    { label: "Quick Sync", icon: Zap,   hint: "Rapid 3–10 min calls",     durations: [5, 10, 15] },
-  meeting: { label: "Meeting", icon: Video,    hint: "Focused work session",     durations: [15, 30, 60] },
-  venue:   { label: "Venue",   icon: MapPin,   hint: "On-site / in-person",      durations: [30, 60] },
-};
-
-const accessMeta: Record<WizardAccess, { label: string; icon: any; cls: string }> = {
-  public:   { label: "Public",       icon: Globe,    cls: "bg-emerald-500/15 text-emerald-700" },
-  contacts: { label: "Contacts",     icon: UsersIcon,cls: "bg-sky-500/15 text-sky-700" },
-  approved: { label: "Link / Approved", icon: Check, cls: "bg-indigo-500/15 text-indigo-700" },
-  priority: { label: "Priority",     icon: Crown,    cls: "bg-amber-500/20 text-amber-800" },
-};
-
-const toHHMM = (mins: number) =>
-  `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-
-function generateSlots(s: WizardSlot): { time: string; end: string }[] {
-  const start = s.windowStart * 60;
-  const end = s.windowEnd * 60;
-  const step = s.duration + s.bufferMin;
-  const out: { time: string; end: string }[] = [];
-  for (let t = start; t + s.duration <= end && out.length < s.maxBookings; t += step) {
-    out.push({ time: toHHMM(t), end: toHHMM(t + s.duration) });
-  }
-  return out;
+  onSave: (w: WizardOutput) => void;
 }
 
 const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
   const [step, setStep] = useState(0);
-  const [slot, setSlot] = useState<WizardSlot>(DEFAULTS);
-  const set = <K extends keyof WizardSlot>(k: K, v: WizardSlot[K]) =>
-    setSlot((s) => ({ ...s, [k]: v }));
+  const [w, setW] = useState<WizardOutput>(DEFAULTS);
+  const [dateMode, setDateMode] = useState<DateMode>("single");
+  const [rangeStart, setRangeStart] = useState<Date | undefined>();
+  const [rangeEnd, setRangeEnd] = useState<Date | undefined>();
+  const [seatCustom, setSeatCustom] = useState<number | "">("");
 
-  const generated = useMemo(() => generateSlots(slot), [slot]);
-  const Cat = categoryMeta[slot.category];
+  const set = <K extends keyof WizardOutput>(k: K, v: WizardOutput[K]) =>
+    setW((s) => ({ ...s, [k]: v }));
+
+  const duration = w.module === "quicksync" ? w.qsCallMin : w.duration;
+
+  // Real scheduling: subtract providerDelay from each slot end so total fits window.
+  const generated = useMemo(
+    () => generateSlotTimes(w.windowStart, w.windowEnd, duration, w.providerDelay),
+    [w.windowStart, w.windowEnd, duration, w.providerDelay],
+  );
+
+  const handleSave = () => {
+    onSave({ ...w, duration });
+    onOpenChange(false);
+    setStep(0);
+    setW(DEFAULTS);
+    setDateMode("single");
+    setRangeStart(undefined); setRangeEnd(undefined);
+  };
 
   const next = () => setStep((s) => Math.min(STEPS.length - 1, s + 1));
   const prev = () => setStep((s) => Math.max(0, s - 1));
 
-  const handleSave = () => {
-    onSave(slot);
-    onOpenChange(false);
-    setStep(0);
-    setSlot(DEFAULTS);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/50">
           <DialogTitle className="text-base font-headline">Slot Builder</DialogTitle>
           <DialogDescription className="text-xs">
-            Guided setup · {STEPS[step].label} ({step + 1}/{STEPS.length})
+            {STEPS[step].label} · Step {step + 1} of {STEPS.length}
           </DialogDescription>
-
-          {/* Stepper */}
           <div className="mt-3 flex items-center gap-1.5">
             {STEPS.map((st, i) => {
-              const active = i === step;
-              const done = i < step;
+              const active = i === step, done = i < step;
               const Ic = st.icon;
               return (
-                <button
-                  key={st.id}
-                  type="button"
-                  onClick={() => setStep(i)}
+                <button key={st.id} type="button" onClick={() => setStep(i)}
                   className={cn(
-                    "flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-bold transition",
+                    "flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-bold transition",
                     active && "bg-primary text-primary-foreground",
                     done && !active && "bg-primary/15 text-primary",
                     !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
-                  )}
-                >
+                  )}>
                   <Ic className="w-3 h-3" />
-                  <span className="truncate hidden sm:inline">{st.label}</span>
+                  <span className="hidden sm:inline truncate">{st.label}</span>
                 </button>
               );
             })}
           </div>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-[1fr_260px] gap-0 max-h-[60vh] overflow-hidden">
-          {/* Step body */}
+        <div className="grid md:grid-cols-[1fr_300px] gap-0 max-h-[65vh] overflow-hidden">
+          {/* LEFT: stepper body */}
           <div className="p-5 overflow-y-auto space-y-5">
             {step === 0 && (
               <>
-                <Group title="Date">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full inline-flex items-center justify-between px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm hover:bg-surface-low/80"
-                      >
-                        <span className={cn(!slot.date && "text-muted-foreground")}>
-                          {slot.date ? format(new Date(slot.date), "PPP") : "Pick a date"}
-                        </span>
-                        <CalIcon className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[60]" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={slot.date ? new Date(slot.date) : undefined}
-                        onSelect={(d) => d && set("date", d.toISOString().slice(0, 10))}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </Group>
-                <Group title="Repeat">
+                <Group title="Date selection mode">
                   <Tiles
                     options={[
-                      { v: "none", label: "Once", icon: CalIcon },
-                      { v: "weekdays", label: "Weekdays", icon: Repeat },
-                      { v: "weekly", label: "Weekly", icon: Repeat },
+                      { v: "single", label: "Single", icon: CalIcon },
+                      { v: "multi",  label: "Multiple", icon: CalIcon },
+                      { v: "range",  label: "Range", icon: CalIcon },
                     ]}
-                    value={slot.repeat}
-                    onChange={(v) => set("repeat", v as WizardSlot["repeat"])}
+                    value={dateMode}
+                    onChange={(v) => {
+                      setDateMode(v as DateMode);
+                      setW((s) => ({ ...s, dates: [] }));
+                      setRangeStart(undefined); setRangeEnd(undefined);
+                    }}
                   />
+                </Group>
+                <Group title="Pick date(s)">
+                  <div className="rounded-xl ghost-border bg-surface-low p-2 inline-block">
+                    {dateMode === "single" && (
+                      <Calendar
+                        mode="single"
+                        selected={w.dates[0] ? new Date(w.dates[0]) : undefined}
+                        onSelect={(d) => d && set("dates", [d.toISOString().slice(0, 10)])}
+                        className={cn("p-0 pointer-events-auto")}
+                      />
+                    )}
+                    {dateMode === "multi" && (
+                      <Calendar
+                        mode="multiple"
+                        selected={w.dates.map((d) => new Date(d))}
+                        onSelect={(arr) =>
+                          set("dates", (arr ?? []).map((d) => d.toISOString().slice(0, 10)))
+                        }
+                        className={cn("p-0 pointer-events-auto")}
+                      />
+                    )}
+                    {dateMode === "range" && (
+                      <Calendar
+                        mode="range"
+                        selected={{ from: rangeStart, to: rangeEnd }}
+                        onSelect={(r: any) => {
+                          setRangeStart(r?.from);
+                          setRangeEnd(r?.to);
+                          if (r?.from && r?.to) {
+                            const days: string[] = [];
+                            const d = new Date(r.from);
+                            while (d <= r.to) {
+                              days.push(d.toISOString().slice(0, 10));
+                              d.setDate(d.getDate() + 1);
+                            }
+                            set("dates", days);
+                          } else if (r?.from) {
+                            set("dates", [r.from.toISOString().slice(0, 10)]);
+                          }
+                        }}
+                        className={cn("p-0 pointer-events-auto")}
+                      />
+                    )}
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    {w.dates.length} date{w.dates.length === 1 ? "" : "s"} selected
+                  </p>
                 </Group>
               </>
             )}
 
             {step === 1 && (
-              <>
-                <Group title="Working window">
-                  <div className="grid grid-cols-2 gap-2">
-                    <HourPicker label="Start" value={slot.windowStart} onChange={(v) => set("windowStart", v)} />
-                    <HourPicker label="End" value={slot.windowEnd} onChange={(v) => set("windowEnd", v)} min={slot.windowStart + 1} />
-                  </div>
-                </Group>
-                <Group title="Buffer between bookings">
-                  <Tiles
-                    options={[0, 5, 10, 15].map((n) => ({ v: String(n), label: n === 0 ? "None" : `${n}m`, icon: Timer }))}
-                    value={String(slot.bufferMin)}
-                    onChange={(v) => set("bufferMin", Number(v) as WizardSlot["bufferMin"])}
-                  />
-                </Group>
-              </>
+              <Group title="Working window">
+                <div className="grid grid-cols-2 gap-2">
+                  <HourPicker label="Start" value={w.windowStart} onChange={(v) => set("windowStart", v)} />
+                  <HourPicker label="End"   value={w.windowEnd}   onChange={(v) => set("windowEnd", v)} min={w.windowStart + 1} />
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Window: {String(w.windowStart).padStart(2,"0")}:00 → {String(w.windowEnd).padStart(2,"0")}:00 ·{" "}
+                  {(w.windowEnd - w.windowStart)}h
+                </p>
+              </Group>
             )}
 
             {step === 2 && (
               <>
-                <Group title="Connection type">
-                  <div className="grid grid-cols-2 gap-2">
-                    {(Object.keys(categoryMeta) as WizardCategory[]).map((k) => {
-                      const M = categoryMeta[k];
-                      const active = slot.category === k;
+                <Group title="Module type">
+                  <div className="grid grid-cols-3 gap-2">
+                    {(Object.keys(moduleMeta) as SlotModule[]).map((k) => {
+                      const M = moduleMeta[k]; const active = w.module === k;
                       return (
-                        <button
-                          key={k}
-                          onClick={() => {
-                            set("category", k);
-                            if (!M.durations.includes(slot.duration)) set("duration", M.durations[0]);
-                          }}
+                        <button key={k} onClick={() => {
+                          set("module", k);
+                          if (k === "quicksync") set("format", "online");
+                        }}
                           className={cn(
                             "p-3 rounded-xl text-left transition ghost-border",
                             active ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low hover:bg-primary/5",
-                          )}
-                        >
+                          )}>
                           <div className="flex items-center gap-2">
                             <M.icon className="w-4 h-4" />
                             <span className="text-xs font-extrabold">{M.label}</span>
@@ -233,96 +240,165 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
                     })}
                   </div>
                 </Group>
-                <Group title={`${Cat.label} duration`}>
-                  <Tiles
-                    options={Cat.durations.map((d) => ({ v: String(d), label: `${d}m`, icon: Timer }))}
-                    value={String(slot.duration)}
-                    onChange={(v) => set("duration", Number(v) as WizardSlot["duration"])}
-                  />
-                </Group>
+
+                {w.module === "quicksync" ? (
+                  <Group title="Call length">
+                    <Tiles
+                      options={[
+                        { v: "3", label: "3 min", icon: Zap },
+                        { v: "5", label: "5 min", icon: Zap },
+                        { v: "8", label: "8 min", icon: Zap },
+                      ]}
+                      value={String(w.qsCallMin)}
+                      onChange={(v) => set("qsCallMin", Number(v) as 3 | 5 | 8)}
+                    />
+                  </Group>
+                ) : (
+                  <>
+                    <Group title="Format">
+                      <div className="grid grid-cols-3 gap-2">
+                        {([
+                          ["online", "Online", Video],
+                          ["onsite", "Onsite", MapPin],
+                          ["hybrid", "Both", Sparkles],
+                        ] as const).map(([k, l, Ic]) => {
+                          const active = w.format === k;
+                          return (
+                            <button key={k} onClick={() => set("format", k)}
+                              className={cn(
+                                "flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition justify-center",
+                                active ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
+                              )}>
+                              <Ic className="w-3.5 h-3.5" /> {l}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </Group>
+
+                    {(w.format === "onsite" || w.format === "hybrid") && (
+                      <Group title="Venue">
+                        <input
+                          value={w.venue ?? ""}
+                          onChange={(e) => set("venue", e.target.value)}
+                          placeholder="Studio · DIFC Lvl 12"
+                          className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                      </Group>
+                    )}
+
+                    <Group title={`${w.module === "webinar" ? "Webinar" : "Meeting"} duration`}>
+                      <Tiles
+                        options={[15, 30, 45, 60, 90].map((n) => ({ v: String(n), label: `${n}m`, icon: Timer }))}
+                        value={String(w.duration)}
+                        onChange={(v) => set("duration", Number(v))}
+                      />
+                    </Group>
+                  </>
+                )}
               </>
             )}
 
             {step === 3 && (
               <>
-                <Group title="Access">
-                  <div className="grid grid-cols-2 gap-2">
-                    {(Object.keys(accessMeta) as WizardAccess[]).map((a) => {
-                      const M = accessMeta[a];
-                      const active = slot.access === a;
+                <Group title="Seats / People limit">
+                  <div className="flex flex-wrap gap-1.5">
+                    {SEAT_PRESETS.map((n) => {
+                      const active = w.seats === n && seatCustom === "";
                       return (
-                        <button
-                          key={a}
-                          onClick={() => set("access", a)}
+                        <button key={n} onClick={() => { set("seats", n); setSeatCustom(""); }}
                           className={cn(
-                            "flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold transition",
+                            "px-3 py-1.5 rounded-full text-[11px] font-bold transition",
+                            active ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
+                          )}>
+                          {n}
+                        </button>
+                      );
+                    })}
+                    <input
+                      type="number" min={1} placeholder="Custom"
+                      value={seatCustom}
+                      onChange={(e) => {
+                        const n = e.target.value === "" ? "" : Math.max(1, Number(e.target.value));
+                        setSeatCustom(n);
+                        if (n !== "") set("seats", n as number);
+                      }}
+                      className="w-24 px-3 py-1.5 rounded-full bg-surface-low ghost-border text-[11px] font-bold outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                </Group>
+
+                <Group title="Booking access">
+                  <div className="grid grid-cols-3 gap-2">
+                    {(Object.keys(accessMeta) as SlotAccessRule[]).map((a) => {
+                      const M = accessMeta[a]; const active = w.accessRule === a;
+                      return (
+                        <button key={a} onClick={() => set("accessRule", a)}
+                          className={cn(
+                            "flex items-center gap-1.5 justify-center px-3 py-2 rounded-xl text-[11px] font-bold transition",
                             active ? "bg-primary text-primary-foreground" : `${M.cls} hover:opacity-90`,
-                          )}
-                        >
+                          )}>
                           <M.icon className="w-3.5 h-3.5" /> {M.label}
                         </button>
                       );
                     })}
                   </div>
                 </Group>
-                <Group title="Booking">
-                  <Tiles
-                    options={[
-                      { v: "instant", label: "Instant", icon: Check },
-                      { v: "approval", label: "Approval", icon: Lock },
-                    ]}
-                    value={slot.booking}
-                    onChange={(v) => set("booking", v as WizardBooking)}
-                  />
-                </Group>
-                <Group title="Max bookings">
-                  <input
-                    type="number"
-                    min={1}
-                    max={50}
-                    value={slot.maxBookings}
-                    onChange={(e) => set("maxBookings", Math.max(1, Number(e.target.value) || 1))}
-                    className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                </Group>
               </>
             )}
 
             {step === 4 && (
-              <PreviewPanel slot={slot} generated={generated} large />
+              <>
+                <Group title="Join early buffer">
+                  <p className="text-[11px] text-muted-foreground mb-2">Client may join this many minutes before slot start.</p>
+                  <Tiles
+                    options={[0, 2, 5, 10].map((n) => ({ v: String(n), label: n === 0 ? "None" : `${n}m`, icon: Timer }))}
+                    value={String(w.joinEarly)}
+                    onChange={(v) => set("joinEarly", Number(v))}
+                  />
+                </Group>
+                <Group title="Provider delay buffer">
+                  <p className="text-[11px] text-muted-foreground mb-2">Provider grace window — also acts as gap between generated slots.</p>
+                  <Tiles
+                    options={[0, 5, 10, 15].map((n) => ({ v: String(n), label: n === 0 ? "None" : `${n}m`, icon: Timer }))}
+                    value={String(w.providerDelay)}
+                    onChange={(v) => set("providerDelay", Number(v))}
+                  />
+                </Group>
+                <div className="rounded-xl bg-primary/5 ghost-border p-3 text-[11px] text-muted-foreground">
+                  <p className="font-bold text-primary mb-1">Engine math</p>
+                  Window {(w.windowEnd - w.windowStart)}h · slot {duration}m · gap {w.providerDelay}m →{" "}
+                  <span className="font-bold text-primary">{generated.length} slots / day</span>
+                </div>
+              </>
+            )}
+
+            {step === 5 && (
+              <PreviewPanel w={w} duration={duration} generated={generated} large />
             )}
           </div>
 
-          {/* Live preview side panel */}
+          {/* RIGHT: live preview */}
           <aside className="hidden md:block border-l border-border/50 bg-surface-lowest p-4 overflow-y-auto">
-            <PreviewPanel slot={slot} generated={generated} />
+            <PreviewPanel w={w} duration={duration} generated={generated} />
           </aside>
         </div>
 
         <DialogFooter className="px-5 py-3 border-t border-border/50 bg-surface-lowest">
-          <button
-            type="button"
-            onClick={prev}
-            disabled={step === 0}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-background text-xs font-bold text-primary disabled:opacity-40"
-          >
+          <button type="button" onClick={prev} disabled={step === 0}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-background text-xs font-bold text-primary disabled:opacity-40">
             <ChevronLeft className="w-3.5 h-3.5" /> Back
           </button>
           {step < STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={next}
-              className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-elevated"
-            >
+            <button type="button" onClick={next}
+              className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-elevated">
               Next <ChevronRight className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
-            >
-              <CalendarPlus className="w-3.5 h-3.5" /> Save slot
+            <button type="button" onClick={handleSave}
+              disabled={w.dates.length === 0 || generated.length === 0}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated disabled:opacity-40">
+              <CalendarPlus className="w-3.5 h-3.5" /> Save {w.dates.length * generated.length} slots
             </button>
           )}
         </DialogFooter>
@@ -340,24 +416,16 @@ const Group = ({ title, children }: { title: string; children: React.ReactNode }
 
 const Tiles = ({
   options, value, onChange,
-}: {
-  options: { v: string; label: string; icon: any }[];
-  value: string;
-  onChange: (v: string) => void;
-}) => (
+}: { options: { v: string; label: string; icon: any }[]; value: string; onChange: (v: string) => void }) => (
   <div className="flex flex-wrap gap-1.5">
     {options.map((o) => {
-      const active = value === o.v;
-      const Ic = o.icon;
+      const active = value === o.v; const Ic = o.icon;
       return (
-        <button
-          key={o.v}
-          onClick={() => onChange(o.v)}
+        <button key={o.v} onClick={() => onChange(o.v)}
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition",
             active ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
-          )}
-        >
+          )}>
           <Ic className="w-3 h-3" /> {o.label}
         </button>
       );
@@ -370,11 +438,8 @@ const HourPicker = ({
 }: { label: string; value: number; onChange: (v: number) => void; min?: number }) => (
   <label className="block">
     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
-    <select
-      value={value}
-      onChange={(e) => onChange(+e.target.value)}
-      className="mt-1 w-full px-2 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none"
-    >
+    <select value={value} onChange={(e) => onChange(+e.target.value)}
+      className="mt-1 w-full px-2 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none">
       {Array.from({ length: 24 }, (_, h) => h).filter((h) => h >= min).map((h) => (
         <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>
       ))}
@@ -383,46 +448,85 @@ const HourPicker = ({
 );
 
 const PreviewPanel = ({
-  slot, generated, large,
-}: { slot: WizardSlot; generated: { time: string; end: string }[]; large?: boolean }) => {
-  const Cat = categoryMeta[slot.category];
-  const A = accessMeta[slot.access];
+  w, duration, generated, large,
+}: {
+  w: WizardOutput; duration: number;
+  generated: { start: string; end: string }[]; large?: boolean;
+}) => {
+  const M = moduleMeta[w.module];
+  const A = accessMeta[w.accessRule];
   return (
     <div className="space-y-3">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Live preview</p>
         <p className="text-xs font-extrabold text-primary mt-0.5 flex items-center gap-1.5">
-          <Cat.icon className="w-3.5 h-3.5" /> {Cat.label} · {slot.duration}m
-          <span className="text-muted-foreground font-semibold">+{slot.bufferMin}m buffer</span>
+          <M.icon className="w-3.5 h-3.5" /> {M.label} · {duration}m
         </p>
         <p className="text-[10px] text-muted-foreground mt-0.5">
-          {slot.date ? format(new Date(slot.date), "EEE, MMM d") : "—"} ·{" "}
-          {String(slot.windowStart).padStart(2, "0")}:00–{String(slot.windowEnd).padStart(2, "0")}:00
+          {w.dates.length} day{w.dates.length === 1 ? "" : "s"} · {String(w.windowStart).padStart(2,"0")}:00–{String(w.windowEnd).padStart(2,"0")}:00
         </p>
-        <span className={cn("inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold", A.cls)}>
-          <A.icon className="w-2.5 h-2.5" /> {A.label}
-        </span>
+        <div className="mt-1 flex items-center gap-1 flex-wrap">
+          {w.module !== "quicksync" && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold">
+              {w.format === "online" ? <Video className="w-2.5 h-2.5" /> :
+               w.format === "onsite" ? <MapPin className="w-2.5 h-2.5" /> :
+               <Sparkles className="w-2.5 h-2.5" />}
+              {w.format === "hybrid" ? "Both" : w.format}
+            </span>
+          )}
+          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold", A.cls)}>
+            <A.icon className="w-2.5 h-2.5" /> {A.label}
+          </span>
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-surface-low text-[10px] font-bold text-muted-foreground">
+            {w.seats} seat{w.seats === 1 ? "" : "s"}
+          </span>
+        </div>
+        {w.venue && (w.format === "onsite" || w.format === "hybrid") && w.module !== "quicksync" && (
+          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+            <MapPin className="w-2.5 h-2.5" /> {w.venue}
+          </p>
+        )}
+        <p className="text-[10px] text-muted-foreground mt-1">
+          Buffers: join early {w.joinEarly}m · provider delay {w.providerDelay}m
+        </p>
       </div>
+
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-          {generated.length} {Cat.label.toLowerCase()} slot{generated.length === 1 ? "" : "s"}
+          {generated.length} slot{generated.length === 1 ? "" : "s"} per day · {generated.length * w.dates.length} total
         </p>
         {generated.length === 0 ? (
           <p className="text-[11px] text-muted-foreground italic">Window too short for this duration.</p>
         ) : (
           <div className={cn("grid gap-1.5", large ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-2")}>
             {generated.map((g) => (
-              <div
-                key={g.time}
-                className="px-2 py-1.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold tabular-nums text-center ghost-border"
-              >
-                {g.time}
+              <div key={g.start}
+                className="px-2 py-1.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold tabular-nums text-center ghost-border">
+                {g.start}
                 <span className="block text-[9px] text-muted-foreground font-semibold">→ {g.end}</span>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {w.dates.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Days</p>
+          <div className="flex flex-wrap gap-1">
+            {w.dates.slice(0, 8).map((d) => (
+              <span key={d} className="px-1.5 py-0.5 rounded bg-surface-low text-[10px] font-bold text-primary">
+                {format(new Date(d), "MMM d")}
+              </span>
+            ))}
+            {w.dates.length > 8 && (
+              <span className="px-1.5 py-0.5 rounded bg-surface-low text-[10px] text-muted-foreground">
+                +{w.dates.length - 8}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
