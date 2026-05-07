@@ -108,7 +108,7 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden">
+      <DialogContent className="max-w-2xl p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/50">
           <DialogTitle className="text-base font-headline">Slot Builder</DialogTitle>
           <DialogDescription className="text-xs">
