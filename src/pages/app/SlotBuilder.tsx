@@ -713,12 +713,13 @@ const SlotEditor = ({
 
           {/* Mode */}
           <Section title="Connection mode" icon={Sparkles}>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-5 gap-1.5">
               {([
                 ["online", "Online", Video],
                 ["onsite", "Onsite", MapPin],
                 ["hybrid", "Hybrid", Sparkles],
                 ["quicksync", "Quick Sync", Zap],
+                ["webinar", "Webinar", Radio],
               ] as const).map(([k, l, Ic]) => (
                 <button
                   key={k}
@@ -734,6 +735,68 @@ const SlotEditor = ({
               ))}
             </div>
           </Section>
+
+          {/* Onsite-only venue */}
+          {slot.mode === "onsite" && (
+            <Section title="Venue" icon={MapPin}>
+              <Field label="Venue name / address">
+                <input
+                  value={slot.onsite?.location ?? ""}
+                  onChange={(e) => set("onsite", { ...(slot.onsite ?? { capacity: 1, booking: "instant" }), location: e.target.value })}
+                  placeholder="Office / Clinic / Studio"
+                  className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </Field>
+              <Field label="Capacity">
+                <input
+                  type="number" min={1}
+                  value={slot.onsite?.capacity ?? 1}
+                  onChange={(e) => set("onsite", { ...(slot.onsite ?? { location: "", booking: "instant" }), capacity: +e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none"
+                />
+              </Field>
+            </Section>
+          )}
+
+          {/* Webinar */}
+          {slot.mode === "webinar" && (
+            <Section title="Webinar format" icon={Radio} hint="Group session — pick how attendees join.">
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["online", "onsite", "both"] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => set("webinar", { format: f, venue: slot.webinar?.venue ?? "", capacity: slot.webinar?.capacity ?? 25 })}
+                    className={cn(
+                      "px-2 py-2 rounded-xl text-[11px] font-bold transition capitalize",
+                      (slot.webinar?.format ?? "online") === f
+                        ? "bg-primary text-primary-foreground shadow-glass"
+                        : "bg-surface-low text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    {f === "both" ? "Online + Onsite" : f}
+                  </button>
+                ))}
+              </div>
+              {(slot.webinar?.format === "onsite" || slot.webinar?.format === "both") && (
+                <Field label="Venue name / address">
+                  <input
+                    value={slot.webinar?.venue ?? ""}
+                    onChange={(e) => set("webinar", { ...(slot.webinar ?? { format: "onsite", capacity: 25 }), venue: e.target.value })}
+                    placeholder="e.g. Atlas HQ Auditorium"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </Field>
+              )}
+              <Field label="Capacity">
+                <input
+                  type="number" min={1}
+                  value={slot.webinar?.capacity ?? 25}
+                  onChange={(e) => set("webinar", { ...(slot.webinar ?? { format: "online" }), capacity: Math.max(1, +e.target.value) })}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none"
+                />
+              </Field>
+            </Section>
+          )}
 
           {/* Hybrid dual */}
           {slot.mode === "hybrid" && (
