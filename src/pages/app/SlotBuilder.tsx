@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
+import SlotWizardDialog, { WizardSlot } from "@/components/app/SlotWizardDialog";
 
 // ---------- Types ----------
 type Mode = "online" | "onsite" | "hybrid" | "quicksync";
@@ -124,6 +125,7 @@ const SlotBuilder = () => {
   const [editing, setEditing] = useState<Slot | null>(null);
   const [filter, setFilter] = useState<ChannelFilter>("hybrid");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   // Show only hybrid/online/onsite slots in Slot Builder.
   // Quick Sync slots are managed in the Quick Sync Builder.
@@ -147,6 +149,35 @@ const SlotBuilder = () => {
   };
 
   const openEdit = (s: Slot) => { setEditing({ ...s }); setEditorOpen(true); };
+
+  const handleWizardSave = (w: WizardSlot) => {
+    const dayName =
+      w.date ? days[(new Date(w.date).getDay() + 6) % 7] ?? "Mon" : "Mon";
+    const mode: Mode =
+      w.category === "venue" ? "onsite" :
+      w.category === "sync" ? "quicksync" :
+      w.category === "meeting" ? "hybrid" : "online";
+    const newSlot: Slot = {
+      id: `s${Date.now()}`,
+      title: `${w.category[0].toUpperCase()}${w.category.slice(1)} session`,
+      day: days.includes(dayName) ? dayName : "Mon",
+      date: w.date,
+      start: w.windowStart,
+      end: w.windowEnd,
+      mode,
+      duration: w.duration,
+      buffer: w.bufferMin,
+      bookingMode: w.booking,
+      access: w.access === "approved" ? "approved" : w.access,
+      recurring: w.repeat !== "none",
+      pricing: defaultPricing,
+      ...(mode === "quicksync"
+        ? { quickSync: { callMin: (w.duration <= 10 ? w.duration : 5) as 3 | 5 | 8 | 10, bufferMin: (w.bufferMin === 0 ? 1 : Math.min(w.bufferMin, 5)) as 1 | 2 | 5 } }
+        : {}),
+    };
+    setSlots((p) => [...p, newSlot]);
+    toast({ title: "Slot created", description: `${newSlot.title} · ${dayName} ${newSlot.start}:00` });
+  };
 
   const save = () => {
     if (!editing) return;
@@ -208,7 +239,7 @@ const SlotBuilder = () => {
             <ArrowLeft className="w-3.5 h-3.5" /> Calendar
           </button>
           <button
-            onClick={() => openNew()}
+            onClick={() => setWizardOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95"
           >
             <Plus className="w-4 h-4" /> New slot
@@ -377,6 +408,12 @@ const SlotBuilder = () => {
           onDelete={() => remove(editing.id)}
         />
       )}
+
+      <SlotWizardDialog
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onSave={handleWizardSave}
+      />
     </AppShell>
   );
 };
