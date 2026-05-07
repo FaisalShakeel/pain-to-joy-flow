@@ -12,7 +12,9 @@ import { toast } from "@/hooks/use-toast";
 import { useMetrics } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
 import { CheckCircle2, Timer } from "lucide-react";
-import { useSlots, slotCapacity, type StoredSlot } from "@/lib/slotsStore";
+import { useSlots, slotCapacity, slotsStore, slotModule, slotFormat, slotVenue, slotSeats, type StoredSlot, type SlotModule } from "@/lib/slotsStore";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Trash2, Briefcase as BriefcaseIcon } from "lucide-react";
 
 // ---------- Activity model ----------
 interface DayActivity {
@@ -76,6 +78,30 @@ const Availability = () => {
   const perf = useMetrics("week");
   const slots = useSlots();
   const navigate = useNavigate();
+
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const toggleSel = (id: string) =>
+    setSelectedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const clearSel = () => { setSelectedIds([]); setSelectMode(false); };
+  const bulkDelete = () => {
+    slotsStore.set((p) => p.filter((s) => !selectedIds.includes(s.id)));
+    toast({ title: `${selectedIds.length} slot${selectedIds.length === 1 ? "" : "s"} deleted` });
+    clearSel();
+  };
+  const bulkAssign = (m: SlotModule) => {
+    slotsStore.set((p) => p.map((s) => (selectedIds.includes(s.id)
+      ? { ...s, module: m, mode: m === "quicksync" ? "quicksync" : m === "webinar" ? "webinar" : (s.format === "onsite" ? "onsite" : s.format === "hybrid" ? "hybrid" : "online") }
+      : s)));
+    toast({ title: `Assigned to ${m}`, description: `${selectedIds.length} slot${selectedIds.length === 1 ? "" : "s"} updated` });
+    clearSel();
+  };
+
+  const grouped = useMemo(() => {
+    const g: Record<SlotModule, StoredSlot[]> = { meeting: [], webinar: [], quicksync: [] };
+    slots.forEach((s) => g[slotModule(s)].push(s));
+    return g;
+  }, [slots]);
 
   useEffect(() => {
     const t = setTimeout(() => setConnecting(false), 600);
@@ -257,19 +283,63 @@ const Availability = () => {
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Currently created</p>
               <h3 className="font-headline font-extrabold text-primary text-base">Active slots ({slots.length})</h3>
             </div>
-            <Link
-              to="/app/availability/builder"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-primary text-[11px] font-bold hover:bg-primary/10"
-            >
-              <Pencil className="w-3 h-3" /> Manage
-            </Link>
+            <div className="flex items-center gap-1.5">
+              {selectMode && selectedIds.length > 0 && (
+                <>
+                  <BulkAssignMenu onAssign={bulkAssign} />
+                  <button onClick={bulkDelete}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold shadow-elevated">
+                    <Trash2 className="w-3 h-3" /> Delete ({selectedIds.length})
+                  </button>
+                </>
+              )}
+              <button onClick={() => { if (selectMode) clearSel(); else setSelectMode(true); }}
+                className={cn(
+                  "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold transition",
+                  selectMode ? "bg-primary text-primary-foreground" : "ghost-border bg-surface-low text-primary hover:bg-primary/10",
+                )}>
+                {selectMode ? "Cancel" : "Select"}
+              </button>
+              <Link to="/app/availability/builder"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-primary text-[11px] font-bold hover:bg-primary/10">
+                <Pencil className="w-3 h-3" /> Manage
+              </Link>
+            </div>
           </div>
           {slots.length === 0 ? (
             <p className="text-xs text-muted-foreground py-4 text-center">No slots yet. Open the slot builder to create one.</p>
           ) : (
-            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {slots.map((s) => <CreatedSlotRow key={s.id} slot={s} onEdit={() => navigate("/app/availability/builder")} />)}
-            </ul>
+            <div className="space-y-4">
+              {(["meeting", "webinar", "quicksync"] as SlotModule[]).map((mk) => {
+                const items = grouped[mk];
+                if (items.length === 0) return null;
+                const meta = mk === "meeting" ? { label: "Meetings", Ic: BriefcaseIcon, cls: "bg-indigo-500/15 text-indigo-700" }
+                  : mk === "webinar" ? { label: "Webinars", Ic: Radio, cls: "bg-emerald-500/15 text-emerald-700" }
+                  : { label: "Quick Syncs", Ic: Zap, cls: "bg-fuchsia-500/15 text-fuchsia-700" };
+                return (
+                  <div key={mk}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold", meta.cls)}>
+                        <meta.Ic className="w-3 h-3" /> {meta.label}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-bold">{items.length}</span>
+                    </div>
+                    <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {items.map((s) => (
+                        <CreatedSlotRow
+                          key={s.id}
+                          slot={s}
+                          onEdit={() => !selectMode && navigate("/app/availability/builder")}
+                          selectable={selectMode}
+                          selected={selectedIds.includes(s.id)}
+                          onToggleSelect={() => toggleSel(s.id)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </section>
 
