@@ -27,6 +27,7 @@ export interface WizardOutput {
   accessRule: SlotAccessRule;
   joinEarly: number;               // minutes
   providerDelay: number;           // minutes
+  requireApproval: boolean;
 }
 
 const DEFAULTS: WizardOutput = {
@@ -42,6 +43,7 @@ const DEFAULTS: WizardOutput = {
   accessRule: "public",
   joinEarly: 5,
   providerDelay: 5,
+  requireApproval: false,
 };
 
 const STEPS = [
