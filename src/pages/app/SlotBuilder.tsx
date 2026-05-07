@@ -1003,3 +1003,116 @@ const BookingSelect = ({ value, onChange }: { value: Booking; onChange: (v: Book
 );
 
 export default SlotBuilder;
+
+// ---------- Bulk Type Dialog ----------
+const BULK_MODES: { v: Mode; label: string; icon: any; hint: string }[] = [
+  { v: "online",    label: "Online Meeting", icon: Video,    hint: "Video / voice call" },
+  { v: "onsite",    label: "Onsite Meeting", icon: MapPin,   hint: "Physical location" },
+  { v: "hybrid",    label: "Hybrid",         icon: Sparkles, hint: "Online + Onsite, auto-close alternate" },
+  { v: "quicksync", label: "Quick Sync",     icon: Zap,      hint: "Rapid back-to-back calls" },
+  { v: "webinar",   label: "Webinar",        icon: Radio,    hint: "Group session, capacity-based" },
+];
+
+const BulkTypeDialog = ({
+  open, onOpenChange, count, onApply,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  count: number;
+  onApply: (patch: Partial<Slot>) => void;
+}) => {
+  const [mode, setMode] = useState<Mode>("online");
+  const [format, setFormat] = useState<"online" | "onsite" | "both">("online");
+  const [venue, setVenue] = useState("");
+  const [capacity, setCapacity] = useState(25);
+  const [onsiteVenue, setOnsiteVenue] = useState("");
+
+  const handleApply = () => {
+    const patch: Partial<Slot> = { mode };
+    if (mode === "webinar") {
+      patch.webinar = { format, venue: format !== "online" ? venue : undefined, capacity };
+    }
+    if (mode === "onsite") {
+      patch.onsite = { location: onsiteVenue, capacity, booking: "instant" };
+    }
+    onApply(patch);
+  };
+
+  return (
+    <UIDialog open={open} onOpenChange={onOpenChange}>
+      <UIDialogContent className="max-w-md">
+        <UIDialogHeader>
+          <UIDialogTitle>Set type for {count} slot{count === 1 ? "" : "s"}</UIDialogTitle>
+          <UIDialogDescription>Pick a type to assign to all selected slots.</UIDialogDescription>
+        </UIDialogHeader>
+
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-1.5">
+            {BULK_MODES.map((m) => {
+              const active = mode === m.v;
+              return (
+                <button
+                  key={m.v}
+                  onClick={() => setMode(m.v)}
+                  className={cn(
+                    "flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-left transition",
+                    active ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low hover:bg-primary/5",
+                  )}
+                >
+                  <m.icon className="w-4 h-4 mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold">{m.label}</p>
+                    <p className={cn("text-[10px]", active ? "opacity-80" : "text-muted-foreground")}>{m.hint}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {mode === "webinar" && (
+            <div className="rounded-xl bg-surface-low p-3 space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Webinar format</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["online", "onsite", "both"] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFormat(f)}
+                    className={cn(
+                      "px-2 py-1.5 rounded-lg text-[11px] font-bold capitalize",
+                      format === f ? "bg-primary text-primary-foreground" : "bg-background ghost-border text-muted-foreground hover:text-primary",
+                    )}
+                  >{f === "both" ? "Online + Onsite" : f}</button>
+                ))}
+              </div>
+              {(format === "onsite" || format === "both") && (
+                <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Venue name / address" />
+              )}
+              <Input type="number" min={1} value={capacity} onChange={(e) => setCapacity(Math.max(1, +e.target.value))} placeholder="Capacity" />
+            </div>
+          )}
+
+          {mode === "onsite" && (
+            <div className="rounded-xl bg-surface-low p-3 space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Venue</p>
+              <Input value={onsiteVenue} onChange={(e) => setOnsiteVenue(e.target.value)} placeholder="Venue name / address" />
+              <Input type="number" min={1} value={capacity} onChange={(e) => setCapacity(Math.max(1, +e.target.value))} placeholder="Capacity" />
+            </div>
+          )}
+        </div>
+
+        <UIDialogFooter>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="px-4 py-2 rounded-full ghost-border text-xs font-bold text-muted-foreground hover:text-primary"
+          >Cancel</button>
+          <button
+            onClick={handleApply}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
+          >
+            <Check className="w-3.5 h-3.5" /> Apply to {count}
+          </button>
+        </UIDialogFooter>
+      </UIDialogContent>
+    </UIDialog>
+  );
+};
