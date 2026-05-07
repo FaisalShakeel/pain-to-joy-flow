@@ -74,6 +74,8 @@ const Availability = () => {
   const [mode, setMode] = useState<"live" | "history">("live");
   const [selected, setSelected] = useState<string | null>(null);
   const perf = useMetrics("week");
+  const slots = useSlots();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setTimeout(() => setConnecting(false), 600);
