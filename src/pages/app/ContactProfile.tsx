@@ -16,6 +16,7 @@ import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/m
 import { toast } from "@/hooks/use-toast";
 import AuthGateDialog, { isGuestAuthed } from "@/components/guest/AuthGateDialog";
 import QuickSyncBadge, { type SyncWindow } from "@/components/app/QuickSyncBadge";
+import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
 import ActionPanel, { type ActionItem } from "@/components/app/ActionPanel";
 import PreviewModeBanner from "@/components/app/PreviewModeBanner";
 import { trackMetric } from "@/lib/metrics";
@@ -36,6 +37,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
     callback: false, message: false, calendar: false,
   });
   const [authOpen, setAuthOpen] = useState(false);
+  const [qsOpen, setQsOpen] = useState(false);
 
   // Registered seeker detection: if user lands on /v/:id but is already authed,
   // promote them straight to the interactive in-app profile view.
