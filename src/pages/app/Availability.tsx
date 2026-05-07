@@ -2,15 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Loader2, CalendarDays, Plus, Sparkles, History, Activity,
   Briefcase, Zap, Radio, Clock, TrendingUp, AlertTriangle, Shield, ChevronRight, X,
+  Video, MapPin, Crown, Lock, Repeat, Pencil,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useMetrics } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
 import { CheckCircle2, Timer } from "lucide-react";
+import { useSlots, slotCapacity, type StoredSlot } from "@/lib/slotsStore";
 
 // ---------- Activity model ----------
 interface DayActivity {
