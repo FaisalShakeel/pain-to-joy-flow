@@ -684,7 +684,7 @@ const PortalTile = ({
   to: string | null;
   onClick?: () => void;
   variant: "default" | "emerald";
-  topRight?: React.ReactNode;
+  topRight?: ReactNode;
 }) => {
   const wrapperBase =
     variant === "emerald"
