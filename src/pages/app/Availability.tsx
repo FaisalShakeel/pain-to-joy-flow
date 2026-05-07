@@ -2,15 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Loader2, CalendarDays, Plus, Sparkles, History, Activity,
   Briefcase, Zap, Radio, Clock, TrendingUp, AlertTriangle, Shield, ChevronRight, X,
+  Video, MapPin, Crown, Lock, Repeat, Pencil,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useMetrics } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
 import { CheckCircle2, Timer } from "lucide-react";
+import { useSlots, slotCapacity, type StoredSlot } from "@/lib/slotsStore";
 
 // ---------- Activity model ----------
 interface DayActivity {
@@ -72,6 +74,8 @@ const Availability = () => {
   const [mode, setMode] = useState<"live" | "history">("live");
   const [selected, setSelected] = useState<string | null>(null);
   const perf = useMetrics("week");
+  const slots = useSlots();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setTimeout(() => setConnecting(false), 600);
@@ -246,6 +250,29 @@ const Availability = () => {
       </section>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
+        {/* CREATED SLOTS — refined list */}
+        <section className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Currently created</p>
+              <h3 className="font-headline font-extrabold text-primary text-base">Active slots ({slots.length})</h3>
+            </div>
+            <Link
+              to="/app/availability/builder"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-primary text-[11px] font-bold hover:bg-primary/10"
+            >
+              <Pencil className="w-3 h-3" /> Manage
+            </Link>
+          </div>
+          {slots.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-4 text-center">No slots yet. Open the slot builder to create one.</p>
+          ) : (
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {slots.map((s) => <CreatedSlotRow key={s.id} slot={s} onEdit={() => navigate("/app/availability/builder")} />)}
+            </ul>
+          )}
+        </section>
+
         {/* DAILY ACTIVITY GRID */}
         <div className={cn(
           "rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient",
@@ -547,3 +574,52 @@ const Stat = ({ label, value, dot }: { label: string; value: string; dot: string
 );
 
 export default Availability;
+
+// ---------- Created Slot Row ----------
+const modeMeta: Record<StoredSlot["mode"], { label: string; icon: any; cls: string }> = {
+  online:    { label: "Online",     icon: Video,    cls: "bg-sky-500/15 text-sky-700" },
+  onsite:    { label: "Onsite",     icon: MapPin,   cls: "bg-amber-500/20 text-amber-800" },
+  hybrid:    { label: "Hybrid",     icon: Sparkles, cls: "bg-indigo-500/15 text-indigo-700" },
+  quicksync: { label: "Quick Sync", icon: Zap,      cls: "bg-fuchsia-500/15 text-fuchsia-700" },
+  webinar:   { label: "Webinar",    icon: Radio,    cls: "bg-emerald-500/15 text-emerald-700" },
+};
+
+const CreatedSlotRow = ({ slot, onEdit }: { slot: StoredSlot; onEdit: () => void }) => {
+  const M = modeMeta[slot.mode];
+  const venue =
+    slot.mode === "onsite" ? slot.onsite?.location :
+    slot.mode === "webinar" && slot.webinar?.format !== "online" ? slot.webinar?.venue :
+    undefined;
+  const cap = slotCapacity(slot);
+  const when = slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day;
+  return (
+    <li>
+      <button
+        onClick={onEdit}
+        className="w-full text-left rounded-2xl ghost-border bg-surface-low hover:bg-primary/5 p-3 transition group"
+      >
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold", M.cls)}>
+            <M.icon className="w-2.5 h-2.5" /> {M.label}
+          </span>
+          <span className="text-[10px] font-bold tabular-nums text-muted-foreground">
+            {when} · {slot.start}:00–{slot.end}:00
+          </span>
+        </div>
+        <p className="text-xs font-extrabold text-primary truncate flex items-center gap-1">
+          {slot.priority && <Crown className="w-3 h-3 text-amber-600" />}
+          {slot.title || "Untitled"}
+        </p>
+        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+          {slot.duration}m · {slot.buffer}m buffer · {cap} seat{cap === 1 ? "" : "s"}
+          {venue ? ` · ${venue}` : ""}
+        </p>
+        <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
+          {slot.bookingMode === "approval" ? <Lock className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />}
+          <span className="font-bold">{slot.bookingMode === "approval" ? "Approval" : "Instant"}</span>
+          {slot.recurring && (<><span>·</span><Repeat className="w-2.5 h-2.5" /><span className="font-bold">Recurring</span></>)}
+        </div>
+      </button>
+    </li>
+  );
+};

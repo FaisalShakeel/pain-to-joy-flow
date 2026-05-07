@@ -20,35 +20,23 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import SlotWizardDialog, { WizardSlot } from "@/components/app/SlotWizardDialog";
+import { slotsStore, useSlots, type StoredSlot } from "@/lib/slotsStore";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog as UIDialog, DialogContent as UIDialogContent, DialogHeader as UIDialogHeader,
+  DialogTitle as UIDialogTitle, DialogDescription as UIDialogDescription, DialogFooter as UIDialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 // ---------- Types ----------
-type Mode = "online" | "onsite" | "hybrid" | "quicksync";
+type Mode = "online" | "onsite" | "hybrid" | "quicksync" | "webinar";
 type Channel = "voice" | "video" | "message" | "inperson" | "appcall" | "link";
 type Access = "public" | "contacts" | "approved" | "priority" | "paid" | "hidden";
 type Booking = "instant" | "approval";
 type Buffer = 0 | 5 | 10 | 15;
 type Duration = 5 | 10 | 15 | 30 | 60;
 
-interface Slot {
-  id: string;
-  title: string;
-  day: string; // Mon..Fri
-  date?: string; // ISO yyyy-mm-dd
-  start: number; // hour (9..17)
-  end: number;
-  mode: Mode;
-  duration: Duration;
-  buffer: Buffer;
-  bookingMode: Booking;
-  access: Access;
-  recurring: boolean;
-  priority?: boolean;
-  online?: { channel: Channel; capacity: number; booking: Booking; link?: string };
-  onsite?: { location: string; capacity: number; booking: Booking; queue?: boolean };
-  quickSync?: { callMin: 3 | 5 | 8 | 10; bufferMin: 1 | 2 | 5 };
-  autoCloseAlternate?: boolean;
-  pricing?: Pricing;
-}
+type Slot = StoredSlot;
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const hours = Array.from({ length: 10 }, (_, i) => 9 + i); // 9..18
@@ -59,33 +47,6 @@ const templates: { id: string; name: string; icon: React.ComponentType<any>; hin
   { id: "meetings",  name: "Meetings — Focus Work",  icon: Briefcase,  hint: "Protect deep conversations",     route: "/app/availability/focus-meetings" },
   { id: "webinars",  name: "Group Session / Webinar", icon: Radio,     hint: "Multi-attendee · capacity & waitlist", route: "/app/availability/webinars" },
   { id: "venue",     name: "Venue Session",            icon: Building2, hint: "Physical, capacity-based gathering",   route: "/app/availability/venue" },
-];
-
-// ---------- Seed slots ----------
-const seed: Slot[] = [
-  {
-    id: "s1", title: "Hybrid Consult", day: "Mon", start: 15, end: 16,
-    mode: "hybrid", duration: 30, buffer: 5, bookingMode: "approval", access: "contacts",
-    recurring: true, autoCloseAlternate: true,
-    online: { channel: "video", capacity: 1, booking: "approval", link: "meet/availock/jv" },
-    onsite: { location: "Studio · DIFC Lvl 12", capacity: 1, booking: "approval", queue: false },
-  },
-  {
-    id: "s2", title: "Quick Sync Hour", day: "Tue", start: 10, end: 11,
-    mode: "quicksync", duration: 5, buffer: 5, bookingMode: "instant", access: "public",
-    recurring: true, quickSync: { callMin: 5, bufferMin: 2 },
-  },
-  {
-    id: "s3", title: "VIP Fast Lane", day: "Wed", start: 14, end: 15,
-    mode: "online", duration: 15, buffer: 10, bookingMode: "approval", access: "priority",
-    recurring: false, priority: true,
-    online: { channel: "voice", capacity: 1, booking: "approval" },
-  },
-  {
-    id: "s4", title: "Office Hours", day: "Thu", start: 11, end: 12,
-    mode: "onsite", duration: 30, buffer: 5, bookingMode: "instant", access: "approved",
-    recurring: true, onsite: { location: "Atlas HQ Reception", capacity: 4, booking: "instant", queue: true },
-  },
 ];
 
 // ---------- Helpers ----------
@@ -120,12 +81,16 @@ type ChannelFilter = "hybrid" | "online" | "onsite";
 // ---------- Component ----------
 const SlotBuilder = () => {
   const navigate = useNavigate();
-  const [slots, setSlots] = useState<Slot[]>(seed);
+  const slots = useSlots();
+  const setSlots = (n: Slot[] | ((p: Slot[]) => Slot[])) => slotsStore.set(n as any);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Slot | null>(null);
   const [filter, setFilter] = useState<ChannelFilter>("hybrid");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   // Show only hybrid/online/onsite slots in Slot Builder.
   // Quick Sync slots are managed in the Quick Sync Builder.
@@ -133,6 +98,10 @@ const SlotBuilder = () => {
     () => slots.filter((s) => s.mode === filter),
     [slots, filter],
   );
+
+  const toggleSelected = (id: string) =>
+    setSelectedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const clearSelection = () => { setSelectedIds([]); setSelectMode(false); };
 
   const openNew = (day = "Mon", start = 14) => {
     setEditing({
@@ -193,6 +162,13 @@ const SlotBuilder = () => {
     setSlots((p) => p.filter((s) => s.id !== id));
     setEditorOpen(false);
     toast({ title: "Slot removed" });
+  };
+
+  const applyBulk = (patch: Partial<Slot>) => {
+    setSlots((p) => p.map((s) => (selectedIds.includes(s.id) ? { ...s, ...patch } : s)));
+    toast({ title: `${selectedIds.length} slot${selectedIds.length === 1 ? "" : "s"} updated` });
+    clearSelection();
+    setBulkOpen(false);
   };
 
   const clone = (s: Slot, kind: "tomorrow" | "nextweek" | "weekdays") => {
@@ -353,7 +329,26 @@ const SlotBuilder = () => {
       <section className="mt-5 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-headline font-bold text-primary text-sm">Created slots</h3>
-          <p className="text-[11px] text-muted-foreground">{filtered.length} total</p>
+          <div className="flex items-center gap-2">
+            {selectMode && selectedIds.length > 0 && (
+              <button
+                onClick={() => setBulkOpen(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[11px] font-bold shadow-elevated"
+              >
+                <Pencil className="w-3 h-3" /> Edit type ({selectedIds.length})
+              </button>
+            )}
+            <button
+              onClick={() => { if (selectMode) clearSelection(); else setSelectMode(true); }}
+              className={cn(
+                "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold transition",
+                selectMode ? "bg-primary text-primary-foreground" : "ghost-border bg-surface-low text-primary hover:bg-primary/10",
+              )}
+            >
+              {selectMode ? "Cancel" : "Select"}
+            </button>
+            <p className="text-[11px] text-muted-foreground">{filtered.length} total</p>
+          </div>
         </div>
         {filtered.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">No slots yet. Click an empty cell or “New slot” to add one.</p>
@@ -366,6 +361,9 @@ const SlotBuilder = () => {
                 onEdit={() => openEdit(s)}
                 onDelete={() => setConfirmDelete(s.id)}
                 onClone={() => cloneSchedule(s)}
+                selectable={selectMode}
+                selected={selectedIds.includes(s.id)}
+                onToggleSelect={() => toggleSelected(s.id)}
               />
             ))}
           </div>
@@ -414,29 +412,43 @@ const SlotBuilder = () => {
         onOpenChange={setWizardOpen}
         onSave={handleWizardSave}
       />
+
+      <BulkTypeDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        count={selectedIds.length}
+        onApply={applyBulk}
+      />
     </AppShell>
   );
 };
 
 // ---------- Slot Card Compact ----------
 const SlotCardCompact = ({
-  slot, onEdit, onDelete, onClone,
+  slot, onEdit, onDelete, onClone, selectable, selected, onToggleSelect,
 }: {
   slot: Slot;
   onEdit: () => void;
   onDelete: () => void;
   onClone: () => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }) => {
   const A = accessMeta[slot.access];
   const channelLabel =
     slot.mode === "hybrid" ? "Hybrid" :
     slot.mode === "online" ? "Online" :
-    slot.mode === "onsite" ? "Onsite" : "Quick Sync";
+    slot.mode === "onsite" ? "Onsite" :
+    slot.mode === "webinar" ? "Webinar" : "Quick Sync";
   const ChannelIcon =
     slot.mode === "hybrid" ? Sparkles :
     slot.mode === "online" ? Video :
-    slot.mode === "onsite" ? MapPin : Zap;
-  const typeLabel = slot.mode === "quicksync" ? "Quick Sync" : "Meeting";
+    slot.mode === "onsite" ? MapPin :
+    slot.mode === "webinar" ? Radio : Zap;
+  const typeLabel =
+    slot.mode === "quicksync" ? "Quick Sync" :
+    slot.mode === "webinar" ? "Webinar" : "Meeting";
 
   // Status (lightweight)
   let status: "active" | "upcoming" | "expired" | "full" = "upcoming";
@@ -456,10 +468,26 @@ const SlotCardCompact = ({
                             "bg-amber-500/20 text-amber-800";
 
   return (
-    <article className="rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition">
+    <article
+      onClick={() => selectable && onToggleSelect?.()}
+      className={cn(
+        "rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition",
+        selectable && "cursor-pointer",
+        selected && "ring-2 ring-primary bg-primary/5",
+      )}
+    >
       {/* Top line: date + time range */}
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
+        <div className="min-w-0 flex items-start gap-2">
+          {selectable && (
+            <Checkbox
+              checked={!!selected}
+              onCheckedChange={() => onToggleSelect?.()}
+              onClick={(e) => e.stopPropagation()}
+              className="mt-0.5"
+            />
+          )}
+          <div className="min-w-0">
           <p className="text-[12px] font-extrabold text-primary truncate flex items-center gap-1.5">
             {slot.priority && <Crown className="w-3 h-3 text-amber-600 shrink-0" />}
             {slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day}
@@ -467,6 +495,7 @@ const SlotCardCompact = ({
             {slot.start}:00–{slot.end}:00
           </p>
           <p className="text-[10px] text-muted-foreground truncate mt-0.5">{slot.title || "Untitled"}</p>
+          </div>
         </div>
         <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0", statusCls)}>
           {status}
@@ -505,8 +534,17 @@ const SlotCardCompact = ({
         {slot.recurring && " · recurring"}
       </div>
 
+      {slot.mode === "webinar" && slot.webinar && (
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          {slot.webinar.format === "online" ? "Online" : slot.webinar.format === "onsite" ? `Onsite · ${slot.webinar.venue || "venue tbd"}` : `Online + Onsite · ${slot.webinar.venue || "venue tbd"}`} · cap {slot.webinar.capacity}
+        </p>
+      )}
+      {slot.mode === "onsite" && slot.onsite?.location && (
+        <p className="mt-1 text-[10px] text-muted-foreground truncate">📍 {slot.onsite.location}</p>
+      )}
+
       {/* Actions */}
-      <div className="mt-2.5 flex items-center justify-end gap-1">
+      <div className="mt-2.5 flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClone}
           className="inline-flex items-center gap-1 px-2 py-1 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary text-[10px] font-bold"
@@ -675,12 +713,13 @@ const SlotEditor = ({
 
           {/* Mode */}
           <Section title="Connection mode" icon={Sparkles}>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-5 gap-1.5">
               {([
                 ["online", "Online", Video],
                 ["onsite", "Onsite", MapPin],
                 ["hybrid", "Hybrid", Sparkles],
                 ["quicksync", "Quick Sync", Zap],
+                ["webinar", "Webinar", Radio],
               ] as const).map(([k, l, Ic]) => (
                 <button
                   key={k}
@@ -696,6 +735,68 @@ const SlotEditor = ({
               ))}
             </div>
           </Section>
+
+          {/* Onsite-only venue */}
+          {slot.mode === "onsite" && (
+            <Section title="Venue" icon={MapPin}>
+              <Field label="Venue name / address">
+                <input
+                  value={slot.onsite?.location ?? ""}
+                  onChange={(e) => set("onsite", { ...(slot.onsite ?? { capacity: 1, booking: "instant" }), location: e.target.value })}
+                  placeholder="Office / Clinic / Studio"
+                  className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </Field>
+              <Field label="Capacity">
+                <input
+                  type="number" min={1}
+                  value={slot.onsite?.capacity ?? 1}
+                  onChange={(e) => set("onsite", { ...(slot.onsite ?? { location: "", booking: "instant" }), capacity: +e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none"
+                />
+              </Field>
+            </Section>
+          )}
+
+          {/* Webinar */}
+          {slot.mode === "webinar" && (
+            <Section title="Webinar format" icon={Radio} hint="Group session — pick how attendees join.">
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["online", "onsite", "both"] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => set("webinar", { format: f, venue: slot.webinar?.venue ?? "", capacity: slot.webinar?.capacity ?? 25 })}
+                    className={cn(
+                      "px-2 py-2 rounded-xl text-[11px] font-bold transition capitalize",
+                      (slot.webinar?.format ?? "online") === f
+                        ? "bg-primary text-primary-foreground shadow-glass"
+                        : "bg-surface-low text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    {f === "both" ? "Online + Onsite" : f}
+                  </button>
+                ))}
+              </div>
+              {(slot.webinar?.format === "onsite" || slot.webinar?.format === "both") && (
+                <Field label="Venue name / address">
+                  <input
+                    value={slot.webinar?.venue ?? ""}
+                    onChange={(e) => set("webinar", { ...(slot.webinar ?? { format: "onsite", capacity: 25 }), venue: e.target.value })}
+                    placeholder="e.g. Atlas HQ Auditorium"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </Field>
+              )}
+              <Field label="Capacity">
+                <input
+                  type="number" min={1}
+                  value={slot.webinar?.capacity ?? 25}
+                  onChange={(e) => set("webinar", { ...(slot.webinar ?? { format: "online" }), capacity: Math.max(1, +e.target.value) })}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none"
+                />
+              </Field>
+            </Section>
+          )}
 
           {/* Hybrid dual */}
           {slot.mode === "hybrid" && (
@@ -902,3 +1003,116 @@ const BookingSelect = ({ value, onChange }: { value: Booking; onChange: (v: Book
 );
 
 export default SlotBuilder;
+
+// ---------- Bulk Type Dialog ----------
+const BULK_MODES: { v: Mode; label: string; icon: any; hint: string }[] = [
+  { v: "online",    label: "Online Meeting", icon: Video,    hint: "Video / voice call" },
+  { v: "onsite",    label: "Onsite Meeting", icon: MapPin,   hint: "Physical location" },
+  { v: "hybrid",    label: "Hybrid",         icon: Sparkles, hint: "Online + Onsite, auto-close alternate" },
+  { v: "quicksync", label: "Quick Sync",     icon: Zap,      hint: "Rapid back-to-back calls" },
+  { v: "webinar",   label: "Webinar",        icon: Radio,    hint: "Group session, capacity-based" },
+];
+
+const BulkTypeDialog = ({
+  open, onOpenChange, count, onApply,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  count: number;
+  onApply: (patch: Partial<Slot>) => void;
+}) => {
+  const [mode, setMode] = useState<Mode>("online");
+  const [format, setFormat] = useState<"online" | "onsite" | "both">("online");
+  const [venue, setVenue] = useState("");
+  const [capacity, setCapacity] = useState(25);
+  const [onsiteVenue, setOnsiteVenue] = useState("");
+
+  const handleApply = () => {
+    const patch: Partial<Slot> = { mode };
+    if (mode === "webinar") {
+      patch.webinar = { format, venue: format !== "online" ? venue : undefined, capacity };
+    }
+    if (mode === "onsite") {
+      patch.onsite = { location: onsiteVenue, capacity, booking: "instant" };
+    }
+    onApply(patch);
+  };
+
+  return (
+    <UIDialog open={open} onOpenChange={onOpenChange}>
+      <UIDialogContent className="max-w-md">
+        <UIDialogHeader>
+          <UIDialogTitle>Set type for {count} slot{count === 1 ? "" : "s"}</UIDialogTitle>
+          <UIDialogDescription>Pick a type to assign to all selected slots.</UIDialogDescription>
+        </UIDialogHeader>
+
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-1.5">
+            {BULK_MODES.map((m) => {
+              const active = mode === m.v;
+              return (
+                <button
+                  key={m.v}
+                  onClick={() => setMode(m.v)}
+                  className={cn(
+                    "flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-left transition",
+                    active ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low hover:bg-primary/5",
+                  )}
+                >
+                  <m.icon className="w-4 h-4 mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold">{m.label}</p>
+                    <p className={cn("text-[10px]", active ? "opacity-80" : "text-muted-foreground")}>{m.hint}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {mode === "webinar" && (
+            <div className="rounded-xl bg-surface-low p-3 space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Webinar format</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["online", "onsite", "both"] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFormat(f)}
+                    className={cn(
+                      "px-2 py-1.5 rounded-lg text-[11px] font-bold capitalize",
+                      format === f ? "bg-primary text-primary-foreground" : "bg-background ghost-border text-muted-foreground hover:text-primary",
+                    )}
+                  >{f === "both" ? "Online + Onsite" : f}</button>
+                ))}
+              </div>
+              {(format === "onsite" || format === "both") && (
+                <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Venue name / address" />
+              )}
+              <Input type="number" min={1} value={capacity} onChange={(e) => setCapacity(Math.max(1, +e.target.value))} placeholder="Capacity" />
+            </div>
+          )}
+
+          {mode === "onsite" && (
+            <div className="rounded-xl bg-surface-low p-3 space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Venue</p>
+              <Input value={onsiteVenue} onChange={(e) => setOnsiteVenue(e.target.value)} placeholder="Venue name / address" />
+              <Input type="number" min={1} value={capacity} onChange={(e) => setCapacity(Math.max(1, +e.target.value))} placeholder="Capacity" />
+            </div>
+          )}
+        </div>
+
+        <UIDialogFooter>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="px-4 py-2 rounded-full ghost-border text-xs font-bold text-muted-foreground hover:text-primary"
+          >Cancel</button>
+          <button
+            onClick={handleApply}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
+          >
+            <Check className="w-3.5 h-3.5" /> Apply to {count}
+          </button>
+        </UIDialogFooter>
+      </UIDialogContent>
+    </UIDialog>
+  );
+};
