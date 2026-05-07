@@ -134,7 +134,7 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
           </div>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-[1fr_300px] gap-0 max-h-[65vh] overflow-hidden">
+        <div className="max-h-[65vh] overflow-hidden">
           {/* LEFT: stepper body */}
           <div className="p-5 overflow-y-auto space-y-5">
             {step === 0 && (
@@ -303,6 +303,7 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
 
             {step === 3 && (
               <>
+                {w.module === "webinar" && (
                 <Group title="Seats / People limit">
                   <div className="flex flex-wrap gap-1.5">
                     {SEAT_PRESETS.map((n) => {
@@ -329,6 +330,7 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
                     />
                   </div>
                 </Group>
+                )}
 
                 <Group title="Booking access">
                   <div className="grid grid-cols-3 gap-2">
@@ -345,6 +347,18 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
                       );
                     })}
                   </div>
+                </Group>
+
+                <Group title="Approval">
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-low ghost-border cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={w.requireApproval}
+                      onChange={(e) => set("requireApproval", e.target.checked)}
+                      className="w-4 h-4 accent-primary"
+                    />
+                    <span className="text-xs font-bold text-primary">Approval required before booking</span>
+                  </label>
                 </Group>
               </>
             )}
@@ -379,11 +393,6 @@ const SlotWizardDialog = ({ open, onOpenChange, onSave }: Props) => {
               <PreviewPanel w={w} duration={duration} generated={generated} large />
             )}
           </div>
-
-          {/* RIGHT: live preview */}
-          <aside className="hidden md:block border-l border-border/50 bg-surface-lowest p-4 overflow-y-auto">
-            <PreviewPanel w={w} duration={duration} generated={generated} />
-          </aside>
         </div>
 
         <DialogFooter className="px-5 py-3 border-t border-border/50 bg-surface-lowest">
