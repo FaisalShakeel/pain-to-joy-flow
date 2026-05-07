@@ -530,6 +530,13 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         onSubmitted={() => setContact({ ...contact, syncStatus: "pending" })}
       />
 
+      <QuickSyncSlotsDialog
+        open={qsOpen}
+        onOpenChange={setQsOpen}
+        contactName={contact.name}
+        windows={syncWindows}
+      />
+
       {/* Spacer to keep the sticky mobile CTA from covering content */}
       <div className="md:hidden h-20" aria-hidden />
     </>
