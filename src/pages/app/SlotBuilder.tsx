@@ -170,7 +170,8 @@ const SlotBuilder = () => {
       };
     });
     setSlots((p) => [...p, ...newSlots]);
-    toast({ title: `${newSlots.length} slot${newSlots.length === 1 ? "" : "s"} created`, description: `${moduleLabel(w.module)} · ${w.windowStart}:00–${w.windowEnd}:00` });
+    const moduleLabel = w.module === "quicksync" ? "Quick Sync" : w.module === "webinar" ? "Webinar" : "Meeting";
+    toast({ title: `${newSlots.length} slot${newSlots.length === 1 ? "" : "s"} created`, description: `${moduleLabel} · ${w.windowStart}:00–${w.windowEnd}:00` });
   };
 
   const save = () => {
