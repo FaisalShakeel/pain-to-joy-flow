@@ -643,7 +643,7 @@ const CommsCard = ({
 );
 
 const PortalTile = ({
-  icon: Icon, badge, title, desc, preview, dots, cta, ctaIcon: CtaIcon, ctaClass, to, variant,
+  icon: Icon, badge, title, desc, preview, dots, cta, ctaIcon: CtaIcon, ctaClass, to, onClick, variant,
 }: {
   icon: any;
   badge: { label: string; color: string } | null;
@@ -655,6 +655,7 @@ const PortalTile = ({
   ctaIcon: any;
   ctaClass: string;
   to: string | null;
+  onClick?: () => void;
   variant: "default" | "emerald";
 }) => {
   const wrapperBase =
@@ -704,6 +705,10 @@ const PortalTile = ({
         <Link to={to} className={`${ctaClassName} relative z-10`}>
           {ctaContent}
         </Link>
+      ) : onClick ? (
+        <button onClick={onClick} className={`${ctaClassName} relative z-10`}>
+          {ctaContent}
+        </button>
       ) : (
         <button disabled className={`${ctaClassName} relative z-10`}>
           {ctaContent}
