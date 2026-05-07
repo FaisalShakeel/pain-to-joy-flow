@@ -5,6 +5,7 @@ import {
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
   Linkedin, Github, Globe, MessageCircle, Megaphone, Link2, Radio, Bell,
+  ArrowDown, ArrowUp,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -312,18 +313,29 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       </section>
 
       {/* Soft gradient divider + scroll affordance */}
-      <div className="relative h-8 md:h-10 mt-5 flex items-end justify-center">
-        <a
-          href="#contact-actions"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById("contact-actions")?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-          className="inline-flex flex-col items-center justify-center w-10 h-10 rounded-full bg-surface-lowest shadow-ambient ghost-border hover:bg-surface-low transition"
-          aria-label="Jump to contact actions"
-        >
-          <ArrowRight className="w-3.5 h-3.5 text-primary rotate-90" />
-        </a>
+      <div className="relative h-12 md:h-14 mt-5 flex items-center justify-center">
+        <div className="inline-flex flex-col rounded-full bg-surface-lowest shadow-ambient ghost-border overflow-hidden">
+          <button
+            type="button"
+            onClick={() =>
+              document.getElementById("contact-actions")?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="grid place-items-center w-10 h-10 hover:bg-surface-low transition"
+            aria-label="Jump to contact actions"
+          >
+            <ArrowDown className="w-3.5 h-3.5 text-primary" />
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              document.getElementById("profile-identity")?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="grid place-items-center w-10 h-10 border-t border-surface-container hover:bg-surface-low transition"
+            aria-label="Back to profile identity"
+          >
+            <ArrowUp className="w-3.5 h-3.5 text-primary" />
+          </button>
+        </div>
       </div>
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer (blue contact/sync) */}
