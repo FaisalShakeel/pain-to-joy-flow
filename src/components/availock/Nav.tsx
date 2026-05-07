@@ -35,7 +35,6 @@ const Nav = () => {
           </span>
         </a>
         <div className="hidden md:flex items-center gap-9 text-sm font-medium">
-          <a href="#vault" className="text-muted-foreground hover:text-primary transition-colors">The Vault</a>
           <a href="#how" className="text-muted-foreground hover:text-primary transition-colors">How it works</a>
           <a href="#video" className="text-muted-foreground hover:text-primary transition-colors">Video</a>
           <a href="#manifesto" className="text-muted-foreground hover:text-primary transition-colors">Manifesto</a>
