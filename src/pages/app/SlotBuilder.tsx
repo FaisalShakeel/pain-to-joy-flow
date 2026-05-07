@@ -329,7 +329,26 @@ const SlotBuilder = () => {
       <section className="mt-5 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-headline font-bold text-primary text-sm">Created slots</h3>
-          <p className="text-[11px] text-muted-foreground">{filtered.length} total</p>
+          <div className="flex items-center gap-2">
+            {selectMode && selectedIds.length > 0 && (
+              <button
+                onClick={() => setBulkOpen(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[11px] font-bold shadow-elevated"
+              >
+                <Pencil className="w-3 h-3" /> Edit type ({selectedIds.length})
+              </button>
+            )}
+            <button
+              onClick={() => { if (selectMode) clearSelection(); else setSelectMode(true); }}
+              className={cn(
+                "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold transition",
+                selectMode ? "bg-primary text-primary-foreground" : "ghost-border bg-surface-low text-primary hover:bg-primary/10",
+              )}
+            >
+              {selectMode ? "Cancel" : "Select"}
+            </button>
+            <p className="text-[11px] text-muted-foreground">{filtered.length} total</p>
+          </div>
         </div>
         {filtered.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">No slots yet. Click an empty cell or “New slot” to add one.</p>
@@ -342,6 +361,9 @@ const SlotBuilder = () => {
                 onEdit={() => openEdit(s)}
                 onDelete={() => setConfirmDelete(s.id)}
                 onClone={() => cloneSchedule(s)}
+                selectable={selectMode}
+                selected={selectedIds.includes(s.id)}
+                onToggleSelect={() => toggleSelected(s.id)}
               />
             ))}
           </div>
@@ -389,6 +411,13 @@ const SlotBuilder = () => {
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onSave={handleWizardSave}
+      />
+
+      <BulkTypeDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        count={selectedIds.length}
+        onApply={applyBulk}
       />
     </AppShell>
   );
