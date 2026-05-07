@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Mail, Smartphone,
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
-  Linkedin, Github, Globe, MessageCircle,
+  Linkedin, Github, Globe, MessageCircle, Megaphone, Link2, Radio, Bell,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
