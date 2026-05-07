@@ -460,7 +460,6 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 {/* Schedule */}
                 <PortalTile
                   icon={CalendarDays}
-                  badge={isApproved ? { label: "QS", color: "bg-amber-500" } : null}
                   title="Schedule"
                   desc="Review availability and book sessions"
                   dots
@@ -469,6 +468,20 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                   ctaClass={isApproved ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? `/app/schedule/${contact.id}` : null}
                   variant="default"
+                  topRight={
+                    isApproved && syncWindows.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQsOpen(true); }}
+                        title="Open Quick Sync slots"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/90 hover:bg-amber-400 text-white text-[9px] font-bold uppercase tracking-wider shadow-lg shadow-amber-900/30 transition"
+                      >
+                        <Zap className="w-3 h-3" />
+                        <PhoneCall className="w-3 h-3" />
+                        QS
+                      </button>
+                    ) : null
+                  }
                 />
                 {/* Ping */}
                 <PortalTile
