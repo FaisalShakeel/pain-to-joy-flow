@@ -670,10 +670,10 @@ const CommsCard = ({
 );
 
 const PortalTile = ({
-  icon: Icon, badge, title, desc, preview, dots, cta, ctaIcon: CtaIcon, ctaClass, to, onClick, variant,
+  icon: Icon, badge, title, desc, preview, dots, cta, ctaIcon: CtaIcon, ctaClass, to, onClick, variant, topRight,
 }: {
   icon: any;
-  badge: { label: string; color: string } | null;
+  badge?: { label: string; color: string } | null;
   title: string;
   desc: string;
   preview?: string;
@@ -684,6 +684,7 @@ const PortalTile = ({
   to: string | null;
   onClick?: () => void;
   variant: "default" | "emerald";
+  topRight?: React.ReactNode;
 }) => {
   const wrapperBase =
     variant === "emerald"
@@ -705,7 +706,7 @@ const PortalTile = ({
           <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
             <Icon className="w-4 h-4" />
           </div>
-          {badge && (
+          {topRight ? topRight : badge && (
             <span className={`${badge.color} text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
               {badge.label}
             </span>
