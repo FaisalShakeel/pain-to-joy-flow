@@ -574,3 +574,52 @@ const Stat = ({ label, value, dot }: { label: string; value: string; dot: string
 );
 
 export default Availability;
+
+// ---------- Created Slot Row ----------
+const modeMeta: Record<StoredSlot["mode"], { label: string; icon: any; cls: string }> = {
+  online:    { label: "Online",     icon: Video,    cls: "bg-sky-500/15 text-sky-700" },
+  onsite:    { label: "Onsite",     icon: MapPin,   cls: "bg-amber-500/20 text-amber-800" },
+  hybrid:    { label: "Hybrid",     icon: Sparkles, cls: "bg-indigo-500/15 text-indigo-700" },
+  quicksync: { label: "Quick Sync", icon: Zap,      cls: "bg-fuchsia-500/15 text-fuchsia-700" },
+  webinar:   { label: "Webinar",    icon: Radio,    cls: "bg-emerald-500/15 text-emerald-700" },
+};
+
+const CreatedSlotRow = ({ slot, onEdit }: { slot: StoredSlot; onEdit: () => void }) => {
+  const M = modeMeta[slot.mode];
+  const venue =
+    slot.mode === "onsite" ? slot.onsite?.location :
+    slot.mode === "webinar" && slot.webinar?.format !== "online" ? slot.webinar?.venue :
+    undefined;
+  const cap = slotCapacity(slot);
+  const when = slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day;
+  return (
+    <li>
+      <button
+        onClick={onEdit}
+        className="w-full text-left rounded-2xl ghost-border bg-surface-low hover:bg-primary/5 p-3 transition group"
+      >
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold", M.cls)}>
+            <M.icon className="w-2.5 h-2.5" /> {M.label}
+          </span>
+          <span className="text-[10px] font-bold tabular-nums text-muted-foreground">
+            {when} · {slot.start}:00–{slot.end}:00
+          </span>
+        </div>
+        <p className="text-xs font-extrabold text-primary truncate flex items-center gap-1">
+          {slot.priority && <Crown className="w-3 h-3 text-amber-600" />}
+          {slot.title || "Untitled"}
+        </p>
+        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+          {slot.duration}m · {slot.buffer}m buffer · {cap} seat{cap === 1 ? "" : "s"}
+          {venue ? ` · ${venue}` : ""}
+        </p>
+        <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
+          {slot.bookingMode === "approval" ? <Lock className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />}
+          <span className="font-bold">{slot.bookingMode === "approval" ? "Approval" : "Instant"}</span>
+          {slot.recurring && (<><span>·</span><Repeat className="w-2.5 h-2.5" /><span className="font-bold">Recurring</span></>)}
+        </div>
+      </button>
+    </li>
+  );
+};
