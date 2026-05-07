@@ -425,23 +425,30 @@ const SlotBuilder = () => {
 
 // ---------- Slot Card Compact ----------
 const SlotCardCompact = ({
-  slot, onEdit, onDelete, onClone,
+  slot, onEdit, onDelete, onClone, selectable, selected, onToggleSelect,
 }: {
   slot: Slot;
   onEdit: () => void;
   onDelete: () => void;
   onClone: () => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }) => {
   const A = accessMeta[slot.access];
   const channelLabel =
     slot.mode === "hybrid" ? "Hybrid" :
     slot.mode === "online" ? "Online" :
-    slot.mode === "onsite" ? "Onsite" : "Quick Sync";
+    slot.mode === "onsite" ? "Onsite" :
+    slot.mode === "webinar" ? "Webinar" : "Quick Sync";
   const ChannelIcon =
     slot.mode === "hybrid" ? Sparkles :
     slot.mode === "online" ? Video :
-    slot.mode === "onsite" ? MapPin : Zap;
-  const typeLabel = slot.mode === "quicksync" ? "Quick Sync" : "Meeting";
+    slot.mode === "onsite" ? MapPin :
+    slot.mode === "webinar" ? Radio : Zap;
+  const typeLabel =
+    slot.mode === "quicksync" ? "Quick Sync" :
+    slot.mode === "webinar" ? "Webinar" : "Meeting";
 
   // Status (lightweight)
   let status: "active" | "upcoming" | "expired" | "full" = "upcoming";
@@ -461,10 +468,26 @@ const SlotCardCompact = ({
                             "bg-amber-500/20 text-amber-800";
 
   return (
-    <article className="rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition">
+    <article
+      onClick={() => selectable && onToggleSelect?.()}
+      className={cn(
+        "rounded-2xl ghost-border bg-surface-low p-3 hover:shadow-ambient transition",
+        selectable && "cursor-pointer",
+        selected && "ring-2 ring-primary bg-primary/5",
+      )}
+    >
       {/* Top line: date + time range */}
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
+        <div className="min-w-0 flex items-start gap-2">
+          {selectable && (
+            <Checkbox
+              checked={!!selected}
+              onCheckedChange={() => onToggleSelect?.()}
+              onClick={(e) => e.stopPropagation()}
+              className="mt-0.5"
+            />
+          )}
+          <div className="min-w-0">
           <p className="text-[12px] font-extrabold text-primary truncate flex items-center gap-1.5">
             {slot.priority && <Crown className="w-3 h-3 text-amber-600 shrink-0" />}
             {slot.date ? format(new Date(slot.date), "EEE, MMM d") : slot.day}
@@ -472,6 +495,7 @@ const SlotCardCompact = ({
             {slot.start}:00–{slot.end}:00
           </p>
           <p className="text-[10px] text-muted-foreground truncate mt-0.5">{slot.title || "Untitled"}</p>
+          </div>
         </div>
         <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0", statusCls)}>
           {status}
@@ -510,8 +534,17 @@ const SlotCardCompact = ({
         {slot.recurring && " · recurring"}
       </div>
 
+      {slot.mode === "webinar" && slot.webinar && (
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          {slot.webinar.format === "online" ? "Online" : slot.webinar.format === "onsite" ? `Onsite · ${slot.webinar.venue || "venue tbd"}` : `Online + Onsite · ${slot.webinar.venue || "venue tbd"}`} · cap {slot.webinar.capacity}
+        </p>
+      )}
+      {slot.mode === "onsite" && slot.onsite?.location && (
+        <p className="mt-1 text-[10px] text-muted-foreground truncate">📍 {slot.onsite.location}</p>
+      )}
+
       {/* Actions */}
-      <div className="mt-2.5 flex items-center justify-end gap-1">
+      <div className="mt-2.5 flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClone}
           className="inline-flex items-center gap-1 px-2 py-1 rounded-lg ghost-border bg-surface-lowest hover:bg-primary/10 text-primary text-[10px] font-bold"
