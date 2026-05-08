@@ -184,7 +184,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
         <div className="lg:col-span-3">
-          <div className={`aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ring-amber-400 ring-offset-2 ring-offset-surface-low relative grid place-items-center`}>
+          <div className={`aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
             <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
