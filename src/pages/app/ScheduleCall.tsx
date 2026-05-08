@@ -134,7 +134,7 @@ const ScheduleCall = () => {
 
   const channelLabelForSelected = (): string => {
     if (!selected) return "";
-    if (selected.kind === "quick") return `Quick call · ${selected.duration} min`;
+    if (selected.kind === "quick") return `Quick Sync · ${selected.duration} min`;
     if (selected.channel === "hybrid")
       return hybridPick === "online" ? "Online meeting" : `On-site · ${selected.location}`;
     if (selected.channel === "online") return "Online meeting";
@@ -205,7 +205,7 @@ const ScheduleCall = () => {
               active={bookingType === "quick"}
               onClick={() => { setBookingType("quick"); setSlotId(null); setDuration(null); }}
               icon={<Zap className="w-5 h-5" />}
-              title="Quick Call"
+              title="Quick Sync"
               sub="3 / 5 / 8 min · rapid sync"
               accent="gold"
               count={quickCount}
@@ -250,14 +250,14 @@ const ScheduleCall = () => {
             <div className="mt-5">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-                  {bookingType === "meeting" ? "Meeting slots" : "Quick calls"} · {filtered.length} open
+                  {bookingType === "meeting" ? "Meeting slots" : "Quick Syncs"} · {filtered.length} open
                 </p>
                 <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {tz}</span>
               </div>
 
               {filtered.length === 0 ? (
                 <div className="mt-3 rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                  No {bookingType === "meeting" ? "meeting" : "quick call"} slots on this day.
+                  No {bookingType === "meeting" ? "meeting" : "Quick Sync"} slots on this day.
                 </div>
               ) : (
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -408,7 +408,7 @@ const ScheduleCall = () => {
             </ul>
           ) : (
             <p className="mt-3 text-xs text-primary-foreground/75">
-              Pick a {bookingType === "meeting" ? "meeting" : "quick call"} slot to continue.
+              Pick a {bookingType === "meeting" ? "meeting" : "Quick Sync"} slot to continue.
             </p>
           )}
 
@@ -439,7 +439,7 @@ const ScheduleCall = () => {
             <p className="text-sm text-primary truncate font-semibold">
               {selected && duration
                 ? `${selected.time} · ${duration}m · ${channelLabelForSelected()}`
-                : `Pick a ${bookingType === "meeting" ? "meeting" : "quick call"} slot`}
+                : `Pick a ${bookingType === "meeting" ? "meeting" : "Quick Sync"} slot`}
             </p>
           </div>
           <button
@@ -457,7 +457,7 @@ const ScheduleCall = () => {
           open={paymentOpen}
           onOpenChange={setPaymentOpen}
           pricing={selected.pricing}
-          title={`Pay for ${selected.kind === "quick" ? "Quick Call" : "Meeting"}`}
+          title={`Pay for ${selected.kind === "quick" ? "Quick Sync" : "Meeting"}`}
           description={`${dayShort(selected.date).dow} ${dayShort(selected.date).num} · ${selected.time} · ${duration ?? ""} min`}
           onSuccess={finalizeAfterPayment}
         />
