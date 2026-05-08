@@ -184,7 +184,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
         <div className="lg:col-span-3">
-          <div className={`aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} relative grid place-items-center`}>
+          <div className={`aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ring-amber-400 ring-offset-2 ring-offset-surface-low relative grid place-items-center`}>
             <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
@@ -197,12 +197,13 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
           <div className="bg-surface-lowest rounded-2xl p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
             {/* Status pills + meta — top right */}
             <div className="absolute top-5 right-5 flex flex-col gap-2 items-end">
-              <div className="flex items-center gap-1.5 bg-amber-100/80 border border-amber-200 px-3 py-1.5 rounded-full shadow-sm">
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-amber-900">
-                  <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} /> {statusData.label}
+              <div className="flex items-center gap-2 bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-full shadow-sm">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> {statusData.label}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-amber-900 ml-1">
-                  <Zap className="w-3 h-3" /> Focus
+                <span className="h-3 w-px bg-amber-300/70" />
+                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
+                  <Zap className="w-3 h-3 fill-amber-500 text-amber-600" /> Focus
                 </span>
               </div>
               {show("availabilityContext") && (
