@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Send, Zap } from "lucide-react";
+import { MessageSquare, Send, Zap, Megaphone } from "lucide-react";
+import { cn } from "@/lib/utils";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import EmptyState from "@/components/app/EmptyState";
@@ -13,6 +14,7 @@ const Messages = () => {
   const { threads, setThreads, markRead, markAllRead } = useMessages();
   const [active, setActive] = useState<string | null>(threads[0]?.id ?? null);
   const [draft, setDraft] = useState("");
+  const [view, setView] = useState<"messages" | "spotlight">("messages");
 
   const current = threads.find((t) => t.id === active);
   const contact = current ? contacts.find((c) => c.id === current.contactId) : undefined;
@@ -71,7 +73,43 @@ const Messages = () => {
       <div className="grid lg:grid-cols-[320px_1fr] gap-5 h-[calc(100vh-220px)] min-h-[480px]">
         {/* List */}
         <aside className="rounded-3xl bg-surface-lowest ghost-border p-3 overflow-y-auto space-y-3">
-          <BroadcastsRail onReply={replyToBroadcast} />
+          {/* Source toggle: Messages vs Spotlight */}
+          <div className="flex items-center gap-1 p-1 rounded-full bg-surface-low ghost-border">
+            <button
+              type="button"
+              onClick={() => setView("messages")}
+              className={cn(
+                "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
+                view === "messages"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-primary",
+              )}
+              aria-pressed={view === "messages"}
+              title="Direct messages"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              Messages
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("spotlight")}
+              className={cn(
+                "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition",
+                view === "spotlight"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-primary",
+              )}
+              aria-pressed={view === "spotlight"}
+              title="Spotlight broadcasts"
+            >
+              <Megaphone className="w-3.5 h-3.5" />
+              Spotlight
+            </button>
+          </div>
+
+          {view === "spotlight" ? (
+            <BroadcastsRail onReply={replyToBroadcast} />
+          ) : (
           <div>
             <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Conversations</p>
           <ul className="space-y-1">
@@ -103,6 +141,7 @@ const Messages = () => {
             })}
           </ul>
           </div>
+          )}
         </aside>
 
         {/* Thread */}
