@@ -120,7 +120,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
       {/* Sidebar (desktop / tablet) */}
       <aside
         className={cn(
-          "md:flex w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen transition-all",
+          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen transition-all",
           sidebarHidden ? "hidden" : "hidden md:flex",
         )}
       >
