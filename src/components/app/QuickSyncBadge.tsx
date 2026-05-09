@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Zap } from "lucide-react";
+import { Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import QuickSyncSlotsDialog from "./QuickSyncSlotsDialog";
 
@@ -29,7 +29,7 @@ const QuickSyncBadge = ({ windows, contactName = "this contact", size = "sm", cl
             className,
         )}
       >
-        <Zap className={cn(size === "sm" ? "w-2.5 h-2.5" : "w-3 h-3", "text-gold")} />
+        <Megaphone className={cn(size === "sm" ? "w-2.5 h-2.5" : "w-3 h-3", "text-gold")} />
         <span className={cn("font-bold uppercase tracking-[0.14em]", size === "sm" ? "text-[8px]" : "text-[9px]")}>QSync</span>
         <span className={cn("font-semibold tabular-nums", size === "sm" ? "text-[9px]" : "text-[10px]")}>{compact}</span>
       </button>
