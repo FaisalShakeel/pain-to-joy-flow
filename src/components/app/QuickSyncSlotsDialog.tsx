@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Zap, Lock, CalendarClock, Hourglass } from "lucide-react";
+import { Megaphone, Lock, CalendarClock, Hourglass } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -83,7 +83,7 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
         <DialogHeader>
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 grid place-items-center rounded-full bg-primary text-primary-foreground">
-              <Zap className="w-3.5 h-3.5 text-gold" />
+              <Megaphone className="w-3.5 h-3.5 text-gold" />
             </div>
             <div>
               <DialogTitle className="text-base">Quick Sync with {contactName}</DialogTitle>
