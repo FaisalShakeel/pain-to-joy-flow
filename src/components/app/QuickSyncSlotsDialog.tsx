@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Megaphone, Lock, CalendarClock, Hourglass } from "lucide-react";
+import { Megaphone, Lock, Clock, AlertCircle, ShieldCheck, Hourglass } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +46,7 @@ const isMockBooked = (slot: string) => {
 
 const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Props) => {
   const [locallyBooked, setLocallyBooked] = useState<Set<string>>(new Set());
+  const [waitlisted, setWaitlisted] = useState<Set<string>>(new Set());
 
   const expanded = useMemo(
     () => windows.map((w) => ({ window: w, slots: expandWindow(w) })),
@@ -66,101 +67,159 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
     });
   };
 
-  const joinQueue = (windowLabel: string) => {
+  const joinQueue = (windowLabel: string, slot?: string) => {
     joinWaitingList({
       name: contactName,
       note: `Wants Quick Sync in ${windowLabel} window`,
     });
+    if (slot) {
+      setWaitlisted((prev) => {
+        const n = new Set(prev);
+        n.add(slot);
+        return n;
+      });
+    }
     toast({
       title: "You're on the waiting list",
       description: `${contactName} will manually approve and offer you a slot if one opens.`,
     });
   };
 
+  const allSlots = expanded.flatMap(({ slots }) => slots);
+  const totalAll = allSlots.length;
+  const takenAll = allSlots.filter((s) => isMockBooked(s) || locallyBooked.has(s)).length;
+  const freeAll = totalAll - takenAll;
+  const utilPct = totalAll ? Math.round((takenAll / totalAll) * 100) : 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 grid place-items-center rounded-full bg-primary text-primary-foreground">
-              <Megaphone className="w-3.5 h-3.5 text-gold" />
-            </div>
-            <div>
-              <DialogTitle className="text-base">Quick Sync with {contactName}</DialogTitle>
-              <DialogDescription className="text-xs">
-                Same-day · 3-min calls · pick any open slot
+      <DialogContent className="max-w-3xl border-0 p-0 overflow-hidden bg-[#0b1020] text-slate-100">
+        {/* Ambient backdrop */}
+        <div className="relative">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_hsl(220_70%_25%/0.35),transparent_60%)]" />
+          <div className="relative p-6 md:p-8">
+            <DialogHeader className="space-y-1 text-center">
+              <DialogTitle className="text-3xl md:text-4xl font-headline font-bold tracking-tight text-indigo-300">
+                Quick Sync
+              </DialogTitle>
+              <DialogDescription className="text-[11px] uppercase tracking-[0.28em] text-slate-400">
+                Based on 30 min time window · {contactName}
               </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+            </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-          {expanded.map(({ window: w, slots }) => {
-            const total = slots.length;
-            const taken = slots.filter((s) => isMockBooked(s) || locallyBooked.has(s)).length;
-            const free = total - taken;
-            return (
-              <div key={`${w.start}-${w.end}`} className="rounded-xl ghost-border bg-surface-lowest p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <CalendarClock className="w-3.5 h-3.5 text-accent" />
-                    <span className="text-xs font-semibold tabular-nums text-primary">
-                      {w.start} – {w.end}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {free}/{total} free
-                  </span>
-                </div>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {slots.map((s) => {
-                    const booked = isMockBooked(s) || locallyBooked.has(s);
-                    return (
-                      <button
-                        key={s}
-                        type="button"
-                        disabled={booked}
-                        onClick={() => bookSlot(s)}
-                        title={booked ? "Already booked" : `Book ${s}`}
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+              {expanded.flatMap(({ window: w, slots }) =>
+                slots.map((s) => {
+                  const booked = isMockBooked(s) || locallyBooked.has(s);
+                  const waiting = waitlisted.has(s);
+                  // Deterministically mark a couple as waiting-list when booked
+                  const isWaitTile = waiting;
+                  const state: "available" | "booked" | "waiting" = isWaitTile
+                    ? "waiting"
+                    : booked
+                      ? "booked"
+                      : "available";
+
+                  const onClick = () => {
+                    if (state === "available") return bookSlot(s);
+                    if (state === "booked") return joinQueue(`${w.start}–${w.end}`, s);
+                  };
+
+                  return (
+                    <button
+                      key={`${w.start}-${s}`}
+                      type="button"
+                      onClick={onClick}
+                      title={`${s} · ${state}`}
+                      className={cn(
+                        "group relative flex items-center gap-4 px-5 py-5 rounded-2xl border text-left transition-all",
+                        "hover:-translate-y-0.5",
+                        state === "available" &&
+                          "bg-emerald-950/40 border-emerald-500/40 hover:border-emerald-400/70 hover:shadow-[0_0_0_1px_rgba(16,185,129,0.35),0_18px_40px_-20px_rgba(16,185,129,0.6)]",
+                        state === "booked" &&
+                          "bg-slate-900/60 border-slate-700/70 cursor-pointer hover:border-amber-500/50",
+                        state === "waiting" &&
+                          "bg-amber-950/40 border-amber-500/50 hover:border-amber-400/80",
+                      )}
+                    >
+                      <span
                         className={cn(
-                          "inline-flex items-center justify-center gap-0.5 px-1.5 py-1 rounded-md text-[10px] font-semibold tabular-nums transition",
-                          booked
-                            ? "bg-surface-low text-muted-foreground ghost-border cursor-not-allowed"
-                            : "bg-primary text-primary-foreground hover:opacity-95",
+                          "grid place-items-center w-12 h-12 rounded-full ring-1 shrink-0",
+                          state === "available" &&
+                            "bg-emerald-500/15 ring-emerald-500/40 text-emerald-300",
+                          state === "booked" &&
+                            "bg-slate-800/80 ring-slate-700/80 text-slate-300",
+                          state === "waiting" &&
+                            "bg-amber-500/15 ring-amber-500/50 text-amber-300",
                         )}
                       >
-                        {booked && <Lock className="w-2.5 h-2.5" />}
-                        {s}
-                      </button>
-                    );
-                  })}
-                </div>
-                {free === 0 && (
-                  <button
-                    type="button"
-                    onClick={() => joinQueue(`${w.start}–${w.end}`)}
-                    className="mt-2 w-full inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[11px] font-semibold bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 transition"
-                  >
-                    <Hourglass className="w-3 h-3" />
-                    Window full · Join waiting list
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                        {state === "available" && <Clock className="w-5 h-5" />}
+                        {state === "booked" && <Lock className="w-5 h-5" />}
+                        {state === "waiting" && <AlertCircle className="w-5 h-5" />}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 tabular-nums">
+                          3 MIN · {s}
+                        </p>
+                        <p
+                          className={cn(
+                            "text-xl font-bold mt-0.5",
+                            state === "available" && "text-emerald-300",
+                            state === "booked" && "text-slate-100",
+                            state === "waiting" && "text-amber-300",
+                          )}
+                        >
+                          {state === "available" && "Available"}
+                          {state === "booked" && "Booked"}
+                          {state === "waiting" && "Waiting List"}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                }),
+              )}
+            </div>
 
-        <DialogFooter className="mt-2">
-          <p className="text-[10px] text-muted-foreground mr-auto">
-            Times shown in your local timezone.
-          </p>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 rounded-full text-xs font-semibold ghost-border bg-surface-lowest hover:bg-surface-low text-primary"
-          >
-            Close
-          </button>
-        </DialogFooter>
+            {/* Footer status panels */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Hourglass className="w-4 h-4 text-indigo-300" />
+                  <h4 className="text-sm font-semibold text-indigo-300">Session Efficiency</h4>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  {freeAll > 0
+                    ? `${freeAll} of ${totalAll} micro-slots open. Availability refreshes every cycle.`
+                    : "Window fully booked. Join the waiting list to be notified instantly."}
+                </p>
+                <div className="mt-3 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400"
+                    style={{ width: `${utilPct}%` }}
+                  />
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                  <h4 className="text-sm font-semibold text-emerald-300">Protocol Active</h4>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Times shown in your local timezone · 3-min same-day calls.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-6 sm:justify-end">
+              <button
+                onClick={() => onOpenChange(false)}
+                className="px-4 py-2 rounded-full text-xs font-semibold border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 transition"
+              >
+                Close
+              </button>
+            </DialogFooter>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
