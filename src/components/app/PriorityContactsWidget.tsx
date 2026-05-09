@@ -7,6 +7,7 @@ import {
 import Avatar from "./Avatar";
 import StatusPill from "./StatusPill";
 import PingButton from "./PingButton";
+import PinnedContactCard from "./PinnedContactCard";
 import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { useSpotlight } from "./SpotlightContext";
@@ -174,7 +175,13 @@ const PriorityContactsWidget = () => {
 
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {priority.map((c) => (
-            <ContactRow key={c.id} id={c.id} pinned={pins.includes(c.id)} onToggle={togglePin} compact />
+            <PinnedContactCard
+              key={c.id}
+              contact={c}
+              pinned={pins.includes(c.id)}
+              onTogglePin={togglePin}
+              drivingOverride={!!drivingOverride[c.id]}
+            />
           ))}
         </div>
       </div>
