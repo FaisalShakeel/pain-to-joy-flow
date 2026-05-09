@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -527,7 +527,20 @@ const Contacts = () => {
                     </div>
                   </Link>
                   <div className={cn("absolute", roomy ? "bottom-2 right-2" : medium ? "bottom-1.5 right-1.5" : "bottom-1 right-1")}>
-                    <PingButton contact={c} size="sm" />
+                    <div className="flex items-center gap-1">
+                      <Link
+                        to={`/app/contact/${c.id}/log`}
+                        onClick={(e) => e.stopPropagation()}
+                        title="Connection Log"
+                        className={cn(
+                          "grid place-items-center rounded-full bg-surface-low text-muted-foreground hover:text-accent transition",
+                          roomy ? "w-6 h-6" : "w-5 h-5",
+                        )}
+                      >
+                        <Activity className={roomy ? "w-3 h-3" : "w-2.5 h-2.5"} />
+                      </Link>
+                      <PingButton contact={c} size="sm" />
+                    </div>
                   </div>
                 </li>
               );
