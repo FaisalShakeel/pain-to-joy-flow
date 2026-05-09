@@ -262,6 +262,12 @@ const Contacts = () => {
           <ArrowLeft className="w-4 h-4" />
         </button>
 
+        {/* Inline page heading — keeps the title aligned with the toolbar to save vertical space */}
+        <div className="min-w-0 mr-1 leading-tight">
+          <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-accent">Vault directory</p>
+          <h1 className="font-headline font-extrabold text-primary text-base md:text-lg leading-tight truncate">Your contacts</h1>
+        </div>
+
         <div ref={searchWrapRef} className="relative flex-1 min-w-[180px] max-w-sm">
             <div
               className={cn(
@@ -403,12 +409,6 @@ const Contacts = () => {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Heading */}
-      <div className="mb-4">
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">Vault directory</p>
-        <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight">Your contacts</h1>
       </div>
 
       {filtered.length === 0 ? (
