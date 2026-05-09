@@ -38,6 +38,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
   });
   const [authOpen, setAuthOpen] = useState(false);
   const [qsOpen, setQsOpen] = useState(false);
+  const [pingOpen, setPingOpen] = useState(false);
 
   // Registered seeker detection: if user lands on /v/:id but is already authed,
   // promote them straight to the interactive in-app profile view.
@@ -137,7 +138,31 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
   // Smart-CTA action list — Book Meeting / Quick Sync / Ping / Request Access.
   const goSchedule = () => navigate(`/app/schedule/${contact.id}`);
   const goMessage = () => navigate("/app/messages");
-  const onPing = () => toast({ title: "Ping sent", description: `${firstName} will see your nudge.` });
+  const onPing = () => setPingOpen(true);
+  const hasUnread = (contact.alerts ?? []).includes("message");
+  const hasPendingBooking = (contact.alerts ?? []).includes("calendar");
+  const sendPingKind = (kind: "call" | "message" | "calendar") => {
+    if (kind === "message" && !hasUnread) {
+      toast({ title: "No unread thread", description: "Message Ping only nudges existing unread messages." });
+      return;
+    }
+    if (kind === "calendar" && !hasPendingBooking) {
+      toast({ title: "No pending booking", description: "Calendar Ping only escalates a pending booking approval." });
+      return;
+    }
+    const titleMap = {
+      call: "Call Ping sent",
+      message: "Message Ping sent",
+      calendar: "Calendar Ping sent",
+    } as const;
+    const bodyMap = {
+      call: `${firstName} will see your live connection request.`,
+      message: `${firstName} will be reminded of your unread message.`,
+      calendar: `${firstName} will be nudged to review the pending booking.`,
+    } as const;
+    toast({ title: titleMap[kind], description: bodyMap[kind] });
+    setPingOpen(false);
+  };
 
   const actions: ActionItem[] = (() => {
     const a: ActionItem[] = [];
