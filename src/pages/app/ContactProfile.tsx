@@ -563,6 +563,77 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         windows={syncWindows}
       />
 
+      {pingOpen && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 animate-in fade-in"
+          onClick={() => setPingOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-label="Choose ping type"
+            className="w-full max-w-sm rounded-2xl bg-surface-lowest ghost-border shadow-elevated p-4 animate-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Quick Ping</p>
+              <button onClick={() => setPingOpen(false)} className="text-muted-foreground hover:text-primary text-xs">Close</button>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-snug mb-3">
+              Silent signal — request connection without interrupting {firstName}.
+            </p>
+
+            <button
+              onClick={() => sendPingKind("call")}
+              className="w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-left transition hover:bg-surface-low"
+            >
+              <span className="grid place-items-center w-9 h-9 rounded-full bg-emerald-500/15 text-emerald-700">
+                <PhoneCall className="w-4 h-4" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold text-primary">Call Ping</span>
+                <span className="block text-[11px] text-muted-foreground">Request connection without interrupting</span>
+              </span>
+            </button>
+
+            <button
+              disabled={!hasUnread}
+              onClick={() => sendPingKind("message")}
+              className={`mt-1 w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-left transition ${
+                hasUnread ? "hover:bg-surface-low" : "opacity-50 cursor-not-allowed"
+              }`}
+            >
+              <span className="grid place-items-center w-9 h-9 rounded-full bg-sky-500/15 text-sky-700">
+                {hasUnread ? <MessageSquare className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold text-primary">Message Ping</span>
+                <span className="block text-[11px] text-muted-foreground">
+                  {hasUnread ? "Nudge an unread message" : "No unread thread to nudge"}
+                </span>
+              </span>
+            </button>
+
+            <button
+              disabled={!hasPendingBooking}
+              onClick={() => sendPingKind("calendar")}
+              className={`mt-1 w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-left transition ${
+                hasPendingBooking ? "hover:bg-surface-low" : "opacity-50 cursor-not-allowed"
+              }`}
+            >
+              <span className="grid place-items-center w-9 h-9 rounded-full bg-violet-500/15 text-violet-700">
+                {hasPendingBooking ? <CalendarDays className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold text-primary">Calendar Ping</span>
+                <span className="block text-[11px] text-muted-foreground">
+                  {hasPendingBooking ? "Remind about pending booking" : "No booking awaiting approval"}
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Spacer to keep the sticky mobile CTA from covering content */}
       <div className="md:hidden h-20" aria-hidden />
     </>
