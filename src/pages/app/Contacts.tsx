@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -67,12 +67,15 @@ const AlertIcons = ({ alerts, size = "md" }: { alerts?: AlertKind[]; size?: "xs"
 };
 
 const Contacts = () => {
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
   const [density, setDensity] = useState<Density>(16);
   const birdsEye = true;
   const [searchOpen, setSearchOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersWrapRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [pinned, setPinned] = useState<string[]>(() => {
@@ -115,6 +118,16 @@ const Contacts = () => {
     const onDocClick = (e: MouseEvent) => {
       if (!searchWrapRef.current) return;
       if (!searchWrapRef.current.contains(e.target as Node)) setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  // Close filters dropdown on outside click
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!filtersWrapRef.current) return;
+      if (!filtersWrapRef.current.contains(e.target as Node)) setFiltersOpen(false);
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
@@ -256,11 +269,21 @@ const Contacts = () => {
 
   return (
     <AppShell
-      subtitle="Vault directory"
-      title="Your contacts"
-      headerInline={
-        <div className="flex flex-1 items-center gap-2 flex-wrap w-full">
-          <div ref={searchWrapRef} className="relative flex-1 min-w-[220px] max-w-md">
+      hideBell={false}
+    >
+      {/* Top toolbar — back · search · filters · bird-eye view, all above the heading */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          title="Back"
+          aria-label="Back"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-lowest ghost-border text-primary hover:bg-surface-low transition shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+
+        <div ref={searchWrapRef} className="relative flex-1 min-w-[180px] max-w-sm">
             <div
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-full bg-surface-lowest ghost-border transition",
@@ -334,50 +357,81 @@ const Contacts = () => {
                 )}
               </div>
             )}
-          </div>
+        </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-1 min-w-0 py-1">
-            {filters.map((f) => {
-              const Icon = f.icon;
-              const active = filter === f.id;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setFilter(f.id)}
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold ghost-border transition",
-                    active ? "bg-primary text-primary-foreground border-transparent shadow-elevated" : "bg-surface-lowest text-primary hover:bg-surface-low",
-                  )}
-                >
-                  <Icon className="w-3 h-3" /> {f.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="shrink-0 inline-flex items-center gap-1.5">
-            <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              <Eye className="w-3 h-3" /> View
-            </span>
-            <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
-              {([6, 10, 16] as Density[]).map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDensity(d)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-full text-[11px] font-semibold transition min-w-[2rem]",
-                    density === d ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
-                  )}
-                  aria-label={`Show ${d} contacts`}
-                >
-                  {d}
-                </button>
-              ))}
+        {/* Filters disclosure */}
+        <div ref={filtersWrapRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            title="Filters"
+            aria-label="Filters"
+            aria-expanded={filtersOpen}
+            className={cn(
+              "inline-flex items-center gap-1.5 h-9 px-3 rounded-full ghost-border text-xs font-semibold transition shadow-sm",
+              filtersOpen || filter !== "all"
+                ? "bg-primary text-primary-foreground border-transparent"
+                : "bg-surface-lowest text-primary hover:bg-surface-low",
+            )}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{filter === "all" ? "Filter" : filters.find((f) => f.id === filter)?.label}</span>
+            <ChevronDown className={cn("w-3 h-3 transition", filtersOpen && "rotate-180")} />
+          </button>
+          {filtersOpen && (
+            <div className="absolute right-0 z-30 mt-2 w-72 rounded-2xl bg-surface-lowest ghost-border shadow-elevated p-3 animate-in fade-in slide-in-from-top-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Filter contacts</p>
+              <div className="flex flex-wrap gap-1.5">
+                {filters.map((f) => {
+                  const Icon = f.icon;
+                  const active = filter === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => { setFilter(f.id); setFiltersOpen(false); }}
+                      className={cn(
+                        "inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold ghost-border transition",
+                        active ? "bg-primary text-primary-foreground border-transparent shadow-elevated" : "bg-surface-lowest text-primary hover:bg-surface-low",
+                      )}
+                    >
+                      <Icon className="w-3 h-3" /> {f.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* Bird's-eye view density toggle */}
+        <div className="inline-flex items-center gap-1.5 ml-auto">
+          <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Eye className="w-3 h-3" /> View
+          </span>
+          <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
+            {([6, 10, 16] as Density[]).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDensity(d)}
+                className={cn(
+                  "px-2.5 py-1 rounded-full text-[11px] font-semibold transition min-w-[2rem]",
+                  density === d ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
+                )}
+                aria-label={`Show ${d} contacts`}
+              >
+                {d}
+              </button>
+            ))}
           </div>
         </div>
-      }
-    >
+      </div>
+
+      {/* Heading */}
+      <div className="mb-4">
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">Vault directory</p>
+        <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight">Your contacts</h1>
+      </div>
+
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
