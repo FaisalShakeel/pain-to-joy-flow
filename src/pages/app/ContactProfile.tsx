@@ -5,7 +5,7 @@ import {
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
   Linkedin, Github, Globe, MessageCircle, Megaphone, Link2, Radio, Bell,
-  ArrowDown, ArrowUp,
+  ArrowDown, ArrowUp, Activity,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -180,6 +180,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
     if (isApproved) {
       a.push({ key: "msg", label: "Message", icon: MessageSquare, onClick: goMessage, variant: "ghost" });
     }
+    a.push({ key: "log", label: "Connection Log", icon: Activity, onClick: () => navigate(`/app/contact/${contact.id}/log`), variant: "ghost" });
     return a;
   })();
 

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Search, Maximize2, X, Star, Pin, PinOff,
-  Users as UsersIcon, ArrowRight, Car, Megaphone,
+  Users as UsersIcon, ArrowRight, Car, Megaphone, Activity,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPill from "./StatusPill";
@@ -99,6 +99,13 @@ const ContactRow = ({
               {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
             </button>
           )}
+          <Link
+            to={`/app/contact/${c.id}/log`}
+            title="Open Connection Log"
+            className="grid place-items-center w-7 h-7 rounded-full bg-surface-lowest text-muted-foreground hover:text-accent transition"
+          >
+            <Activity className="w-3 h-3" />
+          </Link>
           <PingButton contact={c} drivingOverride={driving} />
         </div>
       </div>

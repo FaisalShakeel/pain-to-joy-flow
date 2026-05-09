@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Send, Zap, Megaphone } from "lucide-react";
+import { Link } from "react-router-dom";
+import { MessageSquare, Send, Zap, Megaphone, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -154,6 +155,13 @@ const Messages = () => {
                   <p className="font-headline font-bold text-primary">{contact.name}</p>
                   <p className="text-xs text-muted-foreground">{contact.title}</p>
                 </div>
+                <Link
+                  to={`/app/contact/${contact.id}/log`}
+                  title="Open Connection Log"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-low ghost-border text-xs font-semibold text-primary hover:bg-surface-lowest transition"
+                >
+                  <Activity className="w-3.5 h-3.5" /> Log
+                </Link>
                 <PriorityBypassButton
                   contactId={contact.id}
                   contactName={contact.name.split(" ")[0]}
