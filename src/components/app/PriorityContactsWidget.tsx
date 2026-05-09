@@ -10,6 +10,8 @@ import PingButton from "./PingButton";
 import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { useSpotlight } from "./SpotlightContext";
+import { usePins } from "@/lib/pinsStore";
+import { toast } from "@/hooks/use-toast";
 
 type Filter = "all" | "available" | "busy" | "focus" | "driving" | "offline" | "pinned";
 
@@ -23,16 +25,6 @@ const filters: { id: Filter; label: string }[] = [
   { id: "offline", label: "Offline" },
 ];
 
-// Default 6 priority contact ids — picked from the available mock set.
-const DEFAULT_PINS = [
-  "rashid-al-amir",
-  "sarah-jenkins",
-  "julian-vane",
-  "alex-rivera",
-  "elena-vance",
-  "mark-thompson",
-];
-
 // Mock "driving" overlay for visual variety — one contact appears as driving.
 const drivingOverride: Record<string, true> = { "mark-thompson": true };
 
@@ -43,8 +35,8 @@ const statusTone = (s: AvailabilityStatus | "driving") =>
   : "offline";
 
 const ContactRow = ({
-  id, pinned, onToggle, compact = false,
-}: { id: string; pinned: boolean; onToggle: (id: string) => void; compact?: boolean }) => {
+  id, pinned, onToggle, compact = false, showPin = true,
+}: { id: string; pinned: boolean; onToggle: (id: string) => void; compact?: boolean; showPin?: boolean }) => {
   const c = contacts.find((x) => x.id === id);
   if (!c) return null;
   const driving = drivingOverride[c.id];
@@ -95,16 +87,18 @@ const ContactRow = ({
           )}
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <button
-            onClick={() => onToggle(c.id)}
-            title={pinned ? "Unpin" : "Pin"}
-            className={cn(
-              "grid place-items-center w-7 h-7 rounded-full transition",
-              pinned ? "bg-gold/20 text-gold" : "bg-surface-lowest text-muted-foreground hover:text-primary",
-            )}
-          >
-            {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
-          </button>
+          {showPin && (
+            <button
+              onClick={() => onToggle(c.id)}
+              title={pinned ? "Unpin" : "Pin"}
+              className={cn(
+                "grid place-items-center w-7 h-7 rounded-full transition",
+                pinned ? "bg-gold/20 text-gold" : "bg-surface-lowest text-muted-foreground hover:text-primary",
+              )}
+            >
+              {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
+            </button>
+          )}
           <PingButton contact={c} drivingOverride={driving} />
         </div>
       </div>
@@ -113,22 +107,29 @@ const ContactRow = ({
 };
 
 const PriorityContactsWidget = () => {
-  const [pins, setPins] = useState<string[]>(DEFAULT_PINS);
+  const { pins, isPinned, canPin, togglePin: storeToggle, max } = usePins();
   const [expanded, setExpanded] = useState(false);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
-  const togglePin = (id: string) =>
-    setPins((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const togglePin = (id: string) => {
+    const result = storeToggle(id);
+    if (result === "limit") {
+      toast({ title: `Pin limit reached`, description: `You can pin up to ${max} contacts.` });
+    }
+  };
 
-  const priority = useMemo(
-    () =>
-      pins
-        .slice(0, 6)
-        .map((id) => contacts.find((c) => c.id === id))
-        .filter(Boolean) as typeof contacts,
-    [pins],
-  );
+  // Always 6 cards: pinned first, then auto-fill with most frequent contacts.
+  const priority = useMemo(() => {
+    const pinSet = new Set(pins);
+    const pinnedList = pins
+      .map((id) => contacts.find((c) => c.id === id))
+      .filter(Boolean) as typeof contacts;
+    const fillers = contacts
+      .filter((c) => !pinSet.has(c.id))
+      .sort((a, b) => Number(!!b.frequent) - Number(!!a.frequent));
+    return [...pinnedList, ...fillers].slice(0, 6);
+  }, [pins]);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -174,7 +175,14 @@ const PriorityContactsWidget = () => {
 
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {priority.map((c) => (
-            <ContactRow key={c.id} id={c.id} pinned={pins.includes(c.id)} onToggle={togglePin} compact />
+            <ContactRow
+              key={c.id}
+              id={c.id}
+              pinned={isPinned(c.id)}
+              onToggle={togglePin}
+              compact
+              showPin={isPinned(c.id) || canPin}
+            />
           ))}
         </div>
       </div>
@@ -235,7 +243,13 @@ const PriorityContactsWidget = () => {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {filtered.map((c) => (
-                  <ContactRow key={c.id} id={c.id} pinned={pins.includes(c.id)} onToggle={togglePin} />
+                  <ContactRow
+                    key={c.id}
+                    id={c.id}
+                    pinned={isPinned(c.id)}
+                    onToggle={togglePin}
+                    showPin={isPinned(c.id) || canPin}
+                  />
                 ))}
               </div>
             )}
