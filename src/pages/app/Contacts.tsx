@@ -465,6 +465,7 @@ const Contacts = () => {
                     </div>
                     <div className={cn("min-w-0 flex-1", roomy ? "pr-10" : medium ? "pr-9" : "pr-8")}>
                       <div className="flex items-center gap-1.5">
+                        {(isPinned || canPin) && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -484,6 +485,7 @@ const Contacts = () => {
                         >
                           {isPinned ? <PinOff className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} /> : <Pin className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} />}
                         </button>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => {
