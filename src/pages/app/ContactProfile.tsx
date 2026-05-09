@@ -171,7 +171,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
     }
     a.push({ key: "book", label: "Book Meeting", icon: CalendarDays, onClick: goSchedule, variant: contact.status === "available" ? "secondary" : "primary" });
     if (syncWindows.length > 0) {
-      a.push({ key: "qsync", label: "Quick Sync", icon: Zap, onClick: goSchedule, variant: "secondary" });
+      a.push({ key: "qsync", label: "Quick Sync", icon: Zap, onClick: () => setQsOpen(true), variant: "secondary" });
     }
     a.push({ key: "ping", label: "Ping", icon: BellRing, onClick: onPing, variant: contact.status === "busy" || contact.status === "focus" ? "primary" : "ghost" });
     if (isLocked) {
@@ -241,15 +241,20 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 </div>
               )}
               {syncWindows.length > 0 && (
-                <div className="flex items-center gap-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => setQsOpen(true)}
+                  title="Open Quick Sync slots"
+                  className="flex items-center gap-2 text-right rounded-md px-1.5 py-1 hover:bg-surface-low/60 transition"
+                >
                   <Clock className="w-3.5 h-3.5 text-primary/60" />
                   <div className="flex flex-col items-end">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Quick Sync</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Quick Sync · tap to book</span>
                     <span className="text-[11px] font-bold text-primary">
                       {syncWindows[0].start} — {syncWindows[0].end} AM
                     </span>
                   </div>
-                </div>
+                </button>
               )}
             </div>
 
