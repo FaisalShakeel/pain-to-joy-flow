@@ -93,21 +93,20 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl border-0 p-0 overflow-hidden bg-[#0b1020] text-slate-100">
-        {/* Ambient backdrop */}
+      <DialogContent className="max-w-2xl border-0 p-0 overflow-hidden bg-card text-foreground">
         <div className="relative">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_hsl(220_70%_25%/0.35),transparent_60%)]" />
-          <div className="relative p-6 md:p-8">
-            <DialogHeader className="space-y-1 text-center">
-              <DialogTitle className="text-3xl md:text-4xl font-headline font-bold tracking-tight text-indigo-300">
-                Quick Sync
+          <div className="absolute inset-0 pointer-events-none bg-gradient-mist" />
+          <div className="relative p-5 md:p-6 max-h-[85vh] overflow-y-auto">
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="text-xl md:text-2xl font-headline font-bold tracking-tight text-foreground">
+                Quick Sync slots
               </DialogTitle>
-              <DialogDescription className="text-[11px] uppercase tracking-[0.28em] text-slate-400">
-                Based on 30 min time window · {contactName}
+              <DialogDescription className="text-xs text-muted-foreground">
+                Same-day 3-minute calls with {contactName}. Tap an open slot to book, or join the waiting list.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {expanded.flatMap(({ window: w, slots }) =>
                 slots.map((s) => {
                   const booked = isMockBooked(s) || locallyBooked.has(s);
@@ -132,46 +131,42 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                       onClick={onClick}
                       title={`${s} · ${state}`}
                       className={cn(
-                        "group relative flex items-center gap-4 px-5 py-5 rounded-2xl border text-left transition-all",
-                        "hover:-translate-y-0.5",
+                        "group relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all hover:-translate-y-0.5",
                         state === "available" &&
-                          "bg-emerald-950/40 border-emerald-500/40 hover:border-emerald-400/70 hover:shadow-[0_0_0_1px_rgba(16,185,129,0.35),0_18px_40px_-20px_rgba(16,185,129,0.6)]",
+                          "bg-surface-lowest border-primary/30 hover:border-primary/60 hover:shadow-ambient",
                         state === "booked" &&
-                          "bg-slate-900/60 border-slate-700/70 cursor-pointer hover:border-amber-500/50",
+                          "bg-surface-low border-outline-variant/40 cursor-pointer hover:border-accent/40",
                         state === "waiting" &&
-                          "bg-amber-950/40 border-amber-500/50 hover:border-amber-400/80",
+                          "bg-gold-soft/40 border-gold/50 hover:border-gold",
                       )}
                     >
                       <span
                         className={cn(
-                          "grid place-items-center w-12 h-12 rounded-full ring-1 shrink-0",
-                          state === "available" &&
-                            "bg-emerald-500/15 ring-emerald-500/40 text-emerald-300",
-                          state === "booked" &&
-                            "bg-slate-800/80 ring-slate-700/80 text-slate-300",
-                          state === "waiting" &&
-                            "bg-amber-500/15 ring-amber-500/50 text-amber-300",
+                          "grid place-items-center w-8 h-8 rounded-full ring-1 shrink-0",
+                          state === "available" && "bg-primary/10 ring-primary/30 text-primary",
+                          state === "booked" && "bg-muted ring-outline-variant/60 text-muted-foreground",
+                          state === "waiting" && "bg-gold-soft ring-gold/60 text-foreground",
                         )}
                       >
-                        {state === "available" && <Clock className="w-5 h-5" />}
-                        {state === "booked" && <Lock className="w-5 h-5" />}
-                        {state === "waiting" && <AlertCircle className="w-5 h-5" />}
+                        {state === "available" && <Clock className="w-4 h-4" />}
+                        {state === "booked" && <Lock className="w-4 h-4" />}
+                        {state === "waiting" && <AlertCircle className="w-4 h-4" />}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 tabular-nums">
-                          3 MIN · {s}
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground tabular-nums">
+                          3 min · {s}
                         </p>
                         <p
                           className={cn(
-                            "text-xl font-bold mt-0.5",
-                            state === "available" && "text-emerald-300",
-                            state === "booked" && "text-slate-100",
-                            state === "waiting" && "text-amber-300",
+                            "text-sm font-bold mt-0.5",
+                            state === "available" && "text-primary",
+                            state === "booked" && "text-foreground",
+                            state === "waiting" && "text-foreground",
                           )}
                         >
                           {state === "available" && "Available"}
                           {state === "booked" && "Booked"}
-                          {state === "waiting" && "Waiting List"}
+                          {state === "waiting" && "Waiting list"}
                         </p>
                       </div>
                     </button>
@@ -180,40 +175,36 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
               )}
             </div>
 
-            {/* Footer status panels */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Hourglass className="w-4 h-4 text-indigo-300" />
-                  <h4 className="text-sm font-semibold text-indigo-300">Session Efficiency</h4>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="rounded-xl bg-surface-low border border-outline-variant/40 p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Hourglass className="w-3.5 h-3.5 text-primary" />
+                  <h4 className="text-xs font-semibold text-foreground">Session efficiency</h4>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   {freeAll > 0
                     ? `${freeAll} of ${totalAll} micro-slots open. Availability refreshes every cycle.`
                     : "Window fully booked. Join the waiting list to be notified instantly."}
                 </p>
-                <div className="mt-3 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400"
-                    style={{ width: `${utilPct}%` }}
-                  />
+                <div className="mt-2 h-1 rounded-full bg-surface-high overflow-hidden">
+                  <div className="h-full bg-gradient-primary" style={{ width: `${utilPct}%` }} />
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                  <h4 className="text-sm font-semibold text-emerald-300">Protocol Active</h4>
+              <div className="rounded-xl bg-surface-low border border-outline-variant/40 p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+                  <h4 className="text-xs font-semibold text-foreground">Protocol active</h4>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   Times shown in your local timezone · 3-min same-day calls.
                 </p>
               </div>
             </div>
 
-            <DialogFooter className="mt-6 sm:justify-end">
+            <DialogFooter className="mt-5 sm:justify-end">
               <button
                 onClick={() => onOpenChange(false)}
-                className="px-4 py-2 rounded-full text-xs font-semibold border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 transition"
+                className="px-4 py-2 rounded-full text-xs font-semibold border border-outline-variant/60 bg-surface-lowest text-foreground hover:bg-surface-low transition"
               >
                 Close
               </button>
