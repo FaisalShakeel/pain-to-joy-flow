@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
-import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
+import QuickSyncOwnerDialog from "@/components/app/QuickSyncOwnerDialog";
 import WaitingList from "@/components/app/WaitingList";
 import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
@@ -390,14 +390,19 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <QuickSyncSlotsDialog
+        <QuickSyncOwnerDialog
           open={quickSyncOpen}
           onOpenChange={setQuickSyncOpen}
-          contactName={me.name.split(" ")[0]}
           windows={[
             { start: "10:00", end: "10:30" },
             { start: "14:00", end: "14:30" },
           ]}
+          reservedCount={RESERVED_COUNT}
+          waitingCount={waitingCount}
+          onJumpWaiting={scrollToWaiting}
+          onJumpReserved={() =>
+            document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
         />
 
         {/* Spotlight + Signal (no outer title; new spotlight inside tile) */}
