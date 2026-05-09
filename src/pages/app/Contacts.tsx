@@ -10,13 +10,13 @@ import { contacts, type Relationship, type AlertKind } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import AccessChip from "@/components/app/ui/AccessChip";
+import { usePins, MAX_PINS } from "@/lib/pinsStore";
 
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
 type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
 type Density = 6 | 10 | 16;
 
-const PINNED_KEY = "availock.pinnedContacts";
 const FAV_KEY = "availock.favoriteContacts";
 
 const relationshipMeta: Record<Relationship, { label: string; cls: string }> = {
@@ -78,15 +78,7 @@ const Contacts = () => {
   const filtersWrapRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [pinned, setPinned] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = localStorage.getItem(PINNED_KEY);
-      return raw ? (JSON.parse(raw) as string[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const { pins: pinned, isPinned: isPinnedFn, canPin, togglePin: storeTogglePin } = usePins();
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -96,14 +88,6 @@ const Contacts = () => {
       return [];
     }
   });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(PINNED_KEY, JSON.stringify(pinned));
-    } catch {
-      /* ignore */
-    }
-  }, [pinned]);
 
   useEffect(() => {
     try {
@@ -148,15 +132,10 @@ const Contacts = () => {
   }, []);
 
   const togglePin = (id: string) => {
-    setPinned((prev) => {
-      const has = prev.includes(id);
-      if (has) {
-        toast({ title: "Unpinned", description: "Contact removed from pinned." });
-        return prev.filter((x) => x !== id);
-      }
-      toast({ title: "Pinned", description: "Contact pinned to the top." });
-      return [id, ...prev];
-    });
+    const result = storeTogglePin(id);
+    if (result === "pinned") toast({ title: "Pinned", description: "Contact pinned to the top." });
+    else if (result === "unpinned") toast({ title: "Unpinned", description: "Contact removed from pinned." });
+    else toast({ title: "Pin limit reached", description: `You can pin up to ${MAX_PINS} contacts.` });
   };
 
   const toggleFavorite = (id: string) => {
