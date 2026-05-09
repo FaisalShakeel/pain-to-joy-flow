@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Mail, Smartphone,
+  ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Calendar, Mail, Smartphone,
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
   Linkedin, Github, Globe, MessageCircle, Megaphone, Link2, Radio, Bell,
