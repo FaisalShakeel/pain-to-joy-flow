@@ -5,9 +5,9 @@ import AppShell from "@/components/app/AppShell";
 import { toast } from "@/hooks/use-toast";
 
 const tiers = [
-  { id: "personal", name: "Personal", price: "$9/mo", best: false, perks: ["Smart Filter", "100 Power Calls/mo", "Email support"] },
-  { id: "pro", name: "Professional", price: "$24/mo", best: true, perks: ["Everything in Personal", "Analytics dashboard", "Priority queues"] },
-  { id: "org", name: "Organization", price: "$79/mo", best: false, perks: ["Everything in Pro", "Team vaults", "Audit log"] },
+  { id: "personal", name: "Personal", price: "$120/yr", kickstarter: "$91/yr", best: false, perks: ["Direct Call Sync", "Ping feature", "Smart routing", "Email support"] },
+  { id: "pro", name: "Professional", price: "$199/yr", kickstarter: "$139/yr", best: true, perks: ["Everything in Personal", "Paid bookings & VIP bypass", "Revenue analytics"] },
+  { id: "org", name: "Organization", price: "$276/yr", kickstarter: "$193/yr", best: false, perks: ["Everything in Pro", "Team availability map", "Admin & SSO"] },
 ];
 
 const Upgrade = () => {
@@ -38,6 +38,9 @@ const Upgrade = () => {
                 <p className="font-headline font-bold">{t.name}</p>
               </div>
               <p className={`mt-1 font-headline font-extrabold text-2xl ${pick === t.id ? "" : "text-primary"}`}>{t.price}</p>
+              <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${pick === t.id ? "text-gold" : "text-accent"}`}>
+                {t.kickstarter} · Early Supporter
+              </p>
               <ul className="mt-3 space-y-1 text-xs">
                 {t.perks.map((p) => (
                   <li key={p} className="flex items-center gap-1.5"><Check className="w-3 h-3" /> {p}</li>
