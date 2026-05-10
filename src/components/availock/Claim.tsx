@@ -35,7 +35,7 @@ const Claim = () => {
       setEmail("");
       toast({
         title: "You're on the early supporter list",
-        description: "We'll email you the moment we go live on Kickstarter — your 40% lifetime discount is reserved.",
+        description: "We'll email you the moment we go live on Kickstarter — your 30% Early Supporter Offer is reserved.",
       });
     } catch (err) {
       const description = err instanceof Error ? err.message : "Please try again in a moment.";
@@ -52,14 +52,14 @@ const Claim = () => {
   return (
     <section id="claim" className="py-24 md:py-32 bg-surface-lowest">
       <div className="mx-auto max-w-3xl px-6 md:px-10 text-center">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-5">Early Supporter · 40% Off For Life</p>
+        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-5">30% Kickstarter Early Supporter Offer</p>
         <h2 className="font-headline font-extrabold text-primary text-4xl md:text-6xl leading-[1.05] text-balance">
-          Back us early. Pay 40% less, forever.
+          Back us early. Save 30% as a founding supporter.
         </h2>
         <p className="mt-6 text-lg text-muted-foreground">
           Leave your email and we'll notify you the instant Availock goes live
           on Kickstarter. Your support helps us validate the mission — and
-          locks in a permanent 40% discount on every tier.
+          unlocks a 30% Early Supporter Offer on every paid tier.
         </p>
 
         <form
