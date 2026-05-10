@@ -168,7 +168,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
             <Crown className="w-5 h-5 text-gold" />
             <p className="mt-2 font-headline font-bold text-sm leading-snug">Unlock the Vault</p>
             <p className="mt-1 text-[11px] text-primary-foreground/80 leading-relaxed">
-              Smart Filter, analytics and Power Calls — from $9/mo.
+              Priority access, Direct Call Sync & Ping — from $91/yr with the 30% Early Supporter Offer.
             </p>
             <Link
               to="/app/upgrade"
