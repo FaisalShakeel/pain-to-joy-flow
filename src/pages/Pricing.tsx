@@ -4,10 +4,10 @@ import Nav from "@/components/availock/Nav";
 import Footer from "@/components/availock/Footer";
 
 const tiers = [
-  { id: "basic", name: "Basic", price: "$0", per: "forever", blurb: "Get the access layer.", perks: ["Live availability status", "5 access requests/mo", "1 vault link"], cta: "Start free", to: "/signup", best: false },
-  { id: "personal", name: "Personal", price: "$9", per: "per month", blurb: "For respectful operators.", perks: ["Unlimited requests", "Smart Filter rules", "100 Power Calls"], cta: "Choose Personal", to: "/app/upgrade", best: false },
-  { id: "professional", name: "Professional", price: "$24", per: "per month", blurb: "For full-time builders.", perks: ["Everything in Personal", "Analytics dashboard", "Priority queues"], cta: "Choose Pro", to: "/app/upgrade", best: true },
-  { id: "org", name: "Organization", price: "$79", per: "per month", blurb: "Teams of up to 25.", perks: ["Everything in Pro", "Team vaults", "Shared queues", "Audit log"], cta: "Choose Org", to: "/app/upgrade", best: false },
+  { id: "basic", name: "Basic", price: "Free", per: "structured access", blurb: "Structured connection without unrestricted interruption.", perks: ["Quick Sync access", "Messaging access", "Live availability status", "Shareable QR / link"], cta: "Start free", to: "/signup", best: false },
+  { id: "personal", name: "Personal", price: "$120", per: "per year · $91 with Early Supporter Offer", blurb: "For professionals who value attention.", perks: ["Direct Call Sync", "Ping feature", "Smart routing & priority contacts", "Quiet hours & focus modes"], cta: "Choose Personal", to: "/app/upgrade", best: false },
+  { id: "professional", name: "Professional", price: "$199", per: "per year · $139 with Early Supporter Offer", blurb: "For consultants who monetize access.", perks: ["Everything in Personal", "Paid sessions / bookings", "VIP bypass rules", "Revenue analytics"], cta: "Choose Pro", to: "/app/upgrade", best: true },
+  { id: "org", name: "Organization", price: "$276", per: "per year · $193 with Early Supporter Offer", blurb: "Coordinated team communication.", perks: ["Everything in Pro", "Team availability map", "Admin permissions", "Usage analytics & SSO"], cta: "Choose Org", to: "/app/upgrade", best: false },
   { id: "ent", name: "Enterprise", price: "Custom", per: "talk to us", blurb: "Compliance-grade security.", perks: ["SSO + SCIM", "Dedicated regions", "Custom DPA", "24/7 support"], cta: "Contact sales", to: "/contact", best: false },
 ];
 
@@ -22,7 +22,10 @@ const Pricing = () => (
             Pay for the time you protect.
           </h1>
           <p className="mt-5 text-lg text-muted-foreground">
-            Free forever for the access layer. Pay when you want filters, analytics and Power Calls.
+            Free forever for structured access. Upgrade for priority interruption and full communication control.
+          </p>
+          <p className="mt-3 text-xs font-bold tracking-[0.18em] uppercase text-accent">
+            30% Kickstarter Early Supporter Offer · Founder Access Pricing
           </p>
         </div>
 
