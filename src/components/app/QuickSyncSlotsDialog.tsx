@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import { Megaphone, Lock, Clock, AlertCircle, ShieldCheck, Hourglass } from "lucide-react";
+import { Lock, Clock, AlertCircle, ShieldCheck, Inbox } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -47,6 +46,7 @@ const isMockBooked = (slot: string) => {
 const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Props) => {
   const [locallyBooked, setLocallyBooked] = useState<Set<string>>(new Set());
   const [waitlisted, setWaitlisted] = useState<Set<string>>(new Set());
+  const [globalWaitJoined, setGlobalWaitJoined] = useState(false);
 
   const expanded = useMemo(
     () => windows.map((w) => ({ window: w, slots: expandWindow(w) })),
@@ -87,31 +87,63 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
 
   const allSlots = expanded.flatMap(({ slots }) => slots);
   const totalAll = allSlots.length;
-  const takenAll = allSlots.filter((s) => isMockBooked(s) || locallyBooked.has(s)).length;
-  const freeAll = totalAll - takenAll;
-  const utilPct = totalAll ? Math.round((takenAll / totalAll) * 100) : 0;
+  const takenAll = allSlots.filter((s) => (isMockBooked(s) || locallyBooked.has(s)) && !waitlisted.has(s)).length;
+  const waitingCount = waitlisted.size;
+  const freeAll = totalAll - takenAll - waitingCount;
+  const allBooked = freeAll <= 0;
+  const windowLabel = windows.length
+    ? `${windows[0].start} – ${windows[windows.length - 1].end}`
+    : "";
+
+  const joinGlobalQueue = () => {
+    joinWaitingList({ name: contactName, note: `Quick Sync waiting list · ${windowLabel}` });
+    setGlobalWaitJoined(true);
+    toast({
+      title: "Added to waiting list",
+      description: `${contactName} will be notified the moment a slot opens.`,
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl border-0 p-0 overflow-hidden bg-card text-foreground">
+      <DialogContent className="max-w-3xl border-0 p-0 overflow-hidden bg-card text-foreground">
         <div className="relative">
           <div className="absolute inset-0 pointer-events-none bg-gradient-mist" />
-          <div className="relative p-5 md:p-6 max-h-[85vh] overflow-y-auto">
-            <DialogHeader className="space-y-1">
-              <DialogTitle className="text-xl md:text-2xl font-headline font-bold tracking-tight text-foreground">
-                Quick Sync slots
+          <div className="relative p-5 md:p-7 max-h-[85vh] overflow-y-auto">
+            <DialogHeader className="space-y-1 text-center sm:text-center items-center">
+              <DialogTitle className="text-2xl md:text-3xl font-headline font-bold tracking-tight text-foreground">
+                Quick Sync
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Same-day 3-minute calls with {contactName}. Tap an open slot to book, or join the waiting list.
+              <DialogDescription className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Based on 30 min time window
               </DialogDescription>
+              {windowLabel && (
+                <p className="text-sm font-semibold tabular-nums text-foreground/80 pt-0.5">{windowLabel}</p>
+              )}
+              <p className="text-[11px] text-muted-foreground pt-0.5">with {contactName}</p>
             </DialogHeader>
 
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {/* Summary chips */}
+            <div className="mt-4 grid grid-cols-3 gap-2.5 max-w-md mx-auto">
+              <div className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-center">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-primary/80">Available</p>
+                <p className="text-lg font-bold text-primary tabular-nums">{freeAll}</p>
+              </div>
+              <div className="rounded-xl border border-outline-variant/50 bg-surface-low px-3 py-2 text-center">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Booked</p>
+                <p className="text-lg font-bold text-foreground tabular-nums">{takenAll}</p>
+              </div>
+              <div className="rounded-xl border border-gold/40 bg-gold-soft/40 px-3 py-2 text-center">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground/70">Waiting list</p>
+                <p className="text-lg font-bold text-foreground tabular-nums">{waitingCount}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-5 gap-2.5">
               {expanded.flatMap(({ window: w, slots }) =>
                 slots.map((s) => {
                   const booked = isMockBooked(s) || locallyBooked.has(s);
                   const waiting = waitlisted.has(s);
-                  // Deterministically mark a couple as waiting-list when booked
                   const isWaitTile = waiting;
                   const state: "available" | "booked" | "waiting" = isWaitTile
                     ? "waiting"
@@ -131,7 +163,7 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                       onClick={onClick}
                       title={`${s} · ${state}`}
                       className={cn(
-                        "group relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all hover:-translate-y-0.5",
+                        "group relative flex flex-col items-start gap-1.5 px-3 py-3 rounded-2xl border text-left transition-all hover:-translate-y-0.5",
                         state === "available" &&
                           "bg-surface-lowest border-primary/30 hover:border-primary/60 hover:shadow-ambient",
                         state === "booked" &&
@@ -142,7 +174,7 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                     >
                       <span
                         className={cn(
-                          "grid place-items-center w-8 h-8 rounded-full ring-1 shrink-0",
+                          "grid place-items-center w-9 h-9 rounded-full ring-1 shrink-0",
                           state === "available" && "bg-primary/10 ring-primary/30 text-primary",
                           state === "booked" && "bg-muted ring-outline-variant/60 text-muted-foreground",
                           state === "waiting" && "bg-gold-soft ring-gold/60 text-foreground",
@@ -152,63 +184,66 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                         {state === "booked" && <Lock className="w-4 h-4" />}
                         {state === "waiting" && <AlertCircle className="w-4 h-4" />}
                       </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground tabular-nums">
-                          3 min · {s}
-                        </p>
-                        <p
-                          className={cn(
-                            "text-sm font-bold mt-0.5",
-                            state === "available" && "text-primary",
-                            state === "booked" && "text-foreground",
-                            state === "waiting" && "text-foreground",
-                          )}
-                        >
-                          {state === "available" && "Available"}
-                          {state === "booked" && "Booked"}
-                          {state === "waiting" && "Waiting list"}
-                        </p>
-                      </div>
+                      <p className="text-[11px] font-bold tabular-nums text-foreground">
+                        {s}
+                        <span className="text-muted-foreground font-medium"> – {toHHMM(toMin(s) + STEP_MIN)}</span>
+                      </p>
+                      <p
+                        className={cn(
+                          "text-xs font-semibold",
+                          state === "available" && "text-primary",
+                          state === "booked" && "text-muted-foreground",
+                          state === "waiting" && "text-foreground",
+                        )}
+                      >
+                        {state === "available" && "Available"}
+                        {state === "booked" && "Booked"}
+                        {state === "waiting" && "Waiting List"}
+                      </p>
                     </button>
                   );
                 }),
               )}
             </div>
 
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div className="rounded-xl bg-surface-low border border-outline-variant/40 p-3">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Hourglass className="w-3.5 h-3.5 text-primary" />
-                  <h4 className="text-xs font-semibold text-foreground">Session efficiency</h4>
+            {allBooked ? (
+              <div className="mt-5 rounded-2xl border border-outline-variant/50 bg-surface-low p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="grid place-items-center w-9 h-9 rounded-full bg-primary/10 text-primary ring-1 ring-primary/30">
+                    <Inbox className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">All slots are booked for this time window.</p>
+                    <p className="text-[11px] text-muted-foreground">Join the waiting list to express your interest.</p>
+                  </div>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  {freeAll > 0
-                    ? `${freeAll} of ${totalAll} micro-slots open. Availability refreshes every cycle.`
-                    : "Window fully booked. Join the waiting list to be notified instantly."}
-                </p>
-                <div className="mt-2 h-1 rounded-full bg-surface-high overflow-hidden">
-                  <div className="h-full bg-gradient-primary" style={{ width: `${utilPct}%` }} />
-                </div>
+                <button
+                  onClick={joinGlobalQueue}
+                  disabled={globalWaitJoined}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-xs font-semibold transition shrink-0",
+                    globalWaitJoined
+                      ? "bg-surface-lowest text-muted-foreground border border-outline-variant/60"
+                      : "bg-primary text-primary-foreground hover:opacity-90",
+                  )}
+                >
+                  {globalWaitJoined ? "On waiting list" : "Join Waiting List"}
+                </button>
               </div>
-              <div className="rounded-xl bg-surface-low border border-outline-variant/40 p-3">
-                <div className="flex items-center gap-2 mb-1.5">
+            ) : (
+              <div className="mt-5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-                  <h4 className="text-xs font-semibold text-foreground">Protocol active</h4>
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Times shown in your local timezone · 3-min same-day calls.
-                </p>
+                  Times shown in your local timezone · 3-min calls
+                </span>
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="px-4 py-2 rounded-full text-xs font-semibold border border-outline-variant/60 bg-surface-lowest text-foreground hover:bg-surface-low transition"
+                >
+                  Close
+                </button>
               </div>
-            </div>
-
-            <DialogFooter className="mt-5 sm:justify-end">
-              <button
-                onClick={() => onOpenChange(false)}
-                className="px-4 py-2 rounded-full text-xs font-semibold border border-outline-variant/60 bg-surface-lowest text-foreground hover:bg-surface-low transition"
-              >
-                Close
-              </button>
-            </DialogFooter>
+            )}
           </div>
         </div>
       </DialogContent>
