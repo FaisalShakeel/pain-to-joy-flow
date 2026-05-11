@@ -307,7 +307,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           )}
         </header>
 
-        <main className="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-5 md:py-7">{children}</main>
+        <main className="flex-1 min-w-0 overflow-x-hidden px-4 md:px-10 py-6 md:py-9">{children}</main>
       </div>
 
       {/* Mobile drawer */}
