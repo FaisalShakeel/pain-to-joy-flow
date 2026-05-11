@@ -241,6 +241,12 @@
   .ring-hairline { box-shadow: var(--ring-hairline); }
   .ease-premium { transition-timing-function: var(--ease-premium); }
   .eyebrow { @apply text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground; }
+  .module-eyebrow { @apply text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground/80; }
+  .module-title { @apply font-headline font-semibold text-primary text-[1.0625rem] md:text-[1.125rem] leading-tight tracking-[-0.01em]; }
+  .module-meta  { @apply text-[11.5px] text-muted-foreground/85 leading-snug; }
+  .module-divider { @apply h-px w-full bg-gradient-to-r from-transparent via-outline-variant/45 to-transparent; }
+  .module-rule    { @apply border-t border-outline-variant/30; }
+  .num-tabular { font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
   .animate-rise { animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .animate-fade { animation: fade 1.2s ease-out both; }
   .animate-float { animation: float 6s ease-in-out infinite; }

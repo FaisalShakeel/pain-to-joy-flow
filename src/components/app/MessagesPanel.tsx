@@ -9,23 +9,20 @@ const MessagesPanel = () => {
   const { threads, unreadCount: totalUnread } = useMessages();
 
   return (
-    <div className="dashboard-module p-5 md:p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-accent/10 text-accent">
-            <MessageSquare className="w-4 h-4" />
-          </span>
-          <div>
-            <h3 className="font-headline font-bold text-primary leading-tight">Messages</h3>
-            <p className="text-[11px] text-muted-foreground">
-              {totalUnread} unread
-            </p>
-          </div>
+    <div className="dashboard-module p-6 md:p-7">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="module-eyebrow inline-flex items-center gap-1.5">
+            <MessageSquare className="w-3 h-3 text-accent/80" /> Inbox · Active threads
+          </p>
+          <h3 className="module-title mt-1.5">Messages</h3>
+          <p className="module-meta mt-1 num-tabular">{totalUnread} unread across priority contacts.</p>
         </div>
-        <Link to="/app/messages" className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
+        <Link to="/app/messages" className="text-[11px] font-semibold text-accent hover:underline inline-flex items-center gap-1 uppercase tracking-wide shrink-0 mt-1">
           Open <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
+      <div className="module-divider mt-5" />
 
       {/* Threads */}
       <ul className="mt-4 space-y-2">

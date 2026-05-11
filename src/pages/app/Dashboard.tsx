@@ -243,7 +243,7 @@ const Dashboard = () => {
         </div>
       }
     >
-      <div className="dashboard-shell grid lg:grid-cols-3 gap-4 md:gap-5 animate-rise">
+      <div className="dashboard-shell grid lg:grid-cols-3 gap-5 md:gap-7 animate-rise">
         {/* Compact full-width Status pane */}
         <div className={cn(
           "lg:col-span-3 command-band rounded-[1.35rem] px-4 md:px-5 py-4 md:py-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] items-center border-l-[3px] border-l-accent transition-all ease-premium",
@@ -421,38 +421,41 @@ const Dashboard = () => {
         </div>
 
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
-        <div id="reserved-time" className="lg:col-span-3 premium-card p-5 md:p-6 scroll-mt-24 animate-fade">
-          <div className="flex items-center justify-between">
-            <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-accent" />
-              Reserved <span aria-hidden>📅</span>
-              <span className="ml-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Confirmed only</span>
-            </h3>
-            <Link to="/app/availability" className="text-xs font-semibold text-accent hover:underline">View all</Link>
+        <div id="reserved-time" className="lg:col-span-3 premium-card p-6 md:p-7 scroll-mt-24 animate-fade">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="module-eyebrow inline-flex items-center gap-1.5">
+                <CalendarDays className="w-3 h-3 text-accent/80" /> Reserved · Confirmed only
+              </p>
+              <h3 className="module-title mt-1.5">Today's reserved time</h3>
+              <p className="module-meta mt-1">Channel-grouped — Quick Sync, Meeting, Webinar, Venue.</p>
+            </div>
+            <Link to="/app/availability" className="text-[11px] font-semibold text-accent hover:underline tracking-wide uppercase shrink-0 mt-1">View all</Link>
           </div>
+          <div className="module-divider mt-5" />
           {RESERVED_CHANNELS.map((ch) => {
             const items = RESERVED_BY_CHANNEL[ch].sort((a, b) => toMin(a.t) - toMin(b.t));
             return (
-              <div key={ch} className="mt-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider", CHANNEL_TONE[ch])}>
+              <div key={ch} className="mt-5">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em]", CHANNEL_TONE[ch])}>
                     {CHANNEL_ICON[ch]}
                     {ch}
                   </span>
-                  <span className="text-[10px] text-muted-foreground tabular-nums">{items.length} confirmed</span>
+                  <span className="text-[10px] text-muted-foreground/80 num-tabular">{items.length} confirmed</span>
                 </div>
                 {items.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic px-1">No confirmed {ch.toLowerCase()} bookings.</p>
                 ) : (
-                  <ul className="grid md:grid-cols-3 gap-2.5">
+                  <ul className="grid md:grid-cols-3 gap-3">
                     {items.map((s) => (
-                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-2.5 nested-surface">
-                        <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/10 text-primary text-[11px] font-bold shrink-0 tabular-nums">
+                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-3 nested-surface">
+                        <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/[0.06] text-primary text-[11px] font-semibold shrink-0 num-tabular ring-1 ring-inset ring-primary/10">
                           {s.t}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-primary truncate">{s.who}</p>
-                          <p className="text-xs text-muted-foreground truncate">{s.kind}</p>
+                          <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{s.who}</p>
+                          <p className="text-[11.5px] text-muted-foreground/85 truncate">{s.kind}</p>
                         </div>
                       </li>
                     ))}
@@ -469,26 +472,33 @@ const Dashboard = () => {
         </div>
 
         {/* Access requests */}
-        <div className="lg:col-span-3 premium-card p-5 md:p-6 animate-fade">
-          <div className="flex items-center justify-between">
-            <h3 className="font-headline font-bold text-primary">Access requests</h3>
-            <Link to="/app/requests" className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
+        <div className="lg:col-span-3 premium-card p-6 md:p-7 animate-fade">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="module-eyebrow inline-flex items-center gap-1.5">
+                <Inbox className="w-3 h-3 text-accent/80" /> Inbound · Pending
+              </p>
+              <h3 className="module-title mt-1.5">Access requests</h3>
+              <p className="module-meta mt-1">People asking to reach you — review, approve, or decline.</p>
+            </div>
+            <Link to="/app/requests" className="text-[11px] font-semibold text-accent hover:underline inline-flex items-center gap-1 uppercase tracking-wide shrink-0 mt-1">
               Manage all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <ul className="mt-4 divide-y divide-border/50">
+          <div className="module-divider mt-5" />
+          <ul className="mt-2 divide-y divide-outline-variant/25">
             {incoming.slice(0, 3).map((r) => {
               const c = contacts.find((x) => x.id === r.contactId)!;
               return (
                 <li key={r.id}>
                   <Link
                     to={`/app/requests?id=${r.id}`}
-                    className="py-3 flex items-center gap-3 hover:bg-surface-low/60 -mx-2 px-2 rounded-xl transition ease-premium"
+                    className="py-3.5 flex items-center gap-3 hover:bg-surface-low/55 -mx-2 px-2 rounded-xl transition ease-premium"
                   >
                     <Avatar initials={c.initials} accent={c.accent} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{r.reason}</p>
+                      <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{c.name}</p>
+                      <p className="text-[11.5px] text-muted-foreground/85 truncate">{r.reason}</p>
                     </div>
                     <StatusPill tone="pending" />
                     <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
@@ -500,20 +510,30 @@ const Dashboard = () => {
         </div>
 
         {/* Recent activity */}
-        <div className="lg:col-span-3 premium-card p-5 md:p-6 animate-fade">
-          <h3 className="font-headline font-bold text-primary">Recent activity</h3>
-          <ul className="mt-4 grid md:grid-cols-3 gap-3">
+        <div className="lg:col-span-3 premium-card p-6 md:p-7 animate-fade">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="module-eyebrow inline-flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-accent/80" /> Signal · Last 24h
+              </p>
+              <h3 className="module-title mt-1.5">Recent activity</h3>
+              <p className="module-meta mt-1">Latest threads moving across your channels.</p>
+            </div>
+            <Link to="/app/messages" className="text-[11px] font-semibold text-accent hover:underline uppercase tracking-wide shrink-0 mt-1">Open messages</Link>
+          </div>
+          <div className="module-divider mt-5" />
+          <ul className="mt-5 grid md:grid-cols-3 gap-3.5">
             {threads.map((t) => {
               const c = contacts.find((x) => x.id === t.contactId)!;
               return (
                 <li key={t.id}>
-                  <Link to="/app/messages" className="flex items-center gap-3 p-3 nested-surface">
+                  <Link to="/app/messages" className="flex items-center gap-3 p-3.5 nested-surface">
                     <Avatar initials={c.initials} accent={c.accent} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{t.preview}</p>
+                      <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{c.name}</p>
+                      <p className="text-[11.5px] text-muted-foreground/85 truncate">{t.preview}</p>
                     </div>
-                    <span className="text-[10px] text-muted-foreground inline-flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground/80 inline-flex items-center gap-1 num-tabular">
                       <Clock className="w-3 h-3" /> {t.lastAt}
                     </span>
                   </Link>
