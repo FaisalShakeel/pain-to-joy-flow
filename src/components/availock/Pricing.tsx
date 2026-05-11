@@ -43,7 +43,7 @@ const plans: Plan[] = [
     name: "Personal",
     tagline: "For professionals who value their attention.",
     sectionLabel: "Control access",
-    prices: { monthly: 12, annual: 120, kickstarter: 91 },
+    prices: { monthly: 12, annual: 130, kickstarter: 91 },
     features: [
       "Everything in Basic",
       "Direct Call Sync",
