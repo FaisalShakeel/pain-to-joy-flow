@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Megaphone, Lock, CalendarClock, Users, Eye, ShieldCheck } from "lucide-react";
+import { Zap, Lock, CalendarClock, Users, Eye, ShieldCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +59,7 @@ const QuickSyncOwnerDialog = ({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 grid place-items-center rounded-full bg-primary text-primary-foreground">
-              <Megaphone className="w-3.5 h-3.5 text-gold" />
+              <Zap className="w-3.5 h-3.5 text-gold" />
             </div>
             <div>
               <DialogTitle className="text-base inline-flex items-center gap-2">
