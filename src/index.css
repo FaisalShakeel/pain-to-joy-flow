@@ -70,6 +70,15 @@
     --shadow-elevated: 0 40px 80px -30px hsl(237 67% 25% / 0.25);
     --shadow-glass: 0 32px 64px -16px hsl(237 67% 25% / 0.15);
 
+    /* Premium operational depth — refined layering */
+    --shadow-soft: 0 1px 2px hsl(237 30% 12% / 0.04), 0 8px 24px -12px hsl(237 30% 12% / 0.10);
+    --shadow-lift: 0 1px 2px hsl(237 30% 12% / 0.05), 0 18px 40px -18px hsl(237 67% 25% / 0.18);
+    --shadow-inset-edge: inset 0 1px 0 hsl(0 0% 100% / 0.6);
+    --ring-hairline: inset 0 0 0 1px hsl(var(--outline-variant) / 0.35);
+
+    /* Premium motion */
+    --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+
     /* Sidebar (kept for shadcn compatibility) */
     --sidebar-background: 210 20% 98%;
     --sidebar-foreground: 230 7% 30%;
@@ -131,6 +140,44 @@
     -webkit-backdrop-filter: blur(24px);
   }
   .ghost-border { border: 1px solid hsl(var(--outline-variant) / 0.25); }
+
+  /* Premium glass surface — for headers, status panes, floating modules */
+  .glass-panel {
+    background:
+      linear-gradient(180deg, hsl(var(--surface-lowest) / 0.85), hsl(var(--surface-lowest) / 0.65));
+    backdrop-filter: saturate(140%) blur(18px);
+    -webkit-backdrop-filter: saturate(140%) blur(18px);
+    box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-lift);
+  }
+
+  /* Premium operational card — refined depth with edge lighting */
+  .premium-card {
+    background: hsl(var(--surface-lowest));
+    border-radius: 1rem;
+    box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-soft);
+    transition: box-shadow 280ms var(--ease-premium), transform 280ms var(--ease-premium);
+  }
+  .premium-card.is-interactive:hover {
+    box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-lift);
+    transform: translateY(-1px);
+  }
+
+  /* Subtle nested surface (used inside premium cards) */
+  .nested-surface {
+    background: hsl(var(--surface-low) / 0.55);
+    border: 1px solid hsl(var(--outline-variant) / 0.22);
+    border-radius: 0.85rem;
+    transition: background 200ms var(--ease-premium), border-color 200ms var(--ease-premium);
+  }
+  .nested-surface:hover { background: hsl(var(--surface-low) / 0.85); }
+
+  /* App ambient background — soft mist for operational calm */
+  .app-ambient {
+    background:
+      radial-gradient(1200px 600px at 12% -10%, hsl(var(--primary-fixed) / 0.35), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, hsl(var(--accent-soft) / 0.18), transparent 55%),
+      hsl(var(--surface));
+  }
   .grain::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
@@ -146,6 +193,11 @@
   .shadow-ambient { box-shadow: var(--shadow-ambient); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
   .shadow-glass { box-shadow: var(--shadow-glass); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-lift { box-shadow: var(--shadow-lift); }
+  .ring-hairline { box-shadow: var(--ring-hairline); }
+  .ease-premium { transition-timing-function: var(--ease-premium); }
+  .eyebrow { @apply text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground; }
   .animate-rise { animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .animate-fade { animation: fade 1.2s ease-out both; }
   .animate-float { animation: float 6s ease-in-out infinite; }
