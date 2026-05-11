@@ -291,7 +291,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
                     <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
                   )}
                   {title && (
-                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight truncate">
+                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight break-words">
                       {title}
                     </h1>
                   )}
