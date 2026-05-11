@@ -221,46 +221,8 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
         {/* Hero info card */}
         <div className="lg:col-span-9">
           <div className="bg-surface-lowest rounded-2xl p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
-            {/* Status pills + meta — top right */}
-            <div className="absolute top-5 right-5 flex flex-col gap-2 items-end">
-              <div className="flex items-center gap-2 bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-full shadow-sm">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> {statusData.label}
-                </span>
-                <span className="h-3 w-px bg-amber-300/70" />
-                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
-                  <Zap className="w-3 h-3 fill-amber-500 text-amber-600" /> Focus
-                </span>
-              </div>
-              {show("availabilityContext") && (
-                <div className="flex items-center gap-2 text-right">
-                  <Clock className="w-3.5 h-3.5 text-amber-600" />
-                  <div className="flex flex-col items-end">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Availability</span>
-                    <span className="text-[11px] font-bold text-amber-700">{owner.availabilityContext}</span>
-                  </div>
-                </div>
-              )}
-              {syncWindows.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setQsOpen(true)}
-                  title="Open Quick Sync slots"
-                  className="flex items-center gap-2 text-right rounded-md px-1.5 py-1 hover:bg-surface-low/60 transition"
-                >
-                  <Calendar className="w-3.5 h-3.5 text-primary/60" />
-                  <div className="flex flex-col items-end">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Quick Sync · tap to book</span>
-                    <span className="text-[11px] font-bold text-primary">
-                      {syncWindows[0].start} — {syncWindows[0].end} AM
-                    </span>
-                  </div>
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-5 pr-40">
-              <div className="space-y-2">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="space-y-2 min-w-0 flex-1">
                 <h1 className="text-5xl md:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
                   {firstName}
                 </h1>
@@ -272,6 +234,44 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                 )}
                 {show("title") && (
                   <p className="text-lg md:text-xl font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+                )}
+              </div>
+
+              {/* Status pills + meta — aligned with the name on the right */}
+              <div className="flex flex-col gap-2 md:items-end shrink-0 md:pt-2">
+                <div className="flex items-center gap-2 bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-full shadow-sm">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> {statusData.label}
+                  </span>
+                  <span className="h-3 w-px bg-amber-300/70" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
+                    <Zap className="w-3 h-3 fill-amber-500 text-amber-600" /> Focus
+                  </span>
+                </div>
+                {show("availabilityContext") && (
+                  <div className="flex items-center gap-2 md:text-right">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    <div className="flex flex-col md:items-end">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Availability</span>
+                      <span className="text-[11px] font-bold text-amber-700">{owner.availabilityContext}</span>
+                    </div>
+                  </div>
+                )}
+                {syncWindows.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setQsOpen(true)}
+                    title="Open Quick Sync slots"
+                    className="flex items-center gap-2 md:text-right rounded-md px-1.5 py-1 hover:bg-surface-low/60 transition"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-primary/70" />
+                    <div className="flex flex-col md:items-end">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Quick Sync · tap to book</span>
+                      <span className="text-[11px] font-bold text-primary">
+                        {syncWindows[0].start} — {syncWindows[0].end} AM
+                      </span>
+                    </div>
+                  </button>
                 )}
               </div>
             </div>
@@ -501,18 +501,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
                   to={isApproved ? `/app/schedule/${contact.id}` : null}
                   variant="default"
                   topRight={
-                    isApproved && syncWindows.length > 0 ? (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQsOpen(true); }}
-                        title="Open Quick Sync slots"
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/90 hover:bg-amber-400 text-white text-[9px] font-bold uppercase tracking-wider shadow-lg shadow-amber-900/30 transition"
-                      >
-                        <Zap className="w-3 h-3" />
-                        <PhoneCall className="w-3 h-3" />
-                        QS
-                      </button>
-                    ) : null
+                    null
                   }
                 />
                 {/* Ping */}
