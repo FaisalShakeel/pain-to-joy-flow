@@ -664,7 +664,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
   }
 
   return (
-    <AppShell subtitle="Contact profile" title={contact.name}>
+    <AppShell subtitle="Contact profile" title={contact.name} headerInline={headerStatusStack}>
       {body}
     </AppShell>
   );
