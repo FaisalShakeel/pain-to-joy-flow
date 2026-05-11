@@ -284,14 +284,14 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           </div>
 
           {(title || actions || headerInline) && (
-            <div className="px-4 md:px-8 pb-3 pt-0.5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="px-4 md:px-8 pb-4 pt-1">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   {subtitle && (
                     <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
                   )}
                   {title && (
-                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-[1.6rem] leading-[1.15] tracking-tight break-words">
+                    <h1 className="font-headline font-extrabold text-primary text-2xl md:text-[1.85rem] leading-[1.08] tracking-tight break-words">
                       {title}
                     </h1>
                   )}
@@ -307,7 +307,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           )}
         </header>
 
-        <main className="flex-1 px-4 md:px-8 py-4 md:py-5">{children}</main>
+        <main className="flex-1 px-4 md:px-8 py-5 md:py-7">{children}</main>
       </div>
 
       {/* Mobile drawer */}
