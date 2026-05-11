@@ -243,10 +243,10 @@ const Dashboard = () => {
         </div>
       }
     >
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className="grid lg:grid-cols-3 gap-5">
         {/* Compact full-width Status pane */}
         <div className={cn(
-          "lg:col-span-3 rounded-2xl bg-surface-lowest ghost-border px-4 py-3 shadow-ambient flex items-center justify-between gap-4 flex-wrap border-l-4 transition-colors",
+          "lg:col-span-3 rounded-2xl glass-panel px-5 py-4 flex items-center justify-between gap-4 flex-wrap border-l-[3px] transition-all ease-premium",
         )} style={{ borderLeftColor: "currentColor" }}>
           <div className="flex items-center gap-3 min-w-0">
             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
