@@ -325,7 +325,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1.5 min-w-0">
+          <div className="flex flex-col items-start md:items-end gap-2 min-w-0">
             {(() => {
               const windows = [
                 { start: "10:00", end: "10:30" },
@@ -336,9 +336,9 @@ const Dashboard = () => {
                 <button
                   type="button"
                   onClick={() => setQuickSyncOpen(true)}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ghost-border bg-surface-low/70 hover:bg-surface-low transition"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest/75 hover:bg-surface-low transition-all ease-premium shadow-soft"
                 >
-                  <CalendarClock className="w-3.5 h-3.5 text-accent" />
+                  <Zap className="w-3.5 h-3.5 text-gold" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                     Quick Sync
                   </span>
@@ -356,7 +356,7 @@ const Dashboard = () => {
                   e.preventDefault();
                   document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-lowest/65 text-[11px] hover:bg-surface-low transition-all ease-premium shadow-soft"
                 aria-label="Jump to reserved time"
               >
                 <CalendarDays className="w-3 h-3 text-accent" />
@@ -367,7 +367,7 @@ const Dashboard = () => {
                 type="button"
                 onClick={scrollToWaiting}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px] transition",
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px] transition-all ease-premium shadow-soft",
                   waitingCount > 0
                     ? "bg-amber-500/15 hover:bg-amber-500/25"
                     : "bg-surface-low/60 hover:bg-surface-low",
@@ -380,7 +380,7 @@ const Dashboard = () => {
               </button>
             </div>
             {/* Line 3: Impact metrics row — compact horizontal */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 rounded-full bg-surface-lowest/60 px-3 py-1.5 ghost-border shadow-soft">
               <MiniMetric icon={<Zap className="w-3 h-3" />} tone="text-amber-700" label="avoided" value={`${metrics.avoided}`} />
               <span className="w-px h-4 bg-border/60" aria-hidden />
               <MiniMetric icon={<CheckCircle2 className="w-3 h-3" />} tone="text-emerald-700" label="connected" value={`${metrics.connected}`} />
