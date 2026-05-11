@@ -216,8 +216,8 @@ const Dashboard = () => {
       title={`Good morning, ${me.name.split(" ")[0]}`}
       hideBell
       headerInline={
-        <div className="inline-flex items-center gap-2 ml-2">
-          <span className={cn("hidden sm:inline-flex p-0.5 rounded-full bg-surface-low ring-1 transition-colors", meta.ring)}>
+        <div className="inline-flex items-center gap-2 rounded-full bg-surface-lowest/80 p-1 ghost-border shadow-soft backdrop-blur-md">
+          <span className={cn("hidden sm:inline-flex p-0.5 rounded-full bg-surface-low/70 ring-1 transition-colors", meta.ring)}>
             {(Object.keys(statusMeta) as StatusKey[]).map((s) => {
               const m = statusMeta[s];
               const active = status === s;
@@ -226,7 +226,7 @@ const Dashboard = () => {
                   key={s}
                   onClick={() => handleStatusChange(s)}
                   className={cn(
-                    "px-2.5 py-1 text-[11px] font-semibold rounded-full transition inline-flex items-center gap-1.5",
+                    "px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all ease-premium inline-flex items-center gap-1.5",
                     active ? cn(m.activeBg, m.activeText, "shadow-glass") : "text-muted-foreground hover:text-primary",
                   )}
                 >
@@ -243,11 +243,11 @@ const Dashboard = () => {
         </div>
       }
     >
-      <div className="grid lg:grid-cols-3 gap-5">
+      <div className="dashboard-shell grid lg:grid-cols-3 gap-4 md:gap-5 animate-rise">
         {/* Compact full-width Status pane */}
         <div className={cn(
-          "lg:col-span-3 rounded-2xl glass-panel px-5 py-4 flex items-center justify-between gap-4 flex-wrap border-l-[3px] transition-all ease-premium",
-        )} style={{ borderLeftColor: "currentColor" }}>
+          "lg:col-span-3 command-band rounded-[1.35rem] px-4 md:px-5 py-4 md:py-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] items-center border-l-[3px] border-l-accent transition-all ease-premium",
+        )}>
           <div className="flex items-center gap-3 min-w-0">
             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
               <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
