@@ -284,23 +284,25 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           </div>
 
           {(title || actions || headerInline) && (
-            <div className="px-4 md:px-8 pb-3 pt-0.5 flex flex-col gap-2">
-              <div className="flex flex-col gap-0.5">
-                {subtitle && (
-                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
-                )}
-                {title && (
-                  <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight">
-                    {title}
-                  </h1>
+            <div className="px-4 md:px-8 pb-3 pt-0.5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  {subtitle && (
+                    <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
+                  )}
+                  {title && (
+                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight truncate">
+                      {title}
+                    </h1>
+                  )}
+                </div>
+                {(headerInline || actions) && (
+                  <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:text-right">
+                    {headerInline && <div className="min-w-0 flex items-center gap-2 flex-wrap sm:justify-end">{headerInline}</div>}
+                    {actions && <div className="flex items-center gap-2 sm:justify-end">{actions}</div>}
+                  </div>
                 )}
               </div>
-              {(headerInline || actions) && (
-                <div className="flex flex-wrap items-center gap-2 justify-between">
-                  <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">{headerInline}</div>
-                  {actions && <div className="flex items-center gap-2">{actions}</div>}
-                </div>
-              )}
             </div>
           )}
         </header>
