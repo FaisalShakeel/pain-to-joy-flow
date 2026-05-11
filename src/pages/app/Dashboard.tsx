@@ -217,7 +217,7 @@ const Dashboard = () => {
       hideBell
       headerInline={
         <div className="inline-flex items-center gap-2 rounded-full bg-surface-lowest/80 p-1 ghost-border shadow-soft backdrop-blur-md">
-          <span className={cn("hidden sm:inline-flex p-0.5 rounded-full bg-surface-low/70 ring-1 transition-colors", meta.ring)}>
+          <span className={cn("hidden lg:inline-flex p-0.5 rounded-full bg-surface-low/70 ring-1 transition-colors", meta.ring)}>
             {(Object.keys(statusMeta) as StatusKey[]).map((s) => {
               const m = statusMeta[s];
               const active = status === s;
@@ -236,7 +236,7 @@ const Dashboard = () => {
               );
             })}
           </span>
-          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold sm:hidden", meta.pillBg, meta.pillText)}>
+          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold lg:hidden", meta.pillBg, meta.pillText)}>
             <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
             {meta.label}
           </span>
