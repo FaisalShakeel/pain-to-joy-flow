@@ -116,7 +116,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
   });
 
   return (
-    <div className="min-h-screen app-ambient grain text-foreground flex">
+    <div className="min-h-screen app-ambient grain text-foreground flex overflow-x-hidden">
       {/* Sidebar (desktop / tablet) */}
       <aside
         className={cn(
@@ -307,7 +307,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           )}
         </header>
 
-        <main className="flex-1 px-4 md:px-8 py-5 md:py-7">{children}</main>
+        <main className="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-5 md:py-7">{children}</main>
       </div>
 
       {/* Mobile drawer */}
