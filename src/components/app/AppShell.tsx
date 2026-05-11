@@ -116,11 +116,11 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
   });
 
   return (
-    <div className="min-h-screen bg-surface text-foreground flex">
+    <div className="min-h-screen app-ambient text-foreground flex">
       {/* Sidebar (desktop / tablet) */}
       <aside
         className={cn(
-          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest border-r border-border/50 sticky top-0 h-screen transition-all",
+          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/80 backdrop-blur-xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all",
           sidebarHidden ? "hidden" : "hidden md:flex",
         )}
       >
@@ -198,7 +198,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
       {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border/50">
+        <header className="sticky top-0 z-30 glass-panel border-b border-outline-variant/30 !rounded-none">
           <div className="px-4 md:px-8 py-2 flex items-center gap-3">
             <button
               type="button"
@@ -291,7 +291,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
                     <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
                   )}
                   {title && (
-                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-2xl leading-tight break-words">
+                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-[1.6rem] leading-[1.15] tracking-tight break-words">
                       {title}
                     </h1>
                   )}
