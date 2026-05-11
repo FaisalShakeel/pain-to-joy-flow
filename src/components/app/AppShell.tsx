@@ -285,7 +285,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
 
           {(title || actions || headerInline) && (
             <div className="px-4 md:px-8 pb-4 pt-1">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   {subtitle && (
                     <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
@@ -297,9 +297,9 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
                   )}
                 </div>
                 {(headerInline || actions) && (
-                  <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:text-right">
-                    {headerInline && <div className="min-w-0 flex items-center gap-2 flex-wrap sm:justify-end">{headerInline}</div>}
-                    {actions && <div className="flex items-center gap-2 sm:justify-end">{actions}</div>}
+                  <div className="flex flex-wrap items-center gap-2 lg:justify-end lg:text-right">
+                    {headerInline && <div className="min-w-0 flex items-center gap-2 flex-wrap lg:justify-end">{headerInline}</div>}
+                    {actions && <div className="flex items-center gap-2 lg:justify-end">{actions}</div>}
                   </div>
                 )}
               </div>
