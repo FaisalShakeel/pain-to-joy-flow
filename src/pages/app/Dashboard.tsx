@@ -246,7 +246,7 @@ const Dashboard = () => {
       <div className="dashboard-shell grid lg:grid-cols-3 gap-4 md:gap-5 animate-rise">
         {/* Compact full-width Status pane */}
         <div className={cn(
-          "lg:col-span-3 command-band rounded-[1.35rem] px-4 md:px-5 py-4 md:py-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] items-center border-l-[3px] border-l-accent transition-all ease-premium",
+          "lg:col-span-3 command-band rounded-[1.35rem] px-4 md:px-5 py-4 md:py-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] items-center border-l-[3px] border-l-accent transition-all ease-premium",
         )}>
           <div className="flex items-center gap-3 min-w-0">
             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
@@ -325,7 +325,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-start md:items-end gap-2 min-w-0">
+          <div className="flex flex-col items-start lg:items-end gap-2 min-w-0">
             {(() => {
               const windows = [
                 { start: "10:00", end: "10:30" },
