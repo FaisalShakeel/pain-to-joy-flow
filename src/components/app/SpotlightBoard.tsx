@@ -194,7 +194,7 @@ const SpotlightBoard = () => {
   return (
     <div className="">
       {/* ── Two aligned panes ── */}
-      <div className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3 md:gap-4">
         {/* SPOTLIGHT (mine) */}
         <SidePane
           kind="spotlight"
@@ -582,8 +582,8 @@ function SidePane({
   headerAction?: React.ReactNode;
 }) {
   return (
-    <div className={cn("rounded-2xl bg-gradient-to-br ghost-border p-2.5 flex flex-col h-[235px]", accentClass)}>
-      <div className="flex items-center justify-between gap-2 mb-1.5 px-1">
+    <div className={cn("dashboard-module bg-gradient-to-br p-3 flex flex-col h-[235px] overflow-hidden", accentClass)}>
+      <div className="flex items-center justify-between gap-2 mb-2 px-1">
         <div className="flex items-center gap-1.5">
           <Icon className={cn("w-3.5 h-3.5", kind === "spotlight" ? "text-primary" : "text-gold")} />
           <h4 className="text-[10px] font-bold uppercase tracking-wider text-primary">{title}</h4>
@@ -604,8 +604,8 @@ function SidePane({
               className={cn(
                 "shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border transition",
                 active
-                  ? cn("border-transparent", chipActiveClass)
-                  : "border-border bg-surface-lowest text-muted-foreground hover:text-primary",
+                  ? cn("border-transparent shadow-soft", chipActiveClass)
+                  : "border-border bg-surface-lowest/70 text-muted-foreground hover:text-primary hover:bg-surface-lowest",
               )}
             >
               <span>{a.emoji}</span>
