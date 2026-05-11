@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, Clock, Users, ChevronDown, Check, CalendarClock,
+  CalendarDays, ArrowRight, Inbox, Clock, Users, ChevronDown, Check,
   Zap, CheckCircle2, Timer, Radio, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -421,7 +421,7 @@ const Dashboard = () => {
         </div>
 
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
-        <div id="reserved-time" className="lg:col-span-3 premium-card p-5 md:p-6 scroll-mt-24">
+        <div id="reserved-time" className="lg:col-span-3 premium-card p-5 md:p-6 scroll-mt-24 animate-fade">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
               <CalendarDays className="w-4 h-4 text-accent" />
@@ -469,7 +469,7 @@ const Dashboard = () => {
         </div>
 
         {/* Access requests */}
-        <div className="lg:col-span-3 premium-card p-5 md:p-6">
+        <div className="lg:col-span-3 premium-card p-5 md:p-6 animate-fade">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary">Access requests</h3>
             <Link to="/app/requests" className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
@@ -500,7 +500,7 @@ const Dashboard = () => {
         </div>
 
         {/* Recent activity */}
-        <div className="lg:col-span-3 premium-card p-6">
+        <div className="lg:col-span-3 premium-card p-5 md:p-6 animate-fade">
           <h3 className="font-headline font-bold text-primary">Recent activity</h3>
           <ul className="mt-4 grid md:grid-cols-3 gap-3">
             {threads.map((t) => {
