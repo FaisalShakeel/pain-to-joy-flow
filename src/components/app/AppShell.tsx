@@ -116,11 +116,11 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
   });
 
   return (
-    <div className="min-h-screen app-ambient text-foreground flex">
+    <div className="min-h-screen app-ambient grain text-foreground flex">
       {/* Sidebar (desktop / tablet) */}
       <aside
         className={cn(
-          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/80 backdrop-blur-xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all",
+          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/72 backdrop-blur-2xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all shadow-soft",
           sidebarHidden ? "hidden" : "hidden md:flex",
         )}
       >
@@ -199,7 +199,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
       <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
         {/* Top bar */}
         <header className="sticky top-0 z-30 glass-panel border-b border-outline-variant/30 !rounded-none">
-          <div className="px-4 md:px-8 py-2 flex items-center gap-3">
+          <div className="px-4 md:px-8 py-2.5 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileNav(true)}
