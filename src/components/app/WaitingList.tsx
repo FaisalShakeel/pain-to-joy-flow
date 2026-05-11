@@ -65,7 +65,7 @@ const WaitingList = () => {
   const total = qs.length + pending.length;
 
   return (
-    <div className="rounded-2xl bg-surface-lowest ghost-border p-4 shadow-ambient">
+    <div className="dashboard-module p-4 md:p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="grid place-items-center w-7 h-7 rounded-full bg-primary/10 text-primary">
@@ -91,7 +91,7 @@ const WaitingList = () => {
       ) : (
         <ul className="space-y-2 mb-3">
           {qs.map((w) => (
-            <li key={w.id} className="flex items-center gap-2.5 p-2 rounded-xl ghost-border bg-surface-low/40">
+            <li key={w.id} className="flex items-center gap-2.5 p-2 rounded-xl nested-surface">
               <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
                 {w.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
               </span>
@@ -140,7 +140,7 @@ const WaitingList = () => {
             const name = c?.name || "Unknown";
             const initials = c?.initials || name.split(" ").map((s) => s[0]).slice(0, 2).join("");
             return (
-              <li key={r.id} className="flex items-center gap-2.5 p-2 rounded-xl ghost-border bg-surface-low/40">
+              <li key={r.id} className="flex items-center gap-2.5 p-2 rounded-xl nested-surface">
                 <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
                   {initials}
                 </span>
