@@ -446,7 +446,7 @@ const Dashboard = () => {
                 ) : (
                   <ul className="grid md:grid-cols-3 gap-2.5">
                     {items.map((s) => (
-                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-2.5 rounded-xl ghost-border bg-surface-low/50">
+                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-2.5 nested-surface">
                         <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/10 text-primary text-[11px] font-bold shrink-0 tabular-nums">
                           {s.t}
                         </span>
