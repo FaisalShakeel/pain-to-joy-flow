@@ -9,7 +9,7 @@ const MessagesPanel = () => {
   const { threads, unreadCount: totalUnread } = useMessages();
 
   return (
-    <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+    <div className="dashboard-module p-5 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="grid place-items-center w-9 h-9 rounded-xl bg-accent/10 text-accent">
@@ -36,7 +36,7 @@ const MessagesPanel = () => {
             <li key={t.id}>
               <Link
                 to="/app/messages"
-                className="group flex items-center gap-3 p-3 rounded-2xl ghost-border bg-surface-low/50 hover:bg-surface-low transition"
+                className="group flex items-center gap-3 p-3 rounded-2xl nested-surface transition-all ease-premium"
               >
                 <div className="relative">
                   <Avatar initials={c.initials} accent={c.accent} />
@@ -69,7 +69,7 @@ const MessagesPanel = () => {
       {/* Quick reply */}
       <Link
         to="/app/messages"
-        className="mt-3 flex items-center justify-center gap-2 px-3 py-2.5 rounded-full bg-primary/5 hover:bg-primary/10 text-xs font-semibold text-primary transition"
+        className="mt-3 flex items-center justify-center gap-2 px-3 py-2.5 rounded-full bg-primary/5 hover:bg-primary/10 text-xs font-semibold text-primary transition-all ease-premium shadow-soft"
       >
         <Inbox className="w-3.5 h-3.5" /> Quick reply to a conversation
       </Link>

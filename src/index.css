@@ -144,16 +144,19 @@
   /* Premium glass surface — for headers, status panes, floating modules */
   .glass-panel {
     background:
-      linear-gradient(180deg, hsl(var(--surface-lowest) / 0.85), hsl(var(--surface-lowest) / 0.65));
-    backdrop-filter: saturate(140%) blur(18px);
-    -webkit-backdrop-filter: saturate(140%) blur(18px);
+      linear-gradient(180deg, hsl(var(--surface-lowest) / 0.92), hsl(var(--surface-lowest) / 0.72));
+    border: 1px solid hsl(var(--outline-variant) / 0.34);
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
     box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-lift);
   }
 
   /* Premium operational card — refined depth with edge lighting */
   .premium-card {
-    background: hsl(var(--surface-lowest));
-    border-radius: 1rem;
+    background:
+      linear-gradient(180deg, hsl(var(--surface-lowest) / 0.96), hsl(var(--surface-lowest) / 0.86));
+    border: 1px solid hsl(var(--outline-variant) / 0.30);
+    border-radius: 1.25rem;
     box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-soft);
     transition: box-shadow 280ms var(--ease-premium), transform 280ms var(--ease-premium);
   }
@@ -171,11 +174,51 @@
   }
   .nested-surface:hover { background: hsl(var(--surface-low) / 0.85); }
 
+  .dashboard-shell {
+    position: relative;
+    isolation: isolate;
+  }
+  .dashboard-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, hsl(var(--primary) / 0.055) 1px, transparent 1px),
+      linear-gradient(180deg, hsl(var(--primary) / 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
+    opacity: 0.55;
+  }
+
+  .dashboard-module {
+    background:
+      linear-gradient(180deg, hsl(var(--surface-lowest) / 0.94), hsl(var(--surface-lowest) / 0.82));
+    border: 1px solid hsl(var(--outline-variant) / 0.30);
+    border-radius: 1.35rem;
+    box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-soft);
+    transition: transform 260ms var(--ease-premium), box-shadow 260ms var(--ease-premium), border-color 260ms var(--ease-premium);
+  }
+  .dashboard-module:hover {
+    border-color: hsl(var(--outline-variant) / 0.45);
+    box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-lift);
+  }
+
+  .command-band {
+    background:
+      linear-gradient(135deg, hsl(var(--primary) / 0.08), transparent 38%),
+      linear-gradient(180deg, hsl(var(--surface-lowest) / 0.88), hsl(var(--surface-lowest) / 0.68));
+    border: 1px solid hsl(var(--outline-variant) / 0.34);
+    box-shadow: var(--ring-hairline), var(--shadow-inset-edge), var(--shadow-glass);
+  }
+
   /* App ambient background — soft mist for operational calm */
   .app-ambient {
     background:
-      radial-gradient(1200px 600px at 12% -10%, hsl(var(--primary-fixed) / 0.35), transparent 60%),
-      radial-gradient(900px 500px at 100% 0%, hsl(var(--accent-soft) / 0.18), transparent 55%),
+      radial-gradient(1100px 520px at 14% -12%, hsl(var(--primary-fixed) / 0.48), transparent 58%),
+      radial-gradient(820px 460px at 100% 2%, hsl(var(--brand-gold-soft) / 0.24), transparent 56%),
+      linear-gradient(180deg, hsl(var(--surface) / 0.88), hsl(var(--surface-low) / 0.96)),
       hsl(var(--surface));
   }
   .grain::after {

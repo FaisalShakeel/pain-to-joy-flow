@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  CalendarDays, ArrowRight, Inbox, Clock, Users, ChevronDown, Check, CalendarClock,
+  CalendarDays, ArrowRight, Inbox, Clock, Users, ChevronDown, Check,
   Zap, CheckCircle2, Timer, Radio, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -216,8 +216,8 @@ const Dashboard = () => {
       title={`Good morning, ${me.name.split(" ")[0]}`}
       hideBell
       headerInline={
-        <div className="inline-flex items-center gap-2 ml-2">
-          <span className={cn("hidden sm:inline-flex p-0.5 rounded-full bg-surface-low ring-1 transition-colors", meta.ring)}>
+        <div className="inline-flex items-center gap-2 rounded-full bg-surface-lowest/80 p-1 ghost-border shadow-soft backdrop-blur-md">
+          <span className={cn("hidden lg:inline-flex p-0.5 rounded-full bg-surface-low/70 ring-1 transition-colors", meta.ring)}>
             {(Object.keys(statusMeta) as StatusKey[]).map((s) => {
               const m = statusMeta[s];
               const active = status === s;
@@ -226,7 +226,7 @@ const Dashboard = () => {
                   key={s}
                   onClick={() => handleStatusChange(s)}
                   className={cn(
-                    "px-2.5 py-1 text-[11px] font-semibold rounded-full transition inline-flex items-center gap-1.5",
+                    "px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all ease-premium inline-flex items-center gap-1.5",
                     active ? cn(m.activeBg, m.activeText, "shadow-glass") : "text-muted-foreground hover:text-primary",
                   )}
                 >
@@ -236,18 +236,18 @@ const Dashboard = () => {
               );
             })}
           </span>
-          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold sm:hidden", meta.pillBg, meta.pillText)}>
+          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold lg:hidden", meta.pillBg, meta.pillText)}>
             <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
             {meta.label}
           </span>
         </div>
       }
     >
-      <div className="grid lg:grid-cols-3 gap-5">
+      <div className="dashboard-shell grid lg:grid-cols-3 gap-4 md:gap-5 animate-rise">
         {/* Compact full-width Status pane */}
         <div className={cn(
-          "lg:col-span-3 rounded-2xl glass-panel px-5 py-4 flex items-center justify-between gap-4 flex-wrap border-l-[3px] transition-all ease-premium",
-        )} style={{ borderLeftColor: "currentColor" }}>
+          "lg:col-span-3 command-band rounded-[1.35rem] px-4 md:px-5 py-4 md:py-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] items-center border-l-[3px] border-l-accent transition-all ease-premium",
+        )}>
           <div className="flex items-center gap-3 min-w-0">
             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
               <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
@@ -325,7 +325,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1.5 min-w-0">
+          <div className="flex flex-col items-start lg:items-end gap-2 min-w-0">
             {(() => {
               const windows = [
                 { start: "10:00", end: "10:30" },
@@ -336,9 +336,9 @@ const Dashboard = () => {
                 <button
                   type="button"
                   onClick={() => setQuickSyncOpen(true)}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ghost-border bg-surface-low/70 hover:bg-surface-low transition"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ghost-border bg-surface-lowest/75 hover:bg-surface-low transition-all ease-premium shadow-soft"
                 >
-                  <CalendarClock className="w-3.5 h-3.5 text-accent" />
+                  <Zap className="w-3.5 h-3.5 text-gold" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                     Quick Sync
                   </span>
@@ -356,7 +356,7 @@ const Dashboard = () => {
                   e.preventDefault();
                   document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px] hover:bg-surface-low transition"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-lowest/65 text-[11px] hover:bg-surface-low transition-all ease-premium shadow-soft"
                 aria-label="Jump to reserved time"
               >
                 <CalendarDays className="w-3 h-3 text-accent" />
@@ -367,7 +367,7 @@ const Dashboard = () => {
                 type="button"
                 onClick={scrollToWaiting}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px] transition",
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px] transition-all ease-premium shadow-soft",
                   waitingCount > 0
                     ? "bg-amber-500/15 hover:bg-amber-500/25"
                     : "bg-surface-low/60 hover:bg-surface-low",
@@ -380,7 +380,7 @@ const Dashboard = () => {
               </button>
             </div>
             {/* Line 3: Impact metrics row — compact horizontal */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 rounded-full bg-surface-lowest/60 px-3 py-1.5 ghost-border shadow-soft">
               <MiniMetric icon={<Zap className="w-3 h-3" />} tone="text-amber-700" label="avoided" value={`${metrics.avoided}`} />
               <span className="w-px h-4 bg-border/60" aria-hidden />
               <MiniMetric icon={<CheckCircle2 className="w-3 h-3" />} tone="text-emerald-700" label="connected" value={`${metrics.connected}`} />
@@ -421,7 +421,7 @@ const Dashboard = () => {
         </div>
 
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
-        <div id="reserved-time" className="lg:col-span-3 premium-card p-5 md:p-6 scroll-mt-24">
+        <div id="reserved-time" className="lg:col-span-3 premium-card p-5 md:p-6 scroll-mt-24 animate-fade">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
               <CalendarDays className="w-4 h-4 text-accent" />
@@ -469,7 +469,7 @@ const Dashboard = () => {
         </div>
 
         {/* Access requests */}
-        <div className="lg:col-span-3 premium-card p-5 md:p-6">
+        <div className="lg:col-span-3 premium-card p-5 md:p-6 animate-fade">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary">Access requests</h3>
             <Link to="/app/requests" className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
@@ -500,7 +500,7 @@ const Dashboard = () => {
         </div>
 
         {/* Recent activity */}
-        <div className="lg:col-span-3 premium-card p-6">
+        <div className="lg:col-span-3 premium-card p-5 md:p-6 animate-fade">
           <h3 className="font-headline font-bold text-primary">Recent activity</h3>
           <ul className="mt-4 grid md:grid-cols-3 gap-3">
             {threads.map((t) => {

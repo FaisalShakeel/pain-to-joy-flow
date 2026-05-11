@@ -45,7 +45,7 @@ const ContactRow = ({
   const unseen = unseenForContact(c.id);
 
   return (
-    <div className="group relative p-3 rounded-2xl ghost-border bg-surface-low/50 hover:bg-surface-low transition">
+    <div className="group relative p-3 rounded-2xl nested-surface hover:shadow-soft transition-all ease-premium">
       {unseen > 0 && (
         <Link
           to={`/app/contact/${c.id}`}
@@ -159,7 +159,7 @@ const PriorityContactsWidget = () => {
 
   return (
     <>
-      <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+      <div className="dashboard-module p-5 md:p-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="grid place-items-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
@@ -174,7 +174,7 @@ const PriorityContactsWidget = () => {
           </div>
           <Link
             to="/app/contacts"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/10 text-xs font-semibold text-primary transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/10 text-xs font-semibold text-primary transition-all ease-premium shadow-soft"
           >
             <Maximize2 className="w-3.5 h-3.5" /> Open Vault
           </Link>

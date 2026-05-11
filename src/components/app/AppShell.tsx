@@ -116,11 +116,11 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
   });
 
   return (
-    <div className="min-h-screen app-ambient text-foreground flex">
+    <div className="min-h-screen app-ambient grain text-foreground flex overflow-x-hidden">
       {/* Sidebar (desktop / tablet) */}
       <aside
         className={cn(
-          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/80 backdrop-blur-xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all",
+          "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/72 backdrop-blur-2xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all shadow-soft",
           sidebarHidden ? "hidden" : "hidden md:flex",
         )}
       >
@@ -199,7 +199,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
       <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
         {/* Top bar */}
         <header className="sticky top-0 z-30 glass-panel border-b border-outline-variant/30 !rounded-none">
-          <div className="px-4 md:px-8 py-2 flex items-center gap-3">
+          <div className="px-4 md:px-8 py-2.5 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileNav(true)}
@@ -284,22 +284,22 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           </div>
 
           {(title || actions || headerInline) && (
-            <div className="px-4 md:px-8 pb-3 pt-0.5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="px-4 md:px-8 pb-4 pt-1">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   {subtitle && (
                     <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">{subtitle}</p>
                   )}
                   {title && (
-                    <h1 className="font-headline font-extrabold text-primary text-xl md:text-[1.6rem] leading-[1.15] tracking-tight break-words">
+                    <h1 className="font-headline font-extrabold text-primary text-2xl md:text-[1.85rem] leading-[1.08] tracking-tight break-words">
                       {title}
                     </h1>
                   )}
                 </div>
                 {(headerInline || actions) && (
-                  <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:text-right">
-                    {headerInline && <div className="min-w-0 flex items-center gap-2 flex-wrap sm:justify-end">{headerInline}</div>}
-                    {actions && <div className="flex items-center gap-2 sm:justify-end">{actions}</div>}
+                  <div className="flex flex-wrap items-center gap-2 lg:justify-end lg:text-right">
+                    {headerInline && <div className="min-w-0 flex items-center gap-2 flex-wrap lg:justify-end">{headerInline}</div>}
+                    {actions && <div className="flex items-center gap-2 lg:justify-end">{actions}</div>}
                   </div>
                 )}
               </div>
@@ -307,7 +307,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           )}
         </header>
 
-        <main className="flex-1 px-4 md:px-8 py-4 md:py-5">{children}</main>
+        <main className="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-5 md:py-7">{children}</main>
       </div>
 
       {/* Mobile drawer */}
