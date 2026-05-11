@@ -421,7 +421,7 @@ const Dashboard = () => {
         </div>
 
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
-        <div id="reserved-time" className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient scroll-mt-24">
+        <div id="reserved-time" className="lg:col-span-3 premium-card p-5 md:p-6 scroll-mt-24">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary inline-flex items-center gap-2">
               <CalendarDays className="w-4 h-4 text-accent" />
@@ -469,7 +469,7 @@ const Dashboard = () => {
         </div>
 
         {/* Access requests */}
-        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
+        <div className="lg:col-span-3 premium-card p-5 md:p-6">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-bold text-primary">Access requests</h3>
             <Link to="/app/requests" className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
@@ -483,7 +483,7 @@ const Dashboard = () => {
                 <li key={r.id}>
                   <Link
                     to={`/app/requests?id=${r.id}`}
-                    className="py-3 flex items-center gap-3 hover:bg-surface-low/50 -mx-2 px-2 rounded-xl transition"
+                    className="py-3 flex items-center gap-3 hover:bg-surface-low/60 -mx-2 px-2 rounded-xl transition ease-premium"
                   >
                     <Avatar initials={c.initials} accent={c.accent} />
                     <div className="flex-1 min-w-0">
@@ -500,14 +500,14 @@ const Dashboard = () => {
         </div>
 
         {/* Recent activity */}
-        <div className="lg:col-span-3 rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
+        <div className="lg:col-span-3 premium-card p-6">
           <h3 className="font-headline font-bold text-primary">Recent activity</h3>
           <ul className="mt-4 grid md:grid-cols-3 gap-3">
             {threads.map((t) => {
               const c = contacts.find((x) => x.id === t.contactId)!;
               return (
                 <li key={t.id}>
-                  <Link to="/app/messages" className="flex items-center gap-3 p-3 rounded-xl ghost-border bg-surface-low/50 hover:bg-surface-low transition">
+                  <Link to="/app/messages" className="flex items-center gap-3 p-3 nested-surface">
                     <Avatar initials={c.initials} accent={c.accent} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
@@ -526,7 +526,7 @@ const Dashboard = () => {
         {role === "provider" && (
           <Link
             to="/app/analytics"
-            className="lg:col-span-3 rounded-3xl ghost-border bg-surface-lowest p-5 flex items-center justify-between hover:bg-surface-low transition"
+            className="lg:col-span-3 premium-card is-interactive p-5 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
@@ -543,7 +543,7 @@ const Dashboard = () => {
         {role !== "provider" && (
           <Link
             to="/app/contacts"
-            className="lg:col-span-3 rounded-3xl ghost-border bg-surface-lowest p-5 flex items-center justify-between hover:bg-surface-low transition"
+            className="lg:col-span-3 premium-card is-interactive p-5 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
