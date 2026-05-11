@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Calendar, Mail, Smartphone,
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
-  Linkedin, Github, Globe, MessageCircle, Megaphone, Link2, Radio, Bell,
+  Linkedin, Github, Globe, MessageCircle, Radio, Bell,
   ArrowDown, ArrowUp, Activity,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -15,9 +15,9 @@ import PriorityBypassButton from "@/components/app/PriorityBypassButton";
 import { findContact, ownerProfileFor, canSee, type ViewerAccess } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import AuthGateDialog, { isGuestAuthed } from "@/components/guest/AuthGateDialog";
-import QuickSyncBadge, { type SyncWindow } from "@/components/app/QuickSyncBadge";
+import { type SyncWindow } from "@/components/app/QuickSyncBadge";
 import QuickSyncSlotsDialog from "@/components/app/QuickSyncSlotsDialog";
-import ActionPanel, { type ActionItem } from "@/components/app/ActionPanel";
+import { type ActionItem } from "@/components/app/ActionPanel";
 import PreviewModeBanner from "@/components/app/PreviewModeBanner";
 import { trackMetric } from "@/lib/metrics";
 
@@ -183,6 +183,42 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
     a.push({ key: "log", label: "Connection Log", icon: Activity, onClick: () => navigate(`/app/contact/${contact.id}/log`), variant: "ghost" });
     return a;
   })();
+
+  const headerStatusStack = (
+    <div className="flex flex-col gap-1.5 sm:items-end">
+      <div className="inline-flex items-center gap-2 self-start sm:self-end bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-full shadow-sm">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> {statusData.label}
+        </span>
+        <span className="h-3 w-px bg-amber-300/70" />
+        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold tracking-wider uppercase text-amber-900">
+          <Zap className="w-3 h-3 fill-amber-500 text-amber-600" /> Focus
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        {show("availabilityContext") && (
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+            <Clock className="w-3.5 h-3.5 text-amber-600" />
+            <span className="text-amber-700">{owner.availabilityContext}</span>
+          </span>
+        )}
+        {syncWindows.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setQsOpen(true)}
+            title="Open Quick Sync slots"
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ghost-border bg-surface-lowest hover:bg-surface-low transition"
+          >
+            <Zap className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Quick Sync</span>
+            <span className="text-[11px] font-bold text-primary tabular-nums">
+              {syncWindows[0].start}—{syncWindows[0].end}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   const toggleAlert = (k: "callback" | "message" | "calendar") => {
     const next = { ...alerts, [k]: !alerts[k] };
