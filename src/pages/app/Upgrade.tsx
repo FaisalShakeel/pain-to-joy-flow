@@ -5,7 +5,7 @@ import AppShell from "@/components/app/AppShell";
 import { toast } from "@/hooks/use-toast";
 
 const tiers = [
-  { id: "personal", name: "Personal", price: "$120/yr", kickstarter: "$91/yr", best: false, perks: ["Direct Call Sync", "Ping feature", "Smart routing", "Email support"] },
+  { id: "personal", name: "Personal", price: "$130/yr", kickstarter: "$91/yr", best: false, perks: ["Direct Call Sync", "Ping feature", "Smart routing", "Email support"] },
   { id: "pro", name: "Professional", price: "$199/yr", kickstarter: "$139/yr", best: true, perks: ["Everything in Personal", "Paid bookings & VIP bypass", "Revenue analytics"] },
   { id: "org", name: "Organization", price: "$276/yr", kickstarter: "$193/yr", best: false, perks: ["Everything in Pro", "Team availability map", "Admin & SSO"] },
 ];
