@@ -75,18 +75,31 @@ const PremiumQR = ({ seed }: { seed: string }) => {
   const cells = useMemo(() => {
     let h = 0;
     for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    if (h === 0) h = 1;
     const arr: boolean[] = [];
     for (let i = 0; i < 21 * 21; i++) {
       h = (h * 1103515245 + 12345) >>> 0;
-      arr.push((h & 7) > 3);
+      arr.push(((h >>> 8) & 1) === 1);
     }
     return arr;
   }, [seed]);
 
-  const isFinder = (r: number, c: number) => {
+  const inFinderArea = (r: number, c: number) => {
     const inBox = (r0: number, c0: number) =>
       r >= r0 && r < r0 + 7 && c >= c0 && c < c0 + 7;
     return inBox(0, 0) || inBox(0, 14) || inBox(14, 0);
+  };
+  const finderDraw = (r: number, c: number) => {
+    const norm = (r0: number, c0: number) => {
+      const lr = r - r0, lc = c - c0;
+      if (lr < 0 || lr > 6 || lc < 0 || lc > 6) return null;
+      // outer ring
+      if (lr === 0 || lr === 6 || lc === 0 || lc === 6) return true;
+      // inner 3x3 square
+      if (lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4) return true;
+      return false;
+    };
+    return norm(0, 0) ?? norm(0, 14) ?? norm(14, 0) ?? false;
   };
 
   return (
@@ -99,17 +112,7 @@ const PremiumQR = ({ seed }: { seed: string }) => {
         {cells.map((on, i) => {
           const r = Math.floor(i / 21);
           const c = i % 21;
-          const finder = isFinder(r, c);
-          const finderOuter =
-            (r === 0 || r === 6 || c === 0 || c === 6) ||
-            (r === 14 || r === 20 || c === 14 || c === 20 && r < 7) ||
-            ((r === 14 || r === 20) && c < 7) ||
-            ((c === 14 || c === 20) && r < 7);
-          const finderInner =
-            (r >= 2 && r <= 4 && c >= 2 && c <= 4) ||
-            (r >= 2 && r <= 4 && c >= 16 && c <= 18) ||
-            (r >= 16 && r <= 18 && c >= 2 && c <= 4);
-          const draw = finder ? (finderOuter || finderInner) : on;
+          const draw = inFinderArea(r, c) ? finderDraw(r, c) : on;
           return (
             <span
               key={i}
