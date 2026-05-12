@@ -92,8 +92,10 @@ const PremiumQR = ({ seed }: { seed: string }) => {
   return (
     <div className="relative">
       <div className="absolute -inset-8 qr-aura" aria-hidden />
-      <div className="relative grid grid-cols-21 gap-[2px] p-4 rounded-2xl bg-white/95 shadow-[0_30px_80px_-20px_hsl(45_90%_50%/0.35)]"
-        style={{ gridTemplateColumns: "repeat(21, minmax(0, 1fr))" }}>
+      <div
+        className="relative grid gap-[2px] p-4 rounded-2xl bg-white/95 shadow-[0_30px_80px_-20px_hsl(45_90%_50%/0.35)]"
+        style={{ gridTemplateColumns: "repeat(21, 10px)" }}
+      >
         {cells.map((on, i) => {
           const r = Math.floor(i / 21);
           const c = i % 21;
