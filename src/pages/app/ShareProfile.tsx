@@ -151,21 +151,30 @@ const ShareProfile = () => {
             <div className="share-watermark">AVAILOCK</div>
 
             {/* Header */}
-            <div className="relative flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="font-headline font-bold text-[1.85rem] sm:text-[2rem] leading-[1.05] tracking-[-0.02em] text-foreground">
-                  {me.name}
-                </h1>
-                <p className="mt-2 text-[10.5px] font-bold tracking-[0.22em] uppercase text-accent">
-                  Availock — Live Availability Access
-                </p>
-                <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-                  <span className="live-dot amber" />
-                  In Focus Mode
+            <div className="relative">
+              {/* Floating access badge — never interferes with text */}
+              <div className="absolute top-0 right-0" aria-label="Access active">
+                <div className="access-badge">
+                  <ShieldCheck className="w-4 h-4" strokeWidth={2.2} />
                 </div>
               </div>
-              <div className="access-badge shrink-0" aria-label="Access active">
-                <ShieldCheck className="w-4 h-4" strokeWidth={2.2} />
+
+              {/* Name block — full width, no collision */}
+              <div className="pr-12">
+                <h1 className="font-headline font-bold text-[1.75rem] leading-[1.05] tracking-[-0.02em] text-foreground">
+                  {me.name}
+                </h1>
+              </div>
+
+              {/* Subtitle */}
+              <p className="mt-2 text-[10.5px] font-bold tracking-[0.22em] uppercase text-accent">
+                Availock — Live Availability Access
+              </p>
+
+              {/* Status bar — clearly separated from name */}
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
+                <span className="live-dot amber" />
+                <span>In Focus Mode</span>
               </div>
             </div>
 
