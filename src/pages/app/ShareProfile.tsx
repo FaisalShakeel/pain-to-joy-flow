@@ -106,6 +106,22 @@ const ShareProfile = () => {
   const shareUrl = `https://${link}`;
   const activeIndex = MODES.findIndex((m) => m.id === mode);
 
+  const modeRing: Record<AccessMode, string> = {
+    open: "ring-[hsl(150_55%_45%/0.55)] shadow-[0_30px_70px_-30px_hsl(150_55%_40%/0.35)]",
+    normal: "ring-[hsl(220_16%_85%)] shadow-[0_30px_70px_-30px_hsl(237_30%_20%/0.22)]",
+    vip: "ring-[hsl(252_70%_60%/0.55)] shadow-[0_30px_70px_-30px_hsl(252_70%_50%/0.35)]",
+  };
+  const modeDot: Record<AccessMode, string> = {
+    open: "bg-[hsl(150_55%_45%)]",
+    normal: "bg-[hsl(40_90%_55%)]",
+    vip: "bg-[hsl(252_70%_60%)]",
+  };
+  const modeStatus: Record<AccessMode, string> = {
+    open: "Open · Available now",
+    normal: "In Focus Mode",
+    vip: "VIP priority only",
+  };
+
   useEffect(() => {
     const seg = segRef.current;
     if (!seg) return;
@@ -146,35 +162,30 @@ const ShareProfile = () => {
     <AppShell subtitle="Communication access" title="Share Availability">
       <div className="share-stage -mx-4 md:-mx-10 -my-9 px-4 md:px-10 py-10 md:py-14 min-h-[calc(100vh-4rem)] flex items-start justify-center">
         <div className="relative w-full max-w-[440px]">
-          <div className="share-card relative overflow-hidden px-7 sm:px-9 pt-9 pb-7">
-            {/* Watermark */}
-            <div className="share-watermark">AVAILOCK</div>
+          {/* Name — above the card, single source of truth */}
+          <header className="mb-6 text-center">
+            <p className="text-[10.5px] font-bold tracking-[0.22em] uppercase text-accent">
+              Availock — Live Availability Access
+            </p>
+            <h1 className="mt-2 font-headline font-bold text-[1.9rem] sm:text-[2.1rem] leading-[1.05] tracking-[-0.02em] text-foreground">
+              {me.name}
+            </h1>
+          </header>
 
-            {/* Header */}
-            <div className="relative">
-              {/* Floating access badge — never interferes with text */}
-              <div className="absolute top-0 right-0" aria-label="Access active">
-                <div className="access-badge">
-                  <ShieldCheck className="w-4 h-4" strokeWidth={2.2} />
-                </div>
+          <div
+            className={cn(
+              "share-card relative overflow-hidden px-7 sm:px-9 pt-7 pb-7 ring-1 transition-all duration-500",
+              modeRing[mode],
+            )}
+          >
+            {/* Status row on the card itself */}
+            <div className="relative flex items-center justify-between gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5 text-[11px] font-medium text-foreground/80">
+                <span className={cn("w-1.5 h-1.5 rounded-full", modeDot[mode])} />
+                <span>{modeStatus[mode]}</span>
               </div>
-
-              {/* Name block — full width, no collision */}
-              <div className="pr-12">
-                <h1 className="font-headline font-bold text-[1.75rem] leading-[1.05] tracking-[-0.02em] text-foreground">
-                  {me.name}
-                </h1>
-              </div>
-
-              {/* Subtitle */}
-              <p className="mt-2 text-[10.5px] font-bold tracking-[0.22em] uppercase text-accent">
-                Availock — Live Availability Access
-              </p>
-
-              {/* Status bar — clearly separated from name */}
-              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
-                <span className="live-dot amber" />
-                <span>In Focus Mode</span>
+              <div className="access-badge" aria-label="Access active">
+                <ShieldCheck className="w-4 h-4" strokeWidth={2.2} />
               </div>
             </div>
 
