@@ -21,11 +21,11 @@ import { type ActionItem } from "@/components/app/ActionPanel";
 import PreviewModeBanner from "@/components/app/PreviewModeBanner";
 import { trackMetric } from "@/lib/metrics";
 
-interface ContactProfileProps {
+interface CanonicalProfileProps {
   guestMode?: boolean;
 }
 
-const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
+const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const goBack = () => (window.history.length > 1 ? navigate(-1) : navigate("/app/contacts"));
@@ -844,4 +844,4 @@ const PortalTile = ({
   );
 };
 
-export default ContactProfile;
+export default CanonicalProfile;
