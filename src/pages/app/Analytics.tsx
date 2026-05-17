@@ -241,7 +241,7 @@ const Analytics = () => {
               return (
                 <li key={c.id} className="flex items-center gap-4 py-3">
                   <span className="text-xs font-bold text-muted-foreground w-5 text-right">#{i + 1}</span>
-                  <Avatar initials={c.initials} accent={c.accent} />
+                  <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-primary text-sm truncate">{c.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{c.org}</p>

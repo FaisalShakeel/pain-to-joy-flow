@@ -120,7 +120,7 @@ const BypassSettingsPanel = () => {
               const on = settings.allowedContactIds.includes(c.id);
               return (
                 <li key={c.id} className="flex items-center gap-3 p-2 rounded-xl bg-surface-low/60">
-                  <Avatar initials={c.initials} accent={c.accent} />
+                  <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
                     <p className="text-[10px] text-muted-foreground truncate">{c.relationship}</p>

@@ -41,7 +41,7 @@ const ApprovalQueues = () => {
           const c = contacts.find((x) => x.id === r.contactId)!;
           return (
             <li key={r.id} className="flex items-center gap-4 p-4 rounded-2xl ghost-border bg-surface-lowest">
-              <Avatar initials={c.initials} accent={c.accent} />
+              <Avatar initials={c.initials} accent={c.accent} status={c.status} />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-primary truncate">{c.name}</p>
                 <p className="text-xs text-muted-foreground truncate">{r.reason}</p>

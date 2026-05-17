@@ -36,7 +36,7 @@ const MessagesPanel = () => {
                 className="group flex items-center gap-3 p-3 rounded-2xl nested-surface transition-all ease-premium"
               >
                 <div className="relative">
-                  <Avatar initials={c.initials} accent={c.accent} />
+                  <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                   {t.unread > 0 && (
                     <span className="absolute -top-1 -right-1 grid place-items-center min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
                       {t.unread}

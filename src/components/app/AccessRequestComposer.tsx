@@ -154,7 +154,7 @@ const AccessRequestComposer = ({ open, onOpenChange, contact, onSubmitted }: Pro
 
               {/* Recipient card */}
               <div className="mt-5 flex items-center gap-3 p-3 rounded-2xl bg-surface-low">
-                <Avatar initials={contact.initials} accent={contact.accent} size="md" />
+                <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} size="md" />
                 <div className="min-w-0">
                   <p className="font-semibold text-primary text-sm truncate">{contact.name}</p>
                   <p className="text-xs text-muted-foreground truncate flex items-center gap-1">

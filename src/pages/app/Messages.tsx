@@ -125,7 +125,7 @@ const Messages = () => {
                       isActive ? "bg-primary text-primary-foreground" : "hover:bg-surface-low"
                     }`}
                   >
-                    <Avatar initials={c.initials} accent={c.accent} />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <p className={`font-semibold text-sm truncate ${isActive ? "" : "text-primary"}`}>{c.name}</p>
@@ -150,7 +150,7 @@ const Messages = () => {
           {current && contact ? (
             <>
               <header className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
-                <Avatar initials={contact.initials} accent={contact.accent} />
+                <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} />
                 <div className="flex-1">
                   <p className="font-headline font-bold text-primary">{contact.name}</p>
                   <p className="text-xs text-muted-foreground">{contact.title}</p>

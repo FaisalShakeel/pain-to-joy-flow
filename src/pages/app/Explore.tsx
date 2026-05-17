@@ -176,7 +176,7 @@ const Explore = () => {
                 className="snap-start shrink-0 w-56 rounded-2xl bg-surface-lowest border border-border/60 p-4 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex flex-col items-center text-center">
-                  <Avatar initials={p.initials} accent={p.accent} size="lg" />
+                  <Avatar initials={p.initials} accent={p.accent} status={p.status} size="lg" />
                   <div className="mt-2 flex items-center gap-1">
                     <p className="font-semibold text-primary text-sm truncate max-w-[10rem]">{p.name}</p>
                     {p.verified && <BadgeCheck className="w-4 h-4 text-sky-500" aria-label="Verified" />}
@@ -221,7 +221,7 @@ const Explore = () => {
             return (
               <article key={post.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-4 shadow-sm">
                 <header className="flex items-center gap-3">
-                  <Avatar initials={a.initials} accent={a.accent} />
+                  <Avatar initials={a.initials} accent={a.accent} status={a.status} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
                       <p className="font-semibold text-primary text-sm truncate">{a.name}</p>
@@ -293,7 +293,7 @@ const Explore = () => {
           {trending.map((p, i) => (
             <div key={p.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-3 flex items-center gap-3">
               <span className="text-xs font-bold text-muted-foreground w-5 text-center">#{i + 1}</span>
-              <Avatar initials={p.initials} accent={p.accent} />
+              <Avatar initials={p.initials} accent={p.accent} status={p.status} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
                   <p className="font-semibold text-primary text-sm truncate">{p.name}</p>
@@ -332,7 +332,7 @@ const Explore = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {nearby.map((p) => (
               <div key={p.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-4 flex items-center gap-3">
-                <Avatar initials={p.initials} accent={p.accent} size="lg" />
+                <Avatar initials={p.initials} accent={p.accent} status={p.status} size="lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1">
                     <p className="font-semibold text-primary text-sm truncate">{p.name}</p>
@@ -385,7 +385,7 @@ const Explore = () => {
             const p = PEOPLE[0];
             return (
               <div className="rounded-2xl bg-surface-lowest border border-border/60 p-5 text-center">
-                <Avatar initials={p.initials} accent={p.accent} size="xl" className="mx-auto" />
+                <Avatar initials={p.initials} accent={p.accent} status={p.status} size="xl" className="mx-auto" />
                 <div className="mt-3 flex items-center justify-center gap-1">
                   <p className="font-semibold text-primary">{p.name}</p>
                   {p.verified && <BadgeCheck className="w-4 h-4 text-sky-500" />}

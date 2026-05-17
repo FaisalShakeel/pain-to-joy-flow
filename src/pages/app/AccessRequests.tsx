@@ -259,7 +259,7 @@ const DecisionInterface = ({
     <article className="max-w-2xl mx-auto rounded-3xl bg-surface-lowest ghost-border p-5 md:p-6 shadow-ambient">
       {/* Identity row */}
       <header className="flex items-start gap-3">
-        <Avatar initials={c.initials} accent={c.accent} size="md" />
+        <Avatar initials={c.initials} accent={c.accent} status={c.status} size="md" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <Link
@@ -415,7 +415,7 @@ const InboxSheet = ({
                   onClick={() => { onPick(r.id); setOpen(false); }}
                   className="w-full flex items-center gap-3 p-3 rounded-2xl bg-surface-low hover:shadow-ambient transition text-left"
                 >
-                  <Avatar initials={c.initials} accent={c.accent} size="sm" />
+                  <Avatar initials={c.initials} accent={c.accent} status={c.status} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
                     <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 truncate">
@@ -447,7 +447,7 @@ const OutgoingView = ({ request }: { request: AccessRequest }) => {
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6">
       <div className="flex items-start gap-4">
-        <Avatar initials={c.initials} accent={c.accent} size="lg" />
+        <Avatar initials={c.initials} accent={c.accent} status={c.status} size="lg" />
         <div className="min-w-0 flex-1">
           <Link to={`/app/contact/${c.id}`} className="font-headline font-extrabold text-primary text-2xl hover:underline">
             {c.name}

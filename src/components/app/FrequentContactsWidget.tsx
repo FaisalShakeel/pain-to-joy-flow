@@ -28,7 +28,7 @@ const ContactTile = ({ id, compact = false }: { id: string; compact?: boolean })
     <div className="group relative p-3 rounded-2xl ghost-border bg-surface-low/50 hover:bg-surface-low transition">
       <div className="flex items-start gap-3">
         <Link to={`/app/contact/${c.id}`} className="shrink-0">
-          <Avatar initials={c.initials} accent={c.accent} />
+          <Avatar initials={c.initials} accent={c.accent} status={c.status} />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">

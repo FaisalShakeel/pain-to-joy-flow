@@ -495,7 +495,7 @@ const Dashboard = () => {
                     to={`/app/requests?id=${r.id}`}
                     className="py-3.5 flex items-center gap-3 hover:bg-surface-low/55 -mx-2 px-2 rounded-xl transition ease-premium"
                   >
-                    <Avatar initials={c.initials} accent={c.accent} />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{c.name}</p>
                       <p className="text-[11.5px] text-muted-foreground/85 truncate">{r.reason}</p>
@@ -528,7 +528,7 @@ const Dashboard = () => {
               return (
                 <li key={t.id}>
                   <Link to="/app/messages" className="flex items-center gap-3 p-3.5 nested-surface">
-                    <Avatar initials={c.initials} accent={c.accent} />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{c.name}</p>
                       <p className="text-[11.5px] text-muted-foreground/85 truncate">{t.preview}</p>
