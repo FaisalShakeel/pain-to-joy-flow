@@ -41,17 +41,18 @@ type Person = {
   verified?: boolean;
   accent: string;
   tags: string[];
+  status: "available" | "busy" | "focus" | "offline" | "driving" | "unavailable";
 };
 
 const PEOPLE: Person[] = [
-  { id: "p1", name: "Ahmed Khan", initials: "AK", title: "iOS Engineer", company: "Apple", city: "Cupertino", industry: "Developers", mutual: 12, verified: true, accent: "from-sky-500 to-indigo-600", tags: ["Swift", "Mobile"] },
-  { id: "p2", name: "Sara Malik", initials: "SM", title: "Product Designer", company: "Google", city: "London", industry: "Designers", mutual: 8, verified: true, accent: "from-pink-500 to-rose-600", tags: ["UX", "Figma"] },
-  { id: "p3", name: "Ali Raza", initials: "AR", title: "Founder", company: "Finlock", city: "Karachi", industry: "Founders", mutual: 5, verified: false, accent: "from-amber-500 to-orange-600", tags: ["Fintech"] },
-  { id: "p4", name: "Maya Chen", initials: "MC", title: "Senior Recruiter", company: "Stripe", city: "Dubai", industry: "Recruiters", mutual: 3, verified: true, accent: "from-emerald-500 to-teal-600", tags: ["Hiring"] },
-  { id: "p5", name: "Daniel Park", initials: "DP", title: "Partner", company: "Sequoia", city: "Singapore", industry: "Investors", mutual: 21, verified: true, accent: "from-violet-500 to-fuchsia-600", tags: ["Seed", "Series A"] },
-  { id: "p6", name: "Lena Voss", initials: "LV", title: "Content Creator", company: "Independent", city: "Berlin", industry: "Creators", mutual: 2, verified: false, accent: "from-rose-500 to-red-600", tags: ["Video"] },
-  { id: "p7", name: "Hassan Iqbal", initials: "HI", title: "Full-stack Engineer", company: "Vercel", city: "Karachi", industry: "Developers", mutual: 6, verified: true, accent: "from-cyan-500 to-blue-600", tags: ["React"] },
-  { id: "p8", name: "Ivy Okafor", initials: "IO", title: "Brand Designer", company: "Linear", city: "Lagos", industry: "Designers", mutual: 4, verified: true, accent: "from-lime-500 to-emerald-600", tags: ["Brand"] },
+  { id: "p1", name: "Ahmed Khan", initials: "AK", title: "iOS Engineer", company: "Apple", city: "Cupertino", industry: "Developers", mutual: 12, verified: true, accent: "from-sky-500 to-indigo-600", tags: ["Swift", "Mobile"], status: "available" },
+  { id: "p2", name: "Sara Malik", initials: "SM", title: "Product Designer", company: "Google", city: "London", industry: "Designers", mutual: 8, verified: true, accent: "from-pink-500 to-rose-600", tags: ["UX", "Figma"], status: "focus" },
+  { id: "p3", name: "Ali Raza", initials: "AR", title: "Founder", company: "Finlock", city: "Karachi", industry: "Founders", mutual: 5, verified: false, accent: "from-amber-500 to-orange-600", tags: ["Fintech"], status: "busy" },
+  { id: "p4", name: "Maya Chen", initials: "MC", title: "Senior Recruiter", company: "Stripe", city: "Dubai", industry: "Recruiters", mutual: 3, verified: true, accent: "from-emerald-500 to-teal-600", tags: ["Hiring"], status: "available" },
+  { id: "p5", name: "Daniel Park", initials: "DP", title: "Partner", company: "Sequoia", city: "Singapore", industry: "Investors", mutual: 21, verified: true, accent: "from-violet-500 to-fuchsia-600", tags: ["Seed", "Series A"], status: "driving" },
+  { id: "p6", name: "Lena Voss", initials: "LV", title: "Content Creator", company: "Independent", city: "Berlin", industry: "Creators", mutual: 2, verified: false, accent: "from-rose-500 to-red-600", tags: ["Video"], status: "offline" },
+  { id: "p7", name: "Hassan Iqbal", initials: "HI", title: "Full-stack Engineer", company: "Vercel", city: "Karachi", industry: "Developers", mutual: 6, verified: true, accent: "from-cyan-500 to-blue-600", tags: ["React"], status: "focus" },
+  { id: "p8", name: "Ivy Okafor", initials: "IO", title: "Brand Designer", company: "Linear", city: "Lagos", industry: "Designers", mutual: 4, verified: true, accent: "from-lime-500 to-emerald-600", tags: ["Brand"], status: "available" },
 ];
 
 type Post = {
