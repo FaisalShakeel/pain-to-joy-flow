@@ -208,7 +208,7 @@ const ContactLog = () => {
       <section className="rounded-3xl bg-surface-lowest ghost-border shadow-ambient p-5 md:p-6 mb-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-5">
           <div className="flex items-start gap-4 min-w-0 flex-1">
-            <Avatar initials={contact.initials} accent={contact.accent} size="lg" />
+            <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} size="lg" />
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent inline-flex items-center gap-1.5">
                 <Activity className="w-3 h-3" /> Connection Log

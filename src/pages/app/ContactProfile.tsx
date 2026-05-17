@@ -113,7 +113,7 @@ const ContactProfile = ({ guestMode = false }: ContactProfileProps) => {
       case "available":
         return { label: "Available", subLabel: "Open Window", chipClass: "bg-emerald-100 border-emerald-200 text-emerald-900", dotClass: "bg-emerald-500", pingClass: "bg-emerald-400", subClass: "text-emerald-700", ringClass: "ring-emerald-400" };
       case "focus":
-        return { label: "Focus", subLabel: "Focus Mode Active", chipClass: "bg-amber-100 border-amber-200 text-amber-900", dotClass: "bg-amber-500", pingClass: "bg-amber-400", subClass: "text-amber-700", ringClass: "ring-amber-400" };
+        return { label: "Focus", subLabel: "Focus Mode Active", chipClass: "bg-sky-100 border-sky-200 text-sky-900", dotClass: "bg-sky-500", pingClass: "bg-sky-400", subClass: "text-sky-700", ringClass: "ring-sky-400" };
       case "busy":
         return { label: "Busy", subLabel: "Focus Mode Active", chipClass: "bg-amber-100 border-amber-200 text-amber-900", dotClass: "bg-amber-500", pingClass: "bg-amber-400", subClass: "text-amber-700", ringClass: "ring-amber-400" };
       default:

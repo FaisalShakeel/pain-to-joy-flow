@@ -180,7 +180,7 @@ const ScheduleCall = () => {
         <div className="space-y-5">
           {/* Provider mini header */}
           <div className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient flex items-center gap-4">
-            <Avatar initials={contact.initials} accent={contact.accent} />
+            <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} />
             <div className="min-w-0 flex-1">
               <p className="font-headline font-bold text-primary truncate">{contact.name}</p>
               <p className="text-xs text-muted-foreground truncate">{contact.title} · {contact.org}</p>
@@ -360,7 +360,7 @@ const ScheduleCall = () => {
         {/* ============================ SUMMARY ============================ */}
         <aside className="hidden lg:block rounded-3xl bg-gradient-vault text-primary-foreground p-6 shadow-elevated h-fit lg:sticky lg:top-24">
           <div className="flex items-center gap-3">
-            <Avatar initials={contact.initials} accent={contact.accent} />
+            <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} />
             <div>
               <p className="font-headline font-bold">{contact.name}</p>
               <p className="text-xs text-primary-foreground/80">{contact.title}</p>

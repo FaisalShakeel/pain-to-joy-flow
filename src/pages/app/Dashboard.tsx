@@ -29,7 +29,7 @@ type StatusKey = "available" | "busy" | "focus" | "driving" | "offline";
 const statusMeta: Record<StatusKey, { label: string; activeBg: string; activeText: string; ring: string; pillBg: string; pillText: string; dot: string }> = {
   available: { label: "Available", activeBg: "bg-emerald-500",  activeText: "text-white", ring: "ring-emerald-500/30",  pillBg: "bg-emerald-500/10",  pillText: "text-emerald-700",  dot: "bg-emerald-500" },
   busy:      { label: "Busy",      activeBg: "bg-orange-500",   activeText: "text-white", ring: "ring-orange-500/30",   pillBg: "bg-orange-500/10",   pillText: "text-orange-700",   dot: "bg-orange-500" },
-  focus:     { label: "Focus",     activeBg: "bg-rose-500",     activeText: "text-white", ring: "ring-rose-500/30",     pillBg: "bg-rose-500/10",     pillText: "text-rose-700",     dot: "bg-rose-500" },
+  focus:     { label: "Focus",     activeBg: "bg-sky-500",      activeText: "text-white", ring: "ring-sky-500/30",      pillBg: "bg-sky-500/10",      pillText: "text-sky-700",      dot: "bg-sky-500" },
   driving:   { label: "Driving",   activeBg: "bg-violet-600",   activeText: "text-white", ring: "ring-violet-600/30",   pillBg: "bg-violet-600/10",   pillText: "text-violet-700",   dot: "bg-violet-600" },
   offline:   { label: "Offline",   activeBg: "bg-muted-foreground/70", activeText: "text-white", ring: "ring-muted-foreground/30", pillBg: "bg-muted",  pillText: "text-muted-foreground", dot: "bg-muted-foreground/60" },
 };
@@ -495,7 +495,7 @@ const Dashboard = () => {
                     to={`/app/requests?id=${r.id}`}
                     className="py-3.5 flex items-center gap-3 hover:bg-surface-low/55 -mx-2 px-2 rounded-xl transition ease-premium"
                   >
-                    <Avatar initials={c.initials} accent={c.accent} />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{c.name}</p>
                       <p className="text-[11.5px] text-muted-foreground/85 truncate">{r.reason}</p>
@@ -528,7 +528,7 @@ const Dashboard = () => {
               return (
                 <li key={t.id}>
                   <Link to="/app/messages" className="flex items-center gap-3 p-3.5 nested-surface">
-                    <Avatar initials={c.initials} accent={c.accent} />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{c.name}</p>
                       <p className="text-[11.5px] text-muted-foreground/85 truncate">{t.preview}</p>

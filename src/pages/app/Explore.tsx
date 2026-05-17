@@ -41,17 +41,18 @@ type Person = {
   verified?: boolean;
   accent: string;
   tags: string[];
+  status: "available" | "busy" | "focus" | "offline" | "driving" | "unavailable";
 };
 
 const PEOPLE: Person[] = [
-  { id: "p1", name: "Ahmed Khan", initials: "AK", title: "iOS Engineer", company: "Apple", city: "Cupertino", industry: "Developers", mutual: 12, verified: true, accent: "from-sky-500 to-indigo-600", tags: ["Swift", "Mobile"] },
-  { id: "p2", name: "Sara Malik", initials: "SM", title: "Product Designer", company: "Google", city: "London", industry: "Designers", mutual: 8, verified: true, accent: "from-pink-500 to-rose-600", tags: ["UX", "Figma"] },
-  { id: "p3", name: "Ali Raza", initials: "AR", title: "Founder", company: "Finlock", city: "Karachi", industry: "Founders", mutual: 5, verified: false, accent: "from-amber-500 to-orange-600", tags: ["Fintech"] },
-  { id: "p4", name: "Maya Chen", initials: "MC", title: "Senior Recruiter", company: "Stripe", city: "Dubai", industry: "Recruiters", mutual: 3, verified: true, accent: "from-emerald-500 to-teal-600", tags: ["Hiring"] },
-  { id: "p5", name: "Daniel Park", initials: "DP", title: "Partner", company: "Sequoia", city: "Singapore", industry: "Investors", mutual: 21, verified: true, accent: "from-violet-500 to-fuchsia-600", tags: ["Seed", "Series A"] },
-  { id: "p6", name: "Lena Voss", initials: "LV", title: "Content Creator", company: "Independent", city: "Berlin", industry: "Creators", mutual: 2, verified: false, accent: "from-rose-500 to-red-600", tags: ["Video"] },
-  { id: "p7", name: "Hassan Iqbal", initials: "HI", title: "Full-stack Engineer", company: "Vercel", city: "Karachi", industry: "Developers", mutual: 6, verified: true, accent: "from-cyan-500 to-blue-600", tags: ["React"] },
-  { id: "p8", name: "Ivy Okafor", initials: "IO", title: "Brand Designer", company: "Linear", city: "Lagos", industry: "Designers", mutual: 4, verified: true, accent: "from-lime-500 to-emerald-600", tags: ["Brand"] },
+  { id: "p1", name: "Ahmed Khan", initials: "AK", title: "iOS Engineer", company: "Apple", city: "Cupertino", industry: "Developers", mutual: 12, verified: true, accent: "from-sky-500 to-indigo-600", tags: ["Swift", "Mobile"], status: "available" },
+  { id: "p2", name: "Sara Malik", initials: "SM", title: "Product Designer", company: "Google", city: "London", industry: "Designers", mutual: 8, verified: true, accent: "from-pink-500 to-rose-600", tags: ["UX", "Figma"], status: "focus" },
+  { id: "p3", name: "Ali Raza", initials: "AR", title: "Founder", company: "Finlock", city: "Karachi", industry: "Founders", mutual: 5, verified: false, accent: "from-amber-500 to-orange-600", tags: ["Fintech"], status: "busy" },
+  { id: "p4", name: "Maya Chen", initials: "MC", title: "Senior Recruiter", company: "Stripe", city: "Dubai", industry: "Recruiters", mutual: 3, verified: true, accent: "from-emerald-500 to-teal-600", tags: ["Hiring"], status: "available" },
+  { id: "p5", name: "Daniel Park", initials: "DP", title: "Partner", company: "Sequoia", city: "Singapore", industry: "Investors", mutual: 21, verified: true, accent: "from-violet-500 to-fuchsia-600", tags: ["Seed", "Series A"], status: "driving" },
+  { id: "p6", name: "Lena Voss", initials: "LV", title: "Content Creator", company: "Independent", city: "Berlin", industry: "Creators", mutual: 2, verified: false, accent: "from-rose-500 to-red-600", tags: ["Video"], status: "offline" },
+  { id: "p7", name: "Hassan Iqbal", initials: "HI", title: "Full-stack Engineer", company: "Vercel", city: "Karachi", industry: "Developers", mutual: 6, verified: true, accent: "from-cyan-500 to-blue-600", tags: ["React"], status: "focus" },
+  { id: "p8", name: "Ivy Okafor", initials: "IO", title: "Brand Designer", company: "Linear", city: "Lagos", industry: "Designers", mutual: 4, verified: true, accent: "from-lime-500 to-emerald-600", tags: ["Brand"], status: "available" },
 ];
 
 type Post = {
@@ -176,7 +177,7 @@ const Explore = () => {
                 className="snap-start shrink-0 w-56 rounded-2xl bg-surface-lowest border border-border/60 p-4 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex flex-col items-center text-center">
-                  <Avatar initials={p.initials} accent={p.accent} size="lg" />
+                  <Avatar initials={p.initials} accent={p.accent} status={p.status} size="lg" />
                   <div className="mt-2 flex items-center gap-1">
                     <p className="font-semibold text-primary text-sm truncate max-w-[10rem]">{p.name}</p>
                     {p.verified && <BadgeCheck className="w-4 h-4 text-sky-500" aria-label="Verified" />}
@@ -221,7 +222,7 @@ const Explore = () => {
             return (
               <article key={post.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-4 shadow-sm">
                 <header className="flex items-center gap-3">
-                  <Avatar initials={a.initials} accent={a.accent} />
+                  <Avatar initials={a.initials} accent={a.accent} status={a.status} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
                       <p className="font-semibold text-primary text-sm truncate">{a.name}</p>
@@ -293,7 +294,7 @@ const Explore = () => {
           {trending.map((p, i) => (
             <div key={p.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-3 flex items-center gap-3">
               <span className="text-xs font-bold text-muted-foreground w-5 text-center">#{i + 1}</span>
-              <Avatar initials={p.initials} accent={p.accent} />
+              <Avatar initials={p.initials} accent={p.accent} status={p.status} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
                   <p className="font-semibold text-primary text-sm truncate">{p.name}</p>
@@ -332,7 +333,7 @@ const Explore = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {nearby.map((p) => (
               <div key={p.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-4 flex items-center gap-3">
-                <Avatar initials={p.initials} accent={p.accent} size="lg" />
+                <Avatar initials={p.initials} accent={p.accent} status={p.status} size="lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1">
                     <p className="font-semibold text-primary text-sm truncate">{p.name}</p>
@@ -385,7 +386,7 @@ const Explore = () => {
             const p = PEOPLE[0];
             return (
               <div className="rounded-2xl bg-surface-lowest border border-border/60 p-5 text-center">
-                <Avatar initials={p.initials} accent={p.accent} size="xl" className="mx-auto" />
+                <Avatar initials={p.initials} accent={p.accent} status={p.status} size="xl" className="mx-auto" />
                 <div className="mt-3 flex items-center justify-center gap-1">
                   <p className="font-semibold text-primary">{p.name}</p>
                   {p.verified && <BadgeCheck className="w-4 h-4 text-sky-500" />}

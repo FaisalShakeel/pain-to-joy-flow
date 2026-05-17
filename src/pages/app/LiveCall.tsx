@@ -27,7 +27,7 @@ const LiveCall = () => {
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-accent-soft/20 blur-3xl" />
           <div className="relative">
             <div className="flex items-center gap-4">
-              <Avatar initials={contact.initials} accent={contact.accent} size="xl" />
+              <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} size="xl" />
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Status</p>
                 <h2 className="font-headline font-extrabold text-3xl mt-1">

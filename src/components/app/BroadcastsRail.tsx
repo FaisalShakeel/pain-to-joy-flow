@@ -164,7 +164,7 @@ const BroadcastsRail = ({ onReply }: Props) => {
                     }}
                     className="w-full flex items-center gap-2.5 p-2 text-left hover:bg-surface-low/60 transition"
                   >
-                    <Avatar initials={c.initials} accent={c.accent} />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className={cn("w-1.5 h-1.5 rounded-full", Tn.dot)} />

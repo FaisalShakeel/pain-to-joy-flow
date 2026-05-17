@@ -236,7 +236,7 @@ const Contacts = () => {
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
     busy: "bg-amber-500",
-    focus: "bg-violet-500",
+    focus: "bg-sky-500",
     offline: "bg-muted-foreground",
   };
   const statusLabel: Record<string, string> = {
@@ -303,7 +303,7 @@ const Contacts = () => {
                     {searchMatches.slice(0, 6).map((c) => (
                       <li key={c.id}>
                         <Link to={`/app/contact/${c.id}`} onClick={() => setSearchOpen(false)} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface-low transition">
-                          <Avatar initials={c.initials} accent={c.accent} size="sm" />
+                          <Avatar initials={c.initials} accent={c.accent} status={c.status} size="sm" />
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
                             <p className="text-[11px] text-muted-foreground truncate">{c.title} · {c.org}</p>
@@ -455,7 +455,7 @@ const Contacts = () => {
                     )}
                   >
                     <div className="relative shrink-0">
-                      <Avatar initials={c.initials} accent={c.accent} size={roomy ? "lg" : medium ? "md" : "sm"} />
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : medium ? "md" : "sm"} />
                       <span
                         className={cn(
                           "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
@@ -561,7 +561,7 @@ const Contacts = () => {
                   className="group block h-full p-5 rounded-2xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <Avatar initials={c.initials} accent={c.accent} size="lg" />
+                    <Avatar initials={c.initials} accent={c.accent} status={c.status} size="lg" />
                     <div className="flex flex-col items-end gap-1.5">
                       <StatusPill tone={c.status} />
                       <div className="flex items-center gap-1">
@@ -601,7 +601,7 @@ const Contacts = () => {
                   to={`/app/contact/${c.id}`}
                   className="group flex items-center gap-4 p-4 rounded-2xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition"
                 >
-                  <Avatar initials={c.initials} accent={c.accent} size="lg" />
+                  <Avatar initials={c.initials} accent={c.accent} status={c.status} size="lg" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-headline font-bold text-primary truncate">{c.name}</p>
