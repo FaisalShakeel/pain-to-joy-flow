@@ -236,7 +236,7 @@ const Contacts = () => {
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
     busy: "bg-amber-500",
-    focus: "bg-violet-500",
+    focus: "bg-sky-500",
     offline: "bg-muted-foreground",
   };
   const statusLabel: Record<string, string> = {
