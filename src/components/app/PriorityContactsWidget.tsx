@@ -60,9 +60,18 @@ const ContactRow = ({
         </Link>
       )}
       <div className="flex items-start gap-3">
-        <Link to={`/app/contact/${c.id}`} className="shrink-0">
-          <Avatar initials={c.initials} accent={c.accent} status={c.status} />
-        </Link>
+        <div className="flex flex-col items-center gap-1.5 shrink-0">
+          <Link to={`/app/contact/${c.id}`}>
+            <Avatar initials={c.initials} accent={c.accent} status={c.status} />
+          </Link>
+          <Link
+            to={`/app/contact/${c.id}/log`}
+            title="Open Connection Log"
+            className="grid place-items-center w-7 h-7 rounded-full bg-surface-lowest text-muted-foreground hover:text-accent transition"
+          >
+            <Activity className="w-3 h-3" />
+          </Link>
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <Link to={`/app/contact/${c.id}`} className="text-sm font-semibold text-primary truncate hover:text-accent">
@@ -99,13 +108,6 @@ const ContactRow = ({
               {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
             </button>
           )}
-          <Link
-            to={`/app/contact/${c.id}/log`}
-            title="Open Connection Log"
-            className="grid place-items-center w-7 h-7 rounded-full bg-surface-lowest text-muted-foreground hover:text-accent transition"
-          >
-            <Activity className="w-3 h-3" />
-          </Link>
           <PingButton contact={c} drivingOverride={driving} />
         </div>
       </div>
