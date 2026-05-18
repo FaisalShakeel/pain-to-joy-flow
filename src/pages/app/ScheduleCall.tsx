@@ -634,11 +634,13 @@ function HybridIcon({
 
 function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean; onPick: () => void }) {
   const disabled = slot.full;
+  const dur = clampQuickDuration(slot.duration);
+  const endTime = addMinutes(slot.time, dur);
   return (
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-3 rounded-xl border transition relative overflow-hidden ${
+      className={`text-left p-2 rounded-lg border transition relative overflow-hidden ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
@@ -646,23 +648,24 @@ function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean;
           : "bg-amber-500/5 border-amber-500/30 text-primary hover:bg-amber-500/10"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-headline font-bold text-sm inline-flex items-center gap-1.5 leading-none">
-          <Zap className={`w-3.5 h-3.5 ${active ? "text-white" : "text-amber-600"}`} /> {slot.time}
+      <div className="flex items-center justify-between gap-1.5">
+        <span className="font-headline font-bold text-[12px] tabular-nums inline-flex items-center gap-1 leading-none">
+          <Zap className={`w-3 h-3 ${active ? "text-white" : "text-amber-600"}`} />
+          {slot.time}<span className="opacity-70">–{endTime}</span>
         </span>
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
-          {slot.duration} min
+        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
+          {dur} min
         </span>
       </div>
-      <p className={`mt-1 text-[11px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
-        <Video className="w-3 h-3" /> Online · one-tap
+      <p className={`mt-0.5 text-[10px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
+        <Video className="w-2.5 h-2.5" /> Online · one-tap
       </p>
-      <div className="mt-1.5">
+      <div className="mt-1">
         <PriceTag pricing={slot.pricing} />
       </div>
-      <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
-        {slot.approval ? <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>
-          : <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> Instant</span>}
+      <div className={`mt-1 flex items-center gap-1.5 text-[9px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
+        {slot.approval ? <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>
+          : <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> Instant</span>}
       </div>
     </button>
   );
