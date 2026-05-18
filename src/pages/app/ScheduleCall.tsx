@@ -337,7 +337,10 @@ const ScheduleCall = () => {
                   {selected.kind === "meeting" ? "Meeting length" : "Call length"}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(selected.kind === "meeting" ? selected.durations : [selected.duration]).map((d) => (
+                  {(selected.kind === "meeting"
+                    ? clampMeetingDurations(selected.durations)
+                    : [clampQuickDuration(selected.duration)]
+                  ).map((d) => (
                     <button
                       key={d}
                       onClick={() => setDuration(d)}
