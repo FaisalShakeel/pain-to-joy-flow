@@ -462,6 +462,17 @@ const Contacts = () => {
                           statusDot[c.status],
                         )}
                       />
+                      <Link
+                        to={`/app/contact/${c.id}/log`}
+                        onClick={(e) => e.stopPropagation()}
+                        title="Connection Log"
+                        className={cn(
+                          "mt-1.5 mx-auto grid place-items-center rounded-full bg-surface-low text-muted-foreground hover:text-accent transition",
+                          roomy ? "w-6 h-6" : "w-5 h-5",
+                        )}
+                      >
+                        <Activity className={roomy ? "w-3 h-3" : "w-2.5 h-2.5"} />
+                      </Link>
                     </div>
                     <div className={cn("min-w-0 flex-1", roomy ? "pr-10" : medium ? "pr-9" : "pr-8")}>
                       <div className="flex items-center gap-1.5">
@@ -528,17 +539,6 @@ const Contacts = () => {
                   </Link>
                   <div className={cn("absolute", roomy ? "bottom-2 right-2" : medium ? "bottom-1.5 right-1.5" : "bottom-1 right-1")}>
                     <div className="flex items-center gap-1">
-                      <Link
-                        to={`/app/contact/${c.id}/log`}
-                        onClick={(e) => e.stopPropagation()}
-                        title="Connection Log"
-                        className={cn(
-                          "grid place-items-center rounded-full bg-surface-low text-muted-foreground hover:text-accent transition",
-                          roomy ? "w-6 h-6" : "w-5 h-5",
-                        )}
-                      >
-                        <Activity className={roomy ? "w-3 h-3" : "w-2.5 h-2.5"} />
-                      </Link>
                       <PingButton contact={c} size="sm" />
                     </div>
                   </div>
