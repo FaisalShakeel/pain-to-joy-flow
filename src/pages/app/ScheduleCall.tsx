@@ -88,6 +88,28 @@ const dayShort = (iso: string) => {
   return { dow: d.toLocaleDateString(undefined, { weekday: "short" }), num: d.getDate() };
 };
 
+// Time math + duration constraints
+// Meetings: 15–35 min only. Quick Syncs: 3–8 min only.
+const MEETING_MIN = 15;
+const MEETING_MAX = 35;
+const QUICK_ALLOWED = [3, 5, 8] as const;
+
+const clampMeetingDurations = (ds: number[]): number[] => {
+  const filtered = ds.filter((d) => d >= MEETING_MIN && d <= MEETING_MAX);
+  return filtered.length ? filtered : [MEETING_MIN];
+};
+const clampQuickDuration = (d: number): 3 | 5 | 8 => {
+  if (d <= 3) return 3;
+  if (d <= 5) return 5;
+  return 8;
+};
+
+const addMinutes = (hhmm: string, mins: number): string => {
+  const [h, m] = hhmm.split(":").map(Number);
+  const total = h * 60 + m + mins;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+};
+
 // =============================================================================
 const ScheduleCall = () => {
   const { id = "" } = useParams();
