@@ -436,7 +436,7 @@ const Contacts = () => {
           className="mt-4 overflow-y-auto pr-1 rounded-2xl"
           style={{ maxHeight: scrollMaxHeight }}
         >
-          <ul className={cn("grid", density === 6 ? "gap-4" : density === 10 ? "gap-3" : "gap-2", densityCols[density])}>
+          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : density === 10 ? "gap-3" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
@@ -444,12 +444,12 @@ const Contacts = () => {
               const roomy = density === 6;
               const medium = density === 10;
               return (
-                <li key={c.id} className="relative">
+                <li key={c.id} className="relative h-full">
                   <Link
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
-                      "group flex items-start rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
+                      "group flex items-start h-full w-full rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
                       roomy ? "gap-3 p-4" : medium ? "gap-2.5 p-3" : "gap-2 p-2",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
