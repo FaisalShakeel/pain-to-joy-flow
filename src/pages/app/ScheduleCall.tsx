@@ -530,11 +530,14 @@ function MeetingCard({
 }) {
   const C = channelMeta[slot.channel];
   const disabled = slot.full;
+  const durations = clampMeetingDurations(slot.durations);
+  const maxDur = durations[durations.length - 1];
+  const endTime = addMinutes(slot.time, maxDur);
   return (
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-3 rounded-xl border transition ${
+      className={`text-left p-2 rounded-lg border transition ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
@@ -542,8 +545,10 @@ function MeetingCard({
           : "bg-surface-low ghost-border text-primary hover:bg-surface hover:shadow-ambient"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-headline font-bold text-sm leading-none">{slot.time}</span>
+      <div className="flex items-center justify-between gap-1.5">
+        <span className="font-headline font-bold text-[12px] tabular-nums leading-none">
+          {slot.time}<span className="opacity-70">–{endTime}</span>
+        </span>
         <span className="inline-flex items-center gap-1">
           {slot.channel === "hybrid" ? (
             <>
@@ -567,26 +572,26 @@ function MeetingCard({
               />
             </>
           ) : (
-            <C.icon className={`w-3.5 h-3.5 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
+            <C.icon className={`w-3 h-3 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
           )}
         </span>
       </div>
-      <p className={`mt-1 text-[11px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-        {slot.durations[0]}–{slot.durations[slot.durations.length - 1]} min
+      <p className={`mt-0.5 text-[10px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+        {durations[0]}–{maxDur} min
         {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
       </p>
-      <div className="mt-1.5">
+      <div className="mt-1">
         <PriceTag pricing={slot.pricing} />
       </div>
-      <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-        <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> 3-min buffer</span>
-        {slot.approval && <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>}
+      <div className={`mt-1 flex items-center flex-wrap gap-x-1.5 gap-y-0.5 text-[9px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+        <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> 3m buf</span>
+        {slot.approval && <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>}
         {slot.channel === "hybrid" && slot.taken && (
-          <span className="inline-flex items-center gap-1">{slot.taken === "online" ? "On-site only" : "Online only"}</span>
+          <span>{slot.taken === "online" ? "On-site only" : "Online only"}</span>
         )}
         {slot.channel === "hybrid" && !slot.taken && active && (
-          <span className="inline-flex items-center gap-1 font-semibold">
-            · {hybridPick === "online" ? "Online picked" : "On-site picked"}
+          <span className="font-semibold">
+            · {hybridPick === "online" ? "Online" : "On-site"}
           </span>
         )}
       </div>
