@@ -88,6 +88,28 @@ const dayShort = (iso: string) => {
   return { dow: d.toLocaleDateString(undefined, { weekday: "short" }), num: d.getDate() };
 };
 
+// Time math + duration constraints
+// Meetings: 15–35 min only. Quick Syncs: 3–8 min only.
+const MEETING_MIN = 15;
+const MEETING_MAX = 35;
+const QUICK_ALLOWED = [3, 5, 8] as const;
+
+const clampMeetingDurations = (ds: number[]): number[] => {
+  const filtered = ds.filter((d) => d >= MEETING_MIN && d <= MEETING_MAX);
+  return filtered.length ? filtered : [MEETING_MIN];
+};
+const clampQuickDuration = (d: number): 3 | 5 | 8 => {
+  if (d <= 3) return 3;
+  if (d <= 5) return 5;
+  return 8;
+};
+
+const addMinutes = (hhmm: string, mins: number): string => {
+  const [h, m] = hhmm.split(":").map(Number);
+  const total = h * 60 + m + mins;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+};
+
 // =============================================================================
 const ScheduleCall = () => {
   const { id = "" } = useParams();
@@ -260,7 +282,7 @@ const ScheduleCall = () => {
                   No {bookingType === "meeting" ? "meeting" : "Quick Sync"} slots on this day.
                 </div>
               ) : (
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                    {filtered.map((s) =>
                      s.kind === "meeting" ? (
                        <MeetingCard
@@ -315,7 +337,10 @@ const ScheduleCall = () => {
                   {selected.kind === "meeting" ? "Meeting length" : "Call length"}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(selected.kind === "meeting" ? selected.durations : [selected.duration]).map((d) => (
+                  {(selected.kind === "meeting"
+                    ? clampMeetingDurations(selected.durations)
+                    : [clampQuickDuration(selected.duration)]
+                  ).map((d) => (
                     <button
                       key={d}
                       onClick={() => setDuration(d)}
@@ -508,11 +533,14 @@ function MeetingCard({
 }) {
   const C = channelMeta[slot.channel];
   const disabled = slot.full;
+  const durations = clampMeetingDurations(slot.durations);
+  const maxDur = durations[durations.length - 1];
+  const endTime = addMinutes(slot.time, maxDur);
   return (
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-3 rounded-xl border transition ${
+      className={`text-left p-2 rounded-lg border transition ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
@@ -520,8 +548,10 @@ function MeetingCard({
           : "bg-surface-low ghost-border text-primary hover:bg-surface hover:shadow-ambient"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-headline font-bold text-sm leading-none">{slot.time}</span>
+      <div className="flex items-center justify-between gap-1.5">
+        <span className="font-headline font-bold text-[12px] tabular-nums leading-none">
+          {slot.time}<span className="opacity-70">–{endTime}</span>
+        </span>
         <span className="inline-flex items-center gap-1">
           {slot.channel === "hybrid" ? (
             <>
@@ -545,26 +575,26 @@ function MeetingCard({
               />
             </>
           ) : (
-            <C.icon className={`w-3.5 h-3.5 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
+            <C.icon className={`w-3 h-3 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
           )}
         </span>
       </div>
-      <p className={`mt-1 text-[11px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-        {slot.durations[0]}–{slot.durations[slot.durations.length - 1]} min
+      <p className={`mt-0.5 text-[10px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+        {durations[0]}–{maxDur} min
         {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
       </p>
-      <div className="mt-1.5">
+      <div className="mt-1">
         <PriceTag pricing={slot.pricing} />
       </div>
-      <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-        <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> 3-min buffer</span>
-        {slot.approval && <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>}
+      <div className={`mt-1 flex items-center flex-wrap gap-x-1.5 gap-y-0.5 text-[9px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+        <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> 3m buf</span>
+        {slot.approval && <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>}
         {slot.channel === "hybrid" && slot.taken && (
-          <span className="inline-flex items-center gap-1">{slot.taken === "online" ? "On-site only" : "Online only"}</span>
+          <span>{slot.taken === "online" ? "On-site only" : "Online only"}</span>
         )}
         {slot.channel === "hybrid" && !slot.taken && active && (
-          <span className="inline-flex items-center gap-1 font-semibold">
-            · {hybridPick === "online" ? "Online picked" : "On-site picked"}
+          <span className="font-semibold">
+            · {hybridPick === "online" ? "Online" : "On-site"}
           </span>
         )}
       </div>
@@ -607,11 +637,13 @@ function HybridIcon({
 
 function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean; onPick: () => void }) {
   const disabled = slot.full;
+  const dur = clampQuickDuration(slot.duration);
+  const endTime = addMinutes(slot.time, dur);
   return (
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-3 rounded-xl border transition relative overflow-hidden ${
+      className={`text-left p-2 rounded-lg border transition relative overflow-hidden ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
@@ -619,23 +651,24 @@ function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean;
           : "bg-amber-500/5 border-amber-500/30 text-primary hover:bg-amber-500/10"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-headline font-bold text-sm inline-flex items-center gap-1.5 leading-none">
-          <Zap className={`w-3.5 h-3.5 ${active ? "text-white" : "text-amber-600"}`} /> {slot.time}
+      <div className="flex items-center justify-between gap-1.5">
+        <span className="font-headline font-bold text-[12px] tabular-nums inline-flex items-center gap-1 leading-none">
+          <Zap className={`w-3 h-3 ${active ? "text-white" : "text-amber-600"}`} />
+          {slot.time}<span className="opacity-70">–{endTime}</span>
         </span>
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
-          {slot.duration} min
+        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
+          {dur} min
         </span>
       </div>
-      <p className={`mt-1 text-[11px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
-        <Video className="w-3 h-3" /> Online · one-tap
+      <p className={`mt-0.5 text-[10px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
+        <Video className="w-2.5 h-2.5" /> Online · one-tap
       </p>
-      <div className="mt-1.5">
+      <div className="mt-1">
         <PriceTag pricing={slot.pricing} />
       </div>
-      <div className={`mt-1.5 flex items-center gap-2 text-[10px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
-        {slot.approval ? <span className="inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Approval</span>
-          : <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> Instant</span>}
+      <div className={`mt-1 flex items-center gap-1.5 text-[9px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
+        {slot.approval ? <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>
+          : <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> Instant</span>}
       </div>
     </button>
   );
