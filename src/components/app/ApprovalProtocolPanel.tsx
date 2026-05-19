@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic, MessageSquare, CalendarDays, ShieldCheck, Ban, Undo2, Contact, Share2 } from "lucide-react";
+import { Mic, MessageSquare, CalendarDays, ShieldCheck, Ban, Undo2, Contact, Share2, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type Channel = "voice" | "message" | "schedule" | "contact" | "social";
@@ -13,11 +13,23 @@ interface Props {
 }
 
 const ApprovalProtocolPanel = ({ contactName, onAuthorize, onDecline }: Props) => {
-  const [channel, setChannel] = useState<Channel>("voice");
-  const [lane, setLane] = useState<Lane>("urgent");
-  const [duration, setDuration] = useState<Duration>("week");
+  const [channels, setChannels] = useState<Set<Channel>>(
+    new Set(["voice", "message", "schedule", "social"]),
+  );
+  const [lane, setLane] = useState<Lane>("standard");
+  const [duration, setDuration] = useState<Duration>("forever");
 
-  const channels: { id: Channel; icon: typeof Mic; label: string }[] = [
+  const toggleChannel = (id: Channel) => {
+    if (id === "contact") return;
+    setChannels((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const channelList: { id: Channel; icon: typeof Mic; label: string }[] = [
     { id: "voice", icon: Mic, label: "Voice" },
     { id: "message", icon: MessageSquare, label: "Message" },
     { id: "schedule", icon: CalendarDays, label: "Schedule" },
@@ -42,21 +54,28 @@ const ApprovalProtocolPanel = ({ contactName, onAuthorize, onDecline }: Props) =
       {/* Connection channels */}
       <Section label="Connection channels">
         <div className="grid grid-cols-5 gap-1.5">
-          {channels.map((c) => {
+          {channelList.map((c) => {
             const Icon = c.icon;
-            const active = channel === c.id;
+            const blocked = c.id === "contact";
+            const active = channels.has(c.id);
             return (
               <button
                 key={c.id}
-                onClick={() => setChannel(c.id)}
-                className={`flex flex-col items-center justify-center gap-1 py-2 rounded-xl border text-[10px] font-semibold transition ${
-                  active
-                    ? "bg-primary/5 border-primary text-primary shadow-glass"
-                    : "ghost-border bg-surface-low text-muted-foreground hover:text-primary hover:bg-surface"
+                onClick={() => toggleChannel(c.id)}
+                disabled={blocked}
+                className={`relative flex flex-col items-center justify-center gap-1 py-2 rounded-xl border text-[10px] font-semibold transition ${
+                  blocked
+                    ? "ghost-border bg-surface-low text-muted-foreground/60 cursor-not-allowed opacity-70"
+                    : active
+                      ? "bg-primary/5 border-primary text-primary shadow-glass"
+                      : "ghost-border bg-surface-low text-muted-foreground hover:text-primary hover:bg-surface"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {c.label}
+                {blocked && (
+                  <Lock className="absolute top-1 right-1 w-2.5 h-2.5 text-muted-foreground" />
+                )}
               </button>
             );
           })}
@@ -113,7 +132,7 @@ const ApprovalProtocolPanel = ({ contactName, onAuthorize, onDecline }: Props) =
         onClick={() => {
           toast({
             title: "Request authorized",
-            description: `${channel} · ${lane} · ${duration}`,
+            description: `${Array.from(channels).join(", ")} · ${lane} · ${duration}`,
           });
           onAuthorize?.();
         }}
