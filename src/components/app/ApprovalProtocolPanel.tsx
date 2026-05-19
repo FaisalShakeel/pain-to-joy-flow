@@ -20,7 +20,6 @@ const ApprovalProtocolPanel = ({ contactName, onAuthorize, onDecline }: Props) =
   const [duration, setDuration] = useState<Duration>("forever");
 
   const toggleChannel = (id: Channel) => {
-    if (id === "contact") return;
     setChannels((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -56,24 +55,20 @@ const ApprovalProtocolPanel = ({ contactName, onAuthorize, onDecline }: Props) =
         <div className="grid grid-cols-5 gap-1.5">
           {channelList.map((c) => {
             const Icon = c.icon;
-            const blocked = c.id === "contact";
             const active = channels.has(c.id);
             return (
               <button
                 key={c.id}
                 onClick={() => toggleChannel(c.id)}
-                disabled={blocked}
                 className={`relative flex flex-col items-center justify-center gap-1 py-2 rounded-xl border text-[10px] font-semibold transition ${
-                  blocked
-                    ? "ghost-border bg-surface-low text-muted-foreground/60 cursor-not-allowed opacity-70"
-                    : active
-                      ? "bg-primary/5 border-primary text-primary shadow-glass"
-                      : "ghost-border bg-surface-low text-muted-foreground hover:text-primary hover:bg-surface"
+                  active
+                    ? "bg-primary/5 border-primary text-primary shadow-glass"
+                    : "ghost-border bg-surface-low text-muted-foreground hover:text-primary hover:bg-surface"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {c.label}
-                {blocked && (
+                {!active && (
                   <Lock className="absolute top-1 right-1 w-2.5 h-2.5 text-muted-foreground" />
                 )}
               </button>
