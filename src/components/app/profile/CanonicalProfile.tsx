@@ -281,7 +281,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                 {show("availabilityContext") && (
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground max-w-[240px] md:text-right">
                     <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span className="text-amber-700 truncate">{owner.availabilityContext}</span>
+                    <span className="text-amber-700 truncate">Available till 3:00 PM</span>
                   </span>
                 )}
                 {syncWindows.length > 0 && (
@@ -344,8 +344,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         <CommsCard
           title="Primary Comms"
           badge="Secure"
-          locked={!isApproved}
-          footer={isApproved ? "Displayed if approved" : undefined}
+          locked={true}
+          footer={undefined}
           emptyLabel={visiblePrimaryComms.length === 0 ? "Owner has hidden all channels" : undefined}
           items={visiblePrimaryComms.map((c) => ({
             icon: commsIcon(c.kind),
