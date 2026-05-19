@@ -130,23 +130,7 @@ const AccessRequests = () => {
     <AppShell
       subtitle={role === "provider" ? "Provider control" : "Your activity"}
       title="Access requests"
-      actions={
-        <div className="flex items-center gap-2">
-          <InboxSheet
-            list={list.filter((r) => r.direction === tab)}
-            onPick={(id) => setCursorId(id)}
-          />
-          <Link
-            to="/app/requests/manage"
-            className="hidden md:inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
-          >
-            <ShieldCheck className="w-4 h-4" /> Approval flow
-          </Link>
-        </div>
-      }
-    >
-      {/* Tab + queue indicator */}
-      <div className="flex items-center justify-between flex-wrap gap-2 -mt-2 mb-3">
+      headerInline={
         <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
           {(["incoming", "outgoing"] as const).map((t) => (
             <button
@@ -160,29 +144,41 @@ const AccessRequests = () => {
             </button>
           ))}
         </div>
-        {current && pending.length > 0 && (
-          <div className="flex items-center gap-1.5 text-[11px]">
-            <button
-              onClick={() => pending[currentIndex - 1] && setCursorId(pending[currentIndex - 1].id)}
-              disabled={currentIndex === 0}
-              className="p-1 rounded-full ghost-border bg-surface-lowest disabled:opacity-40 hover:bg-surface-low"
-            >
-              <ArrowLeft className="w-3 h-3" />
-            </button>
-            <span className="font-bold text-primary">
-              Request {currentIndex + 1} of {pending.length}
-            </span>
-            <button
-              onClick={() => pending[currentIndex + 1] && setCursorId(pending[currentIndex + 1].id)}
-              disabled={currentIndex >= pending.length - 1}
-              className="p-1 rounded-full ghost-border bg-surface-lowest disabled:opacity-40 hover:bg-surface-low"
-            >
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-        )}
-      </div>
-
+      }
+      actions={
+        <div className="flex items-center gap-2">
+          {current && pending.length > 0 && (
+            <div className="flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full ghost-border bg-surface-lowest">
+              <button
+                onClick={() => pending[currentIndex - 1] && setCursorId(pending[currentIndex - 1].id)}
+                disabled={currentIndex === 0}
+                className="p-1 rounded-full disabled:opacity-40 hover:bg-surface-low"
+                aria-label="Previous request"
+              >
+                <ArrowLeft className="w-3 h-3" />
+              </button>
+              <span className="font-bold text-primary whitespace-nowrap">
+                Request {currentIndex + 1} of {pending.length}
+              </span>
+              <button
+                onClick={() => pending[currentIndex + 1] && setCursorId(pending[currentIndex + 1].id)}
+                disabled={currentIndex >= pending.length - 1}
+                className="p-1 rounded-full disabled:opacity-40 hover:bg-surface-low"
+                aria-label="Next request"
+              >
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+          <Link
+            to="/app/requests/manage"
+            className="hidden md:inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"
+          >
+            <ShieldCheck className="w-4 h-4" /> Approval flow
+          </Link>
+        </div>
+      }
+    >
       {!current ? (
         <div className="rounded-3xl bg-surface-lowest p-10 ghost-border">
           <EmptyState
