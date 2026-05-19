@@ -14,6 +14,7 @@ import { contacts, type AccessRequest } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
 import { toast } from "@/hooks/use-toast";
 import { useRole } from "@/lib/role";
+import ApprovalProtocolPanel from "@/components/app/ApprovalProtocolPanel";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
@@ -202,11 +203,18 @@ const AccessRequests = () => {
       ) : tab === "outgoing" ? (
         <OutgoingView request={current} />
       ) : (
-        <DecisionInterface
-          key={current.id}
-          request={current}
-          onAct={handleAct}
-        />
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5 items-start">
+          <DecisionInterface
+            key={current.id}
+            request={current}
+            onAct={handleAct}
+          />
+          <ApprovalProtocolPanel
+            contactName={contacts.find((x) => x.id === current.contactId)?.name}
+            onAuthorize={() => handleAct(current.id, "approved")}
+            onDecline={() => handleAct(current.id, "denied")}
+          />
+        </div>
       )}
     </AppShell>
   );
