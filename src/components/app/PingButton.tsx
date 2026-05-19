@@ -170,7 +170,7 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-2 z-40 w-72 rounded-2xl ghost-border bg-surface-lowest shadow-elevated p-2 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute left-0 top-full mt-2 z-40 w-72 rounded-2xl ghost-border bg-surface-lowest shadow-elevated p-2 animate-in fade-in zoom-in-95 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-2 py-1">
