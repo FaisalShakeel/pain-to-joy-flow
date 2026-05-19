@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import AccessChip from "@/components/app/ui/AccessChip";
 import { usePins, MAX_PINS } from "@/lib/pinsStore";
+import { useSpotlight } from "@/components/app/SpotlightContext";
 
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
@@ -79,6 +80,7 @@ const Contacts = () => {
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { pins: pinned, isPinned: isPinnedFn, canPin, togglePin: storeTogglePin } = usePins();
+  const { unseenForContact, markSeen, markContactPostsViewed } = useSpotlight();
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -445,6 +447,20 @@ const Contacts = () => {
               const medium = density === 10;
               return (
                 <li key={c.id} className="relative h-full">
+                  {unseenForContact(c.id) > 0 && (
+                    <Link
+                      to={`/app/contact/${c.id}`}
+                      onClick={(e) => { e.stopPropagation(); markSeen(c.id); markContactPostsViewed(c.id); }}
+                      title={`${unseenForContact(c.id)} new spotlight ${unseenForContact(c.id) === 1 ? "post" : "posts"}`}
+                      aria-label="New spotlight posts"
+                      className="absolute -top-1.5 -left-1.5 z-10 grid place-items-center w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 text-white shadow-glass ring-2 ring-surface-lowest animate-pulse"
+                    >
+                      <Megaphone className="w-3 h-3" />
+                      <span className="absolute -bottom-1 -right-1 grid place-items-center min-w-[14px] h-[14px] px-[3px] rounded-full bg-primary text-primary-foreground text-[8px] font-bold">
+                        {unseenForContact(c.id)}
+                      </span>
+                    </Link>
+                  )}
                   <Link
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
