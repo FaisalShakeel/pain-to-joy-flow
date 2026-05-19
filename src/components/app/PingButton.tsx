@@ -158,7 +158,17 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
             : "bg-primary/10 text-primary hover:bg-primary/20",
         )}
       >
-        <Bell className={cn(iconSize, open && "animate-pulse")} />
+        {/* Soft fading halo to draw attention — matches spotlight icon's pulse */}
+        {!open && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "absolute inset-0 rounded-full animate-ping opacity-60",
+              priority ? "bg-amber-400/30" : "bg-primary/20",
+            )}
+          />
+        )}
+        <Bell className={cn(iconSize, "relative animate-pulse")} />
         {priority && (
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 ring-2 ring-surface-lowest" />
         )}
