@@ -1,22 +1,43 @@
-import { ShieldCheck, Handshake, Users, MessageSquareQuote, Clock3, BadgeCheck, AlertCircle, Zap, Briefcase } from "lucide-react";
+import { useState } from "react";
+import { ShieldCheck, Handshake, Users, MessageSquareQuote, Clock3, BadgeCheck, ChevronDown, Send } from "lucide-react";
 import Avatar from "@/components/app/Avatar";
 import { contacts, type AccessRequest } from "@/lib/mockData";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
   request: AccessRequest;
+  variant?: "incoming" | "outgoing";
+  onSend?: () => void;
 }
 
-const AccessRequestDetailsPanel = ({ request }: Props) => {
+const PRIORITY_OPTIONS = [
+  "Standard", "Important", "Urgent",
+  "Collaboration", "Follow-Up", "Informational",
+  "Decision Required", "Escalation", "Critical Issue",
+  "Opportunity", "Support Needed",
+] as const;
+
+type Priority = typeof PRIORITY_OPTIONS[number];
+
+const priorityTone = (p: Priority) => {
+  if (p === "Urgent" || p === "Critical Issue" || p === "Escalation")
+    return "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20";
+  if (p === "Important" || p === "Decision Required" || p === "Support Needed")
+    return "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20";
+  if (p === "Opportunity" || p === "Collaboration")
+    return "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20";
+  return "bg-muted text-muted-foreground ring-1 ring-border";
+};
+
+const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Props) => {
   const c = contacts.find((x) => x.id === request.contactId)!;
 
-  const urgency = request.urgency ?? "low";
-  const urgencyMeta =
-    urgency === "high"
-      ? { label: "Important", icon: AlertCircle, tone: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20" }
-      : urgency === "medium"
-      ? { label: "Priority", icon: Zap, tone: "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20" }
-      : { label: "Routine", icon: BadgeCheck, tone: "bg-muted text-muted-foreground ring-1 ring-border" };
-  const UrgencyIcon = urgencyMeta.icon;
+  const initialPriority: Priority =
+    request.urgency === "high" ? "Urgent" :
+    request.urgency === "medium" ? "Important" : "Standard";
+  const [priority, setPriority] = useState<Priority>(initialPriority);
 
   return (
     <aside className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
@@ -26,11 +47,32 @@ const AccessRequestDetailsPanel = ({ request }: Props) => {
           <ShieldCheck className="w-3 h-3" /> Security Protocol
         </p>
         <h3 className="mt-0.5 font-headline font-extrabold text-primary text-xl leading-tight">
-          Access Request Details
+          {variant === "outgoing" ? "Outgoing Access Request" : "Access Request Details"}
         </h3>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
-          Review the seeker's intent before authorizing connection.
+          {variant === "outgoing"
+            ? "Review and dispatch your permissioned request."
+            : "Review the seeker's intent before authorizing connection."}
         </p>
+        <div className="mt-2 flex items-center justify-center gap-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Priority</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition hover:opacity-90 ${priorityTone(priority)}`}>
+                {priority} <ChevronDown className="w-3 h-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-48">
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wider">Priority window</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {PRIORITY_OPTIONS.map((p) => (
+                <DropdownMenuItem key={p} onSelect={() => setPriority(p)} className="text-xs">
+                  {p}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Identity card */}
@@ -40,9 +82,6 @@ const AccessRequestDetailsPanel = ({ request }: Props) => {
           <p className="font-headline font-bold text-primary text-sm leading-tight truncate">{c.name}</p>
           <p className="text-[11px] text-muted-foreground truncate">{c.title} · {c.org}</p>
         </div>
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${urgencyMeta.tone}`}>
-          <UrgencyIcon className="w-3 h-3" /> {urgencyMeta.label}
-        </span>
       </div>
 
       {/* Connection purpose */}
@@ -82,6 +121,15 @@ const AccessRequestDetailsPanel = ({ request }: Props) => {
           <BadgeCheck className="w-3 h-3" /> Verified Identity
         </span>
       </div>
+
+      {variant === "outgoing" && (
+        <button
+          onClick={onSend}
+          className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition"
+        >
+          <Send className="w-4 h-4" /> Send Request
+        </button>
+      )}
     </aside>
   );
 };
