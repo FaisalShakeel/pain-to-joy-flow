@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Calendar, Mail, Smartphone,
-  MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Download,
+  MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Check,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
   Linkedin, Github, Globe, MessageCircle, Radio, Bell,
   ArrowDown, ArrowUp, Activity,
@@ -272,6 +272,33 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   <p className="text-lg md:text-xl font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
                 )}
               </div>
+              {/* Right-aligned 3-row status stack: status · context · quick sync */}
+              <div className="flex flex-col items-start md:items-end gap-1.5 shrink-0">
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full shadow-sm border ${statusData.chipClass}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
+                  <span className="text-[10px] font-extrabold tracking-wider uppercase">{statusData.label}</span>
+                </div>
+                {show("availabilityContext") && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground max-w-[240px] md:text-right">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span className="text-amber-700 truncate">{owner.availabilityContext}</span>
+                  </span>
+                )}
+                {syncWindows.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setQsOpen(true)}
+                    title="Open Quick Sync slots"
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ghost-border bg-surface-lowest hover:bg-surface-low transition"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Quick Sync</span>
+                    <span className="text-[11px] font-bold text-primary tabular-nums">
+                      {syncWindows[0].start}—{syncWindows[0].end}
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Operations Center */}
@@ -317,7 +344,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         <CommsCard
           title="Primary Comms"
           badge="Secure"
-          locked={isLocked}
+          locked={!isApproved}
           footer={isApproved ? "Displayed if approved" : undefined}
           emptyLabel={visiblePrimaryComms.length === 0 ? "Owner has hidden all channels" : undefined}
           items={visiblePrimaryComms.map((c) => ({
@@ -421,7 +448,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                     onClick={() => toast({ title: "Access approved", description: `You have full access to ${firstName}'s channels.` })}
                     className="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-headline font-bold text-xs shadow-lg shadow-emerald-900/40 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
                   >
-                    ACCESS APPROVED <Download className="w-3.5 h-3.5" />
+                    ACCESS APPROVED <Check className="w-3.5 h-3.5" />
                   </button>
                 )}
                 {isLocked && (
@@ -664,7 +691,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
   }
 
   return (
-    <AppShell subtitle="Contact profile" title={contact.name} headerInline={headerStatusStack}>
+    <AppShell subtitle="Contact profile" title={contact.name}>
       {body}
     </AppShell>
   );
