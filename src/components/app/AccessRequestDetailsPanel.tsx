@@ -90,6 +90,7 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
         </p>
         <div className="mt-2 flex items-center justify-center gap-1.5">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Priority</span>
+          {variant === "outgoing" ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition hover:opacity-90 ${priorityTone(priority)}`}>
@@ -106,6 +107,11 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          ) : (
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${priorityTone(priority)}`}>
+              {priority}
+            </span>
+          )}
         </div>
       </div>
 
@@ -120,6 +126,7 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
 
       {/* Connection purpose */}
       <Section label="Connection purpose">
+        {variant === "outgoing" ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-full flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low text-left hover:bg-surface-low/80 transition">
@@ -140,10 +147,17 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        ) : (
+          <div className="w-full flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low">
+            <Handshake className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-[12px] font-semibold text-primary truncate">{purpose}</span>
+          </div>
+        )}
       </Section>
 
       {/* Contact relation */}
       <Section label="Contact relation">
+        {variant === "outgoing" ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="w-full flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low text-left hover:bg-surface-low/80 transition">
@@ -164,6 +178,12 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        ) : (
+          <div className="w-full flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low">
+            <Users className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-[12px] font-semibold text-primary truncate">{relation}</span>
+          </div>
+        )}
       </Section>
 
       {/* Incoming message */}
