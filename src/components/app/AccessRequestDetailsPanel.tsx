@@ -21,6 +21,28 @@ const PRIORITY_OPTIONS = [
 
 type Priority = typeof PRIORITY_OPTIONS[number];
 
+const PURPOSE_OPTIONS = [
+  "Business", "Sales", "Partnership", "Investor Relations",
+  "Customer Support", "Media / Press", "Networking", "Collaboration",
+  "Advisory / Consultation", "Personal / Social", "Family",
+  "Marketing / Promotion", "Vendor / Service Request",
+  "Technical Support", "Event / Speaking Request",
+  "Community / Membership", "Legal / Compliance",
+] as const;
+
+type Purpose = typeof PURPOSE_OPTIONS[number];
+
+const RELATION_OPTIONS = [
+  "Unknown / First-Time Contact", "Family", "Friend", "Colleague",
+  "Employee / Team Member", "Client", "Customer", "Vendor / Supplier",
+  "Investor", "Founder", "Recruiter", "Candidate", "Partner",
+  "Advisor / Mentor", "Student", "Teacher / Professor",
+  "Doctor / Patient", "Service Provider", "Community Member",
+  "Existing Contact", "Mutual Connection",
+] as const;
+
+type Relation = typeof RELATION_OPTIONS[number];
+
 const priorityTone = (p: Priority) => {
   if (p === "Urgent" || p === "Critical Issue" || p === "Escalation")
     return "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20";
@@ -38,6 +60,18 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
     request.urgency === "high" ? "Urgent" :
     request.urgency === "medium" ? "Important" : "Standard";
   const [priority, setPriority] = useState<Priority>(initialPriority);
+
+  const initialPurpose: Purpose =
+    (request.purpose && PURPOSE_OPTIONS.includes(request.purpose as Purpose))
+      ? (request.purpose as Purpose)
+      : "Business";
+  const [purpose, setPurpose] = useState<Purpose>(initialPurpose);
+
+  const initialRelation: Relation =
+    (request.relation && RELATION_OPTIONS.includes(request.relation as Relation))
+      ? (request.relation as Relation)
+      : (request.senderType === "guest" ? "Unknown / First-Time Contact" : "Existing Contact");
+  const [relation, setRelation] = useState<Relation>(initialRelation);
 
   return (
     <aside className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
@@ -86,22 +120,50 @@ const AccessRequestDetailsPanel = ({ request, variant = "incoming", onSend }: Pr
 
       {/* Connection purpose */}
       <Section label="Connection purpose">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low">
-          <Handshake className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[12px] font-semibold text-primary truncate">
-            {request.purpose ?? "Strategic Review"}
-          </span>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="w-full flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low text-left hover:bg-surface-low/80 transition">
+              <Handshake className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="text-[12px] font-semibold text-primary truncate">
+                {purpose}
+              </span>
+              <ChevronDown className="w-3 h-3 text-muted-foreground ml-auto shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider">Purpose</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {PURPOSE_OPTIONS.map((p) => (
+              <DropdownMenuItem key={p} onSelect={() => setPurpose(p)} className="text-xs">
+                {p}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </Section>
 
       {/* Contact relation */}
       <Section label="Contact relation">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low">
-          <Users className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[12px] font-semibold text-primary truncate">
-            {request.relation ?? (request.senderType === "guest" ? "Unknown / First-Time Contact" : "Existing Contact")}
-          </span>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="w-full flex items-center gap-2 px-3 py-2 rounded-xl ghost-border bg-surface-low text-left hover:bg-surface-low/80 transition">
+              <Users className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="text-[12px] font-semibold text-primary truncate">
+                {relation}
+              </span>
+              <ChevronDown className="w-3 h-3 text-muted-foreground ml-auto shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider">Relation</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {RELATION_OPTIONS.map((r) => (
+              <DropdownMenuItem key={r} onSelect={() => setRelation(r)} className="text-xs">
+                {r}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </Section>
 
       {/* Incoming message */}
