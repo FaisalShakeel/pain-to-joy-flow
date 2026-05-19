@@ -204,7 +204,7 @@ const AccessRequests = () => {
       ) : tab === "outgoing" ? (
         <OutgoingView request={current} />
       ) : (
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5 items-start">
+        <div className="grid lg:grid-cols-2 gap-5 items-start max-w-3xl mx-auto">
           <AccessRequestDetailsPanel key={current.id} request={current} />
           <ApprovalProtocolPanel
             contactName={contacts.find((x) => x.id === current.contactId)?.name}
