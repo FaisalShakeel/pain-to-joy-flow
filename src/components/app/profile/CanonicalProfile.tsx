@@ -344,7 +344,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         <CommsCard
           title="Primary Comms"
           badge="Secure"
-          locked={isLocked}
+          locked={!isApproved}
           footer={isApproved ? "Displayed if approved" : undefined}
           emptyLabel={visiblePrimaryComms.length === 0 ? "Owner has hidden all channels" : undefined}
           items={visiblePrimaryComms.map((c) => ({
