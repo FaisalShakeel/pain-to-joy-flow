@@ -15,6 +15,7 @@ import { useRequests } from "@/components/app/RequestsContext";
 import { toast } from "@/hooks/use-toast";
 import { useRole } from "@/lib/role";
 import ApprovalProtocolPanel from "@/components/app/ApprovalProtocolPanel";
+import AccessRequestDetailsPanel from "@/components/app/AccessRequestDetailsPanel";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
@@ -204,11 +205,7 @@ const AccessRequests = () => {
         <OutgoingView request={current} />
       ) : (
         <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5 items-start">
-          <DecisionInterface
-            key={current.id}
-            request={current}
-            onAct={handleAct}
-          />
+          <AccessRequestDetailsPanel key={current.id} request={current} />
           <ApprovalProtocolPanel
             contactName={contacts.find((x) => x.id === current.contactId)?.name}
             onAuthorize={() => handleAct(current.id, "approved")}
