@@ -202,7 +202,14 @@ const AccessRequests = () => {
           </div>
         </div>
       ) : tab === "outgoing" ? (
-        <OutgoingView request={current} />
+        <div className="max-w-md mx-auto">
+          <AccessRequestDetailsPanel
+            key={current.id}
+            request={current}
+            variant="outgoing"
+            onSend={() => toast({ title: "Request sent", description: "Your access request has been dispatched." })}
+          />
+        </div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-5 items-start max-w-3xl mx-auto">
           <AccessRequestDetailsPanel key={current.id} request={current} />
