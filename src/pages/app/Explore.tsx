@@ -133,37 +133,46 @@ const Explore = () => {
   const personById = (id: string) => PEOPLE.find((p) => p.id === id)!;
 
   return (
-    <AppShell title="Explore" subtitle="Discover" hideBell>
-      {/* Search */}
-      <div className="relative mb-4">
+    <AppShell title="Explore" subtitle="Discover Your Network through the Lens of Consent" hideBell>
+      {/* Search with filter dropdown */}
+      <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search people, companies, industries…"
-          className="pl-9 h-11 rounded-2xl bg-surface-lowest border-border/60"
+          className="pl-9 pr-28 h-11 rounded-2xl bg-surface-lowest border-border/60"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 h-8 px-3 rounded-xl bg-surface border border-border/60 text-xs font-semibold text-primary hover:bg-surface-low transition-colors"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              {chip}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+              Filter by
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {CHIPS.map((c) => (
+              <DropdownMenuItem
+                key={c}
+                onSelect={() => setChip(c)}
+                className="text-xs font-medium flex items-center justify-between"
+              >
+                {c}
+                {chip === c && <Check className="w-3.5 h-3.5 text-primary" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Chips */}
-      <div className="-mx-4 md:-mx-8 px-4 md:px-8 mb-6">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {CHIPS.map((c) => (
-            <button
-              key={c}
-              onClick={() => setChip(c)}
-              className={cn(
-                "shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors",
-                chip === c
-                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                  : "bg-surface-lowest text-muted-foreground border-border/60 hover:text-primary hover:border-primary/40",
-              )}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Featured carousel */}
       <section className="mb-8">
