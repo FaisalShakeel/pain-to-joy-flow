@@ -145,13 +145,13 @@ const AccessRequests = () => {
       }
     >
       {/* Tab + queue indicator */}
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
-        <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
+      <div className="flex items-center justify-between flex-wrap gap-2 -mt-2 mb-3">
+        <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
           {(["incoming", "outgoing"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full capitalize ${
+              className={`px-3 py-1 text-[11px] font-semibold rounded-full capitalize ${
                 tab === t ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary"
               }`}
             >
@@ -160,13 +160,13 @@ const AccessRequests = () => {
           ))}
         </div>
         {current && pending.length > 0 && (
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex items-center gap-1.5 text-[11px]">
             <button
               onClick={() => pending[currentIndex - 1] && setCursorId(pending[currentIndex - 1].id)}
               disabled={currentIndex === 0}
-              className="p-1.5 rounded-full ghost-border bg-surface-lowest disabled:opacity-40 hover:bg-surface-low"
+              className="p-1 rounded-full ghost-border bg-surface-lowest disabled:opacity-40 hover:bg-surface-low"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-3 h-3" />
             </button>
             <span className="font-bold text-primary">
               Request {currentIndex + 1} of {pending.length}
@@ -174,9 +174,9 @@ const AccessRequests = () => {
             <button
               onClick={() => pending[currentIndex + 1] && setCursorId(pending[currentIndex + 1].id)}
               disabled={currentIndex >= pending.length - 1}
-              className="p-1.5 rounded-full ghost-border bg-surface-lowest disabled:opacity-40 hover:bg-surface-low"
+              className="p-1 rounded-full ghost-border bg-surface-lowest disabled:opacity-40 hover:bg-surface-low"
             >
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         )}
