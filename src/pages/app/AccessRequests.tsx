@@ -198,13 +198,44 @@ const AccessRequests = () => {
           </div>
         </div>
       ) : tab === "outgoing" ? (
-        <div className="max-w-md mx-auto">
+        <div className="grid lg:grid-cols-2 gap-5 items-start max-w-3xl mx-auto">
           <AccessRequestDetailsPanel
             key={current.id}
             request={current}
             variant="outgoing"
             onSend={() => toast({ title: "Request sent", description: "Your access request has been dispatched." })}
           />
+          <aside className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
+            <header className="flex items-center justify-between mb-3">
+              <h3 className="font-headline font-bold text-primary text-sm">Pending outgoing</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700">
+                {pending.length}
+              </span>
+            </header>
+            <ul className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {pending.map((r) => {
+                const c = contacts.find((x) => x.id === r.contactId)!;
+                const active = r.id === current.id;
+                return (
+                  <li key={r.id}>
+                    <button
+                      onClick={() => setCursorId(r.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left transition ${
+                        active ? "bg-primary/10 ring-1 ring-primary/30" : "bg-surface-low hover:shadow-ambient"
+                      }`}
+                    >
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size="sm" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{r.purpose ?? r.reason}</p>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">{r.receivedAt}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
         </div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-5 items-start max-w-3xl mx-auto">
