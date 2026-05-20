@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Lock, Clock, AlertCircle, ShieldCheck, Inbox } from "lucide-react";
+import { Zap, Lock, CalendarClock, ShieldCheck, AlertCircle, Inbox } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -106,146 +107,136 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl border-0 p-0 overflow-hidden bg-card text-foreground">
-        <div className="relative">
-          <div className="absolute inset-0 pointer-events-none bg-gradient-mist" />
-          <div className="relative p-5 md:p-7 max-h-[85vh] overflow-y-auto">
-            <DialogHeader className="space-y-1 text-center sm:text-center items-center">
-              <DialogTitle className="text-2xl md:text-3xl font-headline font-bold tracking-tight text-foreground">
-                Quick Sync
-              </DialogTitle>
-              <DialogDescription className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Based on 30 min time window
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 grid place-items-center rounded-full bg-primary text-primary-foreground">
+              <Zap className="w-3.5 h-3.5 text-gold" />
+            </div>
+            <div>
+              <DialogTitle className="text-base">Quick Sync with {contactName}</DialogTitle>
+              <DialogDescription className="text-xs">
+                Tap an open slot to book a 3-min call. Booked? Join the waiting list.
               </DialogDescription>
-              {windowLabel && (
-                <p className="text-sm font-semibold tabular-nums text-foreground/80 pt-0.5">{windowLabel}</p>
-              )}
-              <p className="text-[11px] text-muted-foreground pt-0.5">with {contactName}</p>
-            </DialogHeader>
-
-            {/* Summary chips */}
-            <div className="mt-4 grid grid-cols-3 gap-2.5 max-w-md mx-auto">
-              <div className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-center">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-primary/80">Available</p>
-                <p className="text-lg font-bold text-primary tabular-nums">{freeAll}</p>
-              </div>
-              <div className="rounded-xl border border-outline-variant/50 bg-surface-low px-3 py-2 text-center">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Booked</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">{takenAll}</p>
-              </div>
-              <div className="rounded-xl border border-gold/40 bg-gold-soft/40 px-3 py-2 text-center">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground/70">Waiting list</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">{waitingCount}</p>
-              </div>
             </div>
-
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-              {expanded.flatMap(({ window: w, slots }) =>
-                slots.map((s) => {
-                  const booked = isMockBooked(s) || locallyBooked.has(s);
-                  const waiting = waitlisted.has(s);
-                  const isWaitTile = waiting;
-                  const state: "available" | "booked" | "waiting" = isWaitTile
-                    ? "waiting"
-                    : booked
-                      ? "booked"
-                      : "available";
-
-                  const onClick = () => {
-                    if (state === "available") return bookSlot(s);
-                    if (state === "booked") return joinQueue(`${w.start}–${w.end}`, s);
-                  };
-
-                  return (
-                    <button
-                      key={`${w.start}-${s}`}
-                      type="button"
-                      onClick={onClick}
-                      title={`${s} · ${state}`}
-                      className={cn(
-                        "group relative flex flex-col items-start gap-1.5 px-3 py-3 rounded-2xl border text-left transition-all hover:-translate-y-0.5",
-                        state === "available" &&
-                          "bg-surface-lowest border-primary/30 hover:border-primary/60 hover:shadow-ambient",
-                        state === "booked" &&
-                          "bg-surface-low border-outline-variant/40 cursor-pointer hover:border-accent/40",
-                        state === "waiting" &&
-                          "bg-gold-soft/40 border-gold/50 hover:border-gold",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "grid place-items-center w-9 h-9 rounded-full ring-1 shrink-0",
-                          state === "available" && "bg-primary/10 ring-primary/30 text-primary",
-                          state === "booked" && "bg-muted ring-outline-variant/60 text-muted-foreground",
-                          state === "waiting" && "bg-gold-soft ring-gold/60 text-foreground",
-                        )}
-                      >
-                        {state === "available" && <Clock className="w-4 h-4" />}
-                        {state === "booked" && <Lock className="w-4 h-4" />}
-                        {state === "waiting" && <AlertCircle className="w-4 h-4" />}
-                      </span>
-                      <p className="text-[11px] font-bold tabular-nums text-foreground">
-                        {s}
-                        <span className="text-muted-foreground font-medium"> – {toHHMM(toMin(s) + STEP_MIN)}</span>
-                      </p>
-                      <p
-                        className={cn(
-                          "text-xs font-semibold",
-                          state === "available" && "text-primary",
-                          state === "booked" && "text-muted-foreground",
-                          state === "waiting" && "text-foreground",
-                        )}
-                      >
-                        {state === "available" && "Available"}
-                        {state === "booked" && "Booked"}
-                        {state === "waiting" && "Waiting List"}
-                      </p>
-                    </button>
-                  );
-                }),
-              )}
-            </div>
-
-            {allBooked ? (
-              <div className="mt-5 rounded-2xl border border-outline-variant/50 bg-surface-low p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="grid place-items-center w-9 h-9 rounded-full bg-primary/10 text-primary ring-1 ring-primary/30">
-                    <Inbox className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">All slots are booked for this time window.</p>
-                    <p className="text-[11px] text-muted-foreground">Join the waiting list to express your interest.</p>
-                  </div>
-                </div>
-                <button
-                  onClick={joinGlobalQueue}
-                  disabled={globalWaitJoined}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-xs font-semibold transition shrink-0",
-                    globalWaitJoined
-                      ? "bg-surface-lowest text-muted-foreground border border-outline-variant/60"
-                      : "bg-primary text-primary-foreground hover:opacity-90",
-                  )}
-                >
-                  {globalWaitJoined ? "On waiting list" : "Join Waiting List"}
-                </button>
-              </div>
-            ) : (
-              <div className="mt-5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-                  Times shown in your local timezone · 3-min calls
-                </span>
-                <button
-                  onClick={() => onOpenChange(false)}
-                  className="px-4 py-2 rounded-full text-xs font-semibold border border-outline-variant/60 bg-surface-lowest text-foreground hover:bg-surface-low transition"
-                >
-                  Close
-                </button>
-              </div>
-            )}
           </div>
+        </DialogHeader>
+
+        {/* Summary chips */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px]">
+            <CalendarClock className="w-3 h-3 text-accent" />
+            <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Open</span>
+            <span className="font-bold text-primary tabular-nums">{freeAll}</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-low/60 text-[11px]">
+            <Lock className="w-3 h-3 text-muted-foreground" />
+            <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Booked</span>
+            <span className="font-bold text-primary tabular-nums">{takenAll}</span>
+          </span>
+          <span className={cn(
+            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border text-[11px]",
+            waitingCount > 0 ? "bg-amber-500/15" : "bg-surface-low/60",
+          )}>
+            <AlertCircle className="w-3 h-3 text-accent" />
+            <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Waiting</span>
+            <span className="font-bold text-primary tabular-nums">{waitingCount}</span>
+          </span>
         </div>
+
+        {/* Windows + slot occupancy */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+          {expanded.map(({ window: w, slots }) => {
+            const taken = slots.filter((s) => isMockBooked(s) || locallyBooked.has(s)).length;
+            const free = slots.length - taken;
+            return (
+              <div key={`${w.start}-${w.end}`} className="rounded-xl ghost-border bg-surface-lowest p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarClock className="w-3.5 h-3.5 text-accent" />
+                    <span className="text-xs font-semibold tabular-nums text-primary">
+                      {w.start} – {w.end}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {free}/{slots.length} free
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {slots.map((s) => {
+                    const booked = isMockBooked(s) || locallyBooked.has(s);
+                    const waiting = waitlisted.has(s);
+                    const state: "available" | "booked" | "waiting" = waiting
+                      ? "waiting"
+                      : booked
+                        ? "booked"
+                        : "available";
+                    const onClick = () => {
+                      if (state === "available") return bookSlot(s);
+                      if (state === "booked") return joinQueue(`${w.start}–${w.end}`, s);
+                    };
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={onClick}
+                        disabled={state === "waiting"}
+                        title={
+                          state === "available"
+                            ? "Open — tap to book"
+                            : state === "booked"
+                              ? "Booked — tap to join waiting list"
+                              : "On waiting list"
+                        }
+                        className={cn(
+                          "inline-flex items-center justify-center gap-0.5 px-1.5 py-1 rounded-md text-[10px] font-semibold tabular-nums transition",
+                          state === "available" &&
+                            "bg-emerald-500/10 text-emerald-700 ghost-border hover:bg-emerald-500/20",
+                          state === "booked" &&
+                            "bg-surface-low text-muted-foreground ghost-border hover:bg-amber-500/15 hover:text-amber-700",
+                          state === "waiting" &&
+                            "bg-amber-500/15 text-amber-700 ghost-border cursor-default",
+                        )}
+                      >
+                        {state === "booked" && <Lock className="w-2.5 h-2.5" />}
+                        {state === "waiting" && <AlertCircle className="w-2.5 h-2.5" />}
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <DialogFooter className="mt-2 gap-2 flex-wrap sm:justify-between">
+          <p className="text-[10px] text-muted-foreground mr-auto inline-flex items-center gap-1.5">
+            <ShieldCheck className="w-3 h-3 text-emerald-600" />
+            Local timezone · 3-min calls
+          </p>
+          {allBooked && (
+            <button
+              onClick={joinGlobalQueue}
+              disabled={globalWaitJoined}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-semibold transition",
+                globalWaitJoined
+                  ? "ghost-border bg-surface-lowest text-muted-foreground"
+                  : "bg-amber-500/15 text-amber-700 hover:bg-amber-500/25",
+              )}
+            >
+              <Inbox className="w-3 h-3 inline-block mr-1" />
+              {globalWaitJoined ? "On waiting list" : "Join Waiting List"}
+            </button>
+          )}
+          <button
+            onClick={() => onOpenChange(false)}
+            className="px-3 py-1.5 rounded-full text-xs font-semibold ghost-border bg-surface-lowest hover:bg-surface-low text-primary"
+          >
+            Close
+          </button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
