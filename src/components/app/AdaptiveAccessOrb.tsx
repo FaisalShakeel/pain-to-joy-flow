@@ -149,7 +149,7 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
         <div
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "absolute z-50 top-full mt-2 right-0",
+            "absolute z-50 top-1/2 -translate-y-1/2 right-full mr-2",
             "w-[260px] rounded-xl p-2",
             "bg-surface-lowest/95 backdrop-blur-xl ring-1 ring-border shadow-elevated",
             "animate-in fade-in-0 zoom-in-95 duration-150",
