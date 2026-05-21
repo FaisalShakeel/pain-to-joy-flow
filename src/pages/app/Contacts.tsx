@@ -537,10 +537,11 @@ const Contacts = () => {
                         </p>
                       </div>
                       <div className="flex items-center justify-between gap-1">
-                        <p className={cn("flex items-center gap-1 text-muted-foreground truncate", roomy ? "text-[11px]" : medium ? "text-[10px]" : "text-[9px]")}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusDot[c.status])} />
-                          {statusLabel[c.status]}
-                        </p>
+                        <StatusPill
+                          tone={c.status}
+                          label={statusLabel[c.status]}
+                          className={cn(roomy ? "text-[10px] px-2 py-0.5" : "text-[9px] px-1.5 py-0.5")}
+                        />
                         <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
                       </div>
                       <p className={cn("mt-1 text-foreground/80 leading-snug", roomy ? "text-[11px] line-clamp-3" : medium ? "text-[10px] line-clamp-2" : "text-[9px] line-clamp-2")}>
