@@ -81,6 +81,7 @@ interface Props {
   children: ReactNode;
   title?: string;
   subtitle?: string;
+  description?: string;
   actions?: ReactNode;
   headerInline?: ReactNode;
   hideBell?: boolean;
