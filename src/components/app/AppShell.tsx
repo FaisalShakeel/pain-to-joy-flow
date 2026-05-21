@@ -81,12 +81,13 @@ interface Props {
   children: ReactNode;
   title?: string;
   subtitle?: string;
+  description?: string;
   actions?: ReactNode;
   headerInline?: ReactNode;
   hideBell?: boolean;
 }
 
-const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }: Props) => {
+const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
@@ -305,6 +306,11 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
                     <h1 className="font-headline font-semibold text-primary text-[1.35rem] md:text-[1.75rem] leading-[1.05] tracking-[-0.022em] break-words">
                       {title}
                     </h1>
+                  )}
+                  {description && (
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-1.5 max-w-2xl">
+                      {description}
+                    </p>
                   )}
                 </div>
                 {(headerInline || actions) && (

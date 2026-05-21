@@ -251,26 +251,22 @@ const Contacts = () => {
   return (
     <AppShell
       hideBell={false}
-    >
-      {/* Top toolbar — back · search · filters · bird-eye view, all above the heading */}
-      <div className="flex items-center gap-2 flex-wrap mb-3">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          title="Back"
-          aria-label="Back"
-          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-lowest ghost-border text-primary hover:bg-surface-low transition shadow-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
+      subtitle="Vault directory"
+      title="Your contacts"
+      description="Connect with intention. These professionals have granted you visibility into their real-time availability to ensure every reach-out is respectful and effective."
+      headerInline={
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            title="Back"
+            aria-label="Back"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-lowest ghost-border text-primary hover:bg-surface-low transition shadow-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
 
-        {/* Inline page heading — keeps the title aligned with the toolbar to save vertical space */}
-        <div className="min-w-0 mr-1 leading-tight">
-          <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-accent">Vault directory</p>
-          <h1 className="font-headline font-extrabold text-primary text-base md:text-lg leading-tight truncate">Your contacts</h1>
-        </div>
-
-        <div ref={searchWrapRef} className="relative flex-1 min-w-[180px] max-w-sm">
+          <div ref={searchWrapRef} className="relative flex-1 min-w-[180px] max-w-sm">
             <div
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-full bg-surface-lowest ghost-border transition",
@@ -411,8 +407,8 @@ const Contacts = () => {
             ))}
           </div>
         </div>
-      </div>
-
+      </div>}
+    >
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
