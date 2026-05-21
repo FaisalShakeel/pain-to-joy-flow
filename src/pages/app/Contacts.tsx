@@ -253,7 +253,6 @@ const Contacts = () => {
       hideBell={false}
       subtitle="Vault directory"
       title="Your contacts"
-      description="Connect with intention. These professionals have granted you visibility into their real-time availability to ensure every reach-out is respectful and effective."
     >
       <div className="flex items-center gap-2 flex-wrap mb-4">
           <button
