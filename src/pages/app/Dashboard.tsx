@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import StatusContextPanel from "@/components/app/StatusContextPanel";
 import QuickSyncOwnerDialog from "@/components/app/QuickSyncOwnerDialog";
 import WaitingList from "@/components/app/WaitingList";
+import AdaptiveAccessOrb from "@/components/app/AdaptiveAccessOrb";
 import { useMetrics, useWaitingList } from "@/hooks/use-metrics";
 import { formatProtected } from "@/lib/metrics";
 
@@ -216,31 +217,19 @@ const Dashboard = () => {
       title={`Good morning, ${me.name.split(" ")[0]}`}
       hideBell
       headerInline={
-        <div className="inline-flex items-center gap-2 rounded-full bg-surface-lowest/80 p-1 ghost-border shadow-soft backdrop-blur-md">
-          <span className={cn("hidden lg:inline-flex p-0.5 rounded-full bg-surface-low/70 ring-1 transition-colors", meta.ring)}>
-            {(Object.keys(statusMeta) as StatusKey[]).map((s) => {
-              const m = statusMeta[s];
-              const active = status === s;
-              return (
-                <button
-                  key={s}
-                  onClick={() => handleStatusChange(s)}
-                  className={cn(
-                    "px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all ease-premium inline-flex items-center gap-1.5",
-                    active ? cn(m.activeBg, m.activeText, "shadow-glass") : "text-muted-foreground hover:text-primary",
-                  )}
-                >
-                  <span className={cn("w-1.5 h-1.5 rounded-full", active ? "bg-current opacity-90" : m.dot)} />
-                  {m.label}
-                </button>
-              );
-            })}
-          </span>
-          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold lg:hidden", meta.pillBg, meta.pillText)}>
+        role === "provider" ? (
+          <AdaptiveAccessOrb
+            status={status}
+            onChange={handleStatusChange}
+            initials={me.initials}
+            accent="from-indigo-500 to-violet-600"
+          />
+        ) : (
+          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
             <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
             {meta.label}
           </span>
-        </div>
+        )
       }
     >
       <div className="dashboard-shell grid lg:grid-cols-3 gap-5 md:gap-7 animate-rise">
