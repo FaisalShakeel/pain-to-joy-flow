@@ -139,22 +139,30 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
       )}
 
       {/* Orb stack */}
-      <div className="relative z-40">
-        {/* Animated outer pulse ring */}
+      <div className="relative z-40 w-16 h-16">
+        {/* Animated outer pulse rings (two staggered for a richer halo) */}
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-0 m-auto rounded-full",
-            "w-16 h-16 ring-2 ring-offset-2 ring-offset-transparent",
-            meta.ring,
-            "animate-[ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40",
+            "pointer-events-none absolute -inset-1 rounded-full border-2",
+            meta.ring.replace("ring-", "border-"),
+            "opacity-70 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]",
+          )}
+        />
+        <span
+          aria-hidden
+          style={{ animationDelay: "0.9s" }}
+          className={cn(
+            "pointer-events-none absolute -inset-1 rounded-full border-2",
+            meta.ring.replace("ring-", "border-"),
+            "opacity-50 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]",
           )}
         />
         {/* Static refined ring + glow */}
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-0 m-auto rounded-full w-16 h-16 ring-2",
+            "pointer-events-none absolute inset-0 rounded-full ring-2",
             meta.ring, meta.glow, "transition-all duration-500",
           )}
         />
