@@ -54,7 +54,7 @@ const baseItems: NavItem[] = [
   { to: "/app/availability", label: "Availability", icon: CalendarDays },
   { to: "/app/requests", label: "Requests", icon: Inbox },
   { to: "/app/messages", label: "Messages", icon: MessageSquare },
-  { to: "/app/analytics", label: "Analytics", icon: BarChart3, providerOnly: true },
+  { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/app/share", label: "Share", icon: QrCode },
   { to: "/app/settings", label: "Settings", icon: Settings },
 ];
