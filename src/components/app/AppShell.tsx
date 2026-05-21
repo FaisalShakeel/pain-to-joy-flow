@@ -92,7 +92,7 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
   const [sidebarHidden, setSidebarHidden] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const items = baseItems.filter((i) => !i.providerOnly || role === "provider");
+  const items = baseItems;
   const { unreadCount } = useNotifications();
   const { unreadCount: messagesUnread, markAllRead: markAllMessagesRead } = useMessages();
   const { pendingIncomingCount } = useRequests();
@@ -179,19 +179,28 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           </div>
         </nav>
 
-        <div className="p-3 border-t border-border/50">
+        <div className="p-3 border-t border-border/50 flex items-center gap-2">
           <Link
             to="/app/settings"
-            className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-low transition"
+            className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-low transition flex-1 min-w-0"
           >
             <Avatar initials={me.initials} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-primary truncate">{me.name}</p>
               <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> {role === "provider" ? "Provider" : "Seeker"} · {me.plan}
+                <ShieldCheck className="w-3 h-3" /> {me.plan}
               </p>
             </div>
           </Link>
+          <button
+            type="button"
+            onClick={() => setSidebarHidden(true)}
+            className="shrink-0 grid place-items-center w-8 h-8 rounded-lg ghost-border bg-surface-lowest hover:bg-surface-low transition"
+            aria-label="Hide sidebar"
+            title="Hide sidebar"
+          >
+            <PanelLeftClose className="w-4 h-4 text-primary" />
+          </button>
         </div>
       </aside>
 
@@ -208,15 +217,17 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
             >
               <Menu className="w-4 h-4 text-primary" />
             </button>
-            <button
-              type="button"
-              onClick={() => setSidebarHidden((v) => !v)}
-              className="hidden md:grid place-items-center w-9 h-9 rounded-lg ghost-border bg-surface-lowest hover:bg-surface-low transition"
-              aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
-              title={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
-            >
-              {sidebarHidden ? <PanelLeftOpen className="w-4 h-4 text-primary" /> : <PanelLeftClose className="w-4 h-4 text-primary" />}
-            </button>
+            {sidebarHidden && (
+              <button
+                type="button"
+                onClick={() => setSidebarHidden(false)}
+                className="hidden md:grid place-items-center w-9 h-9 rounded-lg ghost-border bg-surface-lowest hover:bg-surface-low transition"
+                aria-label="Show sidebar"
+                title="Show sidebar"
+              >
+                <PanelLeftOpen className="w-4 h-4 text-primary" />
+              </button>
+            )}
 
             <div className="flex-1" />
 
@@ -284,14 +295,14 @@ const AppShell = ({ children, title, subtitle, actions, headerInline, hideBell }
           </div>
 
           {(title || actions || headerInline) && (
-            <div className="px-4 md:px-8 pb-5 pt-2">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                <div className="flex flex-col gap-1 min-w-0">
+            <div className="px-4 md:px-8 pb-3 pt-1">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex flex-col gap-0.5 min-w-0">
                   {subtitle && (
                     <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">{subtitle}</p>
                   )}
                   {title && (
-                    <h1 className="font-headline font-semibold text-primary text-[1.65rem] md:text-[2rem] leading-[1.05] tracking-[-0.022em] break-words">
+                    <h1 className="font-headline font-semibold text-primary text-[1.35rem] md:text-[1.75rem] leading-[1.05] tracking-[-0.022em] break-words">
                       {title}
                     </h1>
                   )}
