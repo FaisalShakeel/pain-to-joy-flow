@@ -254,12 +254,8 @@ const Dashboard = () => {
               {meta.label}
             </span>
             <div className="min-w-0">
-              {/* Line 1 — Primary status (bold) */}
-              <p className={cn("font-headline font-extrabold text-sm md:text-base leading-tight", meta.pillText)}>
-                {meta.label}
-              </p>
-              {/* Line 2 — Auto status (system-synced) */}
-              <p className="text-xs md:text-[13px] font-semibold text-primary/80 leading-tight mt-0.5 truncate max-w-[60vw] md:max-w-[28rem]">
+              {/* Line 1 — Auto status (system-synced). The status pill on the left replaces the redundant label. */}
+              <p className="font-headline font-extrabold text-sm md:text-base leading-tight text-primary truncate max-w-[60vw] md:max-w-[28rem]">
                 {autoStatus}
               </p>
               {/* Line 3 — Quick context (styled like brand tagline) */}
