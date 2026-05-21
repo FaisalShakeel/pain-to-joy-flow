@@ -248,14 +248,15 @@ const Dashboard = () => {
         <div className={cn(
           "lg:col-span-3 command-band rounded-[1.35rem] px-4 md:px-5 py-4 md:py-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] items-center border-l-[3px] border-l-accent transition-all ease-premium",
         )}>
-          <div className="flex items-center gap-3 min-w-0">
-            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
-              <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
-              {meta.label}
-            </span>
+          <div className="flex items-start gap-3 min-w-0">
             <div className="min-w-0">
-              {/* Line 1 — Auto status (system-synced). The status pill on the left replaces the redundant label. */}
-              <p className="font-headline font-extrabold text-sm md:text-base leading-tight text-primary truncate max-w-[60vw] md:max-w-[28rem]">
+              {/* Line 1 — Status pill (replaces the bold label) */}
+              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
+                <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
+                {meta.label}
+              </span>
+              {/* Line 2 — Auto status (system-synced) */}
+              <p className="mt-1 font-headline font-extrabold text-sm md:text-base leading-tight text-primary truncate max-w-[60vw] md:max-w-[28rem]">
                 {autoStatus}
               </p>
               {/* Line 3 — Quick context (styled like brand tagline) */}
