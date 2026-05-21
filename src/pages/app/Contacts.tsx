@@ -472,12 +472,6 @@ const Contacts = () => {
                   >
                     <div className="relative shrink-0">
                       <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : medium ? "md" : "sm"} />
-                      <span
-                        className={cn(
-                          "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-surface-lowest",
-                          statusDot[c.status],
-                        )}
-                      />
                       <Link
                         to={`/app/contact/${c.id}/log`}
                         onClick={(e) => e.stopPropagation()}
