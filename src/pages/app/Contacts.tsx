@@ -408,7 +408,7 @@ const Contacts = () => {
           </div>
         </div>
       </div>}
-
+    >
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />
