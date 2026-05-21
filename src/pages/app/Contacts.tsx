@@ -254,8 +254,8 @@ const Contacts = () => {
       subtitle="Vault directory"
       title="Your contacts"
       description="Connect with intention. These professionals have granted you visibility into their real-time availability to ensure every reach-out is respectful and effective."
-      headerInline={
-        <div className="flex items-center gap-2 flex-wrap">
+    >
+      <div className="flex items-center gap-2 flex-wrap mb-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -407,8 +407,7 @@ const Contacts = () => {
             ))}
           </div>
         </div>
-      </div>}
-    >
+      </div>
       {filtered.length === 0 ? (
         <div className="mt-8">
           <EmptyState icon={Users} title="No contacts match" description="Try a different filter, name or tag — or add a new contact." />

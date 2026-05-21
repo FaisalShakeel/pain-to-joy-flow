@@ -302,15 +302,15 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                   {subtitle && (
                     <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">{subtitle}</p>
                   )}
+                  {description && (
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-1.5 max-w-2xl">
+                      {description}
+                    </p>
+                  )}
                   {title && (
                     <h1 className="font-headline font-semibold text-primary text-[1.35rem] md:text-[1.75rem] leading-[1.05] tracking-[-0.022em] break-words">
                       {title}
                     </h1>
-                  )}
-                  {description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed mt-1.5 max-w-2xl">
-                      {description}
-                    </p>
                   )}
                 </div>
                 {(headerInline || actions) && (
