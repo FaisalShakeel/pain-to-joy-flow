@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Sparkles, ShieldCheck, Briefcase, Car, Brain, MoonStar, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Avatar from "@/components/app/Avatar";
@@ -9,6 +9,7 @@ type Meta = {
   label: string;
   ring: string;        // ring color class for avatar outline
   glow: string;        // soft glow color (rgba via tailwind arbitrary)
+  signal: string;      // HSL channels for operational halo styles
   chipBg: string;
   chipText: string;
   dot: string;
@@ -16,11 +17,11 @@ type Meta = {
 };
 
 const META: Record<OrbStatus, Meta> = {
-  available: { label: "Available", ring: "ring-emerald-400/80", glow: "shadow-[0_0_28px_-4px_hsl(152_72%_45%/0.55)]", chipBg: "bg-emerald-500/15", chipText: "text-emerald-200", dot: "bg-emerald-400", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
-  busy:      { label: "Busy",      ring: "ring-amber-400/80",   glow: "shadow-[0_0_28px_-4px_hsl(38_92%_55%/0.55)]",  chipBg: "bg-amber-500/15",   chipText: "text-amber-200",   dot: "bg-amber-400",   icon: <Briefcase className="w-3.5 h-3.5" /> },
-  driving:   { label: "Driving",   ring: "ring-violet-400/80",  glow: "shadow-[0_0_28px_-4px_hsl(265_85%_65%/0.55)]", chipBg: "bg-violet-500/15",  chipText: "text-violet-200",  dot: "bg-violet-400",  icon: <Car className="w-3.5 h-3.5" /> },
-  focus:     { label: "Focus",     ring: "ring-sky-400/80",     glow: "shadow-[0_0_28px_-4px_hsl(205_92%_55%/0.55)]", chipBg: "bg-sky-500/15",     chipText: "text-sky-200",     dot: "bg-sky-400",     icon: <Brain className="w-3.5 h-3.5" /> },
-  offline:   { label: "Offline",   ring: "ring-slate-400/60",   glow: "shadow-[0_0_22px_-6px_hsl(215_15%_55%/0.45)]", chipBg: "bg-slate-500/15",   chipText: "text-slate-200",   dot: "bg-slate-400",   icon: <MoonStar className="w-3.5 h-3.5" /> },
+  available: { label: "Available", ring: "ring-emerald-400/80", glow: "shadow-[0_0_28px_-4px_hsl(152_72%_45%/0.55)]", signal: "152 72% 45%", chipBg: "bg-emerald-500/15", chipText: "text-emerald-200", dot: "bg-emerald-400", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+  busy:      { label: "Busy",      ring: "ring-amber-400/80",   glow: "shadow-[0_0_28px_-4px_hsl(38_92%_55%/0.55)]",  signal: "38 92% 55%",  chipBg: "bg-amber-500/15",   chipText: "text-amber-200",   dot: "bg-amber-400",   icon: <Briefcase className="w-3.5 h-3.5" /> },
+  driving:   { label: "Driving",   ring: "ring-violet-400/80",  glow: "shadow-[0_0_28px_-4px_hsl(265_85%_65%/0.55)]", signal: "265 85% 65%", chipBg: "bg-violet-500/15",  chipText: "text-violet-200",  dot: "bg-violet-400",  icon: <Car className="w-3.5 h-3.5" /> },
+  focus:     { label: "Focus",     ring: "ring-sky-400/80",     glow: "shadow-[0_0_28px_-4px_hsl(205_92%_55%/0.55)]", signal: "205 92% 55%", chipBg: "bg-sky-500/15",     chipText: "text-sky-200",     dot: "bg-sky-400",     icon: <Brain className="w-3.5 h-3.5" /> },
+  offline:   { label: "Offline",   ring: "ring-slate-400/60",   glow: "shadow-[0_0_22px_-6px_hsl(215_15%_55%/0.45)]", signal: "215 15% 55%", chipBg: "bg-slate-500/15",   chipText: "text-slate-200",   dot: "bg-slate-400",   icon: <MoonStar className="w-3.5 h-3.5" /> },
 };
 
 // Radial positions (degrees from 12 o'clock, clockwise).
@@ -56,6 +57,13 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
   const rootRef = useRef<HTMLDivElement>(null);
 
   const meta = META[status];
+  const signalStyle = useMemo(() => ({
+    "--orb-signal": meta.signal,
+  }) as CSSProperties, [meta.signal]);
+  const ringStyle = (opacity: number, blur = 0): CSSProperties => ({
+    borderColor: `hsl(${meta.signal} / ${opacity})`,
+    boxShadow: `0 0 ${26 + blur}px hsl(${meta.signal} / ${Math.min(opacity, 0.68)}), inset 0 0 ${16 + blur / 2}px hsl(${meta.signal} / ${Math.min(opacity, 0.42)})`,
+  });
 
   // Tick clock for countdown
   useEffect(() => {
@@ -127,7 +135,7 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
   const R = 92;
 
   return (
-    <div ref={rootRef} className="relative inline-flex flex-col items-center select-none">
+    <div ref={rootRef} className="relative isolate inline-flex flex-col items-center overflow-visible px-8 py-5 -my-5 select-none" style={signalStyle}>
       {/* Backdrop blur when expanded */}
       {open && (
         <button
@@ -139,32 +147,45 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
       )}
 
       {/* Orb stack */}
-      <div className="relative z-40 w-16 h-16">
-        {/* Animated outer pulse rings (two staggered for a richer halo) */}
+      <div className="relative z-40 grid h-28 w-28 place-items-center overflow-visible isolate">
+        {/* Soft outer bloom — makes the orb read as an active communication node */}
         <span
           aria-hidden
-          className={cn(
-            "pointer-events-none absolute -inset-1 rounded-full border-2",
-            meta.ring.replace("ring-", "border-"),
-            "opacity-70 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]",
-          )}
+          className="pointer-events-none absolute -inset-3 z-0 rounded-full opacity-80 blur-2xl"
+          style={{ background: `radial-gradient(circle, hsl(${meta.signal} / 0.5) 0%, hsl(${meta.signal} / 0.24) 38%, transparent 70%)` }}
+        />
+
+        {/* Radar sweep above the dashboard surface but below the avatar */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-1 z-10 rounded-full opacity-75 animate-[spin_3.8s_linear_infinite] [mask-image:radial-gradient(circle,transparent_0_32%,black_34%_64%,transparent_66%)]"
+          style={{ background: `conic-gradient(from 0deg, transparent 0deg, hsl(${meta.signal} / 0.08) 210deg, hsl(${meta.signal} / 0.72) 306deg, transparent 342deg)` }}
+        />
+
+        {/* Layered animated pulse rings — explicit HSL styles avoid dynamic Tailwind class clipping/omission */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-4 z-20 rounded-full border-[3px] opacity-95 animate-[ping_2.15s_cubic-bezier(0,0,0.2,1)_infinite]"
+          style={ringStyle(0.98, 10)}
         />
         <span
           aria-hidden
-          style={{ animationDelay: "0.9s" }}
-          className={cn(
-            "pointer-events-none absolute -inset-1 rounded-full border-2",
-            meta.ring.replace("ring-", "border-"),
-            "opacity-50 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]",
-          )}
+          className="pointer-events-none absolute inset-3 z-20 rounded-full border-[2.5px] opacity-80 animate-[ping_2.7s_cubic-bezier(0,0,0.2,1)_infinite]"
+          style={{ ...ringStyle(0.82, 18), animationDelay: "0.65s" }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-2 z-20 rounded-full border-2 opacity-65 animate-[ping_3.2s_cubic-bezier(0,0,0.2,1)_infinite]"
+          style={{ ...ringStyle(0.7, 28), animationDelay: "1.25s" }}
         />
         {/* Static refined ring + glow */}
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-0 rounded-full ring-2",
+            "pointer-events-none absolute inset-4 z-30 rounded-full ring-[3px]",
             meta.ring, meta.glow, "transition-all duration-500",
           )}
+          style={{ boxShadow: `0 0 34px hsl(${meta.signal} / 0.64), 0 0 76px hsl(${meta.signal} / 0.34), inset 0 0 18px hsl(${meta.signal} / 0.34)` }}
         />
 
         <button
@@ -173,7 +194,7 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
           aria-label="Adaptive access controls"
           aria-expanded={open}
           className={cn(
-            "relative grid place-items-center w-16 h-16 rounded-full",
+            "relative z-50 grid place-items-center w-16 h-16 rounded-full",
             "transition-transform duration-300 ease-out hover:scale-[1.06] active:scale-95",
           )}
         >
@@ -184,7 +205,7 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
             meta.dot,
             "after:absolute after:inset-0 after:rounded-full after:animate-ping after:opacity-60",
             meta.dot.replace("bg-", "after:bg-"),
-          )} />
+          )} style={{ boxShadow: `0 0 18px hsl(${meta.signal} / 0.9)` }} />
         </button>
 
         {/* Radial menu — chips */}
