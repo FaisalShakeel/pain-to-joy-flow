@@ -407,7 +407,7 @@ const Contacts = () => {
             ))}
           </div>
         </div>
-      </div>
+      </div>}
 
       {filtered.length === 0 ? (
         <div className="mt-8">
