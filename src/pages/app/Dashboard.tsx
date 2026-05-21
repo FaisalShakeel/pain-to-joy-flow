@@ -217,19 +217,12 @@ const Dashboard = () => {
       title={`Good morning, ${me.name.split(" ")[0]}`}
       hideBell
       headerInline={
-        role === "provider" ? (
-          <AdaptiveAccessOrb
-            status={status}
-            onChange={handleStatusChange}
-            initials={me.initials}
-            accent="from-indigo-500 to-violet-600"
-          />
-        ) : (
-          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold", meta.pillBg, meta.pillText)}>
-            <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
-            {meta.label}
-          </span>
-        )
+        <AdaptiveAccessOrb
+          status={status}
+          onChange={handleStatusChange}
+          initials={me.initials}
+          accent="from-indigo-500 to-violet-600"
+        />
       }
     >
       <div className="dashboard-shell grid lg:grid-cols-3 gap-5 md:gap-7 animate-rise">
@@ -529,40 +522,21 @@ const Dashboard = () => {
           </ul>
         </div>
 
-        {role === "provider" && (
-          <Link
-            to="/app/analytics"
-            className="lg:col-span-3 premium-card is-interactive p-5 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
-                <CalendarDays className="w-5 h-5" />
-              </span>
-              <div>
-                <p className="font-semibold text-primary text-sm">See how Availock is protecting your time</p>
-                <p className="text-xs text-muted-foreground">Provider analytics — interruptions saved, response time, request mix.</p>
-              </div>
+        <Link
+          to="/app/analytics"
+          className="lg:col-span-3 premium-card is-interactive p-5 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
+              <CalendarDays className="w-5 h-5" />
+            </span>
+            <div>
+              <p className="font-semibold text-primary text-sm">See how Availock is protecting your time</p>
+              <p className="text-xs text-muted-foreground">Analytics — interruptions saved, response time, request mix.</p>
             </div>
-            <ArrowRight className="w-4 h-4 text-primary" />
-          </Link>
-        )}
-        {role !== "provider" && (
-          <Link
-            to="/app/contacts"
-            className="lg:col-span-3 premium-card is-interactive p-5 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
-                <Inbox className="w-5 h-5" />
-              </span>
-              <div>
-                <p className="font-semibold text-primary text-sm">Find someone you want to reach</p>
-                <p className="text-xs text-muted-foreground">Browse contacts and request access in one tap.</p>
-              </div>
-            </div>
-            <ArrowRight className="w-4 h-4 text-primary" />
-          </Link>
-        )}
+          </div>
+          <ArrowRight className="w-4 h-4 text-primary" />
+        </Link>
       </div>
     </AppShell>
   );

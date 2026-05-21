@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Sparkles, ShieldCheck, Briefcase, Car, Brain, MoonStar, X } from "lucide-react";
+import { Sparkles, ShieldCheck, Briefcase, Car, Brain, MoonStar, X, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Avatar from "@/components/app/Avatar";
 
@@ -7,30 +7,27 @@ export type OrbStatus = "available" | "busy" | "focus" | "driving" | "offline";
 
 type Meta = {
   label: string;
-  ring: string;        // ring color class for avatar outline
-  glow: string;        // soft glow color (rgba via tailwind arbitrary)
-  signal: string;      // HSL channels for operational halo styles
+  signal: string; // HSL channels
+  dot: string;
   chipBg: string;
   chipText: string;
-  dot: string;
   icon: React.ReactNode;
 };
 
 const META: Record<OrbStatus, Meta> = {
-  available: { label: "Available", ring: "ring-emerald-400/80", glow: "shadow-[0_0_28px_-4px_hsl(152_72%_45%/0.55)]", signal: "152 72% 45%", chipBg: "bg-emerald-500/15", chipText: "text-emerald-200", dot: "bg-emerald-400", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
-  busy:      { label: "Busy",      ring: "ring-amber-400/80",   glow: "shadow-[0_0_28px_-4px_hsl(38_92%_55%/0.55)]",  signal: "38 92% 55%",  chipBg: "bg-amber-500/15",   chipText: "text-amber-200",   dot: "bg-amber-400",   icon: <Briefcase className="w-3.5 h-3.5" /> },
-  driving:   { label: "Driving",   ring: "ring-violet-400/80",  glow: "shadow-[0_0_28px_-4px_hsl(265_85%_65%/0.55)]", signal: "265 85% 65%", chipBg: "bg-violet-500/15",  chipText: "text-violet-200",  dot: "bg-violet-400",  icon: <Car className="w-3.5 h-3.5" /> },
-  focus:     { label: "Focus",     ring: "ring-sky-400/80",     glow: "shadow-[0_0_28px_-4px_hsl(205_92%_55%/0.55)]", signal: "205 92% 55%", chipBg: "bg-sky-500/15",     chipText: "text-sky-200",     dot: "bg-sky-400",     icon: <Brain className="w-3.5 h-3.5" /> },
-  offline:   { label: "Offline",   ring: "ring-slate-400/60",   glow: "shadow-[0_0_22px_-6px_hsl(215_15%_55%/0.45)]", signal: "215 15% 55%", chipBg: "bg-slate-500/15",   chipText: "text-slate-200",   dot: "bg-slate-400",   icon: <MoonStar className="w-3.5 h-3.5" /> },
+  available: { label: "Available", signal: "152 72% 45%", dot: "bg-emerald-500", chipBg: "bg-emerald-500/15", chipText: "text-emerald-700", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+  busy:      { label: "Busy",      signal: "38 92% 55%",  dot: "bg-amber-500",   chipBg: "bg-amber-500/15",   chipText: "text-amber-700",   icon: <Briefcase className="w-3.5 h-3.5" /> },
+  driving:   { label: "Driving",   signal: "265 85% 65%", dot: "bg-violet-500",  chipBg: "bg-violet-500/15",  chipText: "text-violet-700",  icon: <Car className="w-3.5 h-3.5" /> },
+  focus:     { label: "Focus",     signal: "205 92% 55%", dot: "bg-sky-500",     chipBg: "bg-sky-500/15",     chipText: "text-sky-700",     icon: <Brain className="w-3.5 h-3.5" /> },
+  offline:   { label: "Offline",   signal: "215 15% 55%", dot: "bg-slate-400",   chipBg: "bg-slate-500/15",   chipText: "text-slate-600",   icon: <MoonStar className="w-3.5 h-3.5" /> },
 };
 
-// Radial positions (degrees from 12 o'clock, clockwise).
 const RADIAL: { key: OrbStatus; angle: number }[] = [
-  { key: "available", angle: 0 },
-  { key: "busy",      angle: 45 },
-  { key: "driving",   angle: 90 },
-  { key: "focus",     angle: 135 },
-  { key: "offline",   angle: 180 },
+  { key: "available", angle: -60 },
+  { key: "busy",      angle: -30 },
+  { key: "focus",     angle: 0 },
+  { key: "driving",   angle: 30 },
+  { key: "offline",   angle: 60 },
 ];
 
 type DurationKey = "30m" | "1h" | "event" | "off";
@@ -57,22 +54,17 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
   const rootRef = useRef<HTMLDivElement>(null);
 
   const meta = META[status];
-  const signalStyle = useMemo(() => ({
-    "--orb-signal": meta.signal,
-  }) as CSSProperties, [meta.signal]);
-  const ringStyle = (opacity: number, blur = 0): CSSProperties => ({
-    borderColor: `hsl(${meta.signal} / ${opacity})`,
-    boxShadow: `0 0 ${26 + blur}px hsl(${meta.signal} / ${Math.min(opacity, 0.68)}), inset 0 0 ${16 + blur / 2}px hsl(${meta.signal} / ${Math.min(opacity, 0.42)})`,
-  });
+  const signalStyle = useMemo(() => ({ "--orb-signal": meta.signal }) as CSSProperties, [meta.signal]);
 
-  // Tick clock for countdown
+  // Pulse is active ONLY when a manual override is in effect.
+  const pulseActive = !aiManaged && override !== null;
+
   useEffect(() => {
     if (!override) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [override]);
 
-  // Auto-revert when override expires
   useEffect(() => {
     if (override?.until && now >= override.until) {
       setOverride(null);
@@ -81,29 +73,18 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
     }
   }, [now, override, onChange]);
 
-  // Close radial on outside click / escape
   useEffect(() => {
     if (!open && !pendingPick) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setPendingPick(null);
-      }
+      if (!rootRef.current?.contains(e.target as Node)) { setOpen(false); setPendingPick(null); }
     };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setOpen(false); setPendingPick(null); }
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); setPendingPick(null); } };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
   }, [open, pendingPick]);
 
-  const pickStatus = (s: OrbStatus) => {
-    setPendingPick(s);
-  };
+  const pickStatus = (s: OrbStatus) => setPendingPick(s);
 
   const confirmDuration = (d: typeof DURATIONS[number]) => {
     if (!pendingPick) return;
@@ -131,86 +112,63 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
     return `${m}m ${s.toString().padStart(2, "0")}s`;
   }, [override, now]);
 
-  // radius in px for radial menu items
-  const R = 92;
+  const R = 72;
 
   return (
-    <div ref={rootRef} className="relative isolate inline-flex flex-col items-center overflow-visible px-8 py-5 -my-5 select-none" style={signalStyle}>
-      {/* Backdrop blur when expanded */}
+    <div ref={rootRef} className="relative inline-flex flex-col items-center select-none" style={signalStyle}>
       {open && (
         <button
-          aria-hidden
-          tabIndex={-1}
+          aria-hidden tabIndex={-1}
           onClick={() => { setOpen(false); setPendingPick(null); }}
-          className="fixed inset-0 z-30 bg-slate-950/30 backdrop-blur-[2px] animate-fade-in cursor-default"
+          className="fixed inset-0 z-30 bg-foreground/10 backdrop-blur-[1px] animate-fade-in cursor-default"
         />
       )}
 
-      {/* Orb stack */}
-      <div className="relative z-40 grid h-28 w-28 place-items-center overflow-visible isolate">
-        {/* Soft outer bloom — makes the orb read as an active communication node */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -inset-3 z-0 rounded-full opacity-80 blur-2xl"
-          style={{ background: `radial-gradient(circle, hsl(${meta.signal} / 0.5) 0%, hsl(${meta.signal} / 0.24) 38%, transparent 70%)` }}
-        />
+      <div className="relative z-40 grid h-12 w-12 place-items-center">
+        {/* Pulse rings — ONLY when manual override is active */}
+        {pulseActive && (
+          <>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-10 rounded-full border opacity-70 animate-[ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite]"
+              style={{ borderColor: `hsl(${meta.signal} / 0.7)` }}
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-10 rounded-full border opacity-50 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"
+              style={{ borderColor: `hsl(${meta.signal} / 0.55)`, animationDelay: "0.9s" }}
+            />
+          </>
+        )}
 
-        {/* Radar sweep above the dashboard surface but below the avatar */}
+        {/* Static subtle ring — always visible, calm */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-1 z-10 rounded-full opacity-75 animate-[spin_3.8s_linear_infinite] [mask-image:radial-gradient(circle,transparent_0_32%,black_34%_64%,transparent_66%)]"
-          style={{ background: `conic-gradient(from 0deg, transparent 0deg, hsl(${meta.signal} / 0.08) 210deg, hsl(${meta.signal} / 0.72) 306deg, transparent 342deg)` }}
-        />
-
-        {/* Layered animated pulse rings — explicit HSL styles avoid dynamic Tailwind class clipping/omission */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-4 z-20 rounded-full border-[3px] opacity-95 animate-[ping_2.15s_cubic-bezier(0,0,0.2,1)_infinite]"
-          style={ringStyle(0.98, 10)}
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-3 z-20 rounded-full border-[2.5px] opacity-80 animate-[ping_2.7s_cubic-bezier(0,0,0.2,1)_infinite]"
-          style={{ ...ringStyle(0.82, 18), animationDelay: "0.65s" }}
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-2 z-20 rounded-full border-2 opacity-65 animate-[ping_3.2s_cubic-bezier(0,0,0.2,1)_infinite]"
-          style={{ ...ringStyle(0.7, 28), animationDelay: "1.25s" }}
-        />
-        {/* Static refined ring + glow */}
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-4 z-30 rounded-full ring-[3px]",
-            meta.ring, meta.glow, "transition-all duration-500",
-          )}
-          style={{ boxShadow: `0 0 34px hsl(${meta.signal} / 0.64), 0 0 76px hsl(${meta.signal} / 0.34), inset 0 0 18px hsl(${meta.signal} / 0.34)` }}
+          className="pointer-events-none absolute inset-0 z-20 rounded-full ring-1 transition-colors duration-500"
+          style={{
+            boxShadow: `inset 0 0 0 1.5px hsl(${meta.signal} / ${aiManaged ? 0.35 : 0.7})`,
+          }}
         />
 
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label="Adaptive access controls"
+          aria-label="Availability controls"
           aria-expanded={open}
           className={cn(
-            "relative z-50 grid place-items-center w-16 h-16 rounded-full",
-            "transition-transform duration-300 ease-out hover:scale-[1.06] active:scale-95",
+            "relative z-50 grid place-items-center w-10 h-10 rounded-full",
+            "transition-transform duration-300 ease-out hover:scale-105 active:scale-95",
           )}
         >
-          <Avatar initials={initials} accent={accent} size="lg" hideDot />
-          {/* live status dot */}
-          <span className={cn(
-            "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full ring-2 ring-background",
-            meta.dot,
-            "after:absolute after:inset-0 after:rounded-full after:animate-ping after:opacity-60",
-            meta.dot.replace("bg-", "after:bg-"),
-          )} style={{ boxShadow: `0 0 18px hsl(${meta.signal} / 0.9)` }} />
+          <Avatar initials={initials} accent={accent} size="md" hideDot />
+          <span
+            className={cn("absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-background", meta.dot)}
+          />
         </button>
 
-        {/* Radial menu — chips */}
+        {/* Radial menu — chips arc above the avatar */}
         {RADIAL.map(({ key, angle }, i) => {
-          const rad = (angle - 90) * (Math.PI / 180); // 0deg = top
+          const rad = (angle - 90) * (Math.PI / 180);
           const x = Math.cos(rad) * R;
           const y = Math.sin(rad) * R;
           const m = META[key];
@@ -225,58 +183,84 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
                 transform: open
                   ? `translate(${x}px, ${y}px) scale(1)`
                   : `translate(0px, 0px) scale(0.4)`,
-                transitionDelay: `${open ? i * 35 : (RADIAL.length - i) * 20}ms`,
+                transitionDelay: `${open ? i * 30 : (RADIAL.length - i) * 18}ms`,
               }}
               className={cn(
-                "absolute top-1/2 left-1/2 -mt-5 -ml-5 z-40",
-                "grid place-items-center w-10 h-10 rounded-full",
-                "backdrop-blur-xl bg-slate-900/60 ring-1 ring-white/15 text-white",
-                "shadow-[0_8px_30px_-6px_rgba(0,0,0,0.45)]",
-                "transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+                "absolute top-1/2 left-1/2 -mt-4 -ml-4 z-40",
+                "grid place-items-center w-8 h-8 rounded-full",
+                "backdrop-blur-xl bg-surface-lowest/95 ring-1 ring-border text-primary",
+                "shadow-soft",
+                "transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
                 open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
-                isActive && cn("ring-2", m.ring, m.glow),
+                isActive && "ring-2",
                 "hover:scale-110",
               )}
               title={m.label}
+              data-active={isActive || undefined}
             >
               <span className={cn("absolute inset-0 rounded-full opacity-40", m.chipBg)} aria-hidden />
               <span className="relative">{m.icon}</span>
               {pendingPick === key && (
-                <span className={cn("absolute -inset-1 rounded-full ring-2 animate-pulse", m.ring)} aria-hidden />
+                <span
+                  className="absolute -inset-1 rounded-full ring-2 animate-pulse"
+                  style={{ boxShadow: `0 0 0 2px hsl(${m.signal} / 0.7)` }}
+                  aria-hidden
+                />
               )}
             </button>
           );
         })}
+
+        {/* Return to Auto — appears in radial when manual override is active */}
+        {open && !aiManaged && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); revertToAI(); }}
+            aria-label="Resume Adaptive AI"
+            style={{
+              transform: `translate(0px, ${R + 4}px) scale(1)`,
+              transitionDelay: "120ms",
+            }}
+            className={cn(
+              "absolute top-1/2 left-1/2 -mt-3.5 -ml-12 z-40",
+              "inline-flex items-center gap-1 h-7 px-2.5 rounded-full",
+              "bg-indigo-500/15 ring-1 ring-indigo-400/30 text-indigo-700 text-[10px] font-semibold",
+              "transition-all duration-400 hover:bg-indigo-500/25 backdrop-blur-xl",
+            )}
+          >
+            <Wand2 className="w-3 h-3" /> Resume AI
+          </button>
+        )}
 
         {/* Duration picker (after a status is tapped) */}
         {pendingPick && (
           <div
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "absolute z-50 top-full mt-4 left-1/2 -translate-x-1/2",
-              "w-[260px] rounded-2xl p-3",
-              "bg-slate-950/85 backdrop-blur-xl ring-1 ring-white/10 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.6)]",
+              "absolute z-50 top-full mt-3 left-1/2 -translate-x-1/2",
+              "w-[240px] rounded-2xl p-2.5",
+              "bg-surface-lowest/95 backdrop-blur-xl ring-1 ring-border shadow-elevated",
               "animate-in fade-in-0 zoom-in-95 duration-200",
             )}
           >
-            <div className="flex items-center justify-between px-1 pb-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300/80">
+            <div className="flex items-center justify-between px-1 pb-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                 Override duration
               </p>
-              <button onClick={() => setPendingPick(null)} className="text-slate-400 hover:text-white" aria-label="Cancel">
+              <button onClick={() => setPendingPick(null)} className="text-muted-foreground hover:text-primary" aria-label="Cancel">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-            <div className="flex items-center gap-1.5 px-1 pb-2">
+            <div className="flex items-center gap-1.5 px-1 pb-1.5">
               <span className={cn("w-1.5 h-1.5 rounded-full", META[pendingPick].dot)} />
-              <span className="text-xs text-white font-semibold">{META[pendingPick].label}</span>
+              <span className="text-xs text-primary font-semibold">{META[pendingPick].label}</span>
             </div>
-            <ul className="grid gap-1">
+            <ul className="grid gap-0.5">
               {DURATIONS.map((d) => (
                 <li key={d.key}>
                   <button
                     onClick={() => confirmDuration(d)}
-                    className="w-full text-left px-3 py-2 rounded-lg text-[12.5px] text-slate-100 hover:bg-white/10 transition"
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-[12px] text-primary hover:bg-surface-low transition"
                   >
                     {d.label}
                   </button>
@@ -288,23 +272,23 @@ export default function AdaptiveAccessOrb({ status, onChange, initials, accent }
       </div>
 
       {/* Caption under avatar */}
-      <div className="relative z-40 mt-2 flex items-center gap-1.5">
+      <div className="relative z-40 mt-1.5 flex items-center gap-1.5">
         {aiManaged ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/15 ring-1 ring-indigo-400/30 text-[10px] font-semibold tracking-wide text-indigo-200">
-            <Sparkles className="w-3 h-3" />
-            AI Managing Availability
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/10 ring-1 ring-indigo-400/25 text-[9.5px] font-semibold tracking-wide text-indigo-700">
+            <Sparkles className="w-2.5 h-2.5" />
+            AI Managing
           </span>
         ) : (
           <button
             onClick={revertToAI}
             className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide ring-1",
-              meta.chipBg, meta.chipText, "ring-white/15 hover:ring-white/30 transition",
+              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-semibold tracking-wide ring-1 ring-border",
+              meta.chipBg, meta.chipText, "hover:ring-foreground/30 transition",
             )}
-            title="Tap to return to AI-managed"
+            title="Tap to resume Adaptive AI"
           >
             <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
-            Manual Override
+            Manual
             {remaining && <span className="opacity-80 tabular-nums">· {remaining}</span>}
           </button>
         )}
