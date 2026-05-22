@@ -251,9 +251,8 @@ const Contacts = () => {
   return (
     <AppShell
       hideBell={false}
-      subtitle="Vault directory"
-      title="Your contacts"
-      description="Real-time availability visibility for respectful, effective reach-outs."
+      subtitle="Real-time availability visibility for respectful, effective reach-outs"
+      title="The Contact Vault"
     >
       <div className="flex items-center gap-2 flex-wrap mb-4">
           <button
