@@ -4,6 +4,7 @@ import {
   Briefcase, Zap, Radio, Clock, TrendingUp, AlertTriangle, Shield, ChevronRight, X,
   Video, MapPin, Crown, Lock, Repeat, Pencil,
 } from "lucide-react";
+import { Users, Bell, Gauge, Timer as TimerIcon, MessageCircle, Repeat as RepeatIcon } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Link, useNavigate } from "react-router-dom";
 import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
@@ -264,72 +265,8 @@ const Availability = () => {
       </section>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
-        {/* CREATED SLOTS — refined list */}
-        <section className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Currently created</p>
-              <h3 className="font-headline font-extrabold text-primary text-base">Active slots ({slots.length})</h3>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {selectMode && selectedIds.length > 0 && (
-                <>
-                  <BulkAssignMenu onAssign={bulkAssign} />
-                  <button onClick={bulkDelete}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold shadow-elevated">
-                    <Trash2 className="w-3 h-3" /> Delete ({selectedIds.length})
-                  </button>
-                </>
-              )}
-              <button onClick={() => { if (selectMode) clearSel(); else setSelectMode(true); }}
-                className={cn(
-                  "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold transition",
-                  selectMode ? "bg-primary text-primary-foreground" : "ghost-border bg-surface-low text-primary hover:bg-primary/10",
-                )}>
-                {selectMode ? "Cancel" : "Select"}
-              </button>
-              <Link to="/app/availability/builder"
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-primary text-[11px] font-bold hover:bg-primary/10">
-                <Pencil className="w-3 h-3" /> Manage
-              </Link>
-            </div>
-          </div>
-          {slots.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-4 text-center">No slots yet. Open the slot builder to create one.</p>
-          ) : (
-            <div className="space-y-4">
-              {(["meeting", "webinar", "quicksync"] as SlotModule[]).map((mk) => {
-                const items = grouped[mk];
-                if (items.length === 0) return null;
-                const meta = mk === "meeting" ? { label: "Meetings", Ic: BriefcaseIcon, cls: "bg-indigo-500/15 text-indigo-700" }
-                  : mk === "webinar" ? { label: "Webinars", Ic: Radio, cls: "bg-emerald-500/15 text-emerald-700" }
-                  : { label: "Quick Syncs", Ic: Zap, cls: "bg-fuchsia-500/15 text-fuchsia-700" };
-                return (
-                  <div key={mk}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold", meta.cls)}>
-                        <meta.Ic className="w-3 h-3" /> {meta.label}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-bold">{items.length}</span>
-                    </div>
-                    <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {items.map((s) => (
-                        <CreatedSlotRow
-                          key={s.id}
-                          slot={s}
-                          onEdit={() => !selectMode && navigate("/app/availability/builder")}
-                          selectable={selectMode}
-                          selected={selectedIds.includes(s.id)}
-                          onToggleSelect={() => toggleSel(s.id)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+        {/* COMMUNICATION PATTERN STATISTICS — derived from activity */}
+        <PatternStatistics activity={activity} totals={totals} slots={slots} perf={perf} />
 
         {/* DAILY ACTIVITY GRID */}
         <div className={cn(
