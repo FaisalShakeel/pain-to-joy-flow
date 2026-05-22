@@ -444,8 +444,8 @@ const SpotlightWindow = () => {
                       Me
                     </span>
                   )}
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1 flex-wrap max-w-full">
                       <span className="text-[12px] font-bold text-primary truncate">
                         {author?.name ?? "You"}
                       </span>
