@@ -107,6 +107,10 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem("nav.openGroup");
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const items = baseItems;
@@ -119,6 +123,25 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       markAllMessagesRead();
     }
   }, [location.pathname, markAllMessagesRead, messagesUnread]);
+
+  // Auto-open the group that contains the active route
+  useEffect(() => {
+    const parent = baseItems.find(
+      (i) => i.children && i.children.some((c) => location.pathname === c.to || location.pathname.startsWith(c.to + "/")),
+    );
+    if (parent) setOpenGroup(parent.to);
+  }, [location.pathname]);
+
+  const toggleGroup = (to: string) => {
+    setOpenGroup((prev) => {
+      const next = prev === to ? null : to;
+      if (typeof window !== "undefined") {
+        if (next) window.localStorage.setItem("nav.openGroup", next);
+        else window.localStorage.removeItem("nav.openGroup");
+      }
+      return next;
+    });
+  };
 
   const handleNavClick = (to: string) => {
     if (to === "/app/messages") markAllMessagesRead();
