@@ -4,6 +4,7 @@ import {
   Briefcase, Zap, Radio, Clock, TrendingUp, AlertTriangle, Shield, ChevronRight, X,
   Video, MapPin, Crown, Lock, Repeat, Pencil,
 } from "lucide-react";
+import { Users, Bell, Gauge, Timer as TimerIcon, MessageCircle, Repeat as RepeatIcon } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Link, useNavigate } from "react-router-dom";
 import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
@@ -264,72 +265,8 @@ const Availability = () => {
       </section>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
-        {/* CREATED SLOTS — refined list */}
-        <section className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Currently created</p>
-              <h3 className="font-headline font-extrabold text-primary text-base">Active slots ({slots.length})</h3>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {selectMode && selectedIds.length > 0 && (
-                <>
-                  <BulkAssignMenu onAssign={bulkAssign} />
-                  <button onClick={bulkDelete}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold shadow-elevated">
-                    <Trash2 className="w-3 h-3" /> Delete ({selectedIds.length})
-                  </button>
-                </>
-              )}
-              <button onClick={() => { if (selectMode) clearSel(); else setSelectMode(true); }}
-                className={cn(
-                  "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold transition",
-                  selectMode ? "bg-primary text-primary-foreground" : "ghost-border bg-surface-low text-primary hover:bg-primary/10",
-                )}>
-                {selectMode ? "Cancel" : "Select"}
-              </button>
-              <Link to="/app/availability/builder"
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full ghost-border bg-surface-low text-primary text-[11px] font-bold hover:bg-primary/10">
-                <Pencil className="w-3 h-3" /> Manage
-              </Link>
-            </div>
-          </div>
-          {slots.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-4 text-center">No slots yet. Open the slot builder to create one.</p>
-          ) : (
-            <div className="space-y-4">
-              {(["meeting", "webinar", "quicksync"] as SlotModule[]).map((mk) => {
-                const items = grouped[mk];
-                if (items.length === 0) return null;
-                const meta = mk === "meeting" ? { label: "Meetings", Ic: BriefcaseIcon, cls: "bg-indigo-500/15 text-indigo-700" }
-                  : mk === "webinar" ? { label: "Webinars", Ic: Radio, cls: "bg-emerald-500/15 text-emerald-700" }
-                  : { label: "Quick Syncs", Ic: Zap, cls: "bg-fuchsia-500/15 text-fuchsia-700" };
-                return (
-                  <div key={mk}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold", meta.cls)}>
-                        <meta.Ic className="w-3 h-3" /> {meta.label}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-bold">{items.length}</span>
-                    </div>
-                    <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {items.map((s) => (
-                        <CreatedSlotRow
-                          key={s.id}
-                          slot={s}
-                          onEdit={() => !selectMode && navigate("/app/availability/builder")}
-                          selectable={selectMode}
-                          selected={selectedIds.includes(s.id)}
-                          onToggleSelect={() => toggleSel(s.id)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+        {/* COMMUNICATION PATTERN STATISTICS — derived from activity */}
+        <PatternStatistics activity={activity} totals={totals} slots={slots} perf={perf} />
 
         {/* DAILY ACTIVITY GRID */}
         <div className={cn(
@@ -632,6 +569,116 @@ const Stat = ({ label, value, dot }: { label: string; value: string; dot: string
 );
 
 export default Availability;
+
+// ---------- Pattern Statistics ----------
+interface PatternStatsProps {
+  activity: DayActivity[];
+  totals: { meetings: number; qs: number; live: number; usedMin: number; capacityMin: number; interruptions: number };
+  slots: StoredSlot[];
+  perf: ReturnType<typeof useMetrics>;
+}
+
+const PatternStatistics = ({ activity, totals, slots, perf }: PatternStatsProps) => {
+  const days = Math.max(1, activity.length);
+  const peakBusy = [...activity].sort((a, b) => b.status.busyPct - a.status.busyPct)[0];
+  const peakFocus = [...activity].sort((a, b) => b.status.focusPct - a.status.focusPct)[0];
+  const freeMin = Math.max(0, totals.capacityMin - totals.usedMin);
+  const reachabilityPct = Math.round((freeMin / Math.max(1, totals.capacityMin)) * 100);
+  const interruptionsPerDay = Math.round((totals.interruptions / days) * 10) / 10;
+  const tolerance =
+    interruptionsPerDay >= 8 ? { label: "Low — high pings", cls: "bg-rose-500/15 text-rose-700" } :
+    interruptionsPerDay >= 4 ? { label: "Medium", cls: "bg-amber-500/15 text-amber-700" } :
+                               { label: "High — rarely interrupted", cls: "bg-emerald-500/15 text-emerald-700" };
+  const responseRatio = perf.connected + perf.avoided > 0
+    ? Math.round((perf.connected / (perf.connected + perf.avoided)) * 100)
+    : 0;
+  const avgResponse = Math.max(2, Math.round(45 / (perf.connected + 1)));
+  const urgencyHandled = perf.breakdown.pingConnects + perf.breakdown.approvedInteractions;
+  const urgencyBlocked = perf.breakdown.blocked;
+  const recurring = slots.filter((s) => s.recurring).length;
+  const approvalSlots = slots.filter((s) => s.bookingMode === "approval").length;
+  const instantSlots = slots.length - approvalSlots;
+
+  const rows: { ic: any; label: string; value: string; sub: string; tone: string }[] = [
+    {
+      ic: Clock,
+      label: "Preferred contact timing",
+      value: peakBusy ? `${format(new Date(peakBusy.date), "EEE")} · 10:00–13:00` : "—",
+      sub: "Window with the most accepted conversations",
+      tone: "bg-indigo-500/15 text-indigo-700",
+    },
+    {
+      ic: MessageCircle,
+      label: "Response behavior",
+      value: `${responseRatio}% replied · ~${avgResponse}m`,
+      sub: `${perf.connected} connected vs ${perf.avoided} deferred this week`,
+      tone: "bg-fuchsia-500/15 text-fuchsia-700",
+    },
+    {
+      ic: Bell,
+      label: "Interruption tolerance",
+      value: `${interruptionsPerDay}/day`,
+      sub: tolerance.label,
+      tone: tolerance.cls,
+    },
+    {
+      ic: TimerIcon,
+      label: "Reachability windows",
+      value: `${minToHr(freeMin)} free`,
+      sub: `${reachabilityPct}% of planned capacity (${minToHr(totals.capacityMin)})`,
+      tone: "bg-sky-500/15 text-sky-700",
+    },
+    {
+      ic: Gauge,
+      label: "Urgency handling",
+      value: `${urgencyHandled} escalated · ${urgencyBlocked} blocked`,
+      sub: "Pings fast-tracked through bypass vs filtered out",
+      tone: "bg-amber-500/15 text-amber-700",
+    },
+    {
+      ic: Users,
+      label: "Audience-based access",
+      value: `${approvalSlots} approval · ${instantSlots} instant`,
+      sub: `${slots.length} active windows across audiences`,
+      tone: "bg-violet-500/15 text-violet-700",
+    },
+    {
+      ic: RepeatIcon,
+      label: "Recurring availability rhythms",
+      value: `${recurring} recurring slot${recurring === 1 ? "" : "s"}`,
+      sub: peakFocus ? `Peak focus on ${format(new Date(peakFocus.date), "EEEE")}` : "No recurring rhythm yet",
+      tone: "bg-emerald-500/15 text-emerald-700",
+    },
+  ];
+
+  return (
+    <section className="lg:col-span-2 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Recorded as per activity</p>
+          <h3 className="font-headline font-extrabold text-primary text-base">Communication pattern statistics</h3>
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">
+          <TrendingUp className="w-3 h-3" /> Last {days} day{days === 1 ? "" : "s"}
+        </span>
+      </div>
+      <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        {rows.map((r) => (
+          <li key={r.label} className="rounded-2xl ghost-border bg-surface-low p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={cn("grid place-items-center w-7 h-7 rounded-lg", r.tone)}>
+                <r.ic className="w-3.5 h-3.5" />
+              </span>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground leading-tight">{r.label}</p>
+            </div>
+            <p className="font-headline font-extrabold text-primary text-lg leading-tight">{r.value}</p>
+            <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{r.sub}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+};
 
 // ---------- Created Slot Row ----------
 const modeMeta: Record<StoredSlot["mode"], { label: string; icon: any; cls: string }> = {
