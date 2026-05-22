@@ -385,7 +385,7 @@ const Dashboard = () => {
         />
 
         {/* Unified Spotlight Window — view + create + manage in one surface */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 min-w-0">
           <SpotlightWindow />
         </div>
 
