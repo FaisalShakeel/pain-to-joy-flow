@@ -97,6 +97,26 @@ const App = () => (
           <Route path="/app/availability/focus-meetings" element={<FocusMeetingBuilder />} />
           <Route path="/app/availability/webinars" element={<WebinarBuilder />} />
           <Route path="/app/availability/venue" element={<VenueBuilder />} />
+          <Route
+            path="/app/availability/audience"
+            element={
+              <Placeholder
+                title="Audience Scheduling"
+                subtitle="Availability : Audience"
+                description="Audience-based visibility and scheduling rules for team, office, friends, family, selected contacts, public and private access groups."
+              />
+            }
+          />
+          <Route
+            path="/app/availability/communication-patterns"
+            element={
+              <Placeholder
+                title="Communication Patterns"
+                subtitle="Availability : Patterns"
+                description="Insights and controls around response windows, interruption preferences, reachability timing, contact patterns and AI communication intelligence."
+              />
+            }
+          />
           <Route path="/app/schedule/:id" element={<ScheduleCall />} />
           <Route path="/app/requests" element={<AccessRequests />} />
           <Route path="/app/requests/manage" element={<ApprovalFlow />} />
