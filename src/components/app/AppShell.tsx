@@ -64,7 +64,7 @@ const baseItems: NavItem[] = [
     children: [
       { to: "/app/availability/focus-meetings", label: "Hybrid Scheduling", icon: CalendarClock },
       { to: "/app/availability/quick-sync", label: "Quick Sync", icon: Zap },
-      { to: "/app/availability/audience", label: "Audience", icon: UsersRound },
+      { to: "/app/availability/audience", label: "Event Access Scheduling", icon: UsersRound },
       { to: "/app/availability/communication-patterns", label: "Communication Patterns", icon: Radio },
     ],
   },
@@ -185,7 +185,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                       onClick={() => toggleGroup(item.to)}
                       aria-expanded={openGroup === item.to}
                       className={cn(
-                        "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                        "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer",
                         isItemActive(item.to, item.end, location.pathname)
                           ? "bg-primary text-primary-foreground shadow-glass"
                           : "text-muted-foreground hover:text-primary hover:bg-surface-low",
@@ -214,9 +214,9 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                               end
                               className={({ isActive }) =>
                                 cn(
-                                  "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors",
+                                  "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors cursor-pointer",
                                   isActive
-                                    ? "bg-surface-low text-primary"
+                                    ? "bg-surface-low text-primary ring-1 ring-primary/15 shadow-soft"
                                     : "text-muted-foreground hover:text-primary hover:bg-surface-low/60",
                                 )
                               }
@@ -447,7 +447,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                         onClick={() => toggleGroup(item.to)}
                         aria-expanded={openGroup === item.to}
                         className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium cursor-pointer",
                           isItemActive(item.to, item.end, location.pathname)
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:bg-surface-low",
@@ -472,9 +472,9 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                                 onClick={() => setMobileNav(false)}
                                 className={({ isActive }) =>
                                   cn(
-                                    "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium",
+                                    "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium cursor-pointer",
                                     isActive
-                                      ? "bg-surface-low text-primary"
+                                      ? "bg-surface-low text-primary ring-1 ring-primary/15 shadow-soft"
                                       : "text-muted-foreground hover:bg-surface-low/60",
                                   )
                                 }

@@ -154,8 +154,8 @@ const WebinarBuilder = () => {
 
   return (
     <AppShell
-      subtitle="Group Session / Webinar"
-      title="Speak to many, in one open window."
+      subtitle="Real-time coordination for event access and audience participation"
+      title="Event Access Scheduling"
       actions={
         <button
           onClick={() => navigate("/app/availability/builder")}
