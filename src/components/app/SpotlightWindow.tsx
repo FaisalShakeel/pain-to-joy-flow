@@ -155,22 +155,22 @@ const SpotlightWindow = () => {
   const valid = title.trim().length > 0 && body.trim().length > 0 && titleLeft >= 0 && bodyLeft >= 0;
 
   return (
-    <section className="rounded-[1.35rem] bg-gradient-to-br from-primary/[0.04] via-surface-lowest to-surface-low/40 ghost-border shadow-soft overflow-hidden">
+    <section className="w-full min-w-0 max-w-full rounded-[1.35rem] bg-gradient-to-br from-primary/[0.04] via-surface-lowest to-surface-low/40 ghost-border shadow-soft overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-4 md:px-5 pt-4">
-        <div className="flex items-center gap-2 min-w-0">
+      <header className="flex items-center justify-between gap-2 px-3 md:px-5 pt-4">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <span className="relative grid place-items-center w-7 h-7 rounded-xl bg-primary/10 text-primary">
             <Megaphone className="w-3.5 h-3.5" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground leading-none">Spotlight · Live</p>
             <h3 className="font-headline font-extrabold text-primary text-sm md:text-base leading-tight truncate">
               Your operational visibility stream
             </h3>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-muted-foreground">
             <FilterIcon className="w-3 h-3" /> {FILTERS.find((f) => f.id === filter)?.label}
           </span>
@@ -190,7 +190,7 @@ const SpotlightWindow = () => {
       </header>
 
       {/* Filter rail */}
-      <div className="mt-3 px-4 md:px-5">
+      <div className="mt-3 px-3 md:px-5 min-w-0">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
           {FILTERS.map((f) => {
             const active = filter === f.id;
@@ -378,7 +378,7 @@ const SpotlightWindow = () => {
       )}
 
       {/* Stream */}
-      <div className="px-2 md:px-3 pb-3 pt-3">
+      <div className="px-2 md:px-3 pb-3 pt-3 min-w-0">
         {filter === "ai" ? (
           <div className="m-2 p-5 rounded-2xl border border-dashed border-primary/30 bg-primary/[0.03] text-center">
             <Sparkles className="w-5 h-5 text-primary mx-auto" />
@@ -428,7 +428,7 @@ const SpotlightWindow = () => {
                 <li
                   key={p.id}
                   className={cn(
-                    "group relative flex gap-3 px-3 py-3 rounded-xl transition hover:bg-surface-low/40",
+                    "group relative flex gap-2.5 px-2.5 md:px-3 py-3 rounded-xl transition hover:bg-surface-low/40 min-w-0",
                     isUrgent && "bg-amber-500/[0.04]",
                   )}
                 >
@@ -444,7 +444,7 @@ const SpotlightWindow = () => {
                       Me
                     </span>
                   )}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-[12px] font-bold text-primary truncate">
                         {author?.name ?? "You"}
@@ -484,7 +484,7 @@ const SpotlightWindow = () => {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="self-start p-1 rounded-full text-muted-foreground hover:bg-surface-low hover:text-primary transition opacity-70 group-hover:opacity-100"
+                        className="self-start shrink-0 p-1 rounded-full text-muted-foreground hover:bg-surface-low hover:text-primary transition opacity-70 group-hover:opacity-100"
                         aria-label="Spotlight actions"
                       >
                         <MoreHorizontal className="w-4 h-4" />
