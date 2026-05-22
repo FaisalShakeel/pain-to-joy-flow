@@ -178,28 +178,81 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
           <ul className="space-y-0.5">
             {itemsWithBadges.map((item) => (
               <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  onClick={() => handleNavClick(item.to)}
-                  className={() => {
-                    const isActive = isItemActive(item.to, item.end, location.pathname);
-                    return cn(
-                      "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-glass"
-                        : "text-muted-foreground hover:text-primary hover:bg-surface-low",
-                    );
-                  }}
-                >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.badge ? (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
-                      {item.badge}
-                    </span>
-                  ) : null}
-                </NavLink>
+                {item.children ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(item.to)}
+                      aria-expanded={openGroup === item.to}
+                      className={cn(
+                        "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                        isItemActive(item.to, item.end, location.pathname)
+                          ? "bg-primary text-primary-foreground shadow-glass"
+                          : "text-muted-foreground hover:text-primary hover:bg-surface-low",
+                      )}
+                    >
+                      <item.icon className="w-4 h-4 shrink-0" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      <ChevronRight
+                        className={cn(
+                          "w-3.5 h-3.5 shrink-0 transition-transform",
+                          openGroup === item.to && "rotate-90",
+                        )}
+                      />
+                    </button>
+                    <div
+                      className={cn(
+                        "grid transition-[grid-template-rows] duration-200 ease-out",
+                        openGroup === item.to ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                      )}
+                    >
+                      <ul className="overflow-hidden ml-4 mt-0.5 border-l border-outline-variant/40 pl-2 space-y-0.5">
+                        {item.children.map((child) => (
+                          <li key={child.to}>
+                            <NavLink
+                              to={child.to}
+                              end
+                              className={({ isActive }) =>
+                                cn(
+                                  "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors",
+                                  isActive
+                                    ? "bg-surface-low text-primary"
+                                    : "text-muted-foreground hover:text-primary hover:bg-surface-low/60",
+                                )
+                              }
+                            >
+                              <child.icon className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                              <span className="truncate">{child.label}</span>
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ) : (
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    onClick={() => handleNavClick(item.to)}
+                    className={() => {
+                      const isActive = isItemActive(item.to, item.end, location.pathname);
+                      return cn(
+                        "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-glass"
+                          : "text-muted-foreground hover:text-primary hover:bg-surface-low",
+                      );
+                    }}
+                  >
+                    <item.icon className="w-4 h-4 shrink-0" />
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge ? (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </NavLink>
+                )}
               </li>
             ))}
           </ul>
