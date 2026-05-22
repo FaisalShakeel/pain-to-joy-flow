@@ -209,7 +209,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
         {/* Top bar */}
         <header className="sticky top-0 z-30 glass-panel border-b border-outline-variant/30 !rounded-none">
-          <div className="px-4 md:px-8 py-1.5 flex items-center gap-3">
+          <div className="px-4 md:px-8 py-1 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileNav(true)}
