@@ -461,15 +461,18 @@ const SpotlightWindow = () => {
                       )}
                       {aud && (
                         <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
-                          {aud.emoji} {aud.label}
+                          <span>{aud.emoji}</span>
+                          <span className="hidden sm:inline">{aud.label}</span>
                         </span>
                       )}
                       <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-low text-muted-foreground">
-                        <Vis.icon className="w-2.5 h-2.5" /> {Vis.label}
+                        <Vis.icon className="w-2.5 h-2.5" />
+                        <span className="hidden sm:inline">{Vis.label}</span>
                       </span>
                       {p.expiresIn && (
-                        <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground">
-                          <Clock className="w-2.5 h-2.5" /> {p.expiresIn}
+                        <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground whitespace-nowrap">
+                          <Clock className="w-2.5 h-2.5" />
+                          <span className="hidden sm:inline">{p.expiresIn}</span>
                         </span>
                       )}
                     </div>
