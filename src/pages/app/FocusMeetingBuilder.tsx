@@ -4,7 +4,7 @@ import { format, addDays, addWeeks } from "date-fns";
 import {
   ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Repeat, Lock, Check,
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
-  ChevronRight, X, CheckCircle2, CalendarPlus,
+  ChevronRight, X, CheckCircle2, CalendarPlus, Video, MapPin,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
@@ -104,6 +104,7 @@ const FocusMeetingBuilder = () => {
   const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [channel, setChannel] = useState<"hybrid" | "online" | "onsite">("hybrid");
 
   const isEditing = !!draft.id;
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
@@ -161,8 +162,8 @@ const FocusMeetingBuilder = () => {
 
   return (
     <AppShell
-      subtitle="Meetings — Focus Work"
-      title="Protect deep conversations."
+      subtitle="One slot — double the exposure"
+      title="Hybrid Slot Scheduling"
       actions={
         <button
           onClick={() => navigate("/app/availability/builder")}
@@ -174,19 +175,43 @@ const FocusMeetingBuilder = () => {
     >
       {/* CREATION PANEL */}
       <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground">
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground shrink-0">
             <Briefcase className="w-4 h-4" />
           </span>
-          <div>
+          <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "New"} Meeting Block</p>
             <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Focus Meeting Builder</h2>
           </div>
-          {isEditing && (
-            <button onClick={reset} className="ml-auto text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-              <X className="w-3 h-3" /> Discard edit
-            </button>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            <div className="rounded-xl ghost-border bg-surface-low p-1 flex items-center gap-1">
+              {([
+                ["hybrid", "Hybrid", Sparkles],
+                ["online", "Online", Video],
+                ["onsite", "Onsite", MapPin],
+              ] as const).map(([k, l, Ic]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setChannel(k)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition",
+                    channel === k
+                      ? "bg-primary text-primary-foreground shadow-glass"
+                      : "text-muted-foreground hover:text-primary",
+                  )}
+                  aria-pressed={channel === k}
+                >
+                  <Ic className="w-3.5 h-3.5" /> {l}
+                </button>
+              ))}
+            </div>
+            {isEditing && (
+              <button onClick={reset} className="text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
+                <X className="w-3 h-3" /> Discard edit
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Stepper */}
