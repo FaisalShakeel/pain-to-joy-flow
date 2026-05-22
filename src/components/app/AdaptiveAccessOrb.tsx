@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Sparkles, ShieldCheck, Briefcase, Car, Brain, MoonStar, ChevronDown, Wand2, Check } from "lucide-react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Sparkles, Briefcase, Car, Brain, MoonStar, ChevronDown, Wand2, Check, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export type OrbStatus = "available" | "busy" | "focus" | "driving" | "offline";
 
@@ -11,14 +13,22 @@ type Meta = {
   chipBg: string;
   chipText: string;
   icon: React.ReactNode;
+  /** circular floating button gradient + ring (status-first color) */
+  ringBg: string;
+  iconColor: string;
 };
 
 const META: Record<OrbStatus, Meta> = {
-  available: { label: "Available", signal: "152 72% 45%", dot: "bg-emerald-500", chipBg: "bg-emerald-500/15", chipText: "text-emerald-700", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
-  busy:      { label: "Busy",      signal: "38 92% 55%",  dot: "bg-amber-500",   chipBg: "bg-amber-500/15",   chipText: "text-amber-700",   icon: <Briefcase className="w-3.5 h-3.5" /> },
-  focus:     { label: "Focus",     signal: "205 92% 55%", dot: "bg-sky-500",     chipBg: "bg-sky-500/15",     chipText: "text-sky-700",     icon: <Brain className="w-3.5 h-3.5" /> },
-  driving:   { label: "Driving",   signal: "265 85% 65%", dot: "bg-violet-500",  chipBg: "bg-violet-500/15",  chipText: "text-violet-700",  icon: <Car className="w-3.5 h-3.5" /> },
-  offline:   { label: "Offline",   signal: "215 15% 55%", dot: "bg-slate-400",   chipBg: "bg-slate-500/15",   chipText: "text-slate-600",   icon: <MoonStar className="w-3.5 h-3.5" /> },
+  available: { label: "Available", signal: "152 72% 45%", dot: "bg-emerald-500", chipBg: "bg-emerald-500/15", chipText: "text-emerald-700",
+               icon: <Phone className="w-4 h-4" />,        ringBg: "bg-emerald-500 ring-emerald-300/60",       iconColor: "text-white" },
+  busy:      { label: "Busy",      signal: "38 92% 55%",  dot: "bg-amber-500",   chipBg: "bg-amber-500/15",   chipText: "text-amber-700",
+               icon: <Briefcase className="w-4 h-4" />,    ringBg: "bg-amber-500 ring-amber-300/60",            iconColor: "text-white" },
+  focus:     { label: "Focus",     signal: "205 92% 55%", dot: "bg-sky-500",     chipBg: "bg-sky-500/15",     chipText: "text-sky-700",
+               icon: <Brain className="w-4 h-4" />,        ringBg: "bg-sky-500 ring-sky-300/60",                iconColor: "text-white" },
+  driving:   { label: "Driving",   signal: "265 85% 65%", dot: "bg-violet-500",  chipBg: "bg-violet-500/15",  chipText: "text-violet-700",
+               icon: <Car className="w-4 h-4" />,          ringBg: "bg-violet-500 ring-violet-300/60",          iconColor: "text-white" },
+  offline:   { label: "Offline",   signal: "215 15% 55%", dot: "bg-slate-400",   chipBg: "bg-slate-500/15",   chipText: "text-slate-600",
+               icon: <MoonStar className="w-4 h-4" />,     ringBg: "bg-slate-400 ring-slate-300/60",            iconColor: "text-white" },
 };
 
 const ORDER: OrbStatus[] = ["available", "busy", "focus", "driving", "offline"];
@@ -45,7 +55,7 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
   const [pendingPick, setPendingPick] = useState<OrbStatus | null>(null);
   const [override, setOverride] = useState<{ status: OrbStatus; until: number | null } | null>(null);
   const [now, setNow] = useState(() => Date.now());
-  const rootRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const meta = META[status];
   const signalStyle = useMemo(() => ({ "--orb-signal": meta.signal }) as CSSProperties, [meta.signal]);
@@ -64,16 +74,7 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
     }
   }, [now, override, onChange]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) { setOpen(false); setPendingPick(null); }
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); setPendingPick(null); } };
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
-  }, [open]);
+  useEffect(() => { if (!open) setPendingPick(null); }, [open]);
 
   const confirmDuration = (d: typeof DURATIONS[number]) => {
     if (!pendingPick) return;
@@ -102,13 +103,13 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
   }, [override, now]);
 
   return (
-    <div ref={rootRef} className="relative inline-flex" style={signalStyle}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-label="Adaptive access control"
-        className={cn(
+    <div className="relative inline-flex" style={signalStyle}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label="Adaptive access control"
+            className={cn(
           "group inline-flex items-center gap-1.5 sm:gap-2 h-8 pl-2 pr-1.5 sm:pl-2.5 sm:pr-2 rounded-lg",
           "bg-surface-lowest/80 backdrop-blur-xl ring-1 ring-border hover:ring-foreground/25",
           "transition-all duration-300 shadow-sm max-w-[220px]",
@@ -143,21 +144,22 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
         )}
 
         <ChevronDown className={cn("w-3 h-3 text-muted-foreground shrink-0 transition-transform", open && "rotate-180")} />
-      </button>
-
-      {open && (
-        <div
-          onClick={(e) => e.stopPropagation()}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align={isMobile ? "start" : "end"}
+          side="bottom"
+          sideOffset={8}
+          collisionPadding={12}
+          avoidCollisions
           className={cn(
-            "absolute z-50 top-1/2 -translate-y-1/2 right-full mr-2",
-            "w-[260px] rounded-xl p-2",
-            "bg-surface-lowest/95 backdrop-blur-xl ring-1 ring-border shadow-elevated",
-            "animate-in fade-in-0 zoom-in-95 duration-150",
+            "w-auto max-w-[calc(100vw-24px)] p-3 rounded-2xl",
+            "bg-surface-lowest/95 backdrop-blur-xl border-border shadow-elevated",
           )}
         >
           {!pendingPick ? (
-            <>
-              <div className="px-2 pt-1 pb-1.5 flex items-center justify-between">
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center justify-between gap-3 px-1">
                 <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                   Manual override
                 </p>
@@ -167,31 +169,45 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
                   </button>
                 )}
               </div>
-              <ul className="grid gap-0.5">
+              {/* Circular floating action cluster — status-first colors */}
+              <div className="flex items-center gap-2.5">
                 {ORDER.map((k) => {
                   const m = META[k];
                   const active = !aiManaged && k === status;
                   return (
-                    <li key={k}>
-                      <button
-                        onClick={() => setPendingPick(k)}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px] text-primary hover:bg-surface-low transition",
-                          active && "bg-surface-low",
-                        )}
-                      >
-                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", m.dot)} />
-                        <span className="flex-1 text-left">{m.label}</span>
-                        {active && <Check className="w-3 h-3 text-muted-foreground" />}
-                      </button>
-                    </li>
+                    <button
+                      key={k}
+                      onClick={() => setPendingPick(k)}
+                      title={m.label}
+                      aria-label={m.label}
+                      className={cn(
+                        "relative grid place-items-center w-11 h-11 rounded-full shadow-md ring-2 ring-offset-2 ring-offset-surface-lowest transition-transform hover:scale-105 active:scale-95",
+                        m.ringBg, m.iconColor,
+                        active && "scale-110",
+                      )}
+                    >
+                      {m.icon}
+                      {active && (
+                        <span className="absolute -top-1 -right-1 grid place-items-center w-4 h-4 rounded-full bg-surface-lowest ring-1 ring-border">
+                          <Check className="w-2.5 h-2.5 text-primary" />
+                        </span>
+                      )}
+                    </button>
                   );
                 })}
-              </ul>
-            </>
+              </div>
+              <div className="flex items-center justify-between px-1 pt-0.5">
+                <span className="text-[10px] text-muted-foreground">Tap a status to override</span>
+                {aiManaged && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700">
+                    <Sparkles className="w-2.5 h-2.5" /> AI active
+                  </span>
+                )}
+              </div>
+            </div>
           ) : (
-            <>
-              <div className="flex items-center justify-between px-2 pt-1 pb-1.5">
+            <div className="flex flex-col gap-2 min-w-[220px]">
+              <div className="flex items-center justify-between px-1">
                 <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                   Override duration
                 </p>
@@ -199,8 +215,10 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
                   Back
                 </button>
               </div>
-              <div className="flex items-center gap-1.5 px-2 pb-1.5">
-                <span className={cn("w-1.5 h-1.5 rounded-full", META[pendingPick].dot)} />
+              <div className="flex items-center gap-2 px-1">
+                <span className={cn("grid place-items-center w-7 h-7 rounded-full text-white", META[pendingPick].ringBg)}>
+                  {META[pendingPick].icon}
+                </span>
                 <span className="text-xs text-primary font-semibold">{META[pendingPick].label}</span>
               </div>
               <ul className="grid gap-0.5">
@@ -215,10 +233,10 @@ export default function AdaptiveAccessOrb({ status, onChange }: Props) {
                   </li>
                 ))}
               </ul>
-            </>
+            </div>
           )}
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
