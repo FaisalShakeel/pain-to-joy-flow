@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Sparkles, ShieldCheck, Briefcase, Car, Brain, MoonStar, ChevronDown, Wand2, Check, Phone, AlertTriangle } from "lucide-react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Sparkles, Briefcase, Car, Brain, MoonStar, ChevronDown, Wand2, Check, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
