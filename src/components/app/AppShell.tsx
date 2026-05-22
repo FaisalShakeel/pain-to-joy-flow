@@ -20,6 +20,11 @@ import {
   Compass,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronRight,
+  CalendarClock,
+  Zap,
+  UsersRound,
+  Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
@@ -45,13 +50,24 @@ interface NavItem {
   badge?: number;
   end?: boolean;
   providerOnly?: boolean;
+  children?: { to: string; label: string; icon: typeof LayoutDashboard }[];
 }
 
 const baseItems: NavItem[] = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/app/explore", label: "Explore", icon: Compass },
   { to: "/app/contacts", label: "Contacts", icon: Users },
-  { to: "/app/availability", label: "Availability", icon: CalendarDays },
+  {
+    to: "/app/availability",
+    label: "Availability",
+    icon: CalendarDays,
+    children: [
+      { to: "/app/availability", label: "Hybrid Scheduling", icon: CalendarClock },
+      { to: "/app/availability/quick-sync", label: "Quick Sync", icon: Zap },
+      { to: "/app/availability/audience", label: "Audience", icon: UsersRound },
+      { to: "/app/availability/communication-patterns", label: "Communication Patterns", icon: Radio },
+    ],
+  },
   { to: "/app/requests", label: "Requests", icon: Inbox },
   { to: "/app/messages", label: "Messages", icon: MessageSquare },
   { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
