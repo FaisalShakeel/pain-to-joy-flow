@@ -163,8 +163,8 @@ const QuickSyncBuilder = () => {
 
   return (
     <AppShell
-      subtitle="Quick Sync Builder"
-      title="Create it. Manage it. Stay interruption-free."
+      subtitle="Create it. Manage it. Stay interruption-free."
+      title="Quick Sync Builder"
       actions={
         <button
           onClick={() => navigate("/app/availability/builder")}
