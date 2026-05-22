@@ -440,31 +440,80 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
             <ul className="space-y-1">
               {itemsWithBadges.map((item) => (
                 <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.end}
-                    onClick={() => {
-                      handleNavClick(item.to);
-                      setMobileNav(false);
-                    }}
-                    className={() => {
-                      const isActive = isItemActive(item.to, item.end, location.pathname);
-                      return cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-surface-low",
-                      );
-                    }}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge ? (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </NavLink>
+                  {item.children ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(item.to)}
+                        aria-expanded={openGroup === item.to}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                          isItemActive(item.to, item.end, location.pathname)
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-surface-low",
+                        )}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="flex-1 text-left">{item.label}</span>
+                        <ChevronRight
+                          className={cn(
+                            "w-3.5 h-3.5 transition-transform",
+                            openGroup === item.to && "rotate-90",
+                          )}
+                        />
+                      </button>
+                      {openGroup === item.to && (
+                        <ul className="ml-4 mt-1 border-l border-outline-variant/40 pl-2 space-y-0.5">
+                          {item.children.map((child) => (
+                            <li key={child.to}>
+                              <NavLink
+                                to={child.to}
+                                end
+                                onClick={() => setMobileNav(false)}
+                                className={({ isActive }) =>
+                                  cn(
+                                    "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium",
+                                    isActive
+                                      ? "bg-surface-low text-primary"
+                                      : "text-muted-foreground hover:bg-surface-low/60",
+                                  )
+                                }
+                              >
+                                <child.icon className="w-3.5 h-3.5 opacity-80" />
+                                <span className="truncate">{child.label}</span>
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => {
+                        handleNavClick(item.to);
+                        setMobileNav(false);
+                      }}
+                      className={() => {
+                        const isActive = isItemActive(item.to, item.end, location.pathname);
+                        return cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-surface-low",
+                        );
+                      }}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge ? (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>
