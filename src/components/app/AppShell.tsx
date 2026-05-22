@@ -62,7 +62,7 @@ const baseItems: NavItem[] = [
     label: "Availability",
     icon: CalendarDays,
     children: [
-      { to: "/app/availability", label: "Hybrid Scheduling", icon: CalendarClock },
+      { to: "/app/availability/focus-meetings", label: "Hybrid Scheduling", icon: CalendarClock },
       { to: "/app/availability/quick-sync", label: "Quick Sync", icon: Zap },
       { to: "/app/availability/audience", label: "Audience", icon: UsersRound },
       { to: "/app/availability/communication-patterns", label: "Communication Patterns", icon: Radio },
