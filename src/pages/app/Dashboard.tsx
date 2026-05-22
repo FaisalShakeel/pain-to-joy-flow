@@ -8,7 +8,7 @@ import StatusPill from "@/components/app/StatusPill";
 import Avatar from "@/components/app/Avatar";
 import MessagesPanel from "@/components/app/MessagesPanel";
 import PriorityContactsWidget from "@/components/app/PriorityContactsWidget";
-import SpotlightBoard from "@/components/app/SpotlightBoard";
+import SpotlightWindow from "@/components/app/SpotlightWindow";
 import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
 import { useState } from "react";
@@ -384,9 +384,9 @@ const Dashboard = () => {
           }
         />
 
-        {/* Spotlight + Signal (no outer title; new spotlight inside tile) */}
+        {/* Unified Spotlight Window — view + create + manage in one surface */}
         <div className="lg:col-span-3">
-          <SpotlightBoard />
+          <SpotlightWindow />
         </div>
 
         {/* Priority Contacts */}
