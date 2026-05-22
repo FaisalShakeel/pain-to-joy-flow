@@ -16,7 +16,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
 type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
-type Density = 6 | 10 | 16;
+type Density = 6 | 16;
 
 const FAV_KEY = "availock.favoriteContacts";
 
@@ -224,15 +224,14 @@ const Contacts = () => {
 
   const densityCols: Record<Density, string> = {
     6:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-    10: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
     16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
   };
 
   // Approximate per-tile heights (px) used to compute the visible window height.
   // Keeps exactly `density` tiles in view; the rest scrolls within the panel.
-  const densityRowHeight: Record<Density, number> = { 6: 168, 10: 124, 16: 88 };
-  const densityColCount: Record<Density, number> = { 6: 3, 10: 5, 16: 4 };
-  const visibleRows: Record<Density, number> = { 6: 2, 10: 2, 16: 4 };
+  const densityRowHeight: Record<Density, number> = { 6: 168, 16: 88 };
+  const densityColCount: Record<Density, number> = { 6: 3, 16: 4 };
+  const visibleRows: Record<Density, number> = { 6: 2, 16: 4 };
   const scrollMaxHeight = visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
 
   const statusDot: Record<string, string> = {
@@ -388,10 +387,10 @@ const Contacts = () => {
         {/* Bird's-eye view density toggle */}
         <div className="inline-flex items-center gap-1.5 ml-auto">
           <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            <Eye className="w-3 h-3" /> View
+            <Eye className="w-3 h-3" /> Bird's-Eye
           </span>
           <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
-            {([6, 10, 16] as Density[]).map((d) => (
+            {([6, 16] as Density[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDensity(d)}
@@ -432,13 +431,11 @@ const Contacts = () => {
           className="mt-4 overflow-y-auto pr-1 rounded-2xl"
           style={{ maxHeight: scrollMaxHeight }}
         >
-          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : density === 10 ? "gap-3" : "gap-2", densityCols[density])}>
+          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
-              const compact = density === 16;
               const roomy = density === 6;
-              const medium = density === 10;
               return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
@@ -460,12 +457,12 @@ const Contacts = () => {
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
                       "group flex items-start h-full w-full rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
-                      roomy ? "gap-3 p-4" : medium ? "gap-2.5 p-3" : "gap-2 p-2",
+                      roomy ? "gap-3 p-4" : "gap-2 p-2",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
                     <div className="relative shrink-0">
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : medium ? "md" : "sm"} />
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : "sm"} />
                       <Link
                         to={`/app/contact/${c.id}/log`}
                         onClick={(e) => e.stopPropagation()}
@@ -478,7 +475,7 @@ const Contacts = () => {
                         <Activity className={roomy ? "w-3 h-3" : "w-2.5 h-2.5"} />
                       </Link>
                     </div>
-                    <div className={cn("min-w-0 flex-1", roomy ? "pr-10" : medium ? "pr-9" : "pr-8")}>
+                    <div className={cn("min-w-0 flex-1", roomy ? "pr-10" : "pr-8")}>
                       <div className="flex items-center gap-1.5">
                         {(isPinned || canPin) && (
                         <button
@@ -520,7 +517,7 @@ const Contacts = () => {
                         >
                           <Star className={cn(roomy ? "w-3 h-3" : "w-2.5 h-2.5", fav && "fill-amber-500")} />
                         </button>
-                        <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : medium ? "text-xs" : "text-[11px]")}>
+                        <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : "text-[11px]")}>
                           {c.name}
                         </p>
                       </div>
@@ -532,7 +529,7 @@ const Contacts = () => {
                         />
                         <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
                       </div>
-                      <p className={cn("mt-1 text-foreground/80 leading-snug", roomy ? "text-[11px] line-clamp-3" : medium ? "text-[10px] line-clamp-2" : "text-[9px] line-clamp-2")}>
+                      <p className={cn("mt-1 text-foreground/80 leading-snug", roomy ? "text-[11px] line-clamp-3" : "text-[9px] line-clamp-2")}>
                         {c.availabilityContext}
                       </p>
                       {roomy && (
@@ -542,7 +539,7 @@ const Contacts = () => {
                       )}
                     </div>
                   </Link>
-                  <div className={cn("absolute", roomy ? "bottom-2 right-2" : medium ? "bottom-1.5 right-1.5" : "bottom-1 right-1")}>
+                  <div className={cn("absolute", roomy ? "bottom-2 right-2" : "bottom-1 right-1")}>
                     <div className="flex items-center gap-1">
                       <PingButton contact={c} size="sm" />
                     </div>
