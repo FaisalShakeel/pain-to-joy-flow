@@ -209,7 +209,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
         {/* Top bar */}
         <header className="sticky top-0 z-30 glass-panel border-b border-outline-variant/30 !rounded-none">
-          <div className="px-4 md:px-8 py-1.5 flex items-center gap-3">
+          <div className="px-4 md:px-8 py-1 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileNav(true)}
@@ -296,21 +296,25 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
           </div>
 
           {(title || actions || headerInline) && (
-            <div className="px-4 md:px-8 pb-2 pt-0">
+            <div className="px-4 md:px-8 pb-1.5 pt-0">
               <div className="flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-0 min-w-0">
                   {subtitle && (
                     <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">{subtitle}</p>
                   )}
-                  {title && (
-                    <h1 className="font-headline font-semibold text-primary text-[1.2rem] md:text-[1.5rem] leading-[1.05] tracking-[-0.022em] break-words">
-                      {title}
-                    </h1>
-                  )}
-                  {description && (
-                    <p className="text-xs md:text-sm text-muted-foreground leading-snug mt-0.5 max-w-2xl">
-                      {description}
-                    </p>
+                  {(title || description) && (
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+                      {title && (
+                        <h1 className="font-headline font-semibold text-primary text-[1.2rem] md:text-[1.5rem] leading-[1.05] tracking-[-0.022em]">
+                          {title}
+                        </h1>
+                      )}
+                      {description && (
+                        <span className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">
+                          : {description}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
                 {(headerInline || actions) && (
