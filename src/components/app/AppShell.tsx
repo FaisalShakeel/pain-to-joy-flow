@@ -20,6 +20,11 @@ import {
   Compass,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronRight,
+  CalendarClock,
+  Zap,
+  UsersRound,
+  Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
@@ -45,13 +50,24 @@ interface NavItem {
   badge?: number;
   end?: boolean;
   providerOnly?: boolean;
+  children?: { to: string; label: string; icon: typeof LayoutDashboard }[];
 }
 
 const baseItems: NavItem[] = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/app/explore", label: "Explore", icon: Compass },
   { to: "/app/contacts", label: "Contacts", icon: Users },
-  { to: "/app/availability", label: "Availability", icon: CalendarDays },
+  {
+    to: "/app/availability",
+    label: "Availability",
+    icon: CalendarDays,
+    children: [
+      { to: "/app/availability", label: "Hybrid Scheduling", icon: CalendarClock },
+      { to: "/app/availability/quick-sync", label: "Quick Sync", icon: Zap },
+      { to: "/app/availability/audience", label: "Audience", icon: UsersRound },
+      { to: "/app/availability/communication-patterns", label: "Communication Patterns", icon: Radio },
+    ],
+  },
   { to: "/app/requests", label: "Requests", icon: Inbox },
   { to: "/app/messages", label: "Messages", icon: MessageSquare },
   { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
@@ -91,6 +107,10 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem("nav.openGroup");
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const items = baseItems;
@@ -103,6 +123,25 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       markAllMessagesRead();
     }
   }, [location.pathname, markAllMessagesRead, messagesUnread]);
+
+  // Auto-open the group that contains the active route
+  useEffect(() => {
+    const parent = baseItems.find(
+      (i) => i.children && i.children.some((c) => location.pathname === c.to || location.pathname.startsWith(c.to + "/")),
+    );
+    if (parent) setOpenGroup(parent.to);
+  }, [location.pathname]);
+
+  const toggleGroup = (to: string) => {
+    setOpenGroup((prev) => {
+      const next = prev === to ? null : to;
+      if (typeof window !== "undefined") {
+        if (next) window.localStorage.setItem("nav.openGroup", next);
+        else window.localStorage.removeItem("nav.openGroup");
+      }
+      return next;
+    });
+  };
 
   const handleNavClick = (to: string) => {
     if (to === "/app/messages") markAllMessagesRead();
@@ -139,28 +178,81 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
           <ul className="space-y-0.5">
             {itemsWithBadges.map((item) => (
               <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  onClick={() => handleNavClick(item.to)}
-                  className={() => {
-                    const isActive = isItemActive(item.to, item.end, location.pathname);
-                    return cn(
-                      "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-glass"
-                        : "text-muted-foreground hover:text-primary hover:bg-surface-low",
-                    );
-                  }}
-                >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.badge ? (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
-                      {item.badge}
-                    </span>
-                  ) : null}
-                </NavLink>
+                {item.children ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(item.to)}
+                      aria-expanded={openGroup === item.to}
+                      className={cn(
+                        "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                        isItemActive(item.to, item.end, location.pathname)
+                          ? "bg-primary text-primary-foreground shadow-glass"
+                          : "text-muted-foreground hover:text-primary hover:bg-surface-low",
+                      )}
+                    >
+                      <item.icon className="w-4 h-4 shrink-0" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      <ChevronRight
+                        className={cn(
+                          "w-3.5 h-3.5 shrink-0 transition-transform",
+                          openGroup === item.to && "rotate-90",
+                        )}
+                      />
+                    </button>
+                    <div
+                      className={cn(
+                        "grid transition-[grid-template-rows] duration-200 ease-out",
+                        openGroup === item.to ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                      )}
+                    >
+                      <ul className="overflow-hidden ml-4 mt-0.5 border-l border-outline-variant/40 pl-2 space-y-0.5">
+                        {item.children.map((child) => (
+                          <li key={child.to}>
+                            <NavLink
+                              to={child.to}
+                              end
+                              className={({ isActive }) =>
+                                cn(
+                                  "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors",
+                                  isActive
+                                    ? "bg-surface-low text-primary"
+                                    : "text-muted-foreground hover:text-primary hover:bg-surface-low/60",
+                                )
+                              }
+                            >
+                              <child.icon className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                              <span className="truncate">{child.label}</span>
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ) : (
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    onClick={() => handleNavClick(item.to)}
+                    className={() => {
+                      const isActive = isItemActive(item.to, item.end, location.pathname);
+                      return cn(
+                        "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-glass"
+                          : "text-muted-foreground hover:text-primary hover:bg-surface-low",
+                      );
+                    }}
+                  >
+                    <item.icon className="w-4 h-4 shrink-0" />
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge ? (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </NavLink>
+                )}
               </li>
             ))}
           </ul>
@@ -348,31 +440,80 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
             <ul className="space-y-1">
               {itemsWithBadges.map((item) => (
                 <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.end}
-                    onClick={() => {
-                      handleNavClick(item.to);
-                      setMobileNav(false);
-                    }}
-                    className={() => {
-                      const isActive = isItemActive(item.to, item.end, location.pathname);
-                      return cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-surface-low",
-                      );
-                    }}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge ? (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </NavLink>
+                  {item.children ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(item.to)}
+                        aria-expanded={openGroup === item.to}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                          isItemActive(item.to, item.end, location.pathname)
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-surface-low",
+                        )}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="flex-1 text-left">{item.label}</span>
+                        <ChevronRight
+                          className={cn(
+                            "w-3.5 h-3.5 transition-transform",
+                            openGroup === item.to && "rotate-90",
+                          )}
+                        />
+                      </button>
+                      {openGroup === item.to && (
+                        <ul className="ml-4 mt-1 border-l border-outline-variant/40 pl-2 space-y-0.5">
+                          {item.children.map((child) => (
+                            <li key={child.to}>
+                              <NavLink
+                                to={child.to}
+                                end
+                                onClick={() => setMobileNav(false)}
+                                className={({ isActive }) =>
+                                  cn(
+                                    "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium",
+                                    isActive
+                                      ? "bg-surface-low text-primary"
+                                      : "text-muted-foreground hover:bg-surface-low/60",
+                                  )
+                                }
+                              >
+                                <child.icon className="w-3.5 h-3.5 opacity-80" />
+                                <span className="truncate">{child.label}</span>
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => {
+                        handleNavClick(item.to);
+                        setMobileNav(false);
+                      }}
+                      className={() => {
+                        const isActive = isItemActive(item.to, item.end, location.pathname);
+                        return cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-surface-low",
+                        );
+                      }}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge ? (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>
