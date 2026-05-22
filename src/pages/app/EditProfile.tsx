@@ -48,7 +48,7 @@ const DEFAULT_DISCOVERY: DiscoverySettings = {
 const MODE_META: Record<DiscoveryMode, { label: string; icon: typeof Globe; tag: string; tone: string }> = {
   public:     { label: "Public",     icon: Globe,  tag: "Anyone can find you",            tone: "text-emerald-600" },
   restricted: { label: "Restricted", icon: Users,  tag: "Only your circles can find you", tone: "text-amber-600" },
-  private:    { label: "Private",    icon: Lock,   tag: "Hidden from search",             tone: "text-rose-600" },
+  private:    { label: "Private",    icon: Lock,   tag: "Visible to selected contacts only", tone: "text-rose-600" },
 };
 
 // Demo math for the "live preview" reach number.
@@ -300,7 +300,7 @@ const EditProfile = () => {
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li className="flex items-center gap-2"><Globe className="w-3.5 h-3.5 text-emerald-500" /> Public — anyone</li>
                 <li className="flex items-center gap-2"><Users className="w-3.5 h-3.5 text-amber-500" /> Approved — synced contacts</li>
-                <li className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-rose-500" /> Hidden — only you</li>
+                <li className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-rose-500" /> Private — only selected</li>
               </ul>
             </div>
 
