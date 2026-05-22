@@ -166,8 +166,8 @@ const Availability = () => {
 
   return (
     <AppShell
-      subtitle={mode === "live" ? "Communication performance" : "Activity history"}
-      title="Don't just see time. Understand how it was used."
+      subtitle={mode === "live" ? "Don't just see time. Understand how it was used" : "Activity history"}
+      title="Communication Patterns"
       actions={
         <>
           <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
