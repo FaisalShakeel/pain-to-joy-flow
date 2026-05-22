@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock, Camera, X,
+  ArrowLeft, Save, ShieldCheck, Eye, Users, EyeOff, Plus, Trash2, Globe, Lock, Camera, X, Pencil, Check,
   Radar, ChevronDown, ChevronUp, Clock, MessageCircle, Phone, Zap, UserPlus,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -397,8 +397,8 @@ function TextareaField({ label, value, onChange }: { label: string; value: strin
 }
 
 function VisibilityPicker({
-  value, onChange, compact,
-}: { value: Visibility; onChange: (v: Visibility) => void; compact?: boolean }) {
+  value, onChange, compact, iconOnly,
+}: { value: Visibility; onChange: (v: Visibility) => void; compact?: boolean; iconOnly?: boolean }) {
   return (
     <div className={`inline-flex rounded-xl bg-surface-low ghost-border p-1 ${compact ? "" : "self-end"}`}>
       {visibilityOptions.map((opt) => {
@@ -410,12 +410,13 @@ function VisibilityPicker({
             type="button"
             onClick={() => onChange(opt.value)}
             title={opt.hint}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition ${
+            aria-label={opt.label}
+            className={`inline-flex items-center gap-1.5 ${iconOnly ? "p-1.5" : "px-2.5 py-1.5"} rounded-lg text-[11px] font-semibold transition ${
               active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-primary"
             }`}
           >
             <Icon className="w-3 h-3" />
-            {opt.label}
+            {!iconOnly && opt.label}
           </button>
         );
       })}
@@ -434,21 +435,39 @@ function ChannelRow({
   onVisibility: (v: Visibility) => void;
   onRemove: () => void;
 }) {
+  const [editing, setEditing] = useState(!value);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto_auto] gap-2 items-center p-2 rounded-xl bg-surface-low ghost-border">
-      <input
-        value={label}
-        onChange={(e) => onLabel(e.target.value)}
-        placeholder="Label"
-        className="px-3 py-2 rounded-lg bg-surface ghost-border outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20"
-      />
-      <input
-        value={value}
-        onChange={(e) => onValue(e.target.value)}
-        placeholder="Value"
-        className="px-3 py-2 rounded-lg bg-surface ghost-border outline-none text-xs focus:ring-2 focus:ring-primary/20"
-      />
-      <VisibilityPicker value={visibility} onChange={onVisibility} compact />
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-2 items-center p-2 rounded-xl bg-surface-low ghost-border">
+      {editing ? (
+        <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2 min-w-0">
+          <input
+            value={label}
+            onChange={(e) => onLabel(e.target.value)}
+            placeholder="Label"
+            className="px-2.5 py-1.5 rounded-lg bg-surface ghost-border outline-none text-xs font-semibold focus:ring-2 focus:ring-primary/20 min-w-0"
+          />
+          <input
+            value={value}
+            onChange={(e) => onValue(e.target.value)}
+            placeholder="Value"
+            className="px-2.5 py-1.5 rounded-lg bg-surface ghost-border outline-none text-xs focus:ring-2 focus:ring-primary/20 min-w-0"
+          />
+        </div>
+      ) : (
+        <div className="min-w-0 px-1">
+          <p className="text-xs font-semibold text-primary truncate">{label}</p>
+          <p className="text-[11px] text-muted-foreground truncate">{value || <span className="italic">No value</span>}</p>
+        </div>
+      )}
+      <VisibilityPicker value={visibility} onChange={onVisibility} compact iconOnly />
+      <button
+        type="button"
+        onClick={() => setEditing((v) => !v)}
+        className="grid place-items-center w-8 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition"
+        aria-label={editing ? "Done editing" : "Edit channel"}
+      >
+        {editing ? <Check className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+      </button>
       <button
         type="button"
         onClick={onRemove}
