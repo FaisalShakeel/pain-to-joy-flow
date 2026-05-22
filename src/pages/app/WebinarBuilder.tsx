@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import {
   ArrowLeft, Users as UsersIcon, Calendar as CalIcon, Clock, Globe,
   Crown, Sparkles, Lock, Check, Pencil, Trash2, Video, Radio, Hourglass,
-  ChevronRight, X, CheckCircle2, ListChecks,
+  ChevronRight, X, CheckCircle2, ListChecks, MapPin,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
@@ -20,6 +20,7 @@ import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/ap
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
+type Channel = "hybrid" | "online" | "onsite";
 
 interface Webinar {
   id: string;
@@ -36,6 +37,10 @@ interface Webinar {
   bookedCount: number; // mock
   waitlistCount: number; // mock
   createdAt: number;
+  channel?: Channel;
+  venue?: string;
+  locationPin?: string;
+  venueNotes?: string;
 }
 
 const fmtTime = (m: number) => {
@@ -63,6 +68,10 @@ const blank = (): Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCo
   allowWaitlist: true,
   visibility: "public",
   pricing: defaultPricing,
+  channel: "online",
+  venue: "",
+  locationPin: "",
+  venueNotes: "",
 });
 
 const seed: Webinar[] = [
@@ -142,6 +151,10 @@ const WebinarBuilder = () => {
       allowWaitlist: w.allowWaitlist,
       visibility: w.visibility,
       pricing: w.pricing,
+      channel: w.channel ?? "online",
+      venue: w.venue ?? "",
+      locationPin: w.locationPin ?? "",
+      venueNotes: w.venueNotes ?? "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -167,19 +180,43 @@ const WebinarBuilder = () => {
     >
       {/* CREATION PANEL */}
       <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground">
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground shrink-0">
             <Radio className="w-4 h-4" />
           </span>
-          <div>
+          <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "New"} Group Session</p>
             <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Webinar Builder</h2>
           </div>
-          {isEditing && (
-            <button onClick={reset} className="ml-auto text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-              <X className="w-3 h-3" /> Discard edit
-            </button>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            <div className="rounded-xl ghost-border bg-surface-low p-1 flex items-center gap-1">
+              {([
+                ["hybrid", "Hybrid", Sparkles],
+                ["online", "Online", Video],
+                ["onsite", "Onsite", MapPin],
+              ] as const).map(([k, l, Ic]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => set("channel", k)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition",
+                    (draft.channel ?? "online") === k
+                      ? "bg-primary text-primary-foreground shadow-glass"
+                      : "text-muted-foreground hover:text-primary",
+                  )}
+                  aria-pressed={(draft.channel ?? "online") === k}
+                >
+                  <Ic className="w-3.5 h-3.5" /> {l}
+                </button>
+              ))}
+            </div>
+            {isEditing && (
+              <button onClick={reset} className="text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
+                <X className="w-3 h-3" /> Discard edit
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-5">
@@ -246,11 +283,44 @@ const WebinarBuilder = () => {
               </div>
               <div className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-3 ghost-border">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Channel</p>
-                <p className="font-bold text-primary text-sm flex items-center gap-1.5 mt-1">
-                  <Video className="w-3.5 h-3.5" /> Online (default)
+                <p className="font-bold text-primary text-sm flex items-center gap-1.5 mt-1 capitalize">
+                  {(draft.channel ?? "online") === "onsite" ? <MapPin className="w-3.5 h-3.5" /> :
+                   (draft.channel ?? "online") === "hybrid" ? <Sparkles className="w-3.5 h-3.5" /> :
+                   <Video className="w-3.5 h-3.5" />}
+                  {draft.channel ?? "online"}
                 </p>
               </div>
             </Section>
+
+            {((draft.channel ?? "online") === "onsite" || (draft.channel ?? "online") === "hybrid") && (
+              <Section title="Venue & location" icon={MapPin} hint="Where attendees will physically join.">
+                <Field label="Venue name">
+                  <input
+                    value={draft.venue ?? ""}
+                    onChange={(e) => set("venue", e.target.value)}
+                    placeholder="e.g. Atlas HQ · Studio B"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </Field>
+                <Field label="Pin location (Google Maps / Plus Code / coords)">
+                  <input
+                    value={draft.locationPin ?? ""}
+                    onChange={(e) => set("locationPin", e.target.value)}
+                    placeholder="https://maps.google.com/?q=…"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </Field>
+                <Field label="Arrival notes (parking, floor, entry, dress code)">
+                  <textarea
+                    value={draft.venueNotes ?? ""}
+                    onChange={(e) => set("venueNotes", e.target.value)}
+                    placeholder="Use east entrance. Park P2. Ask reception for Studio B."
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+                  />
+                </Field>
+              </Section>
+            )}
 
             {/* Capacity */}
             <Section title="Capacity" icon={UsersIcon} hint="How many can join the session.">
