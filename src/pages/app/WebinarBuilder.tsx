@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import {
   ArrowLeft, Users as UsersIcon, Calendar as CalIcon, Clock, Globe,
   Crown, Sparkles, Lock, Check, Pencil, Trash2, Video, Radio, Hourglass,
-  ChevronRight, X, CheckCircle2, ListChecks,
+  ChevronRight, X, CheckCircle2, ListChecks, MapPin,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
@@ -20,6 +20,7 @@ import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/ap
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
+type Channel = "hybrid" | "online" | "onsite";
 
 interface Webinar {
   id: string;
@@ -36,6 +37,10 @@ interface Webinar {
   bookedCount: number; // mock
   waitlistCount: number; // mock
   createdAt: number;
+  channel?: Channel;
+  venue?: string;
+  locationPin?: string;
+  venueNotes?: string;
 }
 
 const fmtTime = (m: number) => {
@@ -63,6 +68,10 @@ const blank = (): Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCo
   allowWaitlist: true,
   visibility: "public",
   pricing: defaultPricing,
+  channel: "online",
+  venue: "",
+  locationPin: "",
+  venueNotes: "",
 });
 
 const seed: Webinar[] = [
@@ -142,6 +151,10 @@ const WebinarBuilder = () => {
       allowWaitlist: w.allowWaitlist,
       visibility: w.visibility,
       pricing: w.pricing,
+      channel: w.channel ?? "online",
+      venue: w.venue ?? "",
+      locationPin: w.locationPin ?? "",
+      venueNotes: w.venueNotes ?? "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
