@@ -151,7 +151,7 @@ const Availability = () => {
 
   if (connecting) {
     return (
-      <AppShell title="Calendar Intelligence">
+      <AppShell title="Communication Patterns" subtitle="Don't just see time. Understand how it was used">
         <div className="grid place-items-center h-[60vh] text-center">
           <div>
             <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
