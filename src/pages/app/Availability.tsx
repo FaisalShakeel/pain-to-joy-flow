@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Loader2, CalendarDays, Plus, Sparkles, History, Activity,
+  Loader2, CalendarDays, Plus, Sparkles, Activity,
   Briefcase, Zap, Radio, Clock, TrendingUp, AlertTriangle, Shield, ChevronRight, X,
   Video, MapPin, Crown, Lock, Repeat, Pencil,
 } from "lucide-react";
@@ -73,7 +73,7 @@ const tagFor = (a: DayActivity): { label: string; cls: string; Ic: any } => {
 const Availability = () => {
   const [connecting, setConnecting] = useState(true);
   const [view, setView] = useState<"week" | "month">("week");
-  const [mode, setMode] = useState<"live" | "history">("live");
+  
   const [selected, setSelected] = useState<string | null>(null);
   const perf = useMetrics("week");
   const slots = useSlots();
@@ -166,7 +166,7 @@ const Availability = () => {
 
   return (
     <AppShell
-      subtitle={mode === "live" ? "Don't just see time. Understand how it was used" : "Activity history"}
+      subtitle="Don't just see time. Understand how it was used"
       title="Communication Patterns"
       actions={
         <>
@@ -186,18 +186,6 @@ const Availability = () => {
               )}
             >Month</button>
           </div>
-
-          <button
-            onClick={() => setMode((m) => (m === "live" ? "history" : "live"))}
-            className={cn(
-              "inline-flex items-center gap-2 px-3 py-2.5 rounded-full text-xs font-semibold transition",
-              mode === "history"
-                ? "bg-primary text-primary-foreground"
-                : "ghost-border bg-surface-lowest text-primary hover:bg-surface-low",
-            )}
-          >
-            <History className="w-3.5 h-3.5" /> {mode === "history" ? "History on" : "Activity history"}
-          </button>
 
           <Link
             to="/app/availability/builder"
@@ -350,7 +338,7 @@ const Availability = () => {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                {mode === "history" ? "Activity history" : "Live activity"}
+                Live activity
               </p>
               <h3 className="font-headline font-extrabold text-primary text-base md:text-lg">
                 {view === "week" ? "This week" : format(new Date(), "MMMM yyyy")}

@@ -216,7 +216,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                                 cn(
                                   "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors cursor-pointer",
                                   isActive
-                                    ? "bg-surface-low text-primary ring-1 ring-primary/15 shadow-soft"
+                                    ? "bg-primary/10 text-primary ring-1 ring-primary/30 shadow-soft font-semibold"
                                     : "text-muted-foreground hover:text-primary hover:bg-surface-low/60",
                                 )
                               }
@@ -392,7 +392,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
               <div className="flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-0 min-w-0">
                   {(subtitle || description) && (
-                    <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">
+                    <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85 whitespace-nowrap overflow-hidden text-ellipsis">
                       {subtitle}
                       {subtitle && description ? " : " : ""}
                       {description}
