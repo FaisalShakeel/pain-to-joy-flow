@@ -299,22 +299,17 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
             <div className="px-4 md:px-8 pb-1.5 pt-0">
               <div className="flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-0 min-w-0">
-                  {subtitle && (
-                    <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">{subtitle}</p>
+                  {(subtitle || description) && (
+                    <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">
+                      {subtitle}
+                      {subtitle && description ? " : " : ""}
+                      {description}
+                    </p>
                   )}
-                  {(title || description) && (
-                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-                      {title && (
-                        <h1 className="font-headline font-semibold text-primary text-[1.2rem] md:text-[1.5rem] leading-[1.05] tracking-[-0.022em]">
-                          {title}
-                        </h1>
-                      )}
-                      {description && (
-                        <span className="text-[10px] font-semibold tracking-[0.28em] uppercase text-accent/85">
-                          : {description}
-                        </span>
-                      )}
-                    </div>
+                  {title && (
+                    <h1 className="font-headline font-semibold text-primary text-[1.2rem] md:text-[1.5rem] leading-[1.05] tracking-[-0.022em]">
+                      {title}
+                    </h1>
                   )}
                 </div>
                 {(headerInline || actions) && (
