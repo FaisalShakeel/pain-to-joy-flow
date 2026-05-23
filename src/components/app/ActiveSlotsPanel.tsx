@@ -257,9 +257,6 @@ const ActiveSlotsPanel = ({
         ))}
       </div>
 
-      {/* Daily Occupancy Rail (8 AM → 8 PM) */}
-      <OccupancyRail rows={dayRows} dateLabel={format(headerDate, "EEE, MMM d")} />
-
       {/* Rows */}
       {sorted.length === 0 ? (
         <p className="text-xs text-muted-foreground py-12 text-center">{emptyText}</p>
