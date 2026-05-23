@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
-import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
+import ActiveSlotsPanel, { DailyOccupancy, type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
 import { availabilityStore, findConflict, flashConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
@@ -564,6 +564,11 @@ const FocusMeetingBuilder = () => {
           <RelayToSpotlightPanel value={relay} onChange={setRelay} />
         </div>
       </section>
+
+      {/* DAILY OCCUPANCY (today) */}
+      <div className="mt-6">
+        <DailyOccupancy />
+      </div>
 
       {/* ACTIVE SLOTS */}
       <div className="mt-6">
