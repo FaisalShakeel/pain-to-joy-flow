@@ -219,6 +219,15 @@ const SpotlightWindow = () => {
       {expanded && (
         <div className="px-4 md:px-5 pt-3">
           <div className="rounded-2xl ghost-border bg-surface-lowest p-3 shadow-soft">
+            <div className="mb-3 rounded-xl bg-gold/10 ghost-border p-2.5 text-[11px] text-primary leading-relaxed">
+              <p className="font-bold uppercase tracking-wider text-[9px] text-gold mb-0.5">Scheduling lives in Availability</p>
+              Spotlight is for live announcements & relays. To open slots, create them in Availability and toggle <strong>Relay to Spotlight</strong>.
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <a href="/app/availability/focus-meetings" className="px-2 py-0.5 rounded-full bg-surface-lowest ghost-border text-[10px] font-bold text-primary hover:bg-surface-low">Hybrid</a>
+                <a href="/app/availability/quick-sync" className="px-2 py-0.5 rounded-full bg-surface-lowest ghost-border text-[10px] font-bold text-primary hover:bg-surface-low">Quick Sync</a>
+                <a href="/app/availability/webinars" className="px-2 py-0.5 rounded-full bg-surface-lowest ghost-border text-[10px] font-bold text-primary hover:bg-surface-low">Event Access</a>
+              </div>
+            </div>
             <div className="space-y-2.5">
               <div className="flex items-start gap-2">
                 <span className="grid place-items-center w-8 h-8 rounded-full bg-primary text-primary-foreground shrink-0 mt-0.5">
