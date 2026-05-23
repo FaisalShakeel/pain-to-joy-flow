@@ -17,6 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
+import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
 
 // ---------- Types ----------
 type CallMin = 3 | 5 | 8;
