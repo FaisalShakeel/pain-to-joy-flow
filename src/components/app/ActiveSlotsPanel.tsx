@@ -522,7 +522,7 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
           </span>
         </div>
       </div>
-      <OccupancyRail rows={rows} dateLabel={format(new Date(iso), "EEE, MMM d")} />
+      <OccupancyRail rows={rows} dateLabel={format(new Date(iso), "EEE, MMM d")} hideHeader />
     </section>
   );
 };
