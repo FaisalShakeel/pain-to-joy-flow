@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
+import { useSpotlight } from "@/components/app/SpotlightContext";
 
 // ---------- Types ----------
 type CallMin = 3 | 5 | 8;
@@ -110,6 +112,8 @@ const QuickSyncBuilder = () => {
   const [draft, setDraft] = useState<Omit<QSSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
+  const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
@@ -135,6 +139,25 @@ const QuickSyncBuilder = () => {
       const next: QSSlot = { ...(draft as Omit<QSSlot, "id" | "createdAt">), id: `qs${Date.now()}`, createdAt: Date.now() };
       setSlots((p) => [next, ...p]);
       toast({ title: "Quick Sync created", description: `${count} mini-slots generated.` });
+      if (relay.enabled) {
+        createRelay({
+          title: `OPEN QUICK SYNC · ${fmtTime(next.startMin)}–${fmtTime(next.endMin)}`,
+          body: `${count} ${next.callMin}-min sync slots on ${format(new Date(next.date), "EEE, MMM d")}. ${next.booking === "instant" ? "Instant booking." : "Approval required."}`,
+          tone: relay.tone,
+          expiresIn: `expires ${relay.expiry}`,
+          relay: {
+            source: "quicksync",
+            sourceId: next.id,
+            totalSlots: count,
+            remainingSlots: count,
+            permissions: relay.permissions,
+            indicators: relay.indicators,
+            audience: relay.audience,
+            viewHref: "/app/availability/quick-sync",
+          },
+        });
+        toast({ title: "Relayed to Spotlight" });
+      }
     }
     reset();
   };
