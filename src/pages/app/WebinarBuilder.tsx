@@ -417,6 +417,8 @@ const WebinarBuilder = () => {
               <PricingField value={draft.pricing} onChange={(p) => set("pricing", p)} />
             </Section>
 
+            <RelayToSpotlightPanel value={relay} onChange={setRelay} />
+
             <div className="flex items-center justify-end gap-2 pt-2">
               {isEditing && (
                 <button onClick={reset} className="px-4 py-2 rounded-full ghost-border text-xs font-bold text-muted-foreground hover:text-primary">Cancel</button>
