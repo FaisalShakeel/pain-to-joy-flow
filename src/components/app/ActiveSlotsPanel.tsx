@@ -257,9 +257,6 @@ const ActiveSlotsPanel = ({
         ))}
       </div>
 
-      {/* Daily Occupancy Rail (8 AM → 8 PM) */}
-      <OccupancyRail rows={dayRows} dateLabel={format(headerDate, "EEE, MMM d")} />
-
       {/* Rows */}
       {sorted.length === 0 ? (
         <p className="text-xs text-muted-foreground py-12 text-center">{emptyText}</p>
@@ -389,7 +386,7 @@ const sourceColor: Record<string, string> = {
   legacy: "bg-slate-400",
 };
 
-const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) => {
+const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; dateLabel: string; hideHeader?: boolean }) => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -403,7 +400,8 @@ const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) 
       : null;
 
   return (
-    <div className="mt-5 rounded-2xl bg-surface-low/60 ghost-border p-3">
+    <div className={cn("rounded-2xl bg-surface-low/60 ghost-border p-3", !hideHeader && "mt-5")}> 
+      {!hideHeader && (
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           Daily Occupancy · {dateLabel}
@@ -414,6 +412,7 @@ const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) 
           <Legend color="bg-violet-500" label="Event" />
         </div>
       </div>
+      )}
       <div className="relative h-9 rounded-lg bg-surface-lowest ghost-border overflow-hidden">
         {/* Tick grid */}
         {ticks.slice(1, -1).map((h) => {
@@ -468,5 +467,69 @@ const Legend = ({ color, label }: { color: string; label: string }) => (
   <span className="inline-flex items-center gap-1 text-muted-foreground">
     <span className={cn("w-2 h-2 rounded-sm", color)} />
     {label}
+  </span>
+);
+
+// ---------- Standalone Daily Occupancy (header + rail) ----------
+export const DailyOccupancy = ({ date }: { date?: string }) => {
+  const blocks = useAvailability();
+  const iso = date ?? new Date().toISOString().slice(0, 10);
+  const dayBlocks = blocks.filter((b) => b.date === iso);
+
+  const rows: Row[] = dayBlocks.map((b) => ({
+    id: b.id,
+    source: b.source,
+    date: b.date,
+    startMin: b.startMin,
+    endMin: b.endMin,
+    bufferMin: b.bufferMin,
+    mode: b.mode,
+    typeLabel: b.typeLabel,
+    handlers: {},
+  }));
+
+  const countBy = (src: string) => dayBlocks.filter((b) => b.source === src).length;
+  const focusN = countBy("focus");
+  const qsN = countBy("quicksync");
+  const evN = countBy("event-access");
+  const total = dayBlocks.length;
+  // bookedSlots is optional on the block; fall back to 0 if not tracked yet
+  const booked = dayBlocks.reduce(
+    (acc, b: any) => acc + (typeof b.bookedSlots === "number" ? b.bookedSlots : 0),
+    0,
+  );
+
+  return (
+    <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            Daily Occupancy
+          </p>
+          <span className="text-[11px] font-bold text-muted-foreground">
+            {format(new Date(iso), "EEE, MMM d")}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold">
+          <Stat color="bg-indigo-500" label="Focus" value={focusN} />
+          <Stat color="bg-amber-500" label="Quick Sync" value={qsN} />
+          <Stat color="bg-violet-500" label="Event Access" value={evN} />
+          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+            Total: <span className="tabular-nums">{total}</span>
+          </span>
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700">
+            Booked: <span className="tabular-nums">{booked}</span>
+          </span>
+        </div>
+      </div>
+      <OccupancyRail rows={rows} dateLabel={format(new Date(iso), "EEE, MMM d")} hideHeader />
+    </section>
+  );
+};
+
+const Stat = ({ color, label, value }: { color: string; label: string; value: number }) => (
+  <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+    <span className={cn("w-2 h-2 rounded-sm", color)} />
+    {label}: <span className="text-primary tabular-nums">{value}</span>
   </span>
 );
