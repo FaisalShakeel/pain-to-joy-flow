@@ -376,3 +376,97 @@ const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) 
 };
 
 export default ActiveSlotsPanel;
+
+// ---------- Daily Occupancy Rail ----------
+const RAIL_START = 8 * 60;   // 08:00
+const RAIL_END = 20 * 60;    // 20:00
+const RAIL_SPAN = RAIL_END - RAIL_START;
+
+const sourceColor: Record<string, string> = {
+  focus: "bg-indigo-500",
+  quicksync: "bg-amber-500",
+  "event-access": "bg-violet-500",
+  legacy: "bg-slate-400",
+};
+
+const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) => {
+  const [now, setNow] = useState(() => new Date());
+  useMemo(() => {
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  const ticks = Array.from({ length: 7 }, (_, i) => 8 + i * 2); // 8,10,12,14,16,18,20
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowPct =
+    nowMin >= RAIL_START && nowMin <= RAIL_END
+      ? ((nowMin - RAIL_START) / RAIL_SPAN) * 100
+      : null;
+
+  return (
+    <div className="mt-5 rounded-2xl bg-surface-low/60 ghost-border p-3">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          Daily Occupancy · {dateLabel}
+        </p>
+        <div className="flex items-center gap-2 text-[9px] font-bold">
+          <Legend color="bg-indigo-500" label="Focus" />
+          <Legend color="bg-amber-500" label="Quick Sync" />
+          <Legend color="bg-violet-500" label="Event" />
+        </div>
+      </div>
+      <div className="relative h-9 rounded-lg bg-surface-lowest ghost-border overflow-hidden">
+        {/* Tick grid */}
+        {ticks.slice(1, -1).map((h) => {
+          const pct = ((h * 60 - RAIL_START) / RAIL_SPAN) * 100;
+          return (
+            <div
+              key={h}
+              className="absolute top-0 bottom-0 w-px bg-border/60"
+              style={{ left: `${pct}%` }}
+            />
+          );
+        })}
+        {/* Occupied blocks */}
+        {rows.map((r) => {
+          const s = Math.max(RAIL_START, r.startMin);
+          const e = Math.min(RAIL_END, r.endMin);
+          if (e <= s) return null;
+          const left = ((s - RAIL_START) / RAIL_SPAN) * 100;
+          const width = ((e - s) / RAIL_SPAN) * 100;
+          return (
+            <div
+              key={r.id}
+              title={`${r.typeLabel} · ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}`}
+              className={cn(
+                "absolute top-1 bottom-1 rounded-md opacity-90 hover:opacity-100 transition",
+                sourceColor[r.source] ?? "bg-primary",
+              )}
+              style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
+            />
+          );
+        })}
+        {/* Now indicator */}
+        {nowPct !== null && (
+          <div
+            className="absolute top-0 bottom-0 w-[2px] bg-rose-500"
+            style={{ left: `${nowPct}%` }}
+          >
+            <span className="absolute -top-1.5 -left-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-background" />
+          </div>
+        )}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[9px] font-bold text-muted-foreground tabular-nums">
+        {ticks.map((h) => (
+          <span key={h}>{((h + 11) % 12) + 1}{h < 12 ? "a" : "p"}</span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const Legend = ({ color, label }: { color: string; label: string }) => (
+  <span className="inline-flex items-center gap-1 text-muted-foreground">
+    <span className={cn("w-2 h-2 rounded-sm", color)} />
+    {label}
+  </span>
+);
