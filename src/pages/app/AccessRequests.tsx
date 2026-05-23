@@ -198,14 +198,17 @@ const AccessRequests = () => {
           </div>
         </div>
       ) : tab === "outgoing" ? (
-        <div className="grid lg:grid-cols-2 gap-5 items-start max-w-3xl mx-auto">
-          <AccessRequestDetailsPanel
-            key={current.id}
-            request={current}
-            variant="outgoing"
-            onSend={() => toast({ title: "Request sent", description: "Your access request has been dispatched." })}
-          />
-          <aside className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
+        <div className="relative grid lg:grid-cols-2 gap-0 items-stretch w-full rounded-3xl bg-surface-lowest ghost-border shadow-ambient overflow-hidden">
+          <div className="lg:pr-8 p-5 md:p-6">
+            <AccessRequestDetailsPanel
+              key={current.id}
+              request={current}
+              variant="outgoing"
+              onSend={() => toast({ title: "Request sent", description: "Your access request has been dispatched." })}
+            />
+          </div>
+          <div className="hidden lg:block absolute left-1/2 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-border to-transparent" aria-hidden />
+          <aside className="p-5 md:p-6 lg:pl-8 bg-surface-low/40">
             <header className="flex items-center justify-between mb-3">
               <h3 className="font-headline font-bold text-primary text-sm">Pending outgoing</h3>
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700">
@@ -238,13 +241,18 @@ const AccessRequests = () => {
           </aside>
         </div>
       ) : (
-        <div className="grid lg:grid-cols-2 gap-5 items-start max-w-3xl mx-auto">
-          <AccessRequestDetailsPanel key={current.id} request={current} />
-          <ApprovalProtocolPanel
-            contactName={contacts.find((x) => x.id === current.contactId)?.name}
-            onAuthorize={() => handleAct(current.id, "approved")}
-            onDecline={() => handleAct(current.id, "denied")}
-          />
+        <div className="relative grid lg:grid-cols-2 gap-0 items-stretch w-full rounded-3xl bg-surface-lowest ghost-border shadow-ambient overflow-hidden">
+          <div className="p-5 md:p-6 lg:pr-8">
+            <AccessRequestDetailsPanel key={current.id} request={current} />
+          </div>
+          <div className="hidden lg:block absolute left-1/2 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-border to-transparent" aria-hidden />
+          <div className="p-5 md:p-6 lg:pl-8 bg-surface-low/40">
+            <ApprovalProtocolPanel
+              contactName={contacts.find((x) => x.id === current.contactId)?.name}
+              onAuthorize={() => handleAct(current.id, "approved")}
+              onDecline={() => handleAct(current.id, "denied")}
+            />
+          </div>
         </div>
       )}
     </AppShell>
