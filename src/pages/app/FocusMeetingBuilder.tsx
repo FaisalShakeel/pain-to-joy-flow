@@ -14,12 +14,13 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import { toast as sonner } from "sonner";
 import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
-import { availabilityStore, findConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import { availabilityStore, findConflict, flashConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -126,12 +127,13 @@ const FocusMeetingBuilder = () => {
     const sugg = suggestOpenings(date, endMin - startMin, excludeId)
       .map((s) => `${fmtTimeHM(s.startMin)}–${fmtTimeHM(s.endMin)}`)
       .join(" · ");
-    toast({
-      title: "Time conflict",
+    flashConflict(c.id);
+    sonner.error("Time conflict", {
       description:
-        `This time range is already occupied by an existing availability block (${c.typeLabel}, ${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
+        `This time range is already occupied by ${c.typeLabel} (${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
         (sugg ? ` Nearest openings: ${sugg}.` : ""),
-      variant: "destructive" as any,
+      duration: 10000,
+      closeButton: true,
     });
     return true;
   };
@@ -510,14 +512,16 @@ const FocusMeetingBuilder = () => {
           {/* Live preview card */}
           <aside className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated h-fit">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
-            <h4 className="font-headline font-extrabold text-base mt-1">{format(new Date(draft.date), "EEEE, MMM d")}</h4>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-primary-foreground/60 mt-2">Slot type</p>
+            <h4 className="font-headline font-extrabold text-base capitalize">Focus Sync · {channel}</h4>
+            <p className="text-[11px] text-primary-foreground/80 mt-2">{format(new Date(draft.date), "EEEE, MMM d")}</p>
             <p className="text-[12px] text-primary-foreground/80 mt-0.5">
               {fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
-              <Stat label="Call" value={`${draft.callMin}m`} />
+              <Stat label="Duration" value={`${draft.callMin}m`} />
               <Stat label="Buffer" value={`${draft.bufferMin}m`} />
-              <Stat label="Slots" value={`${count}`} />
+              <Stat label="Sub-slots" value={`${count}`} />
               <Stat label="Repeat" value={draft.repeats === "none" ? "—" : draft.repeats[0].toUpperCase()} />
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -528,7 +532,31 @@ const FocusMeetingBuilder = () => {
                 {accessMeta[draft.access].label}
               </span>
               <PriceTag pricing={draft.pricing} />
+              <span className={cn(
+                "px-2 py-0.5 rounded-full text-[10px] font-bold",
+                relay.enabled ? "bg-emerald-400/25 text-emerald-100" : "bg-primary-foreground/10 text-primary-foreground/70",
+              )}>
+                Relay {relay.enabled ? "ON" : "OFF"}
+              </span>
             </div>
+            {timeline.length > 0 && (
+              <div className="mt-3 rounded-lg bg-primary-foreground/10 p-2">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60 mb-1">
+                  Generated sub-slots
+                </p>
+                <ul className="text-[10px] font-mono space-y-0.5 max-h-24 overflow-y-auto">
+                  {timeline.slice(0, 6).map((it, i) => (
+                    <li key={i} className="flex justify-between text-primary-foreground/90">
+                      <span>{fmtTime(it.start)} – {fmtTime(it.end)}</span>
+                      <span className="opacity-60">#{i + 1}</span>
+                    </li>
+                  ))}
+                  {timeline.length > 6 && (
+                    <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 6} more</li>
+                  )}
+                </ul>
+              </div>
+            )}
           </aside>
         </div>
 

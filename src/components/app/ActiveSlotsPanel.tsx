@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronLeft, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
@@ -8,7 +8,7 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useAvailability, type AvailabilityBlock } from "@/lib/availabilityStore";
+import { useAvailability, useConflictHighlight, type AvailabilityBlock } from "@/lib/availabilityStore";
 
 export type ActiveSlotStatus = "active" | "upcoming" | "expired";
 export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
@@ -95,10 +95,12 @@ const ActiveSlotsPanel = ({
   emptyText = "No slots yet — create one above.",
 }: Props) => {
   const [view, setView] = useState<"time" | "type">("time");
+  const [modeFilter, setModeFilter] = useState<"all" | "focus" | "quicksync" | "event-access">("all");
   const [dayOffset, setDayOffset] = useState(0);
   const [expanded, setExpanded] = useState(false);
 
   const blocks = useAvailability();
+  const highlightId = useConflictHighlight();
 
   const rows: Row[] = useMemo(() => {
     const fromStore: Row[] = blocks.map((b: AvailabilityBlock) => ({
@@ -132,22 +134,27 @@ const ActiveSlotsPanel = ({
     return [...fromStore, ...fromItems];
   }, [blocks, items, handlers]);
 
-  const dates = useMemo(() => Array.from(new Set(rows.map((r) => r.date))).sort(), [rows]);
+  const filteredRows = useMemo(
+    () => (modeFilter === "all" ? rows : rows.filter((r) => r.source === modeFilter)),
+    [rows, modeFilter],
+  );
+
+  const dates = useMemo(() => Array.from(new Set(filteredRows.map((r) => r.date))).sort(), [filteredRows]);
   const focusDate = dates.length
     ? dates[Math.min(dates.length - 1, Math.max(0, dayOffset))]
     : new Date().toISOString().slice(0, 10);
 
   const summary = useMemo(() => {
     const acc: Record<string, number> = {};
-    rows.forEach((r) => {
+    filteredRows.forEach((r) => {
       const key = r.source === "legacy" ? modeMeta[r.mode].label : sourceMeta[r.source].label;
       acc[key] = (acc[key] ?? 0) + 1;
     });
     return Object.entries(acc);
-  }, [rows]);
+  }, [filteredRows]);
 
   const sorted = useMemo(() => {
-    const list = [...rows];
+    const list = [...filteredRows];
     if (view === "time") {
       list.sort(
         (a, b) => (a.date + a.startMin).localeCompare(b.date + b.startMin) || a.startMin - b.startMin,
@@ -156,9 +163,14 @@ const ActiveSlotsPanel = ({
       list.sort((a, b) => a.source.localeCompare(b.source) || a.startMin - b.startMin);
     }
     return list;
-  }, [rows, view]);
+  }, [filteredRows, view]);
 
   const headerDate = new Date(focusDate);
+
+  const dayRows = useMemo(
+    () => filteredRows.filter((r) => r.date === focusDate),
+    [filteredRows, focusDate],
+  );
 
   const content = (
     <section
@@ -221,12 +233,39 @@ const ActiveSlotsPanel = ({
         </div>
       </div>
 
+      {/* Mode Filter */}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">Filter</span>
+        {([
+          ["all", "All Modes"],
+          ["focus", "Focused Scheduling"],
+          ["quicksync", "Quick Sync"],
+          ["event-access", "Event Access"],
+        ] as const).map(([k, l]) => (
+          <button
+            key={k}
+            onClick={() => setModeFilter(k)}
+            className={cn(
+              "px-2.5 py-1 rounded-full text-[10px] font-bold transition ghost-border",
+              modeFilter === k
+                ? "bg-primary text-primary-foreground border-transparent"
+                : "bg-surface-lowest text-muted-foreground hover:text-primary",
+            )}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* Daily Occupancy Rail (8 AM → 8 PM) */}
+      <OccupancyRail rows={dayRows} dateLabel={format(headerDate, "EEE, MMM d")} />
+
       {/* Rows */}
       {sorted.length === 0 ? (
         <p className="text-xs text-muted-foreground py-12 text-center">{emptyText}</p>
       ) : (
         <ul className="mt-5 space-y-3">
-          {sorted.map((s) => <SlotRow key={s.id} row={s} />)}
+          {sorted.map((s) => <SlotRow key={s.id} row={s} highlight={highlightId === s.id} />)}
         </ul>
       )}
     </section>
@@ -239,7 +278,7 @@ const ActiveSlotsPanel = ({
   );
 };
 
-const SlotRow = ({ row }: { row: Row }) => {
+const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) => {
   const [dupOpen, setDupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const status = computeStatus(row.date);
@@ -249,7 +288,12 @@ const SlotRow = ({ row }: { row: Row }) => {
   const h = row.handlers;
 
   return (
-    <li className="rounded-2xl bg-surface-lowest ghost-border shadow-ambient/40 hover:shadow-ambient transition">
+    <li
+      className={cn(
+        "rounded-2xl bg-surface-lowest ghost-border shadow-ambient/40 hover:shadow-ambient transition",
+        highlight && "ring-2 ring-rose-500/70 animate-[shake_0.45s_ease-in-out_2] bg-rose-500/5",
+      )}
+    >
       <div className="grid grid-cols-12 items-center gap-3 px-5 py-4">
         {/* SLOT TYPE */}
         <div className="col-span-12 md:col-span-3">
@@ -332,3 +376,97 @@ const SlotRow = ({ row }: { row: Row }) => {
 };
 
 export default ActiveSlotsPanel;
+
+// ---------- Daily Occupancy Rail ----------
+const RAIL_START = 8 * 60;   // 08:00
+const RAIL_END = 20 * 60;    // 20:00
+const RAIL_SPAN = RAIL_END - RAIL_START;
+
+const sourceColor: Record<string, string> = {
+  focus: "bg-indigo-500",
+  quicksync: "bg-amber-500",
+  "event-access": "bg-violet-500",
+  legacy: "bg-slate-400",
+};
+
+const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) => {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  const ticks = Array.from({ length: 7 }, (_, i) => 8 + i * 2); // 8,10,12,14,16,18,20
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowPct =
+    nowMin >= RAIL_START && nowMin <= RAIL_END
+      ? ((nowMin - RAIL_START) / RAIL_SPAN) * 100
+      : null;
+
+  return (
+    <div className="mt-5 rounded-2xl bg-surface-low/60 ghost-border p-3">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          Daily Occupancy · {dateLabel}
+        </p>
+        <div className="flex items-center gap-2 text-[9px] font-bold">
+          <Legend color="bg-indigo-500" label="Focus" />
+          <Legend color="bg-amber-500" label="Quick Sync" />
+          <Legend color="bg-violet-500" label="Event" />
+        </div>
+      </div>
+      <div className="relative h-9 rounded-lg bg-surface-lowest ghost-border overflow-hidden">
+        {/* Tick grid */}
+        {ticks.slice(1, -1).map((h) => {
+          const pct = ((h * 60 - RAIL_START) / RAIL_SPAN) * 100;
+          return (
+            <div
+              key={h}
+              className="absolute top-0 bottom-0 w-px bg-border/60"
+              style={{ left: `${pct}%` }}
+            />
+          );
+        })}
+        {/* Occupied blocks */}
+        {rows.map((r) => {
+          const s = Math.max(RAIL_START, r.startMin);
+          const e = Math.min(RAIL_END, r.endMin);
+          if (e <= s) return null;
+          const left = ((s - RAIL_START) / RAIL_SPAN) * 100;
+          const width = ((e - s) / RAIL_SPAN) * 100;
+          return (
+            <div
+              key={r.id}
+              title={`${r.typeLabel} · ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}`}
+              className={cn(
+                "absolute top-1 bottom-1 rounded-md opacity-90 hover:opacity-100 transition",
+                sourceColor[r.source] ?? "bg-primary",
+              )}
+              style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
+            />
+          );
+        })}
+        {/* Now indicator */}
+        {nowPct !== null && (
+          <div
+            className="absolute top-0 bottom-0 w-[2px] bg-rose-500"
+            style={{ left: `${nowPct}%` }}
+          >
+            <span className="absolute -top-1.5 -left-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-background" />
+          </div>
+        )}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[9px] font-bold text-muted-foreground tabular-nums">
+        {ticks.map((h) => (
+          <span key={h}>{((h + 11) % 12) + 1}{h < 12 ? "a" : "p"}</span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const Legend = ({ color, label }: { color: string; label: string }) => (
+  <span className="inline-flex items-center gap-1 text-muted-foreground">
+    <span className={cn("w-2 h-2 rounded-sm", color)} />
+    {label}
+  </span>
+);
