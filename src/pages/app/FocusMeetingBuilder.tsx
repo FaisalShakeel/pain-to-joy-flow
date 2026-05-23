@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
+import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -500,31 +501,23 @@ const FocusMeetingBuilder = () => {
       </section>
 
       {/* ACTIVE SLOTS */}
-      <section className="mt-6 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Manage</p>
-          <h3 className="font-headline font-extrabold text-primary text-base md:text-lg">Active Meeting Blocks</h3>
-          </div>
-          <span className="text-[11px] text-muted-foreground">{slots.length} active</span>
-        </div>
-
-        {slots.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-10 text-center">No meeting blocks yet — create one above.</p>
-        ) : (
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {slots.map((s) => (
-              <MeetingCard
-                key={s.id}
-                slot={s}
-                onEdit={() => editSlot(s)}
-                onDelete={() => setConfirmDelete(s.id)}
-                onDuplicate={(k, d) => duplicate(s, k, d)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      <div className="mt-6">
+        <ActiveSlotsPanel
+          eyebrow="Schedule View"
+          emptyText="No meeting blocks yet — create one above."
+          items={slots.map<ActiveSlotItem>((s) => ({
+            id: s.id,
+            date: s.date,
+            startMin: s.startMin,
+            endMin: s.endMin,
+            bufferMin: s.bufferMin,
+            mode: channel,
+            onEdit: () => editSlot(s),
+            onDelete: () => setConfirmDelete(s.id),
+            onDuplicate: (k, d) => duplicate(s, k, d),
+          }))}
+        />
+      </div>
 
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
