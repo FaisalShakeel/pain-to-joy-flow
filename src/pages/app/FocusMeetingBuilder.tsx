@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
+import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
