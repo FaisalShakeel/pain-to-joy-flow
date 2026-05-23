@@ -244,6 +244,22 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
     setPosts((prev) => [post, ...prev]);
   }, []);
 
+  const createRelay: SpotlightCtx["createRelay"] = useCallback(({ title, body, relay, tone, expiresIn, cta }) => {
+    const post: SpotlightPost = {
+      id: `rly${Date.now()}`,
+      createdAt: Date.now(),
+      authorId: "me",
+      title,
+      body,
+      visibility: relay.audience === "private" ? "private" : relay.audience === "public" ? "public" : "contacts",
+      tone: tone ?? "offer",
+      expiresIn,
+      cta: cta ?? { label: "View Availability", href: relay.viewHref },
+      relay,
+    };
+    setPosts((prev) => [post, ...prev]);
+  }, []);
+
   const update: SpotlightCtx["update"] = useCallback((id, patch) => {
     setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   }, []);
@@ -314,8 +330,8 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
   }, [posts, dismissedPosts, viewedPosts]);
 
   const value = useMemo(
-    () => ({ posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount, markContactPostsViewed }),
-    [posts, create, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount, markContactPostsViewed],
+    () => ({ posts, create, createRelay, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount, markContactPostsViewed }),
+    [posts, create, createRelay, update, remove, unseenForContact, markSeen, dismissedPosts, dismissPost, viewedPosts, markPostViewed, unseenOthersCount, markContactPostsViewed],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
