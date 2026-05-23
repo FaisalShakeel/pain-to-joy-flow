@@ -4,6 +4,68 @@ export type Visibility = "public" | "contacts" | "private";
 export type Tone = "info" | "warn" | "offer";
 export type AudienceTag = "colleague" | "friend" | "client" | "family" | "other";
 
+export type RelayAudience =
+  | "public" | "team" | "office" | "friends" | "family" | "selected" | "private";
+
+export type RelaySource = "hybrid" | "quicksync" | "event-access";
+
+export interface RelayPermissions {
+  booking: boolean;
+  questions: boolean;
+  rsvp: boolean;
+  quickJoin: boolean;
+  share: boolean;
+  reactions: boolean;
+  waitlist: boolean;
+}
+
+export interface RelayIndicators {
+  live: boolean;
+  urgent: boolean;
+  limited: boolean;
+}
+
+export interface RelayConfig {
+  enabled: boolean;
+  audience: RelayAudience;
+  expiry: string;          // human label e.g. "in 2h", "today", "until slot ends"
+  expiresAt?: number;      // ms epoch — auto-prune when past
+  permissions: RelayPermissions;
+  indicators: RelayIndicators;
+  tone: Tone;
+}
+
+export interface RelayMeta {
+  source: RelaySource;
+  sourceId: string;
+  remainingSlots?: number;
+  totalSlots?: number;
+  startsAt?: number;
+  endsAt?: number;
+  permissions: RelayPermissions;
+  indicators: RelayIndicators;
+  viewHref: string;
+  expiresAt?: number;
+  audience: RelayAudience;
+}
+
+export const DEFAULT_RELAY: RelayConfig = {
+  enabled: false,
+  audience: "selected",
+  expiry: "today",
+  permissions: {
+    booking: true,
+    questions: true,
+    rsvp: false,
+    quickJoin: false,
+    share: true,
+    reactions: true,
+    waitlist: false,
+  },
+  indicators: { live: false, urgent: false, limited: false },
+  tone: "offer",
+};
+
 export const AUDIENCE_TAGS: { id: AudienceTag; label: string; emoji: string }[] = [
   { id: "colleague", label: "Office", emoji: "💼" },
   { id: "friend",    label: "Friends", emoji: "🤝" },
@@ -25,6 +87,7 @@ export interface SpotlightPost {
   audience?: string[]; // optional contact ids the post targets (for torch). empty = all contacts
   authorId?: string;   // who published the post. "me" = the logged-in user.
   audienceTag?: AudienceTag; // which of the 5 audience filters this post belongs to
+  relay?: RelayMeta;   // when present, render as an operational relay card
 }
 
 export const SPOTLIGHT_LIMITS = {
@@ -36,6 +99,14 @@ export const SPOTLIGHT_LIMITS = {
 interface SpotlightCtx {
   posts: SpotlightPost[];
   create: (p: Omit<SpotlightPost, "id" | "createdAt">) => void;
+  createRelay: (args: {
+    title: string;
+    body: string;
+    relay: RelayMeta;
+    tone?: Tone;
+    expiresIn?: string;
+    cta?: { label: string; href: string };
+  }) => void;
   update: (id: string, patch: Partial<SpotlightPost>) => void;
   remove: (id: string) => void;
   // torch: per-contact unseen count
