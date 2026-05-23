@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import {
   ArrowLeft, Users as UsersIcon, Calendar as CalIcon, Clock, Globe,
   Crown, Sparkles, Lock, Check, Pencil, Trash2, Video, Radio, Hourglass,
-  ChevronRight, X, CheckCircle2, ListChecks, MapPin,
+  ChevronRight, X, CheckCircle2, ListChecks, MapPin, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
@@ -408,7 +408,8 @@ const WebinarBuilder = () => {
           </div>
 
           {/* Live preview card */}
-          <aside className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated h-fit">
+          <aside className="space-y-3 h-fit">
+          <div className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
             <h4 className="font-headline font-extrabold text-base mt-1 truncate">{draft.title || "Untitled session"}</h4>
             <p className="text-[12px] text-primary-foreground/80 mt-0.5">
@@ -431,6 +432,39 @@ const WebinarBuilder = () => {
             {draft.pricing.mode === "paid" && draft.pricing.note && (
               <p className="mt-2 text-[10px] text-primary-foreground/70 italic line-clamp-2">"{draft.pricing.note}"</p>
             )}
+          </div>
+
+          {((draft.channel ?? "online") === "onsite" || (draft.channel ?? "online") === "hybrid") && (
+            <>
+              <div className="rounded-3xl bg-gradient-vault text-primary-foreground p-5 shadow-elevated">
+                <Building2 className="w-5 h-5 text-gold" />
+                <p className="mt-2 font-headline font-bold">Venue Mode</p>
+                <p className="mt-1 text-xs text-primary-foreground/80 leading-relaxed">
+                  You're not selling seats — you're controlling access to a shared time and place.
+                </p>
+              </div>
+
+              <div className="rounded-3xl bg-surface-lowest ghost-border p-4">
+                <h3 className="font-headline font-bold text-primary text-sm">Use it for</h3>
+                <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+                  {["Workshops", "Private sessions", "Small seminars", "Coaching groups", "Paid hybrid talks", "Co-working rooms"].map((t) => (
+                    <li key={t} className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-3xl bg-surface-lowest ghost-border p-4">
+                <h3 className="font-headline font-bold text-primary text-sm">Rules</h3>
+                <ul className="mt-3 space-y-2 text-[11px] text-muted-foreground leading-snug">
+                  <li>• No seat-level selection</li>
+                  <li>• No complex ticketing logic</li>
+                  <li>• Time-slot + capacity based</li>
+                </ul>
+              </div>
+            </>
+          )}
           </aside>
         </div>
       </section>
