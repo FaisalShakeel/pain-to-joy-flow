@@ -350,7 +350,7 @@ const FocusMeetingBuilder = () => {
                   ))}
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Participants may join up to <strong className="text-primary">{draft.bufferMin} min</strong> early or run <strong className="text-primary">{draft.bufferMin} min</strong> over. Slot timing stays back-to-back.
+                  Participants may join during the buffer window before the scheduled start time, and the conductor may extend the sync duration beyond the originally scheduled time.
                 </p>
               </Section>
             )}
