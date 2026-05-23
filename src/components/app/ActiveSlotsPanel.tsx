@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronLeft, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
-  Maximize2, Minimize2,
+  Maximize2, Minimize2, Lock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useAvailability, useConflictHighlight, type AvailabilityBlock } from "@/lib/availabilityStore";
+import { useAvailability, useConflictHighlight, availabilityStore, type AvailabilityBlock } from "@/lib/availabilityStore";
 
 export type ActiveSlotStatus = "active" | "upcoming" | "expired";
 export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
@@ -86,6 +86,8 @@ type Row = {
   mode: ActiveSlotMode;
   typeLabel: string;
   handlers: ActiveSlotHandlers;
+  callMin?: number;
+  bookedSubSlots?: number[];
 };
 
 const ActiveSlotsPanel = ({
@@ -113,6 +115,8 @@ const ActiveSlotsPanel = ({
       mode: b.mode,
       typeLabel: b.typeLabel,
       handlers: handlers[b.id] ?? {},
+      callMin: b.callMin,
+      bookedSubSlots: b.bookedSubSlots,
     }));
     const seen = new Set(fromStore.map((r) => r.id));
     const fromItems: Row[] = items
