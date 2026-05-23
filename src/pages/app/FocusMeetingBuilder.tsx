@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
@@ -19,6 +19,7 @@ import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/ap
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
+import { availabilityStore, findConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -119,6 +120,22 @@ const FocusMeetingBuilder = () => {
 
   const reset = () => { setDraft(blank()); setStep(1); };
 
+  const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
+    const c = findConflict(date, startMin, endMin, excludeId);
+    if (!c) return false;
+    const sugg = suggestOpenings(date, endMin - startMin, excludeId)
+      .map((s) => `${fmtTimeHM(s.startMin)}–${fmtTimeHM(s.endMin)}`)
+      .join(" · ");
+    toast({
+      title: "Time conflict",
+      description:
+        `This time range is already occupied by an existing availability block (${c.typeLabel}, ${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
+        (sugg ? ` Nearest openings: ${sugg}.` : ""),
+      variant: "destructive" as any,
+    });
+    return true;
+  };
+
   const save = () => {
     if (totalMin <= 0) {
       toast({ title: "Time window invalid", description: "End time must be after start time." });
@@ -132,6 +149,7 @@ const FocusMeetingBuilder = () => {
       toast({ title: "Set a price", description: "Paid meetings must have a price greater than zero." });
       return;
     }
+    if (conflictToast(draft.date, draft.startMin, draft.endMin, draft.id)) return;
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Meeting updated" });
@@ -180,9 +198,28 @@ const FocusMeetingBuilder = () => {
       kind === "tomorrow" ? addDays(base, 1) :
       kind === "nextweek" ? addWeeks(base, 1) :
       customDate ? new Date(customDate) : base;
-    setSlots((p) => [{ ...s, id: `mt${Date.now()}`, date: nd.toISOString().slice(0, 10), createdAt: Date.now() }, ...p]);
+    const newDate = nd.toISOString().slice(0, 10);
+    if (conflictToast(newDate, s.startMin, s.endMin)) return;
+    setSlots((p) => [{ ...s, id: `mt${Date.now()}`, date: newDate, createdAt: Date.now() }, ...p]);
     toast({ title: "Schedule cloned successfully and extended.", description: format(nd, "EEE, MMM d") });
   };
+
+  // Sync to unified availability store
+  useEffect(() => {
+    availabilityStore.syncSource(
+      "focus",
+      slots.map((s) => ({
+        id: s.id,
+        source: "focus" as const,
+        date: s.date,
+        startMin: s.startMin,
+        endMin: s.endMin,
+        bufferMin: s.bufferMin,
+        mode: channel,
+        typeLabel: "Focus Sync",
+      })),
+    );
+  }, [slots, channel]);
 
   return (
     <AppShell
@@ -503,19 +540,15 @@ const FocusMeetingBuilder = () => {
       {/* ACTIVE SLOTS */}
       <div className="mt-6">
         <ActiveSlotsPanel
-          eyebrow="Schedule View"
+          eyebrow="Unified Availability"
           emptyText="No meeting blocks yet — create one above."
-          items={slots.map<ActiveSlotItem>((s) => ({
-            id: s.id,
-            date: s.date,
-            startMin: s.startMin,
-            endMin: s.endMin,
-            bufferMin: s.bufferMin,
-            mode: channel,
-            onEdit: () => editSlot(s),
-            onDelete: () => setConfirmDelete(s.id),
-            onDuplicate: (k, d) => duplicate(s, k, d),
-          }))}
+          handlers={Object.fromEntries(
+            slots.map((s) => [s.id, {
+              onEdit: () => editSlot(s),
+              onDelete: () => setConfirmDelete(s.id),
+              onDuplicate: (k, d) => duplicate(s, k, d),
+            }]),
+          )}
         />
       </div>
 

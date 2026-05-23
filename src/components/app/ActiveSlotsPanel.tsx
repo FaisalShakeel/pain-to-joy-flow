@@ -1,28 +1,34 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Video, MapPin, Zap, Share2, Pencil, Trash2, Copy } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { createPortal } from "react-dom";
+import {
+  ChevronLeft, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
+  Maximize2, Minimize2,
+} from "lucide-react";
+import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { useAvailability, type AvailabilityBlock } from "@/lib/availabilityStore";
 
 export type ActiveSlotStatus = "active" | "upcoming" | "expired";
 export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
 
-export interface ActiveSlotItem {
-  id: string;
-  /** ISO yyyy-mm-dd */
-  date: string;
-  /** minutes from 00:00 */
-  startMin: number;
-  endMin: number;
-  bufferMin: number;
-  mode: ActiveSlotMode;
-  /** Optional override for the SLOT TYPE label (defaults derived from mode) */
-  typeLabel?: string;
+export interface ActiveSlotHandlers {
   onEdit?: () => void;
   onDelete?: () => void;
   onDuplicate?: (kind: "tomorrow" | "nextweek" | "custom", customDate?: string) => void;
   onShare?: () => void;
+}
+
+/** Legacy item shape — kept so existing callers compile. */
+export interface ActiveSlotItem extends ActiveSlotHandlers {
+  id: string;
+  date: string;
+  startMin: number;
+  endMin: number;
+  bufferMin: number;
+  mode: ActiveSlotMode;
+  typeLabel?: string;
 }
 
 const fmtTime = (m: number) => {
@@ -40,6 +46,12 @@ const modeMeta: Record<ActiveSlotMode, { label: string; icons: React.ComponentTy
   quicksync: { label: "Quick Sync", icons: [Zap] },
 };
 
+const sourceMeta: Record<string, { label: string; cls: string; icon: React.ComponentType<any> }> = {
+  focus:          { label: "Focus Sync",   cls: "bg-indigo-500/15 text-indigo-700",  icon: Video },
+  quicksync:      { label: "Quick Sync",   cls: "bg-amber-500/15 text-amber-800",    icon: Zap },
+  "event-access": { label: "Event Access", cls: "bg-violet-500/15 text-violet-700",  icon: Users },
+};
+
 const statusMeta = (s: ActiveSlotStatus) => {
   if (s === "active")   return { label: "Available", dot: "bg-emerald-500" };
   if (s === "upcoming") return { label: "Pending",   dot: "bg-amber-500" };
@@ -55,44 +67,106 @@ const computeStatus = (iso: string): ActiveSlotStatus => {
 };
 
 interface Props {
-  /** Eyebrow for the heading; defaults to "SCHEDULE VIEW". */
+  /** Eyebrow for the heading; defaults to "UNIFIED AVAILABILITY". */
   eyebrow?: string;
-  items: ActiveSlotItem[];
+  /** Per-block handlers, keyed by block id. */
+  handlers?: Record<string, ActiveSlotHandlers>;
+  /** Legacy: extra items to merge in (still rendered). */
+  items?: ActiveSlotItem[];
   emptyText?: string;
 }
 
-const ActiveSlotsPanel = ({ eyebrow = "SCHEDULE VIEW", items, emptyText = "No slots yet — create one above." }: Props) => {
+type Row = {
+  id: string;
+  source: "focus" | "quicksync" | "event-access" | "legacy";
+  date: string;
+  startMin: number;
+  endMin: number;
+  bufferMin: number;
+  mode: ActiveSlotMode;
+  typeLabel: string;
+  handlers: ActiveSlotHandlers;
+};
+
+const ActiveSlotsPanel = ({
+  eyebrow = "UNIFIED AVAILABILITY",
+  handlers = {},
+  items = [],
+  emptyText = "No slots yet — create one above.",
+}: Props) => {
   const [view, setView] = useState<"time" | "type">("time");
   const [dayOffset, setDayOffset] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
-  const dates = useMemo(() => Array.from(new Set(items.map((i) => i.date))).sort(), [items]);
+  const blocks = useAvailability();
+
+  const rows: Row[] = useMemo(() => {
+    const fromStore: Row[] = blocks.map((b: AvailabilityBlock) => ({
+      id: b.id,
+      source: b.source,
+      date: b.date,
+      startMin: b.startMin,
+      endMin: b.endMin,
+      bufferMin: b.bufferMin,
+      mode: b.mode,
+      typeLabel: b.typeLabel,
+      handlers: handlers[b.id] ?? {},
+    }));
+    const seen = new Set(fromStore.map((r) => r.id));
+    const fromItems: Row[] = items
+      .filter((i) => !seen.has(i.id))
+      .map((i) => ({
+        id: i.id,
+        source: "legacy" as const,
+        date: i.date,
+        startMin: i.startMin,
+        endMin: i.endMin,
+        bufferMin: i.bufferMin,
+        mode: i.mode,
+        typeLabel: i.typeLabel ?? modeMeta[i.mode].label,
+        handlers: {
+          onEdit: i.onEdit, onDelete: i.onDelete,
+          onDuplicate: i.onDuplicate, onShare: i.onShare,
+        },
+      }));
+    return [...fromStore, ...fromItems];
+  }, [blocks, items, handlers]);
+
+  const dates = useMemo(() => Array.from(new Set(rows.map((r) => r.date))).sort(), [rows]);
   const focusDate = dates.length
     ? dates[Math.min(dates.length - 1, Math.max(0, dayOffset))]
     : new Date().toISOString().slice(0, 10);
 
   const summary = useMemo(() => {
     const acc: Record<string, number> = {};
-    items.forEach((i) => {
-      const k = modeMeta[i.mode].label;
-      acc[k] = (acc[k] ?? 0) + 1;
+    rows.forEach((r) => {
+      const key = r.source === "legacy" ? modeMeta[r.mode].label : sourceMeta[r.source].label;
+      acc[key] = (acc[key] ?? 0) + 1;
     });
     return Object.entries(acc);
-  }, [items]);
+  }, [rows]);
 
   const sorted = useMemo(() => {
-    const list = [...items];
+    const list = [...rows];
     if (view === "time") {
-      list.sort((a, b) => (a.date + a.startMin).localeCompare(b.date + b.startMin) || a.startMin - b.startMin);
+      list.sort(
+        (a, b) => (a.date + a.startMin).localeCompare(b.date + b.startMin) || a.startMin - b.startMin,
+      );
     } else {
-      list.sort((a, b) => a.mode.localeCompare(b.mode) || a.startMin - b.startMin);
+      list.sort((a, b) => a.source.localeCompare(b.source) || a.startMin - b.startMin);
     }
     return list;
-  }, [items, view]);
+  }, [rows, view]);
 
   const headerDate = new Date(focusDate);
 
-  return (
-    <section className="rounded-3xl bg-surface-lowest ghost-border p-5 md:p-7 shadow-ambient">
+  const content = (
+    <section
+      className={cn(
+        "rounded-3xl bg-surface-lowest ghost-border p-5 md:p-7 shadow-ambient",
+        expanded && "rounded-none border-0 shadow-none h-full overflow-y-auto",
+      )}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -111,11 +185,12 @@ const ActiveSlotsPanel = ({ eyebrow = "SCHEDULE VIEW", items, emptyText = "No sl
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
-            onClick={() => setDayOffset((v) => Math.min(Math.max(0, dates.length - 1), v + 1))}
+            onClick={() => setExpanded((v) => !v)}
             className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground hover:opacity-90"
-            aria-label="Next day"
+            aria-label={expanded ? "Collapse" : "Expand to full page"}
+            title={expanded ? "Collapse" : "Expand to full page"}
           >
-            <ChevronRight className="w-4 h-4" />
+            {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -151,19 +226,27 @@ const ActiveSlotsPanel = ({ eyebrow = "SCHEDULE VIEW", items, emptyText = "No sl
         <p className="text-xs text-muted-foreground py-12 text-center">{emptyText}</p>
       ) : (
         <ul className="mt-5 space-y-3">
-          {sorted.map((s) => <SlotRow key={s.id} item={s} />)}
+          {sorted.map((s) => <SlotRow key={s.id} row={s} />)}
         </ul>
       )}
     </section>
   );
+
+  if (!expanded) return content;
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-background overflow-y-auto">{content}</div>,
+    document.body,
+  );
 };
 
-const SlotRow = ({ item }: { item: ActiveSlotItem }) => {
+const SlotRow = ({ row }: { row: Row }) => {
   const [dupOpen, setDupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
-  const status = computeStatus(item.date);
+  const status = computeStatus(row.date);
   const sm = statusMeta(status);
-  const mm = modeMeta[item.mode];
+  const mm = modeMeta[row.mode];
+  const srcMeta = row.source !== "legacy" ? sourceMeta[row.source] : null;
+  const h = row.handlers;
 
   return (
     <li className="rounded-2xl bg-surface-lowest ghost-border shadow-ambient/40 hover:shadow-ambient transition">
@@ -171,7 +254,12 @@ const SlotRow = ({ item }: { item: ActiveSlotItem }) => {
         {/* SLOT TYPE */}
         <div className="col-span-12 md:col-span-3">
           <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Slot Type</p>
-          <p className="font-headline font-extrabold text-primary text-base mt-1">{item.typeLabel ?? mm.label}</p>
+          <p className="font-headline font-extrabold text-primary text-base mt-1">{row.typeLabel}</p>
+          {srcMeta && (
+            <span className={cn("mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold", srcMeta.cls)}>
+              <srcMeta.icon className="w-3 h-3" /> {srcMeta.label}
+            </span>
+          )}
         </div>
 
         {/* STATUS */}
@@ -187,11 +275,11 @@ const SlotRow = ({ item }: { item: ActiveSlotItem }) => {
         <div className="col-span-6 md:col-span-4">
           <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Timing</p>
           <p className="font-headline font-extrabold text-primary text-base mt-1 tabular-nums">
-            {fmtTime(item.startMin).replace(/\s.*/, "")} <span className="text-muted-foreground">—</span>{" "}
-            {fmtTime(item.endMin)}
+            {fmtTime(row.startMin).replace(/\s.*/, "")} <span className="text-muted-foreground">—</span>{" "}
+            {fmtTime(row.endMin)}
           </p>
           <p className="text-[10px] italic text-muted-foreground tracking-wider uppercase mt-0.5">
-            {item.bufferMin}-m flexible buffer
+            {row.bufferMin}-m flexible buffer
           </p>
         </div>
 
@@ -211,8 +299,8 @@ const SlotRow = ({ item }: { item: ActiveSlotItem }) => {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-44 p-1 z-[60]" align="end">
-                <button onClick={() => { item.onDuplicate?.("tomorrow"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">To tomorrow</button>
-                <button onClick={() => { item.onDuplicate?.("nextweek"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">To next week</button>
+                <button onClick={() => { h.onDuplicate?.("tomorrow"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">To tomorrow</button>
+                <button onClick={() => { h.onDuplicate?.("nextweek"); setDupOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">To next week</button>
                 <button onClick={() => { setDupOpen(false); setCustomOpen(true); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low">Custom date…</button>
               </PopoverContent>
             </Popover>
@@ -221,19 +309,19 @@ const SlotRow = ({ item }: { item: ActiveSlotItem }) => {
               <PopoverContent className="w-auto p-0 z-[60]" align="end">
                 <Calendar
                   mode="single"
-                  onSelect={(d) => { if (d) { item.onDuplicate?.("custom", d.toISOString().slice(0, 10)); setCustomOpen(false); } }}
+                  onSelect={(d) => { if (d) { h.onDuplicate?.("custom", d.toISOString().slice(0, 10)); setCustomOpen(false); } }}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
-            <button onClick={item.onEdit} className="grid place-items-center w-8 h-8 rounded-full ghost-border bg-surface-lowest hover:bg-primary/10 text-primary" aria-label="Edit">
+            <button onClick={h.onEdit} className="grid place-items-center w-8 h-8 rounded-full ghost-border bg-surface-lowest hover:bg-primary/10 text-primary" aria-label="Edit">
               <Pencil className="w-3.5 h-3.5" />
             </button>
-            <button onClick={item.onShare} className="grid place-items-center w-8 h-8 rounded-full ghost-border bg-surface-lowest hover:bg-primary/10 text-primary" aria-label="Share">
+            <button onClick={h.onShare} className="grid place-items-center w-8 h-8 rounded-full ghost-border bg-surface-lowest hover:bg-primary/10 text-primary" aria-label="Share">
               <Share2 className="w-3.5 h-3.5" />
             </button>
-            <button onClick={item.onDelete} className="grid place-items-center w-8 h-8 rounded-full ghost-border bg-surface-lowest hover:bg-destructive/10 text-destructive" aria-label="Delete">
+            <button onClick={h.onDelete} className="grid place-items-center w-8 h-8 rounded-full ghost-border bg-surface-lowest hover:bg-destructive/10 text-destructive" aria-label="Delete">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>

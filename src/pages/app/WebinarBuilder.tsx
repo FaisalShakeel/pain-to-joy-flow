@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
+import ActiveSlotsPanel from "@/components/app/ActiveSlotsPanel";
+import { availabilityStore, findConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
@@ -108,6 +110,22 @@ const WebinarBuilder = () => {
 
   const reset = () => setDraft(blank());
 
+  const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
+    const c = findConflict(date, startMin, endMin, excludeId);
+    if (!c) return false;
+    const sugg = suggestOpenings(date, endMin - startMin, excludeId)
+      .map((s) => `${fmtTimeHM(s.startMin)}–${fmtTimeHM(s.endMin)}`)
+      .join(" · ");
+    toast({
+      title: "Time conflict",
+      description:
+        `This time range is already occupied by an existing availability block (${c.typeLabel}, ${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
+        (sugg ? ` Nearest openings: ${sugg}.` : ""),
+      variant: "destructive" as any,
+    });
+    return true;
+  };
+
   const save = () => {
     if (!draft.title.trim()) {
       toast({ title: "Title required", description: "Give the session a clear title." });
@@ -125,6 +143,7 @@ const WebinarBuilder = () => {
       toast({ title: "Set a price", description: "Paid sessions must have a price greater than zero." });
       return;
     }
+    if (conflictToast(draft.date, draft.startMin, draft.startMin + draft.durationMin, draft.id)) return;
     if (isEditing) {
       setItems((p) => p.map((w) => (w.id === draft.id ? { ...w, ...draft, id: draft.id! } : w)));
       toast({ title: "Session updated" });
@@ -187,6 +206,27 @@ const WebinarBuilder = () => {
     setConfirmDelete(null);
     toast({ title: "Session deleted" });
   };
+
+  // Sync to unified availability store
+  useEffect(() => {
+    availabilityStore.syncSource(
+      "event-access",
+      items.map((w) => {
+        const mode: "hybrid" | "online" | "onsite" =
+          w.channel === "hybrid" ? "hybrid" : w.channel === "onsite" ? "onsite" : "online";
+        return {
+          id: w.id,
+          source: "event-access" as const,
+          date: w.date,
+          startMin: w.startMin,
+          endMin: w.startMin + w.durationMin,
+          bufferMin: 0,
+          mode,
+          typeLabel: w.title || "Event Access",
+        };
+      }),
+    );
+  }, [items]);
 
   return (
     <AppShell
@@ -494,33 +534,19 @@ const WebinarBuilder = () => {
         </div>
       </section>
 
-      {/* ACTIVE WEBINARS */}
-      <section className="mt-6 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Manage</p>
-            <h3 className="font-headline font-extrabold text-primary text-base md:text-lg">Active Group Sessions</h3>
-          </div>
-          <span className="text-[11px] text-muted-foreground">{items.length} active</span>
-        </div>
-
-        {items.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-10 text-center">
-            No group sessions yet — fill out the form above to publish your first.
-          </p>
-        ) : (
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {items.map((w) => (
-              <WebinarCard
-                key={w.id}
-                webinar={w}
-                onEdit={() => editOne(w)}
-                onDelete={() => setConfirmDelete(w.id)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      {/* UNIFIED AVAILABILITY */}
+      <div className="mt-6">
+        <ActiveSlotsPanel
+          eyebrow="Unified Availability"
+          emptyText="No group sessions yet — create one above."
+          handlers={Object.fromEntries(
+            items.map((w) => [w.id, {
+              onEdit: () => editOne(w),
+              onDelete: () => setConfirmDelete(w.id),
+            }]),
+          )}
+        />
+      </div>
 
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
