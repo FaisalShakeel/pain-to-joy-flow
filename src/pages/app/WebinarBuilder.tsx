@@ -17,6 +17,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
+import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
+import { useSpotlight } from "@/components/app/SpotlightContext";
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
@@ -98,6 +100,8 @@ const WebinarBuilder = () => {
   const [items, setItems] = useState<Webinar[]>(seed);
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
+  const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
@@ -134,6 +138,25 @@ const WebinarBuilder = () => {
       };
       setItems((p) => [next, ...p]);
       toast({ title: "Group session created", description: `${draft.title} · ${draft.capacity} seats` });
+      if (relay.enabled) {
+        createRelay({
+          title: `EVENT ACCESS · ${next.title}`,
+          body: `${format(new Date(next.date), "EEE, MMM d")} · ${fmtTime(next.startMin)} · ${next.capacity} seats · ${next.channel ?? "online"}${next.venue ? ` @ ${next.venue}` : ""}`,
+          tone: relay.tone,
+          expiresIn: `expires ${relay.expiry}`,
+          relay: {
+            source: "event-access",
+            sourceId: next.id,
+            totalSlots: next.capacity,
+            remainingSlots: next.capacity,
+            permissions: relay.permissions,
+            indicators: relay.indicators,
+            audience: relay.audience,
+            viewHref: "/app/availability/webinars",
+          },
+        });
+        toast({ title: "Relayed to Spotlight" });
+      }
     }
     reset();
   };
@@ -393,6 +416,8 @@ const WebinarBuilder = () => {
             <Section title="Pricing" icon={Sparkles} hint="Free by default. Switch to Paid to set a price.">
               <PricingField value={draft.pricing} onChange={(p) => set("pricing", p)} />
             </Section>
+
+            <RelayToSpotlightPanel value={relay} onChange={setRelay} />
 
             <div className="flex items-center justify-end gap-2 pt-2">
               {isEditing && (

@@ -16,6 +16,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
+import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
+import { useSpotlight } from "@/components/app/SpotlightContext";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -105,6 +107,8 @@ const FocusMeetingBuilder = () => {
   const [step, setStep] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [channel, setChannel] = useState<"hybrid" | "online" | "onsite">("hybrid");
+  const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "info" });
+  const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
@@ -134,6 +138,25 @@ const FocusMeetingBuilder = () => {
       const next: MTSlot = { ...(draft as Omit<MTSlot, "id" | "createdAt">), id: `mt${Date.now()}`, createdAt: Date.now() };
       setSlots((p) => [next, ...p]);
       toast({ title: "Meeting block created", description: `${count} meeting slots generated.` });
+      if (relay.enabled) {
+        createRelay({
+          title: `OPEN MEETING BLOCK · ${fmtTime(next.startMin)}–${fmtTime(next.endMin)}`,
+          body: `${count} ${next.callMin}-min meeting slots on ${format(new Date(next.date), "EEE, MMM d")} · ${channel}.`,
+          tone: relay.tone,
+          expiresIn: `expires ${relay.expiry}`,
+          relay: {
+            source: "hybrid",
+            sourceId: next.id,
+            totalSlots: count,
+            remainingSlots: count,
+            permissions: relay.permissions,
+            indicators: relay.indicators,
+            audience: relay.audience,
+            viewHref: "/app/availability/focus-meetings",
+          },
+        });
+        toast({ title: "Relayed to Spotlight" });
+      }
     }
     reset();
   };
@@ -470,6 +493,10 @@ const FocusMeetingBuilder = () => {
               <PriceTag pricing={draft.pricing} />
             </div>
           </aside>
+        </div>
+
+        <div className="mt-5">
+          <RelayToSpotlightPanel value={relay} onChange={setRelay} />
         </div>
       </section>
 
