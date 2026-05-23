@@ -219,6 +219,7 @@ const FocusMeetingBuilder = () => {
         bufferMin: s.bufferMin,
         mode: channel,
         typeLabel: "Focus Sync",
+        callMin: s.callMin,
       })),
     );
   }, [slots, channel]);
