@@ -186,8 +186,6 @@ const QuickSyncBuilder = () => {
 
   return (
     <AppShell
-      subtitle="Create it. Manage it. Stay interruption-free."
-      title="Quick Sync Builder"
       actions={
         <button
           onClick={() => navigate("/app/availability/builder")}
@@ -205,7 +203,7 @@ const QuickSyncBuilder = () => {
           </span>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "New"} Quick Sync</p>
-            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Quick Sync Builder</h2>
+            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Short-call organizer for fast coordination</h2>
           </div>
           {isEditing && (
             <button onClick={reset} className="ml-auto text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
