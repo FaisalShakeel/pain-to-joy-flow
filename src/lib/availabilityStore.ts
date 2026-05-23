@@ -19,6 +19,29 @@ let state: AvailabilityBlock[] = [];
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
+// --- Conflict highlight (shake/flash on the offending block) ---
+let highlightId: string | null = null;
+const highlightListeners = new Set<() => void>();
+const emitHighlight = () => highlightListeners.forEach((l) => l());
+let highlightTimer: ReturnType<typeof setTimeout> | null = null;
+
+export const flashConflict = (id: string, ms = 2400) => {
+  highlightId = id;
+  emitHighlight();
+  if (highlightTimer) clearTimeout(highlightTimer);
+  highlightTimer = setTimeout(() => {
+    highlightId = null;
+    emitHighlight();
+  }, ms);
+};
+
+export const useConflictHighlight = () =>
+  useSyncExternalStore(
+    (l) => { highlightListeners.add(l); return () => highlightListeners.delete(l); },
+    () => highlightId,
+    () => highlightId,
+  );
+
 export const availabilityStore = {
   get: () => state,
   /** Replace this source's blocks with the provided ones (used to sync builder local state). */
