@@ -14,11 +14,12 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import { toast as sonner } from "sonner";
 import { cn } from "@/lib/utils";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
-import { availabilityStore, findConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import { availabilityStore, findConflict, flashConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type CallMin = 3 | 5 | 8;
@@ -131,12 +132,13 @@ const QuickSyncBuilder = () => {
     const sugg = suggestOpenings(date, endMin - startMin, excludeId)
       .map((s) => `${fmtTimeHM(s.startMin)}–${fmtTimeHM(s.endMin)}`)
       .join(" · ");
-    toast({
-      title: "Time conflict",
+    flashConflict(c.id);
+    sonner.error("Time conflict", {
       description:
-        `This time range is already occupied by an existing availability block (${c.typeLabel}, ${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
+        `This time range is already occupied by ${c.typeLabel} (${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
         (sugg ? ` Nearest openings: ${sugg}.` : ""),
-      variant: "destructive" as any,
+      duration: 10000,
+      closeButton: true,
     });
     return true;
   };
