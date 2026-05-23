@@ -795,6 +795,13 @@ function MineCard({
         <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground">
           <Tn.icon className="w-2.5 h-2.5" /> {Tn.label}
         </span>
+        {post.relay && (
+          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gold text-background">
+            <span className={cn("w-1.5 h-1.5 rounded-full", post.relay.indicators.live ? "bg-emerald-500 animate-pulse" : "bg-background/60")} />
+            Relay
+            {typeof post.relay.remainingSlots === "number" && ` · ${post.relay.remainingSlots} left`}
+          </span>
+        )}
       </div>
       <h4 className="mt-2 font-headline font-bold text-primary-foreground text-sm leading-tight">{post.title}</h4>
       <p className="mt-1 text-xs text-primary-foreground/80 leading-relaxed line-clamp-4 flex-1">{post.body}</p>
