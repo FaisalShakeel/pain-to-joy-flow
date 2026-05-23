@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronLeft, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
@@ -391,7 +391,7 @@ const sourceColor: Record<string, string> = {
 
 const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) => {
   const [now, setNow] = useState(() => new Date());
-  useMemo(() => {
+  useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(t);
   }, []);
