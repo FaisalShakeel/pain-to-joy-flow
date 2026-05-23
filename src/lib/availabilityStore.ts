@@ -13,6 +13,10 @@ export interface AvailabilityBlock {
   bufferMin: number;
   mode: AvailabilityMode;
   typeLabel: string;
+  /** Length of each generated sub-slot, in minutes. */
+  callMin?: number;
+  /** Sub-slot start-minutes that are currently booked. */
+  bookedSubSlots?: number[];
 }
 
 let state: AvailabilityBlock[] = [];
@@ -47,15 +51,34 @@ export const availabilityStore = {
   /** Replace this source's blocks with the provided ones (used to sync builder local state). */
   syncSource: (source: AvailabilitySource, blocks: AvailabilityBlock[]) => {
     const others = state.filter((b) => b.source !== source);
-    const next = [...others, ...blocks];
+    // Preserve previously-tracked sub-slot booking state across syncs.
+    const prevById = new Map(state.map((b) => [b.id, b] as const));
+    const merged = blocks.map((b) => {
+      const prev = prevById.get(b.id);
+      return prev?.bookedSubSlots && !b.bookedSubSlots
+        ? { ...b, bookedSubSlots: prev.bookedSubSlots }
+        : b;
+    });
+    const next = [...others, ...merged];
     // Avoid emitting if nothing changed (shallow id+window check).
     if (next.length === state.length) {
-      const sig = (b: AvailabilityBlock) => `${b.id}|${b.date}|${b.startMin}|${b.endMin}|${b.bufferMin}|${b.mode}`;
+      const sig = (b: AvailabilityBlock) =>
+        `${b.id}|${b.date}|${b.startMin}|${b.endMin}|${b.bufferMin}|${b.mode}|${b.callMin ?? ""}|${(b.bookedSubSlots ?? []).join(",")}`;
       const prevSig = state.map(sig).sort().join(";");
       const nextSig = next.map(sig).sort().join(";");
       if (prevSig === nextSig) return;
     }
     state = next;
+    emit();
+  },
+  /** Toggle booked state for a single sub-slot (identified by start-minute). */
+  toggleSubSlot: (blockId: string, startMin: number) => {
+    state = state.map((b) => {
+      if (b.id !== blockId) return b;
+      const cur = new Set(b.bookedSubSlots ?? []);
+      cur.has(startMin) ? cur.delete(startMin) : cur.add(startMin);
+      return { ...b, bookedSubSlots: Array.from(cur).sort((a, z) => a - z) };
+    });
     emit();
   },
 };

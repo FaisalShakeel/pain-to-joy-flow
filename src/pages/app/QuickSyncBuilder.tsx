@@ -219,6 +219,7 @@ const QuickSyncBuilder = () => {
         bufferMin: s.bufferMin,
         mode: "quicksync" as const,
         typeLabel: "Quick Sync",
+        callMin: s.callMin,
       })),
     );
   }, [slots]);
