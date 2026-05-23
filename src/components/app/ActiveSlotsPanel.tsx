@@ -386,7 +386,7 @@ const sourceColor: Record<string, string> = {
   legacy: "bg-slate-400",
 };
 
-const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) => {
+const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; dateLabel: string; hideHeader?: boolean }) => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -400,7 +400,8 @@ const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) 
       : null;
 
   return (
-    <div className="mt-5 rounded-2xl bg-surface-low/60 ghost-border p-3">
+    <div className={cn("rounded-2xl bg-surface-low/60 ghost-border p-3", !hideHeader && "mt-5")}> 
+      {!hideHeader && (
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           Daily Occupancy · {dateLabel}
@@ -411,6 +412,7 @@ const OccupancyRail = ({ rows, dateLabel }: { rows: Row[]; dateLabel: string }) 
           <Legend color="bg-violet-500" label="Event" />
         </div>
       </div>
+      )}
       <div className="relative h-9 rounded-lg bg-surface-lowest ghost-border overflow-hidden">
         {/* Tick grid */}
         {ticks.slice(1, -1).map((h) => {
