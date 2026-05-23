@@ -371,8 +371,103 @@ const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) 
             </button>
           </div>
         </div>
+        {/* GENERATED SUB-SLOTS — individually interactive */}
+        <div className="col-span-12">
+          <SubSlotsStrip row={row} />
+        </div>
       </div>
     </li>
+  );
+};
+
+// ---------- Sub-slots strip (auto-generated, individually bookable) ----------
+const SubSlotsStrip = ({ row }: { row: Row }) => {
+  const callMin = row.callMin ?? 0;
+  if (!callMin || callMin <= 0) return null;
+
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const isToday = row.date === todayISO;
+  const isFuture = row.date > todayISO;
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const booked = new Set(row.bookedSubSlots ?? []);
+
+  type Sub = { start: number; end: number; state: "available" | "booked" | "expired" };
+  const subs: Sub[] = [];
+  for (let t = row.startMin; t + callMin <= row.endMin; t += callMin) {
+    const expired = !isFuture && (row.date < todayISO || (isToday && t < nowMin));
+    const state: Sub["state"] = expired ? "expired" : booked.has(t) ? "booked" : "available";
+    subs.push({ start: t, end: t + callMin, state });
+  }
+
+  if (subs.length === 0) return null;
+
+  const available = subs.filter((s) => s.state === "available").length;
+  const bookedN = subs.filter((s) => s.state === "booked").length;
+  const expiredN = subs.filter((s) => s.state === "expired").length;
+
+  return (
+    <div className="mt-3 rounded-xl bg-surface-low/40 ghost-border p-2.5">
+      <div className="flex items-center justify-between mb-2 px-1">
+        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          Sub-slots · {callMin}-min each
+        </p>
+        <div className="flex items-center gap-2 text-[9px] font-bold">
+          <span className="text-emerald-700">{available} open</span>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-amber-700">{bookedN} booked</span>
+          {expiredN > 0 && (
+            <>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground/70">{expiredN} expired</span>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {subs.map((s) => {
+          const label = `${fmtTime(s.start).replace(/\s.*/, "")} – ${fmtTime(s.end).replace(/\s.*/, "")}`;
+          if (s.state === "expired") {
+            return (
+              <span
+                key={s.start}
+                title="Expired"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums bg-surface-lowest text-muted-foreground/60 ghost-border line-through"
+              >
+                {label}
+              </span>
+            );
+          }
+          const onClick = () => availabilityStore.toggleSubSlot(row.id, s.start);
+          if (s.state === "booked") {
+            return (
+              <button
+                key={s.start}
+                type="button"
+                onClick={onClick}
+                title="Booked — tap to release"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums bg-amber-500/15 text-amber-800 ghost-border hover:bg-amber-500/25"
+              >
+                <Lock className="w-2.5 h-2.5" />
+                {label}
+              </button>
+            );
+          }
+          return (
+            <button
+              key={s.start}
+              type="button"
+              onClick={onClick}
+              title="Open — tap to book"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums bg-emerald-500/10 text-emerald-700 ghost-border hover:bg-emerald-500/25"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
