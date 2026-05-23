@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
+import { availabilityStore, findConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type CallMin = 3 | 5 | 8;
@@ -124,6 +125,22 @@ const QuickSyncBuilder = () => {
 
   const reset = () => { setDraft(blank()); setStep(1); };
 
+  const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
+    const c = findConflict(date, startMin, endMin, excludeId);
+    if (!c) return false;
+    const sugg = suggestOpenings(date, endMin - startMin, excludeId)
+      .map((s) => `${fmtTimeHM(s.startMin)}–${fmtTimeHM(s.endMin)}`)
+      .join(" · ");
+    toast({
+      title: "Time conflict",
+      description:
+        `This time range is already occupied by an existing availability block (${c.typeLabel}, ${fmtTimeHM(c.startMin)}–${fmtTimeHM(c.endMin)}).` +
+        (sugg ? ` Nearest openings: ${sugg}.` : ""),
+      variant: "destructive" as any,
+    });
+    return true;
+  };
+
   const save = () => {
     if (totalMin <= 0) {
       toast({ title: "Time window invalid", description: "End time must be after start time." });
@@ -133,6 +150,7 @@ const QuickSyncBuilder = () => {
       toast({ title: "Window too short", description: "Increase window or reduce call/buffer length." });
       return;
     }
+    if (conflictToast(draft.date, draft.startMin, draft.endMin, draft.id)) return;
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Quick Sync updated" });
@@ -181,9 +199,27 @@ const QuickSyncBuilder = () => {
       kind === "tomorrow" ? addDays(base, 1) :
       kind === "nextweek" ? addWeeks(base, 1) :
       customDate ? new Date(customDate) : base;
-    setSlots((p) => [{ ...s, id: `qs${Date.now()}`, date: nd.toISOString().slice(0, 10), createdAt: Date.now() }, ...p]);
+    const newDate = nd.toISOString().slice(0, 10);
+    if (conflictToast(newDate, s.startMin, s.endMin)) return;
+    setSlots((p) => [{ ...s, id: `qs${Date.now()}`, date: newDate, createdAt: Date.now() }, ...p]);
     toast({ title: "Schedule cloned successfully and extended.", description: format(nd, "EEE, MMM d") });
   };
+
+  useEffect(() => {
+    availabilityStore.syncSource(
+      "quicksync",
+      slots.map((s) => ({
+        id: s.id,
+        source: "quicksync" as const,
+        date: s.date,
+        startMin: s.startMin,
+        endMin: s.endMin,
+        bufferMin: s.bufferMin,
+        mode: "quicksync" as const,
+        typeLabel: "Quick Sync",
+      })),
+    );
+  }, [slots]);
 
   return (
     <AppShell
@@ -473,19 +509,15 @@ const QuickSyncBuilder = () => {
       {/* ACTIVE SLOTS */}
       <div className="mt-6">
         <ActiveSlotsPanel
-          eyebrow="Schedule View"
+          eyebrow="Unified Availability"
           emptyText="No Quick Sync blocks yet — create one above."
-          items={slots.map<ActiveSlotItem>((s) => ({
-            id: s.id,
-            date: s.date,
-            startMin: s.startMin,
-            endMin: s.endMin,
-            bufferMin: s.bufferMin,
-            mode: "quicksync",
-            onEdit: () => editSlot(s),
-            onDelete: () => setConfirmDelete(s.id),
-            onDuplicate: (k, d) => duplicate(s, k, d),
-          }))}
+          handlers={Object.fromEntries(
+            slots.map((s) => [s.id, {
+              onEdit: () => editSlot(s),
+              onDelete: () => setConfirmDelete(s.id),
+              onDuplicate: (k, d) => duplicate(s, k, d),
+            }]),
+          )}
         />
       </div>
 
