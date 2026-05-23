@@ -494,6 +494,10 @@ const FocusMeetingBuilder = () => {
             </div>
           </aside>
         </div>
+
+        <div className="mt-5">
+          <RelayToSpotlightPanel value={relay} onChange={setRelay} />
+        </div>
       </section>
 
       {/* ACTIVE SLOTS */}
