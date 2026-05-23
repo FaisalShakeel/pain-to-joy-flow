@@ -214,32 +214,56 @@ const QuickSyncBuilder = () => {
           )}
         </div>
 
-        {/* Stepper */}
-        <div className="flex items-center gap-1 mb-5 overflow-x-auto pb-1">
-          {[
-            "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access",
-          ].map((label, i) => {
-            const n = i + 1;
-            const active = step === n;
-            const done = step > n;
-            return (
-              <button
-                key={label}
-                onClick={() => setStep(n)}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition",
-                  active && "bg-primary text-primary-foreground",
-                  !active && done && "bg-emerald-500/15 text-emerald-700",
-                  !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
-                )}
-              >
-                <span className={cn("grid place-items-center w-4 h-4 rounded-full text-[9px]", active ? "bg-primary-foreground/20" : done ? "bg-emerald-500/20" : "bg-background/60")}>
-                  {done ? <Check className="w-2.5 h-2.5" /> : n}
-                </span>
-                {label}
-              </button>
-            );
-          })}
+        {/* Stepper with fixed Back/Next anchors */}
+        <div className="flex items-center gap-2 mb-5">
+          <button
+            onClick={() => setStep((s) => Math.max(1, s - 1))}
+            disabled={step === 1}
+            className="shrink-0 px-3 py-1.5 rounded-full ghost-border text-[10px] font-bold text-muted-foreground hover:text-primary disabled:opacity-40"
+          >
+            Back
+          </button>
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
+            {[
+              "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access",
+            ].map((label, i) => {
+              const n = i + 1;
+              const active = step === n;
+              const done = step > n;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setStep(n)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition",
+                    active && "bg-primary text-primary-foreground",
+                    !active && done && "bg-emerald-500/15 text-emerald-700",
+                    !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
+                  )}
+                >
+                  <span className={cn("grid place-items-center w-4 h-4 rounded-full text-[9px]", active ? "bg-primary-foreground/20" : done ? "bg-emerald-500/20" : "bg-background/60")}>
+                    {done ? <Check className="w-2.5 h-2.5" /> : n}
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          {step < 8 ? (
+            <button
+              onClick={() => setStep((s) => Math.min(8, s + 1))}
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
+            >
+              Next <ChevronRight className="w-3 h-3" />
+            </button>
+          ) : (
+            <button
+              onClick={save}
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
+            >
+              <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Update" : "Create"}
+            </button>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-5">
@@ -414,31 +438,6 @@ const QuickSyncBuilder = () => {
               </Section>
             )}
 
-            {/* Step nav */}
-            <div className="flex items-center justify-between pt-2">
-              <button
-                onClick={() => setStep((s) => Math.max(1, s - 1))}
-                disabled={step === 1}
-                className="px-4 py-2 rounded-full ghost-border text-xs font-bold text-muted-foreground hover:text-primary disabled:opacity-40"
-              >
-                Back
-              </button>
-              {step < 8 ? (
-                <button
-                  onClick={() => setStep((s) => Math.min(8, s + 1))}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
-                >
-                  Next <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button
-                  onClick={save}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update Quick Sync" : "Create Quick Sync"}
-                </button>
-              )}
-            </div>
           </div>
 
           {/* Live preview card */}
