@@ -11,6 +11,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useAvailability, useConflictHighlight, availabilityStore, type AvailabilityBlock } from "@/lib/availabilityStore";
 
+/** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
+const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
+
 export type ActiveSlotStatus = "active" | "upcoming" | "expired";
 export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
 
