@@ -11,6 +11,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useAvailability, useConflictHighlight, availabilityStore, type AvailabilityBlock } from "@/lib/availabilityStore";
 
+/** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
+const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
+
 export type ActiveSlotStatus = "active" | "upcoming" | "expired";
 export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
 
@@ -60,10 +63,9 @@ const statusMeta = (s: ActiveSlotStatus) => {
 };
 
 const computeStatus = (iso: string): ActiveSlotStatus => {
-  const today = new Date(new Date().toDateString());
-  const d = new Date(iso);
-  if (d < today) return "expired";
-  if (format(d, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")) return "active";
+  const todayISO = localISO();
+  if (iso < todayISO) return "expired";
+  if (iso === todayISO) return "active";
   return "upcoming";
 };
 
@@ -160,7 +162,7 @@ const ActiveSlotsPanel = ({
 
   // Drop fully-expired parent slots (past date, or today's slot whose end has passed).
   const liveRows = useMemo(() => {
-    const todayISO = new Date().toISOString().slice(0, 10);
+    const todayISO = localISO();
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     return rows.filter((r) => {
@@ -172,19 +174,20 @@ const ActiveSlotsPanel = ({
 
   // Apply time-range filter on top of liveRows.
   const timeFilteredRows = useMemo(() => {
-    const today = new Date(new Date().toDateString());
-    const todayISO = today.toISOString().slice(0, 10);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayISO = localISO(today);
     let endISO: string;
     if (timeRange === "today") {
       endISO = todayISO;
     } else if (timeRange === "month") {
       const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      endISO = end.toISOString().slice(0, 10);
+      endISO = localISO(end);
     } else {
       const days = timeRange === "3d" ? 3 : timeRange === "7d" ? 7 : 15;
       const end = new Date(today);
       end.setDate(end.getDate() + days - 1);
-      endISO = end.toISOString().slice(0, 10);
+      endISO = localISO(end);
     }
     return liveRows.filter((r) => r.date >= todayISO && r.date <= endISO);
   }, [liveRows, timeRange]);
@@ -197,7 +200,7 @@ const ActiveSlotsPanel = ({
   const dates = useMemo(() => Array.from(new Set(filteredRows.map((r) => r.date))).sort(), [filteredRows]);
   const focusDate = dates.length
     ? dates[Math.min(dates.length - 1, Math.max(0, dayOffset))]
-    : new Date().toISOString().slice(0, 10);
+    : localISO();
 
   const summary = useMemo(() => {
     const acc: Record<string, number> = {};
@@ -368,13 +371,13 @@ const ActiveSlotsPanel = ({
         <ul className="mt-3 space-y-3">
           {sorted.map((s, idx) => {
             const prev = sorted[idx - 1];
-            const todayISO = new Date().toISOString().slice(0, 10);
+            const todayISO = localISO();
             const showDate = !prev || prev.date !== s.date;
             return (
               <div key={s.id}>
                 {showDate && s.date !== todayISO && (
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent mt-4 mb-2 first:mt-0">
-                    {s.date === new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+                    {s.date === localISO(new Date(Date.now() + 86400000))
                       ? "Tomorrow"
                       : format(new Date(s.date), "EEEE")} — {format(new Date(s.date), "MMM d")}
                   </p>
@@ -470,7 +473,7 @@ const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) 
               <PopoverContent className="w-auto p-0 z-[60]" align="end">
                 <Calendar
                   mode="single"
-                  onSelect={(d) => { if (d) { h.onDuplicate?.("custom", d.toISOString().slice(0, 10)); setCustomOpen(false); } }}
+                  onSelect={(d) => { if (d) { h.onDuplicate?.("custom", localISO(d)); setCustomOpen(false); } }}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
@@ -501,7 +504,7 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
   const callMin = row.callMin ?? 0;
   if (!callMin || callMin <= 0) return null;
 
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = localISO();
   const isToday = row.date === todayISO;
   const isFuture = row.date > todayISO;
   const now = new Date();
@@ -720,7 +723,7 @@ const Legend = ({ color, label }: { color: string; label: string }) => (
 // ---------- Standalone Daily Occupancy (header + rail) ----------
 export const DailyOccupancy = ({ date }: { date?: string }) => {
   const blocks = useAvailability();
-  const iso = date ?? new Date().toISOString().slice(0, 10);
+  const iso = date ?? localISO();
   const dayBlocks = blocks.filter((b) => b.date === iso);
 
   const rows: Row[] = dayBlocks.map((b) => ({
