@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
-  Maximize2, Minimize2, Lock, MoreVertical, Plus, Minus, X,
+  Maximize2, Minimize2, Lock, Plus, Minus, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
