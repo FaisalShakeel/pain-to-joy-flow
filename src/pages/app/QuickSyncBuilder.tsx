@@ -256,7 +256,7 @@ const QuickSyncBuilder = () => {
 
         {/* DAILY OCCUPANCY (today) */}
         <div className="mb-5">
-          <DailyOccupancy />
+          <DailyOccupancy date={draft.date} />
         </div>
 
         {/* Stepper with fixed Back/Next anchors */}
