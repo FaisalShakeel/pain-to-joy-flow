@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalIcon, ChevronRight, RotateCcw } from "lucide-react";
-import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -27,72 +26,81 @@ const defaultLabel = (from: string, to?: string) => {
 
 const DateRangePopover = ({ from, to, onChange, singleOnly, className, triggerLabel }: Props) => {
   const [open, setOpen] = useState(false);
-  const range: DateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+  const fromDate = new Date(from);
+  const toDate = to ? new Date(to) : undefined;
+  const hasRange = !!toDate && to !== from;
 
   const goToday = () => {
     const today = toISO(new Date());
     onChange(today, singleOnly ? undefined : today);
-    if (singleOnly) setOpen(false);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "w-full md:w-auto inline-flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-surface-low ghost-border text-sm font-bold text-primary hover:bg-surface-low/80",
-            className,
-          )}
-        >
-          <CalIcon className="w-4 h-4 text-muted-foreground" />
-          <span>{(triggerLabel ?? defaultLabel)(from, to)}</span>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 z-[60]" align="start">
-        <div className="flex items-center justify-between gap-2 px-3 pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
-            {singleOnly ? "Pick a date" : "Pick date or range"}
-          </p>
+    <div className={cn("inline-flex items-center gap-2", className)}>
+      <button
+        type="button"
+        onClick={goToday}
+        title="Jump to today"
+        className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-[11px] font-bold hover:opacity-90"
+      >
+        <RotateCcw className="w-3 h-3" /> Today
+      </button>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <button
             type="button"
-            onClick={goToday}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold hover:opacity-90"
+            className="inline-flex items-center justify-between gap-3 px-4 py-2 rounded-xl bg-surface-low ghost-border text-sm font-bold text-primary hover:bg-surface-low/80"
           >
-            <RotateCcw className="w-3 h-3" /> Today
+            <CalIcon className="w-4 h-4 text-muted-foreground" />
+            <span>{(triggerLabel ?? defaultLabel)(from, to)}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
-        </div>
-        {singleOnly ? (
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0 z-[60]" align="start">
+          <div className="px-3 pt-3 pb-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+              {singleOnly ? "Pick a date" : "Click = single date · Shift+Click = range"}
+            </p>
+          </div>
           <Calendar
             mode="single"
-            selected={new Date(from)}
-            onSelect={(d) => {
-              if (!d) return;
-              onChange(toISO(d), undefined);
-              setOpen(false);
+            selected={hasRange ? undefined : fromDate}
+            modifiers={
+              hasRange && toDate
+                ? {
+                    range_start: fromDate,
+                    range_end: toDate,
+                    range_middle: { after: fromDate, before: toDate },
+                  }
+                : undefined
+            }
+            modifiersClassNames={{
+              range_start: "bg-primary text-primary-foreground rounded-l-md",
+              range_end: "bg-primary text-primary-foreground rounded-r-md",
+              range_middle: "bg-accent text-accent-foreground",
+            }}
+            onDayClick={(day, _m, e) => {
+              const iso = toISO(day);
+              const shift = !singleOnly && (e as React.MouseEvent).shiftKey;
+              if (shift) {
+                const anchor = new Date(from);
+                if (day < anchor) {
+                  onChange(iso, from);
+                } else {
+                  onChange(from, iso);
+                }
+                setOpen(false);
+              } else {
+                onChange(iso, singleOnly ? undefined : iso);
+                setOpen(false);
+              }
             }}
             initialFocus
             className={cn("p-3 pointer-events-auto")}
           />
-        ) : (
-          <Calendar
-            mode="range"
-            selected={range}
-            onSelect={(r) => {
-              if (!r?.from) return;
-              const f = toISO(r.from);
-              const t = r.to ? toISO(r.to) : undefined;
-              onChange(f, t);
-              if (r.from && r.to) setOpen(false);
-            }}
-            numberOfMonths={1}
-            initialFocus
-            className={cn("p-3 pointer-events-auto")}
-          />
-        )}
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
 
