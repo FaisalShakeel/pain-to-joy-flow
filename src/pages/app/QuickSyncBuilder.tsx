@@ -237,11 +237,6 @@ const QuickSyncBuilder = () => {
         </button>
       }
     >
-      {/* DAILY OCCUPANCY (today) */}
-      <div className="mb-6">
-        <DailyOccupancy />
-      </div>
-
       {/* CREATION PANEL */}
       <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
         <div className="flex items-center gap-2 mb-4">
@@ -257,6 +252,11 @@ const QuickSyncBuilder = () => {
               <X className="w-3 h-3" /> Discard edit
             </button>
           )}
+        </div>
+
+        {/* DAILY OCCUPANCY (today) */}
+        <div className="mb-5">
+          <DailyOccupancy />
         </div>
 
         {/* Stepper with fixed Back/Next anchors */}
