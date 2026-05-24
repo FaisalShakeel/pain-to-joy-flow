@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  ChevronLeft, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
+  ChevronDown, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
   Maximize2, Minimize2, Lock,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -188,18 +188,22 @@ const ActiveSlotsPanel = ({
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">{eyebrow}</p>
           <h2 className="font-headline font-extrabold text-primary text-2xl md:text-4xl mt-1 leading-none">
-            {format(headerDate, "MMMM d")}{" "}
-            <span className="text-muted-foreground/60 font-bold">{format(headerDate, "yyyy")}</span>
+            Unified Availability
           </h2>
+          <div className="mt-2 flex items-center gap-3 flex-wrap">
+            <h3 className="font-headline font-extrabold text-primary text-sm">Active Slots</h3>
+            <p className="text-[11px] text-muted-foreground">
+              {summary.map(([k, v], i) => (
+                <span key={k}>
+                  {i > 0 && <span className="px-1.5 text-muted-foreground/50">|</span>}
+                  {k}: <span className="font-bold text-primary/80">{v}</span>
+                </span>
+              ))}
+              {summary.length === 0 && <span>No active slots</span>}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setDayOffset((v) => Math.max(0, v - 1))}
-            className="grid place-items-center w-9 h-9 rounded-xl ghost-border bg-surface-lowest hover:bg-surface-low text-primary"
-            aria-label="Previous day"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
           <button
             onClick={() => setExpanded((v) => !v)}
             className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground hover:opacity-90"
@@ -211,61 +215,61 @@ const ActiveSlotsPanel = ({
         </div>
       </div>
 
-      {/* Sub-header */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h3 className="font-headline font-extrabold text-primary text-lg">Active Slots</h3>
-          <p className="text-[11px] text-muted-foreground">
-            {summary.map(([k, v], i) => (
-              <span key={k}>
-                {i > 0 && <span className="px-1.5 text-muted-foreground/50">|</span>}
-                {k}: <span className="font-bold text-primary/80">{v}</span>
-              </span>
-            ))}
-            {summary.length === 0 && <span>No active slots</span>}
-          </p>
-        </div>
+      {/* View toggle */}
+      <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
         <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
           <button
             onClick={() => setView("time")}
             className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
           >View by Time</button>
-          <button
-            onClick={() => setView("type")}
-            className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition", view === "type" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
-          >View by Type</button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                onClick={() => setView("type")}
+                className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1", view === "type" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
+              >
+                View by Type
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-48 p-1 z-[60]">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">Filter</p>
+              {([
+                ["all", "All Modes"],
+                ["focus", "Focused Scheduling"],
+                ["quicksync", "Quick Sync"],
+                ["event-access", "Event Access"],
+              ] as const).map(([k, l]) => (
+                <button
+                  key={k}
+                  onClick={() => setModeFilter(k)}
+                  className={cn(
+                    "w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low font-bold",
+                    modeFilter === k ? "text-primary bg-surface-low" : "text-muted-foreground",
+                  )}
+                >
+                  {l}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
-      {/* Mode Filter */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">Filter</span>
-        {([
-          ["all", "All Modes"],
-          ["focus", "Focused Scheduling"],
-          ["quicksync", "Quick Sync"],
-          ["event-access", "Event Access"],
-        ] as const).map(([k, l]) => (
-          <button
-            key={k}
-            onClick={() => setModeFilter(k)}
-            className={cn(
-              "px-2.5 py-1 rounded-full text-[10px] font-bold transition ghost-border",
-              modeFilter === k
-                ? "bg-primary text-primary-foreground border-transparent"
-                : "bg-surface-lowest text-muted-foreground hover:text-primary",
-            )}
-          >
-            {l}
-          </button>
-        ))}
+      {/* Date — above slot list */}
+      <div className="mt-4">
+        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Date</p>
+        <p className="font-headline font-extrabold text-primary text-lg md:text-xl mt-0.5 leading-none">
+          {format(headerDate, "MMMM d")}{" "}
+          <span className="text-muted-foreground/60 font-bold">{format(headerDate, "yyyy")}</span>
+        </p>
       </div>
 
       {/* Rows */}
       {sorted.length === 0 ? (
         <p className="text-xs text-muted-foreground py-12 text-center">{emptyText}</p>
       ) : (
-        <ul className="mt-5 space-y-3">
+        <ul className="mt-3 space-y-3">
           {sorted.map((s) => <SlotRow key={s.id} row={s} highlight={highlightId === s.id} />)}
         </ul>
       )}
