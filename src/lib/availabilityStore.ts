@@ -17,6 +17,10 @@ export interface AvailabilityBlock {
   callMin?: number;
   /** Sub-slot start-minutes that are currently booked. */
   bookedSubSlots?: number[];
+  /** Sub-slot start-minutes that the owner has deleted/disabled. */
+  disabledSubSlots?: number[];
+  /** Per-sub-slot custom overrides keyed by original start-min. */
+  editedSubSlots?: Record<number, { start: number; end: number }>;
 }
 
 let state: AvailabilityBlock[] = [];
@@ -55,9 +59,13 @@ export const availabilityStore = {
     const prevById = new Map(state.map((b) => [b.id, b] as const));
     const merged = blocks.map((b) => {
       const prev = prevById.get(b.id);
-      return prev?.bookedSubSlots && !b.bookedSubSlots
-        ? { ...b, bookedSubSlots: prev.bookedSubSlots }
-        : b;
+      if (!prev) return b;
+      return {
+        ...b,
+        bookedSubSlots: b.bookedSubSlots ?? prev.bookedSubSlots,
+        disabledSubSlots: b.disabledSubSlots ?? prev.disabledSubSlots,
+        editedSubSlots: b.editedSubSlots ?? prev.editedSubSlots,
+      };
     });
     const next = [...others, ...merged];
     // Avoid emitting if nothing changed (shallow id+window check).
@@ -78,6 +86,30 @@ export const availabilityStore = {
       const cur = new Set(b.bookedSubSlots ?? []);
       cur.has(startMin) ? cur.delete(startMin) : cur.add(startMin);
       return { ...b, bookedSubSlots: Array.from(cur).sort((a, z) => a - z) };
+    });
+    emit();
+  },
+  /** Owner-side: remove a generated sub-slot from availability. */
+  disableSubSlot: (blockId: string, startMin: number) => {
+    state = state.map((b) => {
+      if (b.id !== blockId) return b;
+      const cur = new Set(b.disabledSubSlots ?? []);
+      cur.add(startMin);
+      return { ...b, disabledSubSlots: Array.from(cur).sort((a, z) => a - z) };
+    });
+    emit();
+  },
+  /** Owner-side: shift one sub-slot's start/end (deltaMin can be ±). */
+  editSubSlot: (blockId: string, originalStart: number, deltaMin: number) => {
+    state = state.map((b) => {
+      if (b.id !== blockId) return b;
+      const callMin = b.callMin ?? 0;
+      if (!callMin) return b;
+      const newStart = originalStart + deltaMin;
+      if (newStart < b.startMin || newStart + callMin > b.endMin) return b;
+      const edits = { ...(b.editedSubSlots ?? {}) };
+      edits[originalStart] = { start: newStart, end: newStart + callMin };
+      return { ...b, editedSubSlots: edits };
     });
     emit();
   },
