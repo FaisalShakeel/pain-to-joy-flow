@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
-  Maximize2, Minimize2, Lock,
+  Maximize2, Minimize2, Lock, MoreVertical, Plus, Minus, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -88,6 +88,8 @@ type Row = {
   handlers: ActiveSlotHandlers;
   callMin?: number;
   bookedSubSlots?: number[];
+  disabledSubSlots?: number[];
+  editedSubSlots?: Record<number, { start: number; end: number }>;
 };
 
 const ActiveSlotsPanel = ({
@@ -100,6 +102,12 @@ const ActiveSlotsPanel = ({
   const [modeFilter, setModeFilter] = useState<"all" | "focus" | "quicksync" | "event-access">("all");
   const [dayOffset, setDayOffset] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  // Tick once a minute so expired slots auto-disappear.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 60_000);
+    return () => clearInterval(t);
+  }, []);
 
   const blocks = useAvailability();
   const highlightId = useConflictHighlight();
@@ -117,6 +125,8 @@ const ActiveSlotsPanel = ({
       handlers: handlers[b.id] ?? {},
       callMin: b.callMin,
       bookedSubSlots: b.bookedSubSlots,
+      disabledSubSlots: b.disabledSubSlots,
+      editedSubSlots: b.editedSubSlots,
     }));
     const seen = new Set(fromStore.map((r) => r.id));
     const fromItems: Row[] = items
@@ -138,9 +148,21 @@ const ActiveSlotsPanel = ({
     return [...fromStore, ...fromItems];
   }, [blocks, items, handlers]);
 
+  // Drop fully-expired parent slots (past date, or today's slot whose end has passed).
+  const liveRows = useMemo(() => {
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    return rows.filter((r) => {
+      if (r.date < todayISO) return false;
+      if (r.date === todayISO && r.endMin <= nowMin) return false;
+      return true;
+    });
+  }, [rows]);
+
   const filteredRows = useMemo(
-    () => (modeFilter === "all" ? rows : rows.filter((r) => r.source === modeFilter)),
-    [rows, modeFilter],
+    () => (modeFilter === "all" ? liveRows : liveRows.filter((r) => r.source === modeFilter)),
+    [liveRows, modeFilter],
   );
 
   const dates = useMemo(() => Array.from(new Set(filteredRows.map((r) => r.date))).sort(), [filteredRows]);
@@ -175,6 +197,23 @@ const ActiveSlotsPanel = ({
     () => filteredRows.filter((r) => r.date === focusDate),
     [filteredRows, focusDate],
   );
+
+  // Daily counters across all of today's live availability (slots + booked sub-slots).
+  const dailyCounts = useMemo(() => {
+    const slots = dayRows.length;
+    let booked = 0;
+    let totalSubs = 0;
+    dayRows.forEach((r) => {
+      const cm = r.callMin ?? 0;
+      if (cm > 0) {
+        const gen = Math.floor((r.endMin - r.startMin) / cm);
+        const disabled = (r.disabledSubSlots ?? []).length;
+        totalSubs += Math.max(0, gen - disabled);
+      }
+      booked += (r.bookedSubSlots ?? []).length;
+    });
+    return { slots, booked, totalSubs };
+  }, [dayRows]);
 
   const content = (
     <section
@@ -249,11 +288,19 @@ const ActiveSlotsPanel = ({
         </div>
       </div>
 
-      {/* Date — above slot list */}
-      <div className="mt-4">
+      {/* Today's availability — date + counters */}
+      <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <p className="font-headline font-extrabold text-primary text-sm md:text-base leading-none">
           {format(headerDate, "MMMM d, yyyy")}
         </p>
+        <span className="inline-flex items-center gap-2 text-[11px] font-bold">
+          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary tabular-nums">
+            {dailyCounts.slots} Slot{dailyCounts.slots === 1 ? "" : "s"}
+          </span>
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 tabular-nums">
+            {dailyCounts.booked} Booked
+          </span>
+        </span>
       </div>
 
       {/* Rows */}
@@ -261,7 +308,23 @@ const ActiveSlotsPanel = ({
         <p className="text-xs text-muted-foreground py-12 text-center">{emptyText}</p>
       ) : (
         <ul className="mt-3 space-y-3">
-          {sorted.map((s) => <SlotRow key={s.id} row={s} highlight={highlightId === s.id} />)}
+          {sorted.map((s, idx) => {
+            const prev = sorted[idx - 1];
+            const todayISO = new Date().toISOString().slice(0, 10);
+            const showDate = !prev || prev.date !== s.date;
+            return (
+              <div key={s.id}>
+                {showDate && s.date !== todayISO && (
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent mt-4 mb-2 first:mt-0">
+                    {s.date === new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+                      ? "Tomorrow"
+                      : format(new Date(s.date), "EEEE")} — {format(new Date(s.date), "MMM d")}
+                  </p>
+                )}
+                <SlotRow row={s} highlight={highlightId === s.id} />
+              </div>
+            );
+          })}
         </ul>
       )}
     </section>
@@ -386,13 +449,23 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const booked = new Set(row.bookedSubSlots ?? []);
+  const disabled = new Set(row.disabledSubSlots ?? []);
+  const edits = row.editedSubSlots ?? {};
 
-  type Sub = { start: number; end: number; state: "available" | "booked" | "expired" };
+  type Sub = { key: number; start: number; end: number; state: "available" | "booked" | "expired" };
   const subs: Sub[] = [];
   for (let t = row.startMin; t + callMin <= row.endMin; t += callMin) {
-    const expired = !isFuture && (row.date < todayISO || (isToday && t < nowMin));
-    const state: Sub["state"] = expired ? "expired" : booked.has(t) ? "booked" : "available";
-    subs.push({ start: t, end: t + callMin, state });
+    if (disabled.has(t)) continue; // owner deleted this sub-slot
+    const edit = edits[t];
+    const start = edit ? edit.start : t;
+    const end = edit ? edit.end : t + callMin;
+    const expired = !isFuture && (row.date < todayISO || (isToday && end <= nowMin));
+    const state: Sub["state"] = expired
+      ? "expired"
+      : booked.has(t)
+        ? "booked"
+        : "available";
+    subs.push({ key: t, start, end, state });
   }
 
   if (subs.length === 0) return null;
@@ -425,7 +498,7 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
           if (s.state === "expired") {
             return (
               <span
-                key={s.start}
+                key={s.key}
                 title="Expired"
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums bg-surface-lowest text-muted-foreground/60 ghost-border line-through"
               >
@@ -433,32 +506,54 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
               </span>
             );
           }
-          const onClick = () => availabilityStore.toggleSubSlot(row.id, s.start);
-          if (s.state === "booked") {
-            return (
-              <button
-                key={s.start}
-                type="button"
-                onClick={onClick}
-                title="Booked — tap to release"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums bg-amber-500/15 text-amber-800 ghost-border hover:bg-amber-500/25"
-              >
-                <Lock className="w-2.5 h-2.5" />
-                {label}
-              </button>
-            );
-          }
+          // Owner view — slots are NOT bookable from here. Tap opens edit/delete menu.
+          const cls =
+            s.state === "booked"
+              ? "bg-amber-500/15 text-amber-800 hover:bg-amber-500/25"
+              : "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/25";
           return (
-            <button
-              key={s.start}
-              type="button"
-              onClick={onClick}
-              title="Open — tap to book"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums bg-emerald-500/10 text-emerald-700 ghost-border hover:bg-emerald-500/25"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              {label}
-            </button>
+            <Popover key={s.key}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  title={s.state === "booked" ? "Booked (owner view — not bookable)" : "Open · tap to edit or delete"}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums ghost-border",
+                    cls,
+                  )}
+                >
+                  {s.state === "booked" ? (
+                    <Lock className="w-2.5 h-2.5" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  )}
+                  {label}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-40 p-1 z-[60]">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
+                  Sub-slot · {label}
+                </p>
+                <button
+                  onClick={() => availabilityStore.editSubSlot(row.id, s.key, -5)}
+                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low inline-flex items-center gap-2"
+                >
+                  <Minus className="w-3 h-3" /> Shift −5 min
+                </button>
+                <button
+                  onClick={() => availabilityStore.editSubSlot(row.id, s.key, 5)}
+                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low inline-flex items-center gap-2"
+                >
+                  <Plus className="w-3 h-3" /> Shift +5 min
+                </button>
+                <button
+                  onClick={() => availabilityStore.disableSubSlot(row.id, s.key)}
+                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-destructive/10 text-destructive inline-flex items-center gap-2"
+                >
+                  <X className="w-3 h-3" /> Delete sub-slot
+                </button>
+              </PopoverContent>
+            </Popover>
           );
         })}
       </div>
