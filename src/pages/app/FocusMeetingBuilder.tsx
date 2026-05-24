@@ -9,6 +9,7 @@ import {
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import DateRangePopover, { toISO } from "@/components/app/DateRangePopover";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -32,6 +33,7 @@ type Access = "public" | "contacts" | "priority" | "paid";
 interface MTSlot {
   id: string;
   date: string; // ISO yyyy-mm-dd
+  dateTo?: string; // optional end of range (inclusive)
   startMin: number; // minutes from 00:00
   endMin: number;
   callMin: CallMin;
@@ -77,7 +79,8 @@ const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // ---------- Defaults ----------
 const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
-  date: new Date().toISOString().slice(0, 10),
+  date: toISO(new Date()),
+  dateTo: undefined,
   startMin: 10 * 60,
   endMin: 12 * 60,
   callMin: 30,
@@ -92,7 +95,7 @@ const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
 const seed: MTSlot[] = [
   {
     id: "mt1",
-    date: addDays(new Date(), 3).toISOString().slice(0, 10),
+    date: toISO(addDays(new Date(), 3)),
     startMin: 10 * 60, endMin: 12 * 60,
     callMin: 30, bufferMin: 5,
     repeats: "weekly", weekdays: [2],
@@ -151,18 +154,36 @@ const FocusMeetingBuilder = () => {
       toast({ title: "Set a price", description: "Paid meetings must have a price greater than zero." });
       return;
     }
-    if (conflictToast(draft.date, draft.startMin, draft.endMin, draft.id)) return;
+    // Build the list of dates this save will create (range support).
+    const dates: string[] = [];
+    const startD = new Date(draft.date);
+    const endD = draft.dateTo ? new Date(draft.dateTo) : startD;
+    for (let d = new Date(startD); d <= endD; d = addDays(d, 1)) dates.push(toISO(d));
+    for (const dt of dates) {
+      if (conflictToast(dt, draft.startMin, draft.endMin, draft.id)) return;
+    }
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Meeting updated" });
     } else {
-      const next: MTSlot = { ...(draft as Omit<MTSlot, "id" | "createdAt">), id: `mt${Date.now()}`, createdAt: Date.now() };
-      setSlots((p) => [next, ...p]);
-      toast({ title: "Meeting block created", description: `${count} meeting slots generated.` });
+      const created: MTSlot[] = dates.map((dt, i) => ({
+        ...(draft as Omit<MTSlot, "id" | "createdAt">),
+        date: dt,
+        dateTo: undefined,
+        id: `mt${Date.now()}_${i}`,
+        createdAt: Date.now() + i,
+      }));
+      setSlots((p) => [...created, ...p]);
+      const totalSubSlots = count * dates.length;
+      toast({
+        title: dates.length > 1 ? `Meeting blocks created · ${dates.length} days` : "Meeting block created",
+        description: `${totalSubSlots} meeting slot${totalSubSlots === 1 ? "" : "s"} generated.`,
+      });
+      const next = created[0];
       if (relay.enabled) {
         createRelay({
           title: `OPEN MEETING BLOCK · ${fmtTime(next.startMin)}–${fmtTime(next.endMin)}`,
-          body: `${count} ${next.callMin}-min meeting slots on ${format(new Date(next.date), "EEE, MMM d")} · ${channel}.`,
+          body: `${count} ${next.callMin}-min meeting slots on ${format(new Date(next.date), "EEE, MMM d")}${dates.length > 1 ? ` (+${dates.length - 1} more day${dates.length - 1 === 1 ? "" : "s"})` : ""} · ${channel}.`,
           tone: relay.tone,
           expiresIn: `expires ${relay.expiry}`,
           relay: {
@@ -200,7 +221,7 @@ const FocusMeetingBuilder = () => {
       kind === "tomorrow" ? addDays(base, 1) :
       kind === "nextweek" ? addWeeks(base, 1) :
       customDate ? new Date(customDate) : base;
-    const newDate = nd.toISOString().slice(0, 10);
+    const newDate = toISO(nd);
     if (conflictToast(newDate, s.startMin, s.endMin)) return;
     setSlots((p) => [{ ...s, id: `mt${Date.now()}`, date: newDate, createdAt: Date.now() }, ...p]);
     toast({ title: "Schedule cloned successfully and extended.", description: format(nd, "EEE, MMM d") });
@@ -340,27 +361,16 @@ const FocusMeetingBuilder = () => {
           <div className="space-y-4">
             {step === 1 && (
               <Section title="Step 1 — Select Date" icon={CalIcon} hint="Pick the day this Quick Sync block runs">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-full md:w-auto inline-flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-surface-low ghost-border text-sm font-bold text-primary hover:bg-surface-low/80"
-                    >
-                      <CalIcon className="w-4 h-4 text-muted-foreground" />
-                      <span>{format(new Date(draft.date), "EEEE, MMMM d, yyyy")}</span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[60]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={new Date(draft.date)}
-                      onSelect={(d) => d && set("date", d.toISOString().slice(0, 10))}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DateRangePopover
+                  from={draft.date}
+                  to={draft.dateTo}
+                  onChange={(f, t) => setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined }))}
+                />
+                {draft.dateTo && draft.dateTo !== draft.date && (
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    Creates one block per day across the selected range.
+                  </p>
+                )}
               </Section>
             )}
 
@@ -722,7 +732,7 @@ const MeetingCard = ({
             <PopoverContent className="w-auto p-0 z-[60]" align="end">
               <Calendar
                 mode="single"
-                onSelect={(d) => { if (d) { onDuplicate("custom", d.toISOString().slice(0, 10)); setCustomOpen(false); } }}
+                onSelect={(d) => { if (d) { onDuplicate("custom", toISO(d)); setCustomOpen(false); } }}
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
               />
