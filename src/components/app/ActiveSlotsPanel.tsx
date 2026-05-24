@@ -187,10 +187,7 @@ const ActiveSlotsPanel = ({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">{eyebrow}</p>
-          <h2 className="font-headline font-extrabold text-primary text-2xl md:text-4xl mt-1 leading-none">
-            Unified Availability
-          </h2>
-          <div className="mt-2 flex items-center gap-3 flex-wrap">
+          <div className="mt-1 flex items-center gap-3 flex-wrap">
             <h3 className="font-headline font-extrabold text-primary text-sm">Active Slots</h3>
             <p className="text-[11px] text-muted-foreground">
               {summary.map(([k, v], i) => (
@@ -204,6 +201,43 @@ const ActiveSlotsPanel = ({
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
+            <button
+              onClick={() => setView("time")}
+              className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
+            >View by Time</button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  onClick={() => setView("type")}
+                  className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1", view === "type" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
+                >
+                  View by Type
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 p-1 z-[60]">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">Filter</p>
+                {([
+                  ["all", "All Modes"],
+                  ["focus", "Focused Scheduling"],
+                  ["quicksync", "Quick Sync"],
+                  ["event-access", "Event Access"],
+                ] as const).map(([k, l]) => (
+                  <button
+                    key={k}
+                    onClick={() => setModeFilter(k)}
+                    className={cn(
+                      "w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low font-bold",
+                      modeFilter === k ? "text-primary bg-surface-low" : "text-muted-foreground",
+                    )}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </div>
           <button
             onClick={() => setExpanded((v) => !v)}
             className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground hover:opacity-90"
@@ -215,53 +249,10 @@ const ActiveSlotsPanel = ({
         </div>
       </div>
 
-      {/* View toggle */}
-      <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
-        <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
-          <button
-            onClick={() => setView("time")}
-            className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
-          >View by Time</button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                onClick={() => setView("type")}
-                className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1", view === "type" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
-              >
-                View by Type
-                <ChevronDown className="w-3 h-3" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-48 p-1 z-[60]">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">Filter</p>
-              {([
-                ["all", "All Modes"],
-                ["focus", "Focused Scheduling"],
-                ["quicksync", "Quick Sync"],
-                ["event-access", "Event Access"],
-              ] as const).map(([k, l]) => (
-                <button
-                  key={k}
-                  onClick={() => setModeFilter(k)}
-                  className={cn(
-                    "w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low font-bold",
-                    modeFilter === k ? "text-primary bg-surface-low" : "text-muted-foreground",
-                  )}
-                >
-                  {l}
-                </button>
-              ))}
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-
       {/* Date — above slot list */}
       <div className="mt-4">
-        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Date</p>
-        <p className="font-headline font-extrabold text-primary text-lg md:text-xl mt-0.5 leading-none">
-          {format(headerDate, "MMMM d")}{" "}
-          <span className="text-muted-foreground/60 font-bold">{format(headerDate, "yyyy")}</span>
+        <p className="font-headline font-extrabold text-primary text-sm md:text-base leading-none">
+          {format(headerDate, "MMMM d, yyyy")}
         </p>
       </div>
 

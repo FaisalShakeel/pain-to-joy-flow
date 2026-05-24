@@ -43,8 +43,8 @@ const RelayToSpotlightPanel = ({ value, onChange, onSuggest, className }: Props)
     onChange({ ...value, indicators: { ...value.indicators, [k]: !value.indicators[k] } });
 
   return (
-    <section className={cn("rounded-2xl bg-surface-lowest ghost-border p-4 md:p-5", className)}>
-      <header className="flex items-center justify-between gap-3 mb-3">
+    <section className={cn("rounded-2xl bg-surface-lowest ghost-border p-3 md:p-4", className)}>
+      <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-gold/15 text-gold">
             <Radio className="w-3.5 h-3.5" />
@@ -56,10 +56,6 @@ const RelayToSpotlightPanel = ({ value, onChange, onSuggest, className }: Props)
         </div>
         <Switch checked={value.enabled} onCheckedChange={(v) => set("enabled", v)} />
       </header>
-
-      <p className="text-[11px] text-muted-foreground leading-relaxed">
-        Broadcasts a lightweight signal card. Scheduling stays in Availability — Spotlight only relays visibility & interaction.
-      </p>
 
       {value.enabled && (
         <div className="mt-4 space-y-4">
