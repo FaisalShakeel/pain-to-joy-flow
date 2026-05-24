@@ -136,9 +136,9 @@ export const findConflict = (
   for (const b of state) {
     if (b.id === excludeId) continue;
     if (b.date !== date) continue;
-    const bs = b.startMin - b.bufferMin;
-    const be = b.endMin + b.bufferMin;
-    if (overlaps(startMin, endMin, bs, be)) return b;
+    // Buffers are soft operational metadata, not hard scheduling boundaries.
+    // Overlap detection must only consider true occupied time ranges.
+    if (overlaps(startMin, endMin, b.startMin, b.endMin)) return b;
   }
   return null;
 };
@@ -151,7 +151,7 @@ export const suggestOpenings = (
 ): { startMin: number; endMin: number }[] => {
   const day = state
     .filter((b) => b.date === date && b.id !== excludeId)
-    .map((b) => ({ s: b.startMin - b.bufferMin, e: b.endMin + b.bufferMin }))
+    .map((b) => ({ s: b.startMin, e: b.endMin }))
     .sort((a, b) => a.s - b.s);
 
   const openings: { startMin: number; endMin: number }[] = [];
