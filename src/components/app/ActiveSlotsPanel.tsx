@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import {
   ChevronDown, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
   Maximize2, Minimize2, Lock, Plus, Minus, X,
+  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -100,6 +101,15 @@ const ActiveSlotsPanel = ({
 }: Props) => {
   const [view, setView] = useState<"time" | "type">("time");
   const [modeFilter, setModeFilter] = useState<"all" | "focus" | "quicksync" | "event-access">("all");
+  type TimeRange = "today" | "3d" | "7d" | "15d" | "month";
+  const [timeRange, setTimeRange] = useState<TimeRange>("today");
+  const timeRangeLabels: Record<TimeRange, string> = {
+    today: "Today",
+    "3d": "Next 3 Days",
+    "7d": "Next 7 Days",
+    "15d": "Next 15 Days",
+    month: "This Month",
+  };
   const [dayOffset, setDayOffset] = useState(0);
   const [expanded, setExpanded] = useState(false);
   // Tick once a minute so expired slots auto-disappear.
@@ -160,9 +170,28 @@ const ActiveSlotsPanel = ({
     });
   }, [rows]);
 
+  // Apply time-range filter on top of liveRows.
+  const timeFilteredRows = useMemo(() => {
+    const today = new Date(new Date().toDateString());
+    const todayISO = today.toISOString().slice(0, 10);
+    let endISO: string;
+    if (timeRange === "today") {
+      endISO = todayISO;
+    } else if (timeRange === "month") {
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      endISO = end.toISOString().slice(0, 10);
+    } else {
+      const days = timeRange === "3d" ? 3 : timeRange === "7d" ? 7 : 15;
+      const end = new Date(today);
+      end.setDate(end.getDate() + days - 1);
+      endISO = end.toISOString().slice(0, 10);
+    }
+    return liveRows.filter((r) => r.date >= todayISO && r.date <= endISO);
+  }, [liveRows, timeRange]);
+
   const filteredRows = useMemo(
-    () => (modeFilter === "all" ? liveRows : liveRows.filter((r) => r.source === modeFilter)),
-    [liveRows, modeFilter],
+    () => (modeFilter === "all" ? timeFilteredRows : timeFilteredRows.filter((r) => r.source === modeFilter)),
+    [timeFilteredRows, modeFilter],
   );
 
   const dates = useMemo(() => Array.from(new Set(filteredRows.map((r) => r.date))).sort(), [filteredRows]);
@@ -193,27 +222,25 @@ const ActiveSlotsPanel = ({
 
   const headerDate = new Date(focusDate);
 
-  const dayRows = useMemo(
-    () => filteredRows.filter((r) => r.date === focusDate),
-    [filteredRows, focusDate],
-  );
-
-  // Daily counters across all of today's live availability (slots + booked sub-slots).
-  const dailyCounts = useMemo(() => {
-    const slots = dayRows.length;
+  // Aggregated sub-slot counters across the current filtered range.
+  const rangeCounts = useMemo(() => {
+    let created = 0;
     let booked = 0;
-    let totalSubs = 0;
-    dayRows.forEach((r) => {
+    filteredRows.forEach((r) => {
       const cm = r.callMin ?? 0;
       if (cm > 0) {
         const gen = Math.floor((r.endMin - r.startMin) / cm);
         const disabled = (r.disabledSubSlots ?? []).length;
-        totalSubs += Math.max(0, gen - disabled);
+        created += Math.max(0, gen - disabled);
+      } else {
+        // Parent windows without sub-slot generation count as one actionable slot.
+        created += 1;
       }
       booked += (r.bookedSubSlots ?? []).length;
     });
-    return { slots, booked, totalSubs };
-  }, [dayRows]);
+    const open = Math.max(0, created - booked);
+    return { created, booked, open };
+  }, [filteredRows]);
 
   const content = (
     <section
@@ -241,10 +268,33 @@ const ActiveSlotsPanel = ({
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
-            <button
-              onClick={() => setView("time")}
-              className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
-            >View by Time</button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  onClick={() => setView("time")}
+                  className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
+                >
+                  <Clock className="w-3 h-3" />
+                  {timeRangeLabels[timeRange]}
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-44 p-1 z-[60]">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">View by Time</p>
+                {(Object.keys(timeRangeLabels) as TimeRange[]).map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => { setTimeRange(k); setView("time"); }}
+                    className={cn(
+                      "w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low font-bold",
+                      timeRange === k ? "text-primary bg-surface-low" : "text-muted-foreground",
+                    )}
+                  >
+                    {timeRangeLabels[k]}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -291,14 +341,17 @@ const ActiveSlotsPanel = ({
       {/* Today's availability — date + counters */}
       <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <p className="font-headline font-extrabold text-primary text-sm md:text-base leading-none">
-          {format(headerDate, "MMMM d, yyyy")}
+          {timeRange === "today" ? format(new Date(), "MMMM d, yyyy") : timeRangeLabels[timeRange]}
         </p>
         <span className="inline-flex items-center gap-2 text-[11px] font-bold">
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary tabular-nums">
-            {dailyCounts.slots} Slot{dailyCounts.slots === 1 ? "" : "s"}
+            {rangeCounts.created} Created
           </span>
           <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 tabular-nums">
-            {dailyCounts.booked} Booked
+            {rangeCounts.booked} Booked
+          </span>
+          <span className="px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-700 tabular-nums">
+            {rangeCounts.open} Open
           </span>
         </span>
       </div>
