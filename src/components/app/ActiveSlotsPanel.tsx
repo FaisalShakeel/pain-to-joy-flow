@@ -203,7 +203,12 @@ const ActiveSlotsPanel = ({
     const acc: Record<string, number> = {};
     filteredRows.forEach((r) => {
       const key = r.source === "legacy" ? modeMeta[r.mode].label : sourceMeta[r.source].label;
-      acc[key] = (acc[key] ?? 0) + 1;
+      const cm = r.callMin ?? 0;
+      const sub =
+        cm > 0
+          ? Math.max(0, Math.floor((r.endMin - r.startMin) / cm) - (r.disabledSubSlots ?? []).length)
+          : 1;
+      acc[key] = (acc[key] ?? 0) + sub;
     });
     return Object.entries(acc);
   }, [filteredRows]);
@@ -730,16 +735,20 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
     handlers: {},
   }));
 
-  const countBy = (src: string) => dayBlocks.filter((b) => b.source === src).length;
-  const focusN = countBy("focus");
-  const qsN = countBy("quicksync");
-  const evN = countBy("event-access");
-  const total = dayBlocks.length;
-  // bookedSlots is optional on the block; fall back to 0 if not tracked yet
-  const booked = dayBlocks.reduce(
-    (acc, b: any) => acc + (typeof b.bookedSlots === "number" ? b.bookedSlots : 0),
-    0,
-  );
+  // Sum actionable sub-slots, not just parent windows.
+  const subSlotCount = (b: typeof dayBlocks[number]) => {
+    const cm = b.callMin ?? 0;
+    if (cm <= 0) return 1;
+    const gen = Math.floor((b.endMin - b.startMin) / cm);
+    return Math.max(0, gen - (b.disabledSubSlots ?? []).length);
+  };
+  const sumBy = (src: string) =>
+    dayBlocks.filter((b) => b.source === src).reduce((n, b) => n + subSlotCount(b), 0);
+  const focusN = sumBy("focus");
+  const qsN = sumBy("quicksync");
+  const evN = sumBy("event-access");
+  const total = dayBlocks.reduce((n, b) => n + subSlotCount(b), 0);
+  const booked = dayBlocks.reduce((n, b) => n + (b.bookedSubSlots?.length ?? 0), 0);
 
   return (
     <section className="rounded-2xl bg-surface-lowest ghost-border px-3 py-2 md:px-4 md:py-2.5 shadow-ambient">
