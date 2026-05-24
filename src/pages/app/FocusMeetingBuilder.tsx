@@ -743,14 +743,14 @@ const MeetingCard = ({
 
 // ---------- Small UI ----------
 const Section = ({ title, icon: Ic, hint, children }: { title: string; icon: React.ComponentType<any>; hint?: string; children: React.ReactNode }) => (
-  <section className="space-y-3">
-    <div>
-      <h3 className="font-headline font-bold text-primary text-sm flex items-center gap-2">
-        <Ic className="w-4 h-4" /> {title}
+  <section className="flex flex-col md:flex-row md:items-start md:gap-5">
+    <div className="md:w-[40%] md:max-w-[260px] md:shrink-0">
+      <h3 className="font-headline font-bold text-primary text-sm flex items-center gap-2 leading-tight">
+        <Ic className="w-4 h-4 shrink-0" /> <span className="leading-tight">{title}</span>
       </h3>
-      {hint && <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>}
+      {hint && <p className="text-[11px] text-muted-foreground mt-1 leading-snug">{hint}</p>}
     </div>
-    <div className="space-y-3">{children}</div>
+    <div className="flex-1 min-w-0 space-y-3 mt-3 md:mt-0">{children}</div>
   </section>
 );
 
