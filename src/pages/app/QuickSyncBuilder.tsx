@@ -270,7 +270,7 @@ const QuickSyncBuilder = () => {
           </button>
           <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
             {[
-              "Date", "Window", "Call", "Buffer", "Preview", "Repeat", "Booking", "Access",
+              "Date", "Window", "Call", "Buffer", "Repeat", "Booking", "Access",
             ].map((label, i) => {
               const n = i + 1;
               const active = step === n;
@@ -294,9 +294,9 @@ const QuickSyncBuilder = () => {
               );
             })}
           </div>
-          {step < 8 ? (
+          {step < 7 ? (
             <button
-              onClick={() => setStep((s) => Math.min(8, s + 1))}
+              onClick={() => setStep((s) => Math.min(7, s + 1))}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
             >
               Next <ChevronRight className="w-3 h-3" />
@@ -311,7 +311,7 @@ const QuickSyncBuilder = () => {
           )}
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_320px] gap-5">
+        <div className="space-y-4">
           {/* Step content */}
           <div className="space-y-4">
             {step === 1 && (
@@ -378,19 +378,7 @@ const QuickSyncBuilder = () => {
             )}
 
             {step === 5 && (
-              <Section title="Step 5 — Auto Slot Generation" icon={Sparkles} hint="System calculates structured mini-slots">
-                <div className="rounded-2xl bg-gradient-to-r from-fuchsia-500/15 to-pink-500/15 p-4">
-                  <p className="text-[11px] uppercase tracking-wider text-fuchsia-900/70 font-bold">Total slots</p>
-                  <p className="font-headline font-extrabold text-fuchsia-900 text-3xl">{count}</p>
-                  <p className="text-[11px] text-fuchsia-900/70 mt-0.5">{draft.callMin}-min calls · {draft.bufferMin}-min flexible buffer · {totalMin} min window</p>
-                  <p className="text-[10px] text-fuchsia-900/60 mt-1 italic">Buffer lets participants join early or extend slightly — it does not reduce slot count.</p>
-                </div>
-                <TimelineView items={timeline} />
-              </Section>
-            )}
-
-            {step === 6 && (
-              <Section title="Step 6 — Repeat" icon={Repeat} hint="Set up recurrence">
+              <Section title="Step 5 — Repeat" icon={Repeat} hint="Set up recurrence">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {([
                     ["none", "Do not repeat"],
@@ -436,8 +424,8 @@ const QuickSyncBuilder = () => {
               </Section>
             )}
 
-            {step === 7 && (
-              <Section title="Step 7 — Booking Mode" icon={Lock}>
+            {step === 6 && (
+              <Section title="Step 6 — Booking Mode" icon={Lock}>
                 <div className="grid grid-cols-2 gap-2">
                   {(["instant", "approval"] as const).map((b) => (
                     <button
@@ -461,8 +449,8 @@ const QuickSyncBuilder = () => {
               </Section>
             )}
 
-            {step === 8 && (
-              <Section title="Step 8 — Access Control" icon={UsersIcon} hint="Choose who can book">
+            {step === 7 && (
+              <Section title="Step 7 — Access Control" icon={UsersIcon} hint="Choose who can book">
                 <div className="grid grid-cols-2 gap-2">
                   {(Object.keys(accessMeta) as Access[]).map((a) => {
                     const M = accessMeta[a];
@@ -485,49 +473,51 @@ const QuickSyncBuilder = () => {
 
           </div>
 
-          {/* Live preview card */}
-          <aside className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated h-fit">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-primary-foreground/60 mt-2">Slot type</p>
-            <h4 className="font-headline font-extrabold text-base">Quick Sync</h4>
-            <p className="text-[11px] text-primary-foreground/80 mt-2">{format(new Date(draft.date), "EEEE, MMM d")}</p>
-            <p className="text-[12px] text-primary-foreground/80 mt-0.5">
-              {fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
+          {/* Live preview — horizontal */}
+          <aside className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated">
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
+              <span className="text-[10px] text-primary-foreground/50">·</span>
+              <h4 className="font-headline font-extrabold text-sm">Quick Sync</h4>
+            </div>
+            <div className="flex flex-wrap items-stretch gap-3 text-[10px]">
+              <div className="flex-1 min-w-[140px]">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60">When</p>
+                <p className="text-[11px] text-primary-foreground/90 mt-0.5">{format(new Date(draft.date), "EEE, MMM d")}</p>
+                <p className="text-[11px] text-primary-foreground/90">{fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}</p>
+              </div>
               <Stat label="Call" value={`${draft.callMin}m`} />
               <Stat label="Buffer" value={`${draft.bufferMin}m`} />
               <Stat label="Sub-slots" value={`${count}`} />
               <Stat label="Repeat" value={draft.repeats === "none" ? "—" : draft.repeats[0].toUpperCase()} />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-                {draft.booking === "instant" ? "Instant" : "Approval"}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-                {accessMeta[draft.access].label}
-              </span>
-              <span className={cn(
-                "px-2 py-0.5 rounded-full text-[10px] font-bold",
-                relay.enabled ? "bg-emerald-400/25 text-emerald-100" : "bg-primary-foreground/10 text-primary-foreground/70",
-              )}>
-                Relay {relay.enabled ? "ON" : "OFF"}
-              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
+                  {draft.booking === "instant" ? "Instant" : "Approval"}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
+                  {accessMeta[draft.access].label}
+                </span>
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[10px] font-bold",
+                  relay.enabled ? "bg-emerald-400/25 text-emerald-100" : "bg-primary-foreground/10 text-primary-foreground/70",
+                )}>
+                  Relay {relay.enabled ? "ON" : "OFF"}
+                </span>
+              </div>
             </div>
             {timeline.length > 0 && (
               <div className="mt-3 rounded-lg bg-primary-foreground/10 p-2">
                 <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60 mb-1">
                   Generated sub-slots
                 </p>
-                <ul className="text-[10px] font-mono space-y-0.5 max-h-24 overflow-y-auto">
-                  {timeline.slice(0, 6).map((it, i) => (
-                    <li key={i} className="flex justify-between text-primary-foreground/90">
-                      <span>{fmtTime(it.start)} – {fmtTime(it.end)}</span>
-                      <span className="opacity-60">#{i + 1}</span>
+                <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] font-mono">
+                  {timeline.slice(0, 8).map((it, i) => (
+                    <li key={i} className="text-primary-foreground/90">
+                      {fmtTime(it.start)}–{fmtTime(it.end)}
                     </li>
                   ))}
-                  {timeline.length > 6 && (
-                    <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 6} more</li>
+                  {timeline.length > 8 && (
+                    <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 8} more</li>
                   )}
                 </ul>
               </div>
