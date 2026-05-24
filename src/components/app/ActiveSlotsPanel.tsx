@@ -499,7 +499,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
       : null;
 
   return (
-    <div className={cn("rounded-2xl bg-surface-low/60 ghost-border p-3", !hideHeader && "mt-5")}> 
+    <div className={cn("rounded-2xl bg-surface-low/60 ghost-border", hideHeader ? "p-1.5" : "p-3 mt-5")}> 
       {!hideHeader && (
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -512,7 +512,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
         </div>
       </div>
       )}
-      <div className="relative h-9 rounded-lg bg-surface-lowest ghost-border overflow-hidden">
+      <div className={cn("relative rounded-lg bg-surface-lowest ghost-border overflow-hidden", hideHeader ? "h-4" : "h-9")}>
         {/* Tick grid */}
         {ticks.slice(1, -1).map((h) => {
           const pct = ((h * 60 - RAIL_START) / RAIL_SPAN) * 100;
@@ -536,7 +536,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
               key={r.id}
               title={`${r.typeLabel} · ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}`}
               className={cn(
-                "absolute top-1 bottom-1 rounded-md opacity-90 hover:opacity-100 transition",
+                "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 transition",
                 sourceColor[r.source] ?? "bg-primary",
               )}
               style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
@@ -553,7 +553,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
           </div>
         )}
       </div>
-      <div className="mt-1.5 flex justify-between text-[9px] font-bold text-muted-foreground tabular-nums">
+      <div className={cn("flex justify-between text-[9px] font-bold text-muted-foreground tabular-nums", hideHeader ? "mt-1" : "mt-1.5") }>
         {ticks.map((h) => (
           <span key={h}>{((h + 11) % 12) + 1}{h < 12 ? "a" : "p"}</span>
         ))}
@@ -599,8 +599,8 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
   );
 
   return (
-    <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+    <section className="rounded-2xl bg-surface-lowest ghost-border px-3 py-2 md:px-4 md:py-2.5 shadow-ambient">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-1.5">
         <div className="flex items-center gap-3 flex-wrap">
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             Daily Occupancy
