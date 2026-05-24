@@ -536,7 +536,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
               key={r.id}
               title={`${r.typeLabel} · ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}`}
               className={cn(
-                "absolute top-1 bottom-1 rounded-md opacity-90 hover:opacity-100 transition",
+                "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 transition",
                 sourceColor[r.source] ?? "bg-primary",
               )}
               style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
