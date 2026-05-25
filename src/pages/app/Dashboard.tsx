@@ -133,7 +133,7 @@ const RESERVED_BY_CHANNEL: Record<ReservedChannel, { t: string; who: string; kin
 const CHANNEL_TONE: Record<ReservedChannel, string> = {
   "Quick Sync": "bg-amber-500/15 text-amber-700",
   "Meeting":    "bg-sky-500/15 text-sky-700",
-  "Webinar":    "bg-violet-500/15 text-violet-700",
+  "Webinar":    "bg-orange-500/15 text-orange-700",
   "Venue":      "bg-emerald-500/15 text-emerald-700",
 };
 const CHANNEL_ICON: Record<ReservedChannel, JSX.Element> = {
