@@ -260,6 +260,8 @@ const Contacts = () => {
       hideBell={false}
       subtitle="Real-time availability visibility for respectful, effective reach-outs"
       title="The Contact Vault"
+      fullscreen={fullscreen}
+      onExitFullscreen={() => setFullscreen(false)}
     >
       <div className="flex items-center gap-2 flex-wrap mb-4">
           <button
