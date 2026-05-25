@@ -117,17 +117,21 @@ const QuickSyncBuilder = () => {
   const [slots, setSlots] = useState<QSSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<QSSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
+  const [dirty, setDirty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
-  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
+  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => {
+    setDraft((d) => ({ ...d, [k]: v }));
+    setDirty(true);
+  };
   const totalMin = Math.max(0, draft.endMin - draft.startMin);
   const count = slotCount({ startMin: draft.startMin, endMin: draft.endMin, callMin: draft.callMin, bufferMin: draft.bufferMin });
   const timeline = useMemo(() => buildTimeline(draft), [draft]);
 
-  const reset = () => { setDraft(blank()); setStep(1); };
+  const reset = () => { setDraft(blank()); setStep(1); setDirty(false); };
 
   const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
     const c = findConflict(date, startMin, endMin, excludeId);
@@ -165,6 +169,10 @@ const QuickSyncBuilder = () => {
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Quick Sync updated" });
+      const updatedId = draft.id!;
+      setTimeout(() => markCreated(updatedId), 250);
+      reset();
+      return;
     } else {
       const created: QSSlot[] = dates.map((dt, i) => ({
         ...(draft as Omit<QSSlot, "id" | "createdAt">),
@@ -207,6 +215,7 @@ const QuickSyncBuilder = () => {
   const editSlot = (s: QSSlot) => {
     setDraft({ ...s });
     setStep(1);
+    setDirty(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -338,7 +347,7 @@ const QuickSyncBuilder = () => {
               );
             })}
           </div>
-          {isEditing ? (
+          {isEditing && dirty ? (
             <button
               onClick={save}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
@@ -357,7 +366,7 @@ const QuickSyncBuilder = () => {
               onClick={save}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
             >
-              <CheckCircle2 className="w-3 h-3" /> Create
+              <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Done" : "Create"}
             </button>
           )}
         </div>
@@ -370,7 +379,7 @@ const QuickSyncBuilder = () => {
                 <DateRangePopover
                   from={draft.date}
                   to={draft.dateTo}
-                  onChange={(f, t) => setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined }))}
+                onChange={(f, t) => { setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined })); setDirty(true); }}
                 />
                 {draft.dateTo && draft.dateTo !== draft.date && (
                   <p className="mt-2 text-[11px] text-muted-foreground">
