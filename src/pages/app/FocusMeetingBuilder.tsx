@@ -812,8 +812,51 @@ const TimeInput = ({ value, onChange }: { value: number; onChange: (v: number) =
         const [hs, ms] = e.target.value.split(":");
         onChange(parseInt(hs, 10) * 60 + parseInt(ms, 10));
       }}
-      className="w-full px-3 py-2.5 rounded-xl bg-surface-low ghost-border text-sm font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30"
+      className="w-full px-2 py-1.5 rounded-lg bg-surface-lowest ghost-border text-sm font-bold text-primary tabular-nums text-center outline-none focus:ring-2 focus:ring-primary/30"
     />
+  );
+};
+
+const WindowTabs = ({
+  startMin, endMin, callMin, count, onStart, onEnd, onCount,
+}: {
+  startMin: number; endMin: number; callMin: number; count: number;
+  onStart: (v: number) => void; onEnd: (v: number) => void; onCount: (n: number) => void;
+}) => {
+  const tabBase = "rounded-xl ghost-border bg-surface-low p-3 flex flex-col items-center justify-between gap-2 min-h-[104px]";
+  const labelCls = "text-[9px] font-bold uppercase tracking-wider text-muted-foreground/70";
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <div className={tabBase}>
+        <span className={labelCls}>Start Time</span>
+        <TimeInput value={startMin} onChange={onStart} />
+        <span className="text-[9px] text-muted-foreground/60">window begins</span>
+      </div>
+      <div className={tabBase}>
+        <span className={labelCls}>End Time</span>
+        <TimeInput value={endMin} onChange={onEnd} />
+        <span className="text-[9px] text-muted-foreground/60">window ends</span>
+      </div>
+      <div className={tabBase}>
+        <span className={labelCls}>Slot Count</span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onCount(Math.max(1, count - 1))}
+            className="w-7 h-7 rounded-md ghost-border bg-surface-lowest text-primary font-bold hover:bg-surface"
+            aria-label="Decrease slot count"
+          >−</button>
+          <div className="min-w-[44px] text-center font-headline font-extrabold text-primary text-lg tabular-nums">{count}</div>
+          <button
+            type="button"
+            onClick={() => onCount(count + 1)}
+            className="w-7 h-7 rounded-md ghost-border bg-surface-lowest text-primary font-bold hover:bg-surface"
+            aria-label="Increase slot count"
+          >+</button>
+        </div>
+        <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 tabular-nums">{callMin}-min each</span>
+      </div>
+    </div>
   );
 };
 
