@@ -466,7 +466,7 @@ const Contacts = () => {
               const roomy = density === 8;
               const mid = density === 12;
               const tight = density === 16;
-              return (
+            return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
                     <Link
@@ -482,35 +482,6 @@ const Contacts = () => {
                       </span>
                     </Link>
                   )}
-                  {tight ? (
-                    <Link
-                      to={`/app/contact/${c.id}`}
-                      title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
-                      className={cn(
-                        "group flex items-center gap-3 h-full w-full rounded-xl border border-border/60 bg-surface-lowest px-3 hover:border-border hover:shadow-elevated transition-all duration-200",
-                        isPinned && "ring-1 ring-accent/40 bg-accent/5",
-                      )}
-                    >
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size="sm" />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <p className="text-[12px] font-semibold text-primary truncate leading-tight">{c.name}</p>
-                          {fav && <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />}
-                          {isPinned && <Pin className="w-3 h-3 text-accent shrink-0" />}
-                        </div>
-                        <p className="text-[10.5px] text-muted-foreground truncate leading-snug mt-0.5">
-                          <span className={cn("inline-block w-1.5 h-1.5 rounded-full mr-1.5 align-middle", statusDot[c.status])} />
-                          {c.availabilityContext}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <AlertIcons alerts={c.alerts} size="xs" />
-                        <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                          <PingButton contact={c} size="sm" />
-                        </div>
-                      </div>
-                    </Link>
-                  ) : (
                   <Link
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
