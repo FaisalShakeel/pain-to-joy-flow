@@ -20,7 +20,8 @@ import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
-import ActiveSlotsPanel from "@/components/app/ActiveSlotsPanel";
+import ActiveSlotsPanel, { DailyOccupancy } from "@/components/app/ActiveSlotsPanel";
+import { Activity, Eye, Layers } from "lucide-react";
 import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
@@ -104,6 +105,7 @@ const WebinarBuilder = () => {
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
+  const [viewMode, setViewMode] = useState<"editor" | "live">("editor");
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
