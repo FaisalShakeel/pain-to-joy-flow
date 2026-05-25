@@ -20,8 +20,9 @@ import { cn } from "@/lib/utils";
 import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/app/PricingField";
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
-import ActiveSlotsPanel from "@/components/app/ActiveSlotsPanel";
-import { availabilityStore, findConflict, flashConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import ActiveSlotsPanel, { DailyOccupancy } from "@/components/app/ActiveSlotsPanel";
+import { Activity, Eye, Layers } from "lucide-react";
+import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
@@ -104,6 +105,7 @@ const WebinarBuilder = () => {
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
+  const [viewMode, setViewMode] = useState<"editor" | "live">("editor");
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
@@ -159,6 +161,7 @@ const WebinarBuilder = () => {
       };
       setItems((p) => [next, ...p]);
       toast({ title: "Group session created", description: `${draft.title} · ${draft.capacity} seats` });
+      setTimeout(() => markCreated(next.id), 60);
       if (relay.enabled) {
         createRelay({
           title: `EVENT ACCESS · ${next.title}`,
@@ -235,14 +238,45 @@ const WebinarBuilder = () => {
       subtitle="Real-time coordination for event access and audience participation"
       title="Event Access Scheduling"
       actions={
-        <button
-          onClick={() => navigate("/app/availability/builder")}
-          className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Slot Builder
-        </button>
+        <>
+          <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
+            <button
+              onClick={() => setViewMode("editor")}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1",
+                viewMode === "editor" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              <Layers className="w-3 h-3" /> Editor
+            </button>
+            <button
+              onClick={() => setViewMode("live")}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1",
+                viewMode === "live" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              <Activity className="w-3 h-3" /> Live View
+            </button>
+          </div>
+          <button
+            onClick={() => navigate("/app/availability/builder")}
+            className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Slot Builder
+          </button>
+        </>
       }
     >
+      {/* DAILY OCCUPANCY (today) — parity with Focused & Quick Sync builders */}
+      <div className="mb-5">
+        <DailyOccupancy date={draft.date} />
+      </div>
+
+      {viewMode === "live" ? (
+        <LiveEventView items={items} onEdit={editOne} onDelete={(id) => setConfirmDelete(id)} />
+      ) : (
+      <>
       {/* CREATION PANEL */}
       <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
         <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -549,7 +583,8 @@ const WebinarBuilder = () => {
           )}
         />
       </div>
-
+      </>
+      )}
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

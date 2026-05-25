@@ -50,6 +50,27 @@ export const useConflictHighlight = () =>
     () => highlightId,
   );
 
+// --- Last created (auto-scroll target on the unified timeline) ---
+let lastCreatedId: string | null = null;
+let lastCreatedTick = 0;
+const createdListeners = new Set<() => void>();
+const emitCreated = () => createdListeners.forEach((l) => l());
+
+export const markCreated = (id: string) => {
+  lastCreatedId = id;
+  lastCreatedTick += 1;
+  emitCreated();
+};
+
+export const useLastCreated = () =>
+  useSyncExternalStore(
+    (l) => { createdListeners.add(l); return () => createdListeners.delete(l); },
+    () => `${lastCreatedId ?? ""}#${lastCreatedTick}`,
+    () => `${lastCreatedId ?? ""}#${lastCreatedTick}`,
+  );
+
+export const getLastCreatedId = () => lastCreatedId;
+
 export const availabilityStore = {
   get: () => state,
   /** Replace this source's blocks with the provided ones (used to sync builder local state). */

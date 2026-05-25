@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
@@ -9,7 +9,14 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useAvailability, useConflictHighlight, availabilityStore, type AvailabilityBlock } from "@/lib/availabilityStore";
+import {
+  useAvailability,
+  useConflictHighlight,
+  useLastCreated,
+  getLastCreatedId,
+  availabilityStore,
+  type AvailabilityBlock,
+} from "@/lib/availabilityStore";
 
 /** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
 const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
@@ -123,6 +130,25 @@ const ActiveSlotsPanel = ({
 
   const blocks = useAvailability();
   const highlightId = useConflictHighlight();
+  const lastCreatedKey = useLastCreated();
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [createdGlowId, setCreatedGlowId] = useState<string | null>(null);
+
+  // Auto-scroll + highlight when a slot is newly created (any source).
+  useEffect(() => {
+    const id = getLastCreatedId();
+    if (!id) return;
+    // Wait a tick for rows to render after store sync.
+    const t = setTimeout(() => {
+      const el = rowRefs.current[id];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setCreatedGlowId(id);
+        setTimeout(() => setCreatedGlowId((cur) => (cur === id ? null : cur)), 2400);
+      }
+    }, 80);
+    return () => clearTimeout(t);
+  }, [lastCreatedKey]);
 
   const rows: Row[] = useMemo(() => {
     const fromStore: Row[] = blocks.map((b: AvailabilityBlock) => ({
@@ -374,7 +400,10 @@ const ActiveSlotsPanel = ({
             const todayISO = localISO();
             const showDate = !prev || prev.date !== s.date;
             return (
-              <div key={s.id}>
+              <div
+                key={s.id}
+                ref={(el) => { rowRefs.current[s.id] = el; }}
+              >
                 {showDate && s.date !== todayISO && (
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent mt-4 mb-2 first:mt-0">
                     {s.date === localISO(new Date(Date.now() + 86400000))
@@ -382,7 +411,11 @@ const ActiveSlotsPanel = ({
                       : format(new Date(s.date), "EEEE")} — {format(new Date(s.date), "MMM d")}
                   </p>
                 )}
-                <SlotRow row={s} highlight={highlightId === s.id} />
+                <SlotRow
+                  row={s}
+                  highlight={highlightId === s.id}
+                  createdGlow={createdGlowId === s.id}
+                />
               </div>
             );
           })}
@@ -398,7 +431,7 @@ const ActiveSlotsPanel = ({
   );
 };
 
-const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) => {
+const SlotRow = ({ row, highlight = false, createdGlow = false }: { row: Row; highlight?: boolean; createdGlow?: boolean }) => {
   const [dupOpen, setDupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const status = computeStatus(row.date);
@@ -412,6 +445,7 @@ const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) 
       className={cn(
         "rounded-2xl bg-surface-lowest ghost-border shadow-ambient/40 hover:shadow-ambient transition",
         highlight && "ring-2 ring-rose-500/70 animate-[shake_0.45s_ease-in-out_2] bg-rose-500/5",
+        createdGlow && "ring-2 ring-emerald-500/70 bg-emerald-500/5 animate-[pulse_1.2s_ease-in-out_2]",
       )}
     >
       <div className="grid grid-cols-12 items-center gap-3 px-5 py-4">
