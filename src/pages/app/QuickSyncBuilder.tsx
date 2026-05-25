@@ -180,6 +180,7 @@ const QuickSyncBuilder = () => {
         description: `${totalSubSlots} mini-slot${totalSubSlots === 1 ? "" : "s"} generated.`,
       });
       const next = created[0];
+      if (next) setTimeout(() => markCreated(next.id), 60);
       if (relay.enabled) {
         createRelay({
           title: `OPEN QUICK SYNC · ${fmtTime(next.startMin)}–${fmtTime(next.endMin)}`,
