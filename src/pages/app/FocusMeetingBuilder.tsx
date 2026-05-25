@@ -372,7 +372,7 @@ const FocusMeetingBuilder = () => {
               );
             })}
           </div>
-          {isEditing ? (
+          {isEditing && dirty ? (
             <button
               onClick={save}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
@@ -391,7 +391,7 @@ const FocusMeetingBuilder = () => {
               onClick={save}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
             >
-              <CheckCircle2 className="w-3 h-3" /> Create
+              <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Done" : "Create"}
             </button>
           )}
         </div>
