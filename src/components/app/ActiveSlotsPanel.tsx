@@ -15,6 +15,7 @@ import {
   useLastCreated,
   getLastCreatedId,
   availabilityStore,
+  markCreated,
   type AvailabilityBlock,
 } from "@/lib/availabilityStore";
 
@@ -829,11 +830,16 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
             : (r.typeLabel || "AVAILABILITY").toUpperCase();
           const pad = (n: number) => n.toString().padStart(2, "0");
           return (
-            <div
+            <button
+              type="button"
               key={r.id}
-              title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)})`}
+              title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)}) · click to open in live view`}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                markCreated(r.id);
+              }}
               className={cn(
-                "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 transition",
+                "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 hover:ring-2 hover:ring-primary/50 cursor-pointer transition",
                 sourceColor[r.source] ?? "bg-primary",
               )}
               style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
