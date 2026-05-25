@@ -535,6 +535,14 @@ const QuickSyncBuilder = () => {
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
               <span className="text-[10px] text-primary-foreground/50">·</span>
               <h4 className="font-headline font-extrabold text-sm">Quick Sync</h4>
+              {isEditing && draft.id && (
+                <div className="ml-auto flex items-center gap-1">
+                  <button onClick={() => setStep(1)} className="px-2 py-0.5 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-[10px] font-bold">Edit</button>
+                  <button onClick={() => { const s = slots.find((x) => x.id === draft.id); if (s) duplicate(s, "tomorrow"); }} className="px-2 py-0.5 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-[10px] font-bold">Clone</button>
+                  <button onClick={() => setConfirmDelete(draft.id!)} className="px-2 py-0.5 rounded-full bg-rose-500/30 hover:bg-rose-500/40 text-[10px] font-bold">Delete</button>
+                  <button onClick={reset} className="px-2 py-0.5 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 text-[10px] font-bold">Close</button>
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap items-stretch gap-3 text-[10px]">
               <div className="flex-1 min-w-[140px]">
