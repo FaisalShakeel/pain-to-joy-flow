@@ -229,18 +229,24 @@ const Contacts = () => {
     setSearchOpen(false);
   };
 
-  // True density scaling: different column counts per density so tiles
-  // visibly shrink. Visible rows stay at 2 so the total visible count
-  // matches the selected density on desktop (4×2=8, 6×2=12, 8×2=16).
+  // Density layouts:
+  // - 8:  large vertical tiles (4 cols × 2 rows on desktop)
+  // - 12: tighter vertical tiles (6 cols × 2 rows on desktop)
+  // - 16: horizontal row tiles (4 cols × 4 rows on desktop) — wide enough
+  //        to keep the availability context visible inline.
   const densityCols: Record<Density, string> = {
     8:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
     12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
-    16: "grid-cols-4 sm:grid-cols-6 lg:grid-cols-8",
+    16: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
   };
-  const visibleRows = 2;
+  const densityRowPx: Record<Density, number> = {
+    8:  260,
+    12: 200,
+    16: 88,
+  };
+  const rowHeight = densityRowPx[density];
   const headerOffset = fullscreen ? 96 : 240;
   const containerHeight = Math.max(360, vh - headerOffset);
-  const rowHeight = Math.max(96, Math.floor((containerHeight - 24) / visibleRows));
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
@@ -480,18 +486,47 @@ const Contacts = () => {
                       </span>
                     </Link>
                   )}
+                  {tight ? (
+                    <Link
+                      to={`/app/contact/${c.id}`}
+                      title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
+                      className={cn(
+                        "group flex items-center gap-3 h-full w-full rounded-xl border border-border/60 bg-surface-lowest px-3 hover:border-border hover:shadow-elevated transition-all duration-200",
+                        isPinned && "ring-1 ring-accent/40 bg-accent/5",
+                      )}
+                    >
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size="sm" />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <p className="text-[12px] font-semibold text-primary truncate leading-tight">{c.name}</p>
+                          {fav && <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />}
+                          {isPinned && <Pin className="w-3 h-3 text-accent shrink-0" />}
+                        </div>
+                        <p className="text-[10.5px] text-muted-foreground truncate leading-snug mt-0.5">
+                          <span className={cn("inline-block w-1.5 h-1.5 rounded-full mr-1.5 align-middle", statusDot[c.status])} />
+                          {c.availabilityContext}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <AlertIcons alerts={c.alerts} size="xs" />
+                        <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <PingButton contact={c} size="sm" />
+                        </div>
+                      </div>
+                    </Link>
+                  ) : (
                   <Link
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
                       "group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200",
-                      roomy ? "p-4" : mid ? "p-3" : "p-2.5",
+                      roomy ? "p-4" : "p-3",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
                     {/* Header: avatar + top-right actions */}
                     <div className="flex items-start justify-between gap-2">
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : mid ? "sm" : "sm"} />
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : "sm"} />
                       <div className={cn("flex items-center", roomy ? "gap-1.5" : "gap-1", "opacity-70 group-hover:opacity-100 transition")}>
                         <button
                           type="button"
@@ -531,8 +566,8 @@ const Contacts = () => {
                     </div>
 
                     {/* Body */}
-                    <div className={cn("min-w-0", roomy ? "mt-4" : mid ? "mt-3" : "mt-2")}>
-                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : mid ? "text-[12px]" : "text-[11px]")}>
+                    <div className={cn("min-w-0", roomy ? "mt-3" : "mt-2")}>
+                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : "text-[12px]")}>
                         {c.name}
                       </p>
                       <div className={cn("flex items-center gap-1.5", roomy ? "mt-1.5" : "mt-1")}>
@@ -541,22 +576,20 @@ const Contacts = () => {
                           {statusLabel[c.status]}
                         </span>
                       </div>
-                      {!tight && (
-                        <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-3 text-[12px] line-clamp-3" : "mt-2 text-[10px] line-clamp-2")}>
-                          {c.availabilityContext}
-                        </p>
-                      )}
+                      <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-2 text-[12px] line-clamp-2" : "mt-1.5 text-[10px] line-clamp-2")}>
+                        {c.availabilityContext}
+                      </p>
                     </div>
 
                     {/* Footer: quick actions */}
-                    <div className={cn("flex items-center justify-between gap-2 mt-auto", roomy ? "pt-3 border-t border-border/40" : mid ? "pt-2 border-t border-border/40" : "pt-1.5")}>
+                    <div className={cn("flex items-center justify-between gap-2 mt-auto", roomy ? "pt-3 border-t border-border/40" : "pt-2 border-t border-border/40")}>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/app/contact/${c.id}/log`); }}
                           title="Connection Log"
                           aria-label="Connection Log"
-                          className={cn("inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition", tight ? "w-6 h-6" : "w-7 h-7")}
+                          className="inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition w-7 h-7"
                         >
                           <Activity className="w-3.5 h-3.5" />
                         </button>
@@ -568,6 +601,7 @@ const Contacts = () => {
                       </div>
                     </div>
                   </Link>
+                  )}
                 </li>
               );
             })}
