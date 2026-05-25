@@ -7,9 +7,9 @@ import {
   ChevronRight, X, CheckCircle2, ListChecks, MapPin, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import DateRangePopover from "@/components/app/DateRangePopover";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -161,7 +161,8 @@ const WebinarBuilder = () => {
       };
       setItems((p) => [next, ...p]);
       toast({ title: "Group session created", description: `${draft.title} · ${draft.capacity} seats` });
-      setTimeout(() => markCreated(next.id), 60);
+      // Defer past the store-sync useEffect + panel render so auto-scroll resolves the new row.
+      setTimeout(() => markCreated(next.id), 250);
       if (relay.enabled) {
         createRelay({
           title: `EVENT ACCESS · ${next.title}`,
