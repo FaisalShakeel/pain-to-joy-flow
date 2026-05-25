@@ -434,7 +434,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
           <button
             type="button"
             onClick={onExitFullscreen}
-            className="fixed top-3 right-3 z-40 inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface-lowest ghost-border text-[11px] font-semibold text-primary shadow-elevated hover:bg-surface-low transition"
+            className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-surface-lowest ghost-border text-[11px] font-semibold text-primary shadow-elevated hover:bg-surface-low transition"
             aria-label="Exit fullscreen"
             title="Exit fullscreen"
           >
