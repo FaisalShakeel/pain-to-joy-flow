@@ -302,12 +302,12 @@ const QuickSyncBuilder = () => {
                   onClick={() => setStep(n)}
                   className={cn(
                     "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition",
-                    active && "bg-primary text-primary-foreground",
+                    active && "bg-fuchsia-600 text-white",
                     !active && done && "bg-emerald-500/15 text-emerald-700",
                     !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
                   )}
                 >
-                  <span className={cn("grid place-items-center w-4 h-4 rounded-full text-[9px]", active ? "bg-primary-foreground/20" : done ? "bg-emerald-500/20" : "bg-background/60")}>
+                  <span className={cn("grid place-items-center w-4 h-4 rounded-full text-[9px]", active ? "bg-white/25" : done ? "bg-emerald-500/20" : "bg-background/60")}>
                     {done ? <Check className="w-2.5 h-2.5" /> : n}
                   </span>
                   {label}
