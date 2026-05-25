@@ -101,12 +101,17 @@ interface Props {
   actions?: ReactNode;
   headerInline?: ReactNode;
   hideBell?: boolean;
+  /** When true, collapses sidebar/header/bottom-nav and removes main padding for maximum content area. */
+  fullscreen?: boolean;
+  /** Called when the user clicks the built-in exit-fullscreen affordance. */
+  onExitFullscreen?: () => void;
 }
 
-const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell }: Props) => {
+const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell, fullscreen, onExitFullscreen }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
+  const sidebarActuallyHidden = sidebarHidden || !!fullscreen;
   const [openGroup, setOpenGroup] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem("nav.openGroup");
@@ -161,7 +166,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       <aside
         className={cn(
           "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/72 backdrop-blur-2xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all shadow-soft",
-          sidebarHidden ? "hidden" : "hidden md:flex",
+          sidebarActuallyHidden ? "hidden" : "hidden md:flex",
         )}
       >
         <Link to="/app" className="flex items-center px-6 py-6" aria-label="Availock home">
