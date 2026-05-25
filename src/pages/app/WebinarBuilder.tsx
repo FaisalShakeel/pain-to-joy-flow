@@ -345,26 +345,11 @@ const WebinarBuilder = () => {
             {/* Date & Time */}
             <Section title="Date & time" icon={CalIcon}>
               <Field label="Date">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-full inline-flex items-center justify-between px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none hover:bg-surface-low/80"
-                    >
-                      <span className="truncate">{format(new Date(draft.date), "EEEE, MMM d, yyyy")}</span>
-                      <CalIcon className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[60]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={new Date(draft.date)}
-                      onSelect={(d) => d && set("date", d.toISOString().slice(0, 10))}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DateRangePopover
+                  from={draft.date}
+                  singleOnly
+                  onChange={(from) => set("date", from)}
+                />
               </Field>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Start time">
