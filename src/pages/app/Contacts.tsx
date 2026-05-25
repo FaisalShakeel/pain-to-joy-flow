@@ -433,11 +433,11 @@ const Contacts = () => {
           className="mt-4 overflow-y-auto pr-1 rounded-2xl"
           style={{ maxHeight: scrollMaxHeight }}
         >
-          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : density === 12 ? "gap-3" : "gap-2", densityCols[density])}>
+          <ul className={cn("grid auto-rows-fr", density === 8 ? "gap-3" : density === 12 ? "gap-2.5" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
-              const roomy = density === 6;
+              const roomy = density === 8;
               const mid = density === 12;
               return (
                 <li key={c.id} className="relative h-full">
