@@ -305,11 +305,12 @@ const QuickSyncBuilder = () => {
         {/* Stepper with fixed Back/Next anchors */}
         <div className="flex items-center gap-2 mb-5">
           <button
-            onClick={() => setStep((s) => Math.max(1, s - 1))}
-            disabled={step === 1}
-            className="shrink-0 px-3 py-1.5 rounded-full ghost-border text-[10px] font-bold text-muted-foreground hover:text-primary disabled:opacity-40"
+            onClick={reset}
+            title="Start a fresh slot"
+            aria-label="New slot"
+            className="shrink-0 grid place-items-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:opacity-90"
           >
-            Back
+            <Plus className="w-3.5 h-3.5" />
           </button>
           <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
             {[
@@ -337,7 +338,14 @@ const QuickSyncBuilder = () => {
               );
             })}
           </div>
-          {step < 7 ? (
+          {isEditing ? (
+            <button
+              onClick={save}
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
+            >
+              <CheckCircle2 className="w-3 h-3" /> Update
+            </button>
+          ) : step < 7 ? (
             <button
               onClick={() => setStep((s) => Math.min(7, s + 1))}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
@@ -349,7 +357,7 @@ const QuickSyncBuilder = () => {
               onClick={save}
               className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
             >
-              <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Update" : "Create"}
+              <CheckCircle2 className="w-3 h-3" /> Create
             </button>
           )}
         </div>
