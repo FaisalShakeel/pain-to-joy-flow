@@ -485,13 +485,13 @@ const Contacts = () => {
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
                       "group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200",
-                      density === 8 ? "p-4" : tight ? "p-3.5" : "p-3",
+                      roomy ? "p-4" : mid ? "p-3" : "p-2.5",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
                     {/* Header: avatar + top-right actions */}
                     <div className="flex items-start justify-between gap-2">
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : mid ? "md" : "sm"} />
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : mid ? "sm" : "sm"} />
                       <div className={cn("flex items-center", roomy ? "gap-1.5" : "gap-1", "opacity-70 group-hover:opacity-100 transition")}>
                         <button
                           type="button"
@@ -532,34 +532,36 @@ const Contacts = () => {
 
                     {/* Body */}
                     <div className={cn("min-w-0", roomy ? "mt-4" : mid ? "mt-3" : "mt-2")}>
-                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : mid ? "text-sm" : "text-[12px]")}>
+                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : mid ? "text-[12px]" : "text-[11px]")}>
                         {c.name}
                       </p>
                       <div className={cn("flex items-center gap-1.5", roomy ? "mt-1.5" : "mt-1")}>
                         <span className={cn("inline-block rounded-full", statusDot[c.status], roomy ? "w-2 h-2" : "w-1.5 h-1.5")} />
-                        <span className={cn("text-muted-foreground font-medium", roomy ? "text-xs" : "text-[10px]")}>
+                        <span className={cn("text-muted-foreground font-medium", roomy ? "text-xs" : "text-[9px]")}>
                           {statusLabel[c.status]}
                         </span>
                       </div>
-                      <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-3 text-[12px] line-clamp-3" : mid ? "mt-2 text-[11px] line-clamp-2" : "mt-1.5 text-[10px] line-clamp-2")}>
-                        {c.availabilityContext}
-                      </p>
+                      {!tight && (
+                        <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-3 text-[12px] line-clamp-3" : "mt-2 text-[10px] line-clamp-2")}>
+                          {c.availabilityContext}
+                        </p>
+                      )}
                     </div>
 
                     {/* Footer: quick actions */}
-                    <div className={cn("flex items-center justify-between gap-2", roomy ? "mt-4 pt-3 border-t border-border/40" : mid ? "mt-3 pt-2 border-t border-border/40" : "mt-2")}>
+                    <div className={cn("flex items-center justify-between gap-2 mt-auto", roomy ? "pt-3 border-t border-border/40" : mid ? "pt-2 border-t border-border/40" : "pt-1.5")}>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/app/contact/${c.id}/log`); }}
                           title="Connection Log"
                           aria-label="Connection Log"
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition"
+                          className={cn("inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition", tight ? "w-6 h-6" : "w-7 h-7")}
                         >
                           <Activity className="w-3.5 h-3.5" />
                         </button>
-                        <AlertIcons alerts={c.alerts} size={mid ? "sm" : "xs"} />
-                        {mid && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
+                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
+                        {roomy && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
                       </div>
                       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                         <PingButton contact={c} size="sm" />
