@@ -302,7 +302,7 @@ const QuickSyncBuilder = () => {
                   onClick={() => setStep(n)}
                   className={cn(
                     "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition",
-                    active && "bg-fuchsia-600 text-white",
+                    active && "bg-amber-500 text-white",
                     !active && done && "bg-emerald-500/15 text-emerald-700",
                     !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
                   )}
