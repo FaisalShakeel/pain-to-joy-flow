@@ -536,11 +536,11 @@ const SlotRow = ({ row, highlight = false, createdGlow = false }: { row: Row; hi
             <Popover open={customOpen} onOpenChange={setCustomOpen}>
               <PopoverTrigger asChild><span /></PopoverTrigger>
               <PopoverContent className="w-auto p-0 z-[60]" align="end">
-                <Calendar
-                  mode="single"
-                  onSelect={(d) => { if (d) { h.onDuplicate?.("custom", localISO(d)); setCustomOpen(false); } }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+                <CloneRangeCalendar
+                  onPick={(from, to) => {
+                    h.onDuplicate?.("custom", from, to);
+                    setCustomOpen(false);
+                  }}
                 />
               </PopoverContent>
             </Popover>
