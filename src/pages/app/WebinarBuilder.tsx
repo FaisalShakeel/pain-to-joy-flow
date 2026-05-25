@@ -7,9 +7,9 @@ import {
   ChevronRight, X, CheckCircle2, ListChecks, MapPin, Building2,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import DateRangePopover from "@/components/app/DateRangePopover";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -161,7 +161,8 @@ const WebinarBuilder = () => {
       };
       setItems((p) => [next, ...p]);
       toast({ title: "Group session created", description: `${draft.title} · ${draft.capacity} seats` });
-      setTimeout(() => markCreated(next.id), 60);
+      // Defer past the store-sync useEffect + panel render so auto-scroll resolves the new row.
+      setTimeout(() => markCreated(next.id), 250);
       if (relay.enabled) {
         createRelay({
           title: `EVENT ACCESS · ${next.title}`,
@@ -344,26 +345,11 @@ const WebinarBuilder = () => {
             {/* Date & Time */}
             <Section title="Date & time" icon={CalIcon}>
               <Field label="Date">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-full inline-flex items-center justify-between px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none hover:bg-surface-low/80"
-                    >
-                      <span className="truncate">{format(new Date(draft.date), "EEEE, MMM d, yyyy")}</span>
-                      <CalIcon className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[60]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={new Date(draft.date)}
-                      onSelect={(d) => d && set("date", d.toISOString().slice(0, 10))}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DateRangePopover
+                  from={draft.date}
+                  singleOnly
+                  onChange={(from) => set("date", from)}
+                />
               </Field>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Start time">
@@ -423,30 +409,7 @@ const WebinarBuilder = () => {
 
             {/* Capacity */}
             <Section title="Capacity" icon={UsersIcon} hint="How many can join the session.">
-              <div className="flex flex-wrap gap-1.5">
-                {[10, 25, 50, 100, 250].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => set("capacity", n)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-[11px] font-bold transition",
-                      draft.capacity === n
-                        ? "bg-primary text-primary-foreground shadow-glass"
-                        : "bg-surface-low text-muted-foreground hover:text-primary",
-                    )}
-                  >
-                    {n} seats
-                  </button>
-                ))}
-                <input
-                  type="number"
-                  min={1}
-                  value={draft.capacity}
-                  onChange={(e) => set("capacity", Math.max(1, +e.target.value))}
-                  className="w-24 px-2 py-1.5 rounded-full bg-surface-low ghost-border text-sm font-bold text-primary outline-none text-center"
-                  aria-label="Custom capacity"
-                />
-              </div>
+              <CapacitySlider value={draft.capacity} onChange={(n) => set("capacity", n)} />
             </Section>
 
             {/* Controls */}
@@ -909,5 +872,52 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
     <p className="font-headline font-extrabold text-sm mt-0.5 truncate">{value}</p>
   </div>
 );
+
+const CapacitySlider = ({ value, onChange }: { value: number; onChange: (n: number) => void }) => {
+  const MIN = 1;
+  const MAX = 500;
+  const presets = [10, 25, 50, 100, 250];
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Capacity
+        </span>
+        <span className="font-headline font-extrabold text-primary text-base tabular-nums">
+          {value} <span className="text-[11px] text-muted-foreground font-bold">participants</span>
+        </span>
+      </div>
+      <Slider
+        min={MIN}
+        max={MAX}
+        step={1}
+        value={[Math.min(MAX, Math.max(MIN, value))]}
+        onValueChange={(v) => onChange(Math.max(MIN, Math.min(MAX, v[0] ?? MIN)))}
+        aria-label="Capacity"
+      />
+      <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground tabular-nums">
+        <span>{MIN}</span>
+        <span>{MAX}</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {presets.map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={cn(
+              "px-2.5 py-1 rounded-full text-[11px] font-bold transition",
+              value === n
+                ? "bg-primary text-primary-foreground shadow-glass"
+                : "bg-surface-low text-muted-foreground hover:text-primary",
+            )}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default WebinarBuilder;
