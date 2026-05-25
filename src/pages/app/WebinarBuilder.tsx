@@ -159,6 +159,7 @@ const WebinarBuilder = () => {
       };
       setItems((p) => [next, ...p]);
       toast({ title: "Group session created", description: `${draft.title} · ${draft.capacity} seats` });
+      setTimeout(() => markCreated(next.id), 60);
       if (relay.enabled) {
         createRelay({
           title: `EVENT ACCESS · ${next.title}`,
