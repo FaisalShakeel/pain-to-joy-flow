@@ -16,7 +16,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
 type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
-type Density = 6 | 16;
+type Density = 6 | 12 | 16;
 
 const FAV_KEY = "availock.favoriteContacts";
 
