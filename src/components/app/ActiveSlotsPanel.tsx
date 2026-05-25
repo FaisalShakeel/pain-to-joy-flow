@@ -65,7 +65,7 @@ const modeMeta: Record<ActiveSlotMode, { label: string; icons: React.ComponentTy
 const sourceMeta: Record<string, { label: string; cls: string; icon: React.ComponentType<any> }> = {
   focus:          { label: "Focus Sync",   cls: "bg-indigo-500/15 text-indigo-700",  icon: Video },
   quicksync:      { label: "Quick Sync",   cls: "bg-amber-500/15 text-amber-800",    icon: Zap },
-  "event-access": { label: "Event Access", cls: "bg-violet-500/15 text-violet-700",  icon: Users },
+  "event-access": { label: "Event Access", cls: "bg-orange-500/15 text-orange-700",  icon: Users },
 };
 
 const statusMeta = (s: ActiveSlotStatus) => {
@@ -693,7 +693,7 @@ const RAIL_SPAN = RAIL_END - RAIL_START;
 const sourceColor: Record<string, string> = {
   focus: "bg-indigo-500",
   quicksync: "bg-amber-500",
-  "event-access": "bg-violet-500",
+  "event-access": "bg-orange-500",
   legacy: "bg-slate-400",
 };
 
@@ -720,7 +720,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
         <div className="flex items-center gap-2 text-[9px] font-bold">
           <Legend color="bg-indigo-500" label="Focus" />
           <Legend color="bg-amber-500" label="Quick Sync" />
-          <Legend color="bg-violet-500" label="Event" />
+          <Legend color="bg-orange-500" label="Event" />
         </div>
       </div>
       )}
@@ -843,7 +843,7 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold">
           <Stat color="bg-indigo-500" label="Focus" value={focusN} />
           <Stat color="bg-amber-500" label="Quick Sync" value={qsN} />
-          <Stat color="bg-violet-500" label="Event Access" value={evN} />
+          <Stat color="bg-orange-500" label="Event Access" value={evN} />
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">
             Total: <span className="tabular-nums">{total}</span>
           </span>
