@@ -437,8 +437,11 @@ const Contacts = () => {
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
-              const roomy = density === 8;
-              const mid = density === 12;
+              // 8-view mirrors the previous "12" mid layout (large detailed cards),
+              // 12-view is a slightly tighter mid, 16-view stays compact.
+              const roomy = false;
+              const mid = density === 8 || density === 12;
+              const tight = density === 12;
               return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
@@ -460,7 +463,7 @@ const Contacts = () => {
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
                       "group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200",
-                      roomy ? "p-5" : mid ? "p-4" : "p-3",
+                      density === 8 ? "p-4" : tight ? "p-3.5" : "p-3",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
