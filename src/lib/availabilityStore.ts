@@ -60,8 +60,6 @@ export const markCreated = (id: string) => {
   lastCreatedId = id;
   lastCreatedTick += 1;
   emitCreated();
-  // Also flash the row for visual feedback.
-  flashConflict(id, 1800);
 };
 
 export const useLastCreated = () =>
