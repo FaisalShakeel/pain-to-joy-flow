@@ -409,30 +409,7 @@ const WebinarBuilder = () => {
 
             {/* Capacity */}
             <Section title="Capacity" icon={UsersIcon} hint="How many can join the session.">
-              <div className="flex flex-wrap gap-1.5">
-                {[10, 25, 50, 100, 250].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => set("capacity", n)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-[11px] font-bold transition",
-                      draft.capacity === n
-                        ? "bg-primary text-primary-foreground shadow-glass"
-                        : "bg-surface-low text-muted-foreground hover:text-primary",
-                    )}
-                  >
-                    {n} seats
-                  </button>
-                ))}
-                <input
-                  type="number"
-                  min={1}
-                  value={draft.capacity}
-                  onChange={(e) => set("capacity", Math.max(1, +e.target.value))}
-                  className="w-24 px-2 py-1.5 rounded-full bg-surface-low ghost-border text-sm font-bold text-primary outline-none text-center"
-                  aria-label="Custom capacity"
-                />
-              </div>
+              <CapacitySlider value={draft.capacity} onChange={(n) => set("capacity", n)} />
             </Section>
 
             {/* Controls */}
