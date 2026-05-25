@@ -110,7 +110,7 @@ const ActiveSlotsPanel = ({
 }: Props) => {
   const [view, setView] = useState<"time" | "type">("time");
   const [modeFilter, setModeFilter] = useState<"all" | "focus" | "quicksync" | "event-access">("all");
-  type TimeRange = "today" | "3d" | "7d" | "15d" | "month";
+  type TimeRange = "today" | "3d" | "7d" | "15d" | "month" | "nextMonth";
   const [timeRange, setTimeRange] = useState<TimeRange>("today");
   const timeRangeLabels: Record<TimeRange, string> = {
     today: "Today",
@@ -118,7 +118,10 @@ const ActiveSlotsPanel = ({
     "7d": "Next 7 Days",
     "15d": "Next 15 Days",
     month: "This Month",
+    nextMonth: "Next Month",
   };
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [typeOpen, setTypeOpen] = useState(false);
   const [dayOffset, setDayOffset] = useState(0);
   const [expanded, setExpanded] = useState(false);
   // Tick once a minute so expired slots auto-disappear.
@@ -209,6 +212,13 @@ const ActiveSlotsPanel = ({
     } else if (timeRange === "month") {
       const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
       endISO = localISO(end);
+    } else if (timeRange === "nextMonth") {
+      // Range spans next month entirely.
+      const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      endISO = localISO(end);
+      const start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const startISO = localISO(start);
+      return liveRows.filter((r) => r.date >= startISO && r.date <= endISO);
     } else {
       const days = timeRange === "3d" ? 3 : timeRange === "7d" ? 7 : 15;
       const end = new Date(today);
