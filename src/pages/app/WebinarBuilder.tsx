@@ -57,6 +57,9 @@ const fmtTime = (m: number) => {
   return `${hh}:${mm.toString().padStart(2, "0")} ${period}`;
 };
 
+/** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
+const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
+
 const visibilityMeta: Record<Visibility, { label: string; icon: React.ComponentType<any>; cls: string }> = {
   public:   { label: "Public",        icon: Globe,    cls: "bg-emerald-500/15 text-emerald-700" },
   contacts: { label: "Selected only", icon: UsersIcon,cls: "bg-sky-500/15 text-sky-700" },
@@ -66,7 +69,7 @@ const visibilityMeta: Record<Visibility, { label: string; icon: React.ComponentT
 const blank = (): Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> => ({
   title: "",
   description: "",
-  date: new Date().toISOString().slice(0, 10),
+  date: localISO(),
   startMin: 15 * 60,
   durationMin: 60,
   capacity: 25,
@@ -85,7 +88,7 @@ const seed: Webinar[] = [
     id: "w1",
     title: "Event Access Session",
     description: "Open Q&A on fundraising, hiring, and product strategy.",
-    date: new Date().toISOString().slice(0, 10),
+    date: localISO(),
     startMin: 15 * 60,
     durationMin: 60,
     capacity: 25,
@@ -580,7 +583,7 @@ const LiveEventView = ({
   onDelete: (id: string) => void;
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = localISO();
   const sorted = [...items].sort(
     (a, b) => (a.date + a.startMin).localeCompare(b.date + b.startMin) || a.startMin - b.startMin,
   );
