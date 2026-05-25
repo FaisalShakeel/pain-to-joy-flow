@@ -465,7 +465,6 @@ const Contacts = () => {
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
               const roomy = density === 8;
               const mid = density === 12;
-              const tight = density === 16;
             return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
@@ -568,7 +567,6 @@ const Contacts = () => {
                       </div>
                     </div>
                   </Link>
-                  )}
                 </li>
               );
             })}
