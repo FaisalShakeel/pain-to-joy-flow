@@ -874,7 +874,7 @@ const Legend = ({ color, label }: { color: string; label: string }) => (
 );
 
 // ---------- Standalone Daily Occupancy (header + rail) ----------
-export const DailyOccupancy = ({ date }: { date?: string }) => {
+export const DailyOccupancy = ({ date, onBlockClick }: { date?: string; onBlockClick?: (id: string) => void }) => {
   const blocks = useAvailability();
   const iso = date ?? localISO();
   const dayBlocks = blocks.filter((b) => b.date === iso);
@@ -933,7 +933,7 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
           </span>
         </div>
       </div>
-      <OccupancyRail rows={rows} dateLabel={format(parseLocalISO(iso), "EEE, MMM d")} hideHeader />
+      <OccupancyRail rows={rows} dateLabel={format(parseLocalISO(iso), "EEE, MMM d")} hideHeader onBlockClick={onBlockClick} />
     </section>
   );
 };
