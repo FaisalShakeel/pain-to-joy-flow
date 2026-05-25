@@ -229,18 +229,24 @@ const Contacts = () => {
     setSearchOpen(false);
   };
 
-  // True density scaling: different column counts per density so tiles
-  // visibly shrink. Visible rows stay at 2 so the total visible count
-  // matches the selected density on desktop (4×2=8, 6×2=12, 8×2=16).
+  // Density layouts:
+  // - 8:  large vertical tiles (4 cols × 2 rows on desktop)
+  // - 12: tighter vertical tiles (6 cols × 2 rows on desktop)
+  // - 16: horizontal row tiles (4 cols × 4 rows on desktop) — wide enough
+  //        to keep the availability context visible inline.
   const densityCols: Record<Density, string> = {
     8:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
     12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
-    16: "grid-cols-4 sm:grid-cols-6 lg:grid-cols-8",
+    16: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
   };
-  const visibleRows = 2;
+  const densityRowPx: Record<Density, number> = {
+    8:  260,
+    12: 200,
+    16: 88,
+  };
+  const rowHeight = densityRowPx[density];
   const headerOffset = fullscreen ? 96 : 240;
   const containerHeight = Math.max(360, vh - headerOffset);
-  const rowHeight = Math.max(96, Math.floor((containerHeight - 24) / visibleRows));
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
