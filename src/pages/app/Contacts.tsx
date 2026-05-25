@@ -16,7 +16,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
 type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
-type Density = 8 | 12 | 16;
+type Density = 8 | 12;
 
 const FAV_KEY = "availock.favoriteContacts";
 
@@ -232,17 +232,13 @@ const Contacts = () => {
   // Density layouts:
   // - 8:  large vertical tiles (4 cols × 2 rows on desktop)
   // - 12: tighter vertical tiles (6 cols × 2 rows on desktop)
-  // - 16: horizontal row tiles (4 cols × 4 rows on desktop) — wide enough
-  //        to keep the availability context visible inline.
   const densityCols: Record<Density, string> = {
     8:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
     12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
-    16: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
   };
   const densityRowPx: Record<Density, number> = {
     8:  208,
     12: 200,
-    16: 88,
   };
   const rowHeight = densityRowPx[density];
   const headerOffset = fullscreen ? 96 : 240;
@@ -406,7 +402,7 @@ const Contacts = () => {
             <Eye className="w-3 h-3" /> Bird's-Eye
           </span>
           <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
-            {([8, 12, 16] as Density[]).map((d) => (
+            {([8, 12] as Density[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDensity(d)}
