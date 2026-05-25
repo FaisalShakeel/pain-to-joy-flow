@@ -312,26 +312,32 @@ const ActiveSlotsPanel = ({
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="inline-flex items-center rounded-full ghost-border bg-surface-lowest p-1">
-            <Popover>
+            <Popover open={timeOpen} onOpenChange={setTimeOpen}>
               <PopoverTrigger asChild>
                 <button
                   onClick={() => setView("time")}
-                  className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
+                  className={cn("px-3 py-2 md:py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1.5", view === "time" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
                 >
                   <Clock className="w-3 h-3" />
                   {timeRangeLabels[timeRange]}
                   <ChevronDown className="w-3 h-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-44 p-1 z-[60]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">View by Time</p>
+              <PopoverContent
+                align="end"
+                className="w-48 p-1.5 z-[60] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+                onMouseLeave={() => setTimeOpen(false)}
+              >
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5 mb-1">View by Time</p>
                 {(Object.keys(timeRangeLabels) as TimeRange[]).map((k) => (
                   <button
                     key={k}
-                    onClick={() => { setTimeRange(k); setView("time"); }}
+                    onClick={() => { setTimeRange(k); setView("time"); setTimeOpen(false); }}
                     className={cn(
-                      "w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low font-bold",
-                      timeRange === k ? "text-primary bg-surface-low" : "text-muted-foreground",
+                      "w-full text-left text-xs px-2.5 py-2 md:py-1.5 rounded-md transition-colors font-bold",
+                      timeRange === k
+                        ? "text-primary bg-surface-low"
+                        : "text-muted-foreground hover:text-primary hover:bg-surface-low/70",
                     )}
                   >
                     {timeRangeLabels[k]}
@@ -339,18 +345,22 @@ const ActiveSlotsPanel = ({
                 ))}
               </PopoverContent>
             </Popover>
-            <Popover>
+            <Popover open={typeOpen} onOpenChange={setTypeOpen}>
               <PopoverTrigger asChild>
                 <button
                   onClick={() => setView("type")}
-                  className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1", view === "type" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
+                  className={cn("px-3 py-2 md:py-1.5 rounded-full text-[11px] font-bold transition inline-flex items-center gap-1.5", view === "type" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary")}
                 >
                   View by Type
                   <ChevronDown className="w-3 h-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-48 p-1 z-[60]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">Filter</p>
+              <PopoverContent
+                align="end"
+                className="w-52 p-1.5 z-[60] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+                onMouseLeave={() => setTypeOpen(false)}
+              >
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5 mb-1">Filter</p>
                 {([
                   ["all", "All Modes"],
                   ["focus", "Focused Scheduling"],
@@ -359,10 +369,12 @@ const ActiveSlotsPanel = ({
                 ] as const).map(([k, l]) => (
                   <button
                     key={k}
-                    onClick={() => setModeFilter(k)}
+                    onClick={() => { setModeFilter(k); setTypeOpen(false); }}
                     className={cn(
-                      "w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low font-bold",
-                      modeFilter === k ? "text-primary bg-surface-low" : "text-muted-foreground",
+                      "w-full text-left text-xs px-2.5 py-2 md:py-1.5 rounded-md transition-colors font-bold",
+                      modeFilter === k
+                        ? "text-primary bg-surface-low"
+                        : "text-muted-foreground hover:text-primary hover:bg-surface-low/70",
                     )}
                   >
                     {l}
