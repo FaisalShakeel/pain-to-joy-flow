@@ -16,7 +16,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
 type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
-type Density = 8 | 12 | 16;
+type Density = 8 | 12;
 
 const FAV_KEY = "availock.favoriteContacts";
 
@@ -232,17 +232,13 @@ const Contacts = () => {
   // Density layouts:
   // - 8:  large vertical tiles (4 cols × 2 rows on desktop)
   // - 12: tighter vertical tiles (6 cols × 2 rows on desktop)
-  // - 16: horizontal row tiles (4 cols × 4 rows on desktop) — wide enough
-  //        to keep the availability context visible inline.
   const densityCols: Record<Density, string> = {
     8:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
     12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
-    16: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
   };
   const densityRowPx: Record<Density, number> = {
     8:  208,
     12: 200,
-    16: 88,
   };
   const rowHeight = densityRowPx[density];
   const headerOffset = fullscreen ? 96 : 240;
@@ -406,7 +402,7 @@ const Contacts = () => {
             <Eye className="w-3 h-3" /> Bird's-Eye
           </span>
           <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
-            {([8, 12, 16] as Density[]).map((d) => (
+            {([8, 12] as Density[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDensity(d)}
@@ -469,8 +465,7 @@ const Contacts = () => {
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
               const roomy = density === 8;
               const mid = density === 12;
-              const tight = density === 16;
-              return (
+            return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
                     <Link
@@ -486,35 +481,6 @@ const Contacts = () => {
                       </span>
                     </Link>
                   )}
-                  {tight ? (
-                    <Link
-                      to={`/app/contact/${c.id}`}
-                      title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
-                      className={cn(
-                        "group flex items-center gap-3 h-full w-full rounded-xl border border-border/60 bg-surface-lowest px-3 hover:border-border hover:shadow-elevated transition-all duration-200",
-                        isPinned && "ring-1 ring-accent/40 bg-accent/5",
-                      )}
-                    >
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size="sm" />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <p className="text-[12px] font-semibold text-primary truncate leading-tight">{c.name}</p>
-                          {fav && <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />}
-                          {isPinned && <Pin className="w-3 h-3 text-accent shrink-0" />}
-                        </div>
-                        <p className="text-[10.5px] text-muted-foreground truncate leading-snug mt-0.5">
-                          <span className={cn("inline-block w-1.5 h-1.5 rounded-full mr-1.5 align-middle", statusDot[c.status])} />
-                          {c.availabilityContext}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <AlertIcons alerts={c.alerts} size="xs" />
-                        <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                          <PingButton contact={c} size="sm" />
-                        </div>
-                      </div>
-                    </Link>
-                  ) : (
                   <Link
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
@@ -601,7 +567,6 @@ const Contacts = () => {
                       </div>
                     </div>
                   </Link>
-                  )}
                 </li>
               );
             })}
