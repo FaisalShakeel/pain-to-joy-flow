@@ -803,6 +803,10 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
     mode: b.mode,
     typeLabel: b.typeLabel,
     handlers: {},
+    callMin: b.callMin,
+    bookedSubSlots: b.bookedSubSlots,
+    disabledSubSlots: b.disabledSubSlots,
+    editedSubSlots: b.editedSubSlots,
   }));
 
   // Sum actionable sub-slots, not just parent windows.
