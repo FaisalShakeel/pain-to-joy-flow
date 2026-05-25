@@ -445,18 +445,23 @@ const Contacts = () => {
         </div>
       ) : (
         <div
-          className="mt-4 overflow-y-auto pr-1 rounded-2xl"
-          style={{ maxHeight: scrollMaxHeight }}
+          className="mt-3 overflow-y-auto pr-1 rounded-2xl"
+          style={{ height: containerHeight }}
         >
-          <ul className={cn("grid auto-rows-fr", density === 8 ? "gap-3" : density === 12 ? "gap-2.5" : "gap-2", densityCols[density])}>
+          <ul
+            className={cn(
+              "grid",
+              density === 8 ? "gap-3" : density === 12 ? "gap-2" : "gap-1.5",
+              densityCols[density],
+            )}
+            style={{ gridAutoRows: `${rowHeight}px` }}
+          >
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
-              // 8-view mirrors the previous "12" mid layout (large detailed cards),
-              // 12-view is a slightly tighter mid, 16-view stays compact.
-              const roomy = false;
-              const mid = density === 8 || density === 12;
-              const tight = density === 12;
+              const roomy = density === 8;
+              const mid = density === 12;
+              const tight = density === 16;
               return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
