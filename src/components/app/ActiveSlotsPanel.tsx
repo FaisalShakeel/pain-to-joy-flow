@@ -20,6 +20,11 @@ import {
 
 /** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
 const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
+/** Parse yyyy-mm-dd as a local-date (avoids UTC interpretation of bare ISO date). */
+const parseLocalISO = (iso: string) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+};
 
 export type ActiveSlotStatus = "active" | "upcoming" | "expired";
 export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
