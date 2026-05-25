@@ -832,7 +832,7 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
             Daily Occupancy
           </p>
           <span className="text-[11px] font-bold text-muted-foreground">
-            {format(new Date(iso), "EEE, MMM d")}
+            {format(parseLocalISO(iso), "EEE, MMM d")}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold">
@@ -847,7 +847,7 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
           </span>
         </div>
       </div>
-      <OccupancyRail rows={rows} dateLabel={format(new Date(iso), "EEE, MMM d")} hideHeader />
+      <OccupancyRail rows={rows} dateLabel={format(parseLocalISO(iso), "EEE, MMM d")} hideHeader />
     </section>
   );
 };
