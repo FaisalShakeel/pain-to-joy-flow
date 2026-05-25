@@ -224,14 +224,15 @@ const Contacts = () => {
 
   const densityCols: Record<Density, string> = {
     6:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    12: "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
     16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
   };
 
   // Approximate per-tile heights (px) used to compute the visible window height.
   // Keeps exactly `density` tiles in view; the rest scrolls within the panel.
-  const densityRowHeight: Record<Density, number> = { 6: 168, 16: 88 };
-  const densityColCount: Record<Density, number> = { 6: 3, 16: 4 };
-  const visibleRows: Record<Density, number> = { 6: 2, 16: 4 };
+  const densityRowHeight: Record<Density, number> = { 6: 220, 12: 132, 16: 88 };
+  const densityColCount: Record<Density, number> = { 6: 3, 12: 4, 16: 4 };
+  const visibleRows: Record<Density, number> = { 6: 2, 12: 3, 16: 4 };
   const scrollMaxHeight = visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
 
   const statusDot: Record<string, string> = {
@@ -390,7 +391,7 @@ const Contacts = () => {
             <Eye className="w-3 h-3" /> Bird's-Eye
           </span>
           <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
-            {([6, 16] as Density[]).map((d) => (
+            {([6, 12, 16] as Density[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDensity(d)}
