@@ -83,7 +83,7 @@ const blank = (): Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCo
 const seed: Webinar[] = [
   {
     id: "w1",
-    title: "Startup AMA Session",
+    title: "Event Access Session",
     description: "Open Q&A on fundraising, hiring, and product strategy.",
     date: new Date().toISOString().slice(0, 10),
     startMin: 15 * 60,
@@ -327,7 +327,7 @@ const WebinarBuilder = () => {
                 <input
                   value={draft.title}
                   onChange={(e) => set("title", e.target.value)}
-                  placeholder="e.g. Startup AMA Session"
+                  placeholder="e.g. Event Access Session"
                   className="w-full px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </Field>
