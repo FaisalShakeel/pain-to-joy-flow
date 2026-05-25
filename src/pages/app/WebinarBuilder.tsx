@@ -873,4 +873,51 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const CapacitySlider = ({ value, onChange }: { value: number; onChange: (n: number) => void }) => {
+  const MIN = 1;
+  const MAX = 500;
+  const presets = [10, 25, 50, 100, 250];
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Capacity
+        </span>
+        <span className="font-headline font-extrabold text-primary text-base tabular-nums">
+          {value} <span className="text-[11px] text-muted-foreground font-bold">participants</span>
+        </span>
+      </div>
+      <Slider
+        min={MIN}
+        max={MAX}
+        step={1}
+        value={[Math.min(MAX, Math.max(MIN, value))]}
+        onValueChange={(v) => onChange(Math.max(MIN, Math.min(MAX, v[0] ?? MIN)))}
+        aria-label="Capacity"
+      />
+      <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground tabular-nums">
+        <span>{MIN}</span>
+        <span>{MAX}</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {presets.map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={cn(
+              "px-2.5 py-1 rounded-full text-[11px] font-bold transition",
+              value === n
+                ? "bg-primary text-primary-foreground shadow-glass"
+                : "bg-surface-low text-muted-foreground hover:text-primary",
+            )}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default WebinarBuilder;
