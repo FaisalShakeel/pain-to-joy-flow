@@ -106,15 +106,19 @@ const WebinarBuilder = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<Webinar[]>(seed);
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
+  const [dirty, setDirty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
   const [viewMode, setViewMode] = useState<"editor" | "live">("editor");
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
-  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
+  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => {
+    setDraft((d) => ({ ...d, [k]: v }));
+    setDirty(true);
+  };
 
-  const reset = () => setDraft(blank());
+  const reset = () => { setDraft(blank()); setDirty(false); };
 
   const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
     const c = findConflict(date, startMin, endMin, excludeId);
@@ -154,6 +158,10 @@ const WebinarBuilder = () => {
     if (isEditing) {
       setItems((p) => p.map((w) => (w.id === draft.id ? { ...w, ...draft, id: draft.id! } : w)));
       toast({ title: "Session updated" });
+      const updatedId = draft.id!;
+      setTimeout(() => markCreated(updatedId), 250);
+      reset();
+      return;
     } else {
       const next: Webinar = {
         ...(draft as Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount">),
@@ -207,6 +215,7 @@ const WebinarBuilder = () => {
       locationPin: w.locationPin ?? "",
       venueNotes: w.venueNotes ?? "",
     });
+    setDirty(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -467,6 +476,7 @@ const WebinarBuilder = () => {
               )}
               <button
                 onClick={save}
+                disabled={isEditing && !dirty}
                 className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update session" : "Publish session"}
