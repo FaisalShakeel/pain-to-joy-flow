@@ -536,8 +536,8 @@ const Contacts = () => {
                         >
                           <Activity className="w-3.5 h-3.5" />
                         </button>
-                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
-                        {roomy && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
+                        <AlertIcons alerts={c.alerts} size={mid ? "sm" : "xs"} />
+                        {mid && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
                       </div>
                       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                         <PingButton contact={c} size="sm" />
