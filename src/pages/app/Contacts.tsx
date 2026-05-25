@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone, Maximize2, Minimize2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -73,6 +73,13 @@ const Contacts = () => {
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
   const [density, setDensity] = useState<Density>(8);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [vh, setVh] = useState<number>(typeof window !== "undefined" ? window.innerHeight : 800);
+  useEffect(() => {
+    const onResize = () => setVh(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const birdsEye = true;
   const [searchOpen, setSearchOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -222,19 +229,18 @@ const Contacts = () => {
     setSearchOpen(false);
   };
 
+  // True density scaling: different column counts per density so tiles
+  // visibly shrink. Visible rows stay at 2 so the total visible count
+  // matches the selected density on desktop (4×2=8, 6×2=12, 8×2=16).
   const densityCols: Record<Density, string> = {
-    8:  "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
-    12: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4",
-    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4",
+    8:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+    12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
+    16: "grid-cols-4 sm:grid-cols-6 lg:grid-cols-8",
   };
-
-  // Approximate per-tile heights (px) used to compute the visible window height.
-  const densityRowHeight: Record<Density, number> = { 8: 168, 12: 128, 16: 104 };
-  const visibleRows: Record<Density, number> = { 8: 2, 12: 3, 16: 2 };
-  const baseHeight =
-    visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
-  // For 16-view show ~8 fully visible tiles + a partial row peeking below.
-  const scrollMaxHeight = density === 16 ? baseHeight + Math.round(densityRowHeight[16] * 0.45) : baseHeight;
+  const visibleRows = 2;
+  const headerOffset = fullscreen ? 96 : 240;
+  const containerHeight = Math.max(360, vh - headerOffset);
+  const rowHeight = Math.max(96, Math.floor((containerHeight - 24) / visibleRows));
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
@@ -406,6 +412,15 @@ const Contacts = () => {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setFullscreen((v) => !v)}
+            title={fullscreen ? "Exit fullscreen" : "Fullscreen directory"}
+            aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen directory"}
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-lowest ghost-border text-primary hover:bg-surface-low transition shadow-sm"
+          >
+            {fullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
         </div>
       </div>
       {filtered.length === 0 ? (
