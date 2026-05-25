@@ -772,7 +772,7 @@ const sourceColor: Record<string, string> = {
   legacy: "bg-slate-400",
 };
 
-const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; dateLabel: string; hideHeader?: boolean }) => {
+const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { rows: Row[]; dateLabel: string; hideHeader?: boolean; onBlockClick?: (id: string) => void }) => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -833,10 +833,11 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
             <button
               type="button"
               key={r.id}
-              title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)}) · click to open in live view`}
+              title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)}) · click to open in live preview`}
               onClick={(ev) => {
                 ev.stopPropagation();
-                markCreated(r.id);
+                if (onBlockClick) onBlockClick(r.id);
+                else markCreated(r.id);
               }}
               className={cn(
                 "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 hover:ring-2 hover:ring-primary/50 cursor-pointer transition",
