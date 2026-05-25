@@ -216,16 +216,38 @@ const QuickSyncBuilder = () => {
     toast({ title: "Quick Sync deleted" });
   };
 
-  const duplicate = (s: QSSlot, kind: "tomorrow" | "nextweek" | "custom", customDate?: string) => {
+  const duplicate = (
+    s: QSSlot,
+    kind: "tomorrow" | "nextweek" | "custom",
+    customDate?: string,
+    customDateTo?: string,
+  ) => {
     const base = new Date(s.date);
-    const nd =
+    const fromD =
       kind === "tomorrow" ? addDays(base, 1) :
       kind === "nextweek" ? addWeeks(base, 1) :
       customDate ? new Date(customDate) : base;
-    const newDate = toISO(nd);
-    if (conflictToast(newDate, s.startMin, s.endMin)) return;
-    setSlots((p) => [{ ...s, id: `qs${Date.now()}`, date: newDate, createdAt: Date.now() }, ...p]);
-    toast({ title: "Schedule cloned successfully and extended.", description: format(nd, "EEE, MMM d") });
+    const toD = kind === "custom" && customDateTo ? new Date(customDateTo) : fromD;
+    const dates: string[] = [];
+    for (let d = new Date(fromD); d <= toD; d = addDays(d, 1)) dates.push(toISO(d));
+    const created: QSSlot[] = [];
+    const skipped: string[] = [];
+    for (const dt of dates) {
+      if (findConflict(dt, s.startMin, s.endMin)) { skipped.push(dt); continue; }
+      created.push({ ...s, id: `qs${Date.now()}_${dt}`, date: dt, createdAt: Date.now() + created.length });
+    }
+    if (created.length === 0) {
+      sonner.error("All target dates conflict", { description: "Nothing was cloned.", duration: 6000 });
+      return;
+    }
+    setSlots((p) => [...created, ...p]);
+    const subTotal = created.length * slotCount(s);
+    toast({
+      title: created.length > 1
+        ? `Cloned across ${created.length} dates`
+        : "Schedule cloned successfully and extended.",
+      description: `${subTotal} mini-slot${subTotal === 1 ? "" : "s"} generated${skipped.length ? ` · ${skipped.length} conflicting date${skipped.length === 1 ? "" : "s"} skipped` : ""}.`,
+    });
   };
 
   useEffect(() => {
