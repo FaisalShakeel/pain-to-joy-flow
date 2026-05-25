@@ -111,18 +111,22 @@ const FocusMeetingBuilder = () => {
   const [slots, setSlots] = useState<MTSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
+  const [dirty, setDirty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [channel, setChannel] = useState<"hybrid" | "online" | "onsite">("hybrid");
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "info" });
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
-  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
+  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => {
+    setDraft((d) => ({ ...d, [k]: v }));
+    setDirty(true);
+  };
   const totalMin = Math.max(0, draft.endMin - draft.startMin);
   const count = slotCount({ startMin: draft.startMin, endMin: draft.endMin, callMin: draft.callMin, bufferMin: draft.bufferMin });
   const timeline = useMemo(() => buildTimeline(draft), [draft]);
 
-  const reset = () => { setDraft(blank()); setStep(1); };
+  const reset = () => { setDraft(blank()); setStep(1); setDirty(false); };
 
   const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
     const c = findConflict(date, startMin, endMin, excludeId);
@@ -165,6 +169,10 @@ const FocusMeetingBuilder = () => {
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Meeting updated" });
+      const updatedId = draft.id!;
+      setTimeout(() => markCreated(updatedId), 250);
+      reset();
+      return;
     } else {
       const created: MTSlot[] = dates.map((dt, i) => ({
         ...(draft as Omit<MTSlot, "id" | "createdAt">),
@@ -207,6 +215,7 @@ const FocusMeetingBuilder = () => {
   const editSlot = (s: MTSlot) => {
     setDraft({ ...s });
     setStep(1);
+    setDirty(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -395,7 +404,7 @@ const FocusMeetingBuilder = () => {
                 <DateRangePopover
                   from={draft.date}
                   to={draft.dateTo}
-                  onChange={(f, t) => setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined }))}
+                  onChange={(f, t) => { setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined })); setDirty(true); }}
                 />
                 {draft.dateTo && draft.dateTo !== draft.date && (
                   <p className="mt-2 text-[11px] text-muted-foreground">
