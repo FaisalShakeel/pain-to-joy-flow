@@ -400,7 +400,10 @@ const ActiveSlotsPanel = ({
             const todayISO = localISO();
             const showDate = !prev || prev.date !== s.date;
             return (
-              <div key={s.id}>
+              <div
+                key={s.id}
+                ref={(el) => { rowRefs.current[s.id] = el; }}
+              >
                 {showDate && s.date !== todayISO && (
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent mt-4 mb-2 first:mt-0">
                     {s.date === localISO(new Date(Date.now() + 86400000))
@@ -408,7 +411,11 @@ const ActiveSlotsPanel = ({
                       : format(new Date(s.date), "EEEE")} — {format(new Date(s.date), "MMM d")}
                   </p>
                 )}
-                <SlotRow row={s} highlight={highlightId === s.id} />
+                <SlotRow
+                  row={s}
+                  highlight={highlightId === s.id}
+                  createdGlow={createdGlowId === s.id}
+                />
               </div>
             );
           })}
