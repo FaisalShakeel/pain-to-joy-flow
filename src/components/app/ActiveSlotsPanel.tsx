@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown, Video, MapPin, Zap, Users, Share2, Pencil, Trash2, Copy,
@@ -17,7 +17,6 @@ import {
   availabilityStore,
   type AvailabilityBlock,
 } from "@/lib/availabilityStore";
-import { useRef } from "react";
 
 /** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
 const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
