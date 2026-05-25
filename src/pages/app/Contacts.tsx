@@ -432,11 +432,12 @@ const Contacts = () => {
           className="mt-4 overflow-y-auto pr-1 rounded-2xl"
           style={{ maxHeight: scrollMaxHeight }}
         >
-          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : "gap-2", densityCols[density])}>
+          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : density === 12 ? "gap-3" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
               const roomy = density === 6;
+              const mid = density === 12;
               return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
@@ -457,48 +458,15 @@ const Contacts = () => {
                     to={`/app/contact/${c.id}`}
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
-                      "group flex items-start h-full w-full rounded-xl ghost-border bg-surface-lowest hover:shadow-ambient hover:-translate-y-0.5 transition",
-                      roomy ? "gap-3 p-4" : "gap-2 p-2",
+                      "group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200",
+                      roomy ? "p-5" : mid ? "p-4" : "p-3",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
-                    <div className="relative shrink-0">
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : "sm"} />
-                      <Link
-                        to={`/app/contact/${c.id}/log`}
-                        onClick={(e) => e.stopPropagation()}
-                        title="Connection Log"
-                        className={cn(
-                          "mt-1.5 mx-auto grid place-items-center rounded-full bg-surface-low text-muted-foreground hover:text-accent transition",
-                          roomy ? "w-6 h-6" : "w-5 h-5",
-                        )}
-                      >
-                        <Activity className={roomy ? "w-3 h-3" : "w-2.5 h-2.5"} />
-                      </Link>
-                    </div>
-                    <div className={cn("min-w-0 flex-1", roomy ? "pr-10" : "pr-8")}>
-                      <div className="flex items-center gap-1.5">
-                        {(isPinned || canPin) && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            togglePin(c.id);
-                          }}
-                          title={isPinned ? "Unpin contact" : "Pin contact"}
-                          aria-label={isPinned ? "Unpin contact" : "Pin contact"}
-                          className={cn(
-                            "inline-flex items-center justify-center rounded-full transition shrink-0",
-                            roomy ? "w-5 h-5" : "w-4 h-4",
-                            isPinned
-                              ? "bg-accent text-accent-foreground shadow-elevated"
-                              : "bg-surface-low text-muted-foreground hover:text-primary opacity-60 group-hover:opacity-100",
-                          )}
-                        >
-                          {isPinned ? <PinOff className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} /> : <Pin className={roomy ? "w-2.5 h-2.5" : "w-2 h-2"} />}
-                        </button>
-                        )}
+                    {/* Header: avatar + top-right actions */}
+                    <div className="flex items-start justify-between gap-2">
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : mid ? "md" : "sm"} />
+                      <div className={cn("flex items-center", roomy ? "gap-1.5" : "gap-1", "opacity-70 group-hover:opacity-100 transition")}>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -509,42 +477,69 @@ const Contacts = () => {
                           title={fav ? "Remove from favorites" : "Mark as favorite"}
                           aria-label={fav ? "Remove from favorites" : "Mark as favorite"}
                           className={cn(
-                            "inline-flex items-center justify-center rounded-full transition shrink-0",
-                            roomy ? "w-5 h-5" : "w-4 h-4",
-                            fav
-                              ? "text-amber-500"
-                              : "text-muted-foreground hover:text-amber-500 opacity-60 group-hover:opacity-100",
+                            "inline-flex items-center justify-center rounded-full transition shrink-0 w-6 h-6 hover:bg-surface-low",
+                            fav ? "text-amber-500" : "text-muted-foreground hover:text-amber-500",
                           )}
                         >
-                          <Star className={cn(roomy ? "w-3 h-3" : "w-2.5 h-2.5", fav && "fill-amber-500")} />
+                          <Star className={cn("w-3.5 h-3.5", fav && "fill-amber-500")} />
                         </button>
-                        <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-sm" : "text-[11px]")}>
-                          {c.name}
-                        </p>
+                        {(isPinned || canPin) && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              togglePin(c.id);
+                            }}
+                            title={isPinned ? "Unpin contact" : "Pin contact"}
+                            aria-label={isPinned ? "Unpin contact" : "Pin contact"}
+                            className={cn(
+                              "inline-flex items-center justify-center rounded-full transition shrink-0 w-6 h-6 hover:bg-surface-low",
+                              isPinned ? "text-accent" : "text-muted-foreground hover:text-primary",
+                            )}
+                          >
+                            {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+                          </button>
+                        )}
                       </div>
-                      <div className="flex items-center justify-between gap-1">
-                        <StatusPill
-                          tone={c.status}
-                          label={statusLabel[c.status]}
-                          className={cn(roomy ? "text-[10px] px-2 py-0.5" : "text-[9px] px-1.5 py-0.5")}
-                        />
-                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
+                    </div>
+
+                    {/* Body */}
+                    <div className={cn("min-w-0", roomy ? "mt-4" : mid ? "mt-3" : "mt-2")}>
+                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : mid ? "text-sm" : "text-[12px]")}>
+                        {c.name}
+                      </p>
+                      <div className={cn("flex items-center gap-1.5", roomy ? "mt-1.5" : "mt-1")}>
+                        <span className={cn("inline-block rounded-full", statusDot[c.status], roomy ? "w-2 h-2" : "w-1.5 h-1.5")} />
+                        <span className={cn("text-muted-foreground font-medium", roomy ? "text-xs" : "text-[10px]")}>
+                          {statusLabel[c.status]}
+                        </span>
                       </div>
-                      <p className={cn("mt-1 text-foreground/80 leading-snug", roomy ? "text-[11px] line-clamp-3" : "text-[9px] line-clamp-2")}>
+                      <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-3 text-[12px] line-clamp-3" : mid ? "mt-2 text-[11px] line-clamp-2" : "mt-1.5 text-[10px] line-clamp-2")}>
                         {c.availabilityContext}
                       </p>
-                      {roomy && (
-                        <div className="mt-2">
-                          <AccessChip state={c.syncStatus} size="sm" />
-                        </div>
-                      )}
+                    </div>
+
+                    {/* Footer: quick actions */}
+                    <div className={cn("flex items-center justify-between gap-2", roomy ? "mt-4 pt-3 border-t border-border/40" : mid ? "mt-3 pt-2 border-t border-border/40" : "mt-2")}>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/app/contact/${c.id}/log`); }}
+                          title="Connection Log"
+                          aria-label="Connection Log"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition"
+                        >
+                          <Activity className="w-3.5 h-3.5" />
+                        </button>
+                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
+                        {roomy && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
+                      </div>
+                      <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                        <PingButton contact={c} size="sm" />
+                      </div>
                     </div>
                   </Link>
-                  <div className={cn("absolute", roomy ? "bottom-2 right-2" : "bottom-1 right-1")}>
-                    <div className="flex items-center gap-1">
-                      <PingButton contact={c} size="sm" />
-                    </div>
-                  </div>
                 </li>
               );
             })}
