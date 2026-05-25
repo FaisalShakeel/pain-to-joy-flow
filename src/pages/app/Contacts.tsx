@@ -566,7 +566,7 @@ const Contacts = () => {
                     </div>
 
                     {/* Body */}
-                    <div className={cn("min-w-3", roomy ? "mt-2" : "mt-2")}>
+                    <div className={cn("min-w-0", roomy ? "mt-2" : "mt-2")}>
                       <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-[13px]" : "text-[12px]")}>
                         {c.name}
                       </p>
