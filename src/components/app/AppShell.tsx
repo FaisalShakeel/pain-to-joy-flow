@@ -177,7 +177,16 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
           </p>
           <ul className="space-y-0.5">
             {itemsWithBadges.map((item) => (
-              <li key={item.to}>
+              <li
+                key={item.to}
+                onMouseLeave={item.children ? () => {
+                  // Auto-collapse when cursor leaves, unless this group contains the active route.
+                  const containsActive = item.children!.some(
+                    (c) => location.pathname === c.to || location.pathname.startsWith(c.to + "/"),
+                  );
+                  if (!containsActive && openGroup === item.to) setOpenGroup(null);
+                } : undefined}
+              >
                 {item.children ? (
                   <>
                     <button
@@ -185,28 +194,28 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                       onClick={() => toggleGroup(item.to)}
                       aria-expanded={openGroup === item.to}
                       className={cn(
-                        "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer",
+                        "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer",
                         isItemActive(item.to, item.end, location.pathname)
                           ? "bg-primary text-primary-foreground shadow-glass"
-                          : "text-muted-foreground hover:text-primary hover:bg-surface-low",
+                          : "text-muted-foreground hover:text-primary hover:bg-surface-low/80 hover:translate-x-0.5",
                       )}
                     >
                       <item.icon className="w-4 h-4 shrink-0" />
                       <span className="flex-1 text-left">{item.label}</span>
                       <ChevronRight
                         className={cn(
-                          "w-3.5 h-3.5 shrink-0 transition-transform",
+                          "w-3.5 h-3.5 shrink-0 transition-transform duration-300 ease-out",
                           openGroup === item.to && "rotate-90",
                         )}
                       />
                     </button>
                     <div
                       className={cn(
-                        "grid transition-[grid-template-rows] duration-200 ease-out",
+                        "grid transition-[grid-template-rows] duration-300 ease-out",
                         openGroup === item.to ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
                       )}
                     >
-                      <ul className="overflow-hidden ml-4 mt-0.5 border-l border-outline-variant/40 pl-2 space-y-0.5">
+                      <ul className="overflow-hidden ml-4 mt-2 border-l border-outline-variant/40 pl-2.5 space-y-1">
                         {item.children.map((child) => (
                           <li key={child.to}>
                             <NavLink
@@ -214,10 +223,10 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                               end
                               className={({ isActive }) =>
                                 cn(
-                                  "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors cursor-pointer",
+                                  "flex items-center gap-2.5 px-3 py-2 md:py-1.5 rounded-lg text-[12.5px] font-medium transition-all cursor-pointer",
                                   isActive
                                     ? "bg-primary/10 text-primary ring-1 ring-primary/30 shadow-soft font-semibold"
-                                    : "text-muted-foreground hover:text-primary hover:bg-surface-low/60",
+                                    : "text-muted-foreground hover:text-primary hover:bg-primary/5 hover:translate-x-0.5",
                                 )
                               }
                             >

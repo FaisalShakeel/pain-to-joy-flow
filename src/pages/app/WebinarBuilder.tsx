@@ -608,6 +608,150 @@ const WebinarBuilder = () => {
   );
 };
 
+// ---------- Live Event View (command-center display) ----------
+const LiveEventView = ({
+  items, onEdit, onDelete,
+}: {
+  items: Webinar[];
+  onEdit: (w: Webinar) => void;
+  onDelete: (id: string) => void;
+}) => {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const sorted = [...items].sort(
+    (a, b) => (a.date + a.startMin).localeCompare(b.date + b.startMin) || a.startMin - b.startMin,
+  );
+  if (sorted.length === 0) {
+    return (
+      <section className="rounded-3xl bg-surface-lowest ghost-border p-10 text-center shadow-ambient">
+        <Activity className="w-6 h-6 text-muted-foreground mx-auto" />
+        <p className="mt-3 text-sm text-muted-foreground">No active events. Switch to Editor to create one.</p>
+      </section>
+    );
+  }
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between rounded-2xl bg-surface-lowest ghost-border px-4 py-2.5 shadow-ambient">
+        <div className="flex items-center gap-2">
+          <span className="grid place-items-center w-7 h-7 rounded-lg bg-rose-500/15 text-rose-700">
+            <Activity className="w-3.5 h-3.5" />
+          </span>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">Live View</p>
+            <p className="text-[11px] font-bold text-muted-foreground">
+              {sorted.length} event{sorted.length === 1 ? "" : "s"} · Command-center mode
+            </p>
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
+          <span className="relative flex w-2 h-2">
+            <span className="absolute inset-0 rounded-full bg-emerald-500 opacity-75 animate-ping" />
+            <span className="relative w-2 h-2 rounded-full bg-emerald-500" />
+          </span>
+          Streaming
+        </span>
+      </div>
+      <ul className="space-y-3">
+        {sorted.map((w) => {
+          const seatsLeft = Math.max(0, w.capacity - w.bookedCount);
+          const filled = Math.min(100, Math.round((w.bookedCount / Math.max(1, w.capacity)) * 100));
+          const isLive = w.date === todayISO;
+          const isPast = w.date < todayISO;
+          const status = isPast ? "Ended" : isLive ? "Live" : "Upcoming";
+          const statusCls = isPast
+            ? "bg-muted text-muted-foreground"
+            : isLive
+              ? "bg-rose-500/15 text-rose-700"
+              : "bg-sky-500/15 text-sky-700";
+          const isOpen = expandedId === w.id;
+          const V = visibilityMeta[w.visibility];
+          return (
+            <li
+              key={w.id}
+              className="rounded-2xl bg-surface-lowest ghost-border shadow-ambient overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setExpandedId(isOpen ? null : w.id)}
+                className="w-full text-left grid grid-cols-12 items-center gap-3 px-4 py-3 hover:bg-surface-low/40 transition"
+              >
+                <div className="col-span-12 md:col-span-4 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider", statusCls)}>
+                      {status}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground capitalize">
+                      {w.channel ?? "online"}
+                    </span>
+                  </div>
+                  <p className="font-headline font-extrabold text-primary text-sm mt-1 truncate">{w.title}</p>
+                  <p className="text-[11px] text-muted-foreground tabular-nums">
+                    {format(new Date(w.date), "EEE, MMM d")} · {fmtTime(w.startMin)} – {fmtTime(w.startMin + w.durationMin)}
+                  </p>
+                </div>
+                <div className="col-span-6 md:col-span-3">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Occupancy</p>
+                  <div className="mt-1 h-1.5 w-full rounded-full bg-surface-low overflow-hidden">
+                    <div className="h-full bg-gradient-primary" style={{ width: `${filled}%` }} />
+                  </div>
+                  <p className="text-[11px] font-bold text-primary mt-0.5 tabular-nums">
+                    {w.bookedCount}/{w.capacity} · {seatsLeft} left
+                  </p>
+                </div>
+                <div className="col-span-6 md:col-span-3">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Audience</p>
+                  <p className="text-[11px] font-bold text-primary mt-1 inline-flex items-center gap-1.5">
+                    {V?.icon ? <V.icon className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
+                    {V?.label ?? w.visibility}
+                  </p>
+                  {w.waitlistCount > 0 && (
+                    <p className="text-[10px] text-amber-700 font-bold">+{w.waitlistCount} on waitlist</p>
+                  )}
+                </div>
+                <div className="col-span-12 md:col-span-2 md:text-right">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Relay synced
+                  </span>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{isOpen ? "Hide" : "Expand"}</p>
+                </div>
+              </button>
+              {isOpen && (
+                <div className="px-4 pb-4 pt-1 border-t border-outline-variant/30 grid md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Description</p>
+                    <p className="text-xs text-primary/80 mt-1 leading-relaxed">
+                      {w.description || "—"}
+                    </p>
+                    {w.venue && (
+                      <p className="text-[11px] text-muted-foreground mt-2 inline-flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {w.venue}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex md:justify-end items-start gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onEdit(w); }}
+                      className="px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-[11px] font-bold text-primary hover:bg-surface-low inline-flex items-center gap-1"
+                    >
+                      <Pencil className="w-3 h-3" /> Edit
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDelete(w.id); }}
+                      className="px-3 py-1.5 rounded-full ghost-border bg-surface-lowest text-[11px] font-bold text-destructive hover:bg-destructive/10 inline-flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" /> Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+};
+
 // ---------- Webinar Card (provider view) ----------
 const WebinarCard = ({
   webinar, onEdit, onDelete,
