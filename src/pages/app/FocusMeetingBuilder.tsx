@@ -333,7 +333,13 @@ const FocusMeetingBuilder = () => {
 
         {/* DAILY OCCUPANCY (today) */}
         <div className="mb-5">
-          <DailyOccupancy date={draft.date} />
+          <DailyOccupancy
+            date={draft.date}
+            onBlockClick={(id) => {
+              const s = slots.find((x) => x.id === id);
+              if (s) editSlot(s);
+            }}
+          />
         </div>
 
         {/* Stepper with fixed Back/Next anchors */}
