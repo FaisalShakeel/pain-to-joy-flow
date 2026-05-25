@@ -32,7 +32,11 @@ export type ActiveSlotMode = "hybrid" | "online" | "onsite" | "quicksync";
 export interface ActiveSlotHandlers {
   onEdit?: () => void;
   onDelete?: () => void;
-  onDuplicate?: (kind: "tomorrow" | "nextweek" | "custom", customDate?: string) => void;
+  onDuplicate?: (
+    kind: "tomorrow" | "nextweek" | "custom",
+    customDate?: string,
+    customDateTo?: string,
+  ) => void;
   onShare?: () => void;
 }
 
