@@ -16,7 +16,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
 type Filter = "all" | "favorites" | "frequent" | StatusFilter | Relationship;
-type Density = 6 | 12 | 16;
+type Density = 8 | 12 | 16;
 
 const FAV_KEY = "availock.favoriteContacts";
 
@@ -72,7 +72,7 @@ const Contacts = () => {
   const [q, setQ] = useState("");
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
-  const [density, setDensity] = useState<Density>(16);
+  const [density, setDensity] = useState<Density>(8);
   const birdsEye = true;
   const [searchOpen, setSearchOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -223,17 +223,18 @@ const Contacts = () => {
   };
 
   const densityCols: Record<Density, string> = {
-    6:  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-    12: "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
-    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4",
+    8:  "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
+    12: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4",
+    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4",
   };
 
   // Approximate per-tile heights (px) used to compute the visible window height.
-  // Keeps exactly `density` tiles in view; the rest scrolls within the panel.
-  const densityRowHeight: Record<Density, number> = { 6: 220, 12: 132, 16: 88 };
-  const densityColCount: Record<Density, number> = { 6: 3, 12: 4, 16: 4 };
-  const visibleRows: Record<Density, number> = { 6: 2, 12: 3, 16: 4 };
-  const scrollMaxHeight = visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
+  const densityRowHeight: Record<Density, number> = { 8: 168, 12: 128, 16: 104 };
+  const visibleRows: Record<Density, number> = { 8: 2, 12: 3, 16: 2 };
+  const baseHeight =
+    visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
+  // For 16-view show ~8 fully visible tiles + a partial row peeking below.
+  const scrollMaxHeight = density === 16 ? baseHeight + Math.round(densityRowHeight[16] * 0.45) : baseHeight;
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
@@ -391,7 +392,7 @@ const Contacts = () => {
             <Eye className="w-3 h-3" /> Bird's-Eye
           </span>
           <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
-            {([6, 12, 16] as Density[]).map((d) => (
+            {([8, 12, 16] as Density[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDensity(d)}
@@ -432,12 +433,15 @@ const Contacts = () => {
           className="mt-4 overflow-y-auto pr-1 rounded-2xl"
           style={{ maxHeight: scrollMaxHeight }}
         >
-          <ul className={cn("grid auto-rows-fr", density === 6 ? "gap-4" : density === 12 ? "gap-3" : "gap-2", densityCols[density])}>
+          <ul className={cn("grid auto-rows-fr", density === 8 ? "gap-3" : density === 12 ? "gap-2.5" : "gap-2", densityCols[density])}>
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
-              const roomy = density === 6;
-              const mid = density === 12;
+              // 8-view mirrors the previous "12" mid layout (large detailed cards),
+              // 12-view is a slightly tighter mid, 16-view stays compact.
+              const roomy = false;
+              const mid = density === 8 || density === 12;
+              const tight = density === 12;
               return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
@@ -459,7 +463,7 @@ const Contacts = () => {
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
                       "group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200",
-                      roomy ? "p-5" : mid ? "p-4" : "p-3",
+                      density === 8 ? "p-4" : tight ? "p-3.5" : "p-3",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
@@ -532,8 +536,8 @@ const Contacts = () => {
                         >
                           <Activity className="w-3.5 h-3.5" />
                         </button>
-                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
-                        {roomy && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
+                        <AlertIcons alerts={c.alerts} size={mid ? "sm" : "xs"} />
+                        {mid && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
                       </div>
                       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                         <PingButton contact={c} size="sm" />
