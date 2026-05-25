@@ -283,7 +283,13 @@ const WebinarBuilder = () => {
     >
       {/* DAILY OCCUPANCY (today) — parity with Focused & Quick Sync builders */}
       <div className="mb-5">
-        <DailyOccupancy date={draft.date} />
+        <DailyOccupancy
+          date={draft.date}
+          onBlockClick={(id) => {
+            const w = items.find((x) => x.id === id);
+            if (w) editOne(w);
+          }}
+        />
       </div>
 
       {viewMode === "live" ? (
