@@ -572,7 +572,7 @@ const QuickSyncBuilder = () => {
             slots.map((s) => [s.id, {
               onEdit: () => editSlot(s),
               onDelete: () => setConfirmDelete(s.id),
-              onDuplicate: (k, d) => duplicate(s, k, d),
+              onDuplicate: (k, d, dt) => duplicate(s, k, d, dt),
             }]),
           )}
         />
