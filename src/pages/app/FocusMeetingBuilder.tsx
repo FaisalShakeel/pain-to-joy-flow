@@ -21,7 +21,7 @@ import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/ap
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { DailyOccupancy, type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
-import { availabilityStore, findConflict, flashConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
@@ -180,6 +180,7 @@ const FocusMeetingBuilder = () => {
         description: `${totalSubSlots} meeting slot${totalSubSlots === 1 ? "" : "s"} generated.`,
       });
       const next = created[0];
+      if (next) setTimeout(() => markCreated(next.id), 60);
       if (relay.enabled) {
         createRelay({
           title: `OPEN MEETING BLOCK · ${fmtTime(next.startMin)}–${fmtTime(next.endMin)}`,

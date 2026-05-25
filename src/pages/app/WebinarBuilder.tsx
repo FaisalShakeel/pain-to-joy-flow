@@ -21,7 +21,7 @@ import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/ap
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel from "@/components/app/ActiveSlotsPanel";
-import { availabilityStore, findConflict, flashConflict, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
