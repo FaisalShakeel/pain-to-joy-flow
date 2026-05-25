@@ -387,53 +387,16 @@ const FocusMeetingBuilder = () => {
             )}
 
             {step === 3 && (
-              <Section title="Step 3 — Time Window" icon={Clock} hint="Pick End Time manually, tap +Forward, or enter Slot Count">
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Start Time">
-                    <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
-                  </Field>
-                  <Field label="End Time">
-                    <div className="flex items-center gap-2">
-                      <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
-                      <button
-                        type="button"
-                        onClick={() => set("endMin", Math.min(24 * 60, draft.endMin + draft.callMin))}
-                        className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg ghost-border bg-surface-low text-[11px] font-bold text-primary hover:bg-surface"
-                        title={`Extend window by one ${draft.callMin}-min slot`}
-                      >
-                        <Plus className="w-3 h-3" /> Forward
-                      </button>
-                    </div>
-                  </Field>
-                </div>
-
-                <Field label={`Slot Count (${draft.callMin}-min each)`}>
-                  <input
-                    type="number"
-                    min={1}
-                    value={count}
-                    onChange={(e) => {
-                      const n = Math.max(1, Number(e.target.value) || 1);
-                      set("endMin", Math.min(24 * 60, draft.startMin + n * draft.callMin));
-                    }}
-                    className="w-32 px-3 py-2 rounded-lg bg-surface-low ghost-border text-sm font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                </Field>
-
-                <div className="grid grid-cols-3 gap-2 mt-1">
-                  <div className="rounded-lg ghost-border bg-surface-low p-2">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Total Slots</p>
-                    <p className="font-headline font-extrabold text-primary text-base tabular-nums">{count}</p>
-                  </div>
-                  <div className="rounded-lg ghost-border bg-surface-low p-2">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Window</p>
-                    <p className="font-headline font-extrabold text-primary text-base tabular-nums">{totalMin}m</p>
-                  </div>
-                  <div className="rounded-lg ghost-border bg-surface-low p-2">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Ends</p>
-                    <p className="font-headline font-extrabold text-primary text-base tabular-nums">{fmtTime(draft.endMin)}</p>
-                  </div>
-                </div>
+              <Section title="Step 3 — Time Window" icon={Clock} hint="Set Start, End, and Slot Count — calculations update live.">
+                <WindowTabs
+                  startMin={draft.startMin}
+                  endMin={draft.endMin}
+                  callMin={draft.callMin}
+                  count={count}
+                  onStart={(v) => set("startMin", v)}
+                  onEnd={(v) => set("endMin", v)}
+                  onCount={(n) => set("endMin", Math.min(24 * 60, draft.startMin + Math.max(1, n) * draft.callMin))}
+                />
               </Section>
             )}
 
