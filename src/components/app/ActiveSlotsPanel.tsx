@@ -738,10 +738,21 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false }: { rows: Row[]; d
           if (e <= s) return null;
           const left = ((s - RAIL_START) / RAIL_SPAN) * 100;
           const width = ((e - s) / RAIL_SPAN) * 100;
+          const cm = r.callMin ?? 0;
+          const subCount =
+            cm > 0
+              ? Math.max(0, Math.floor((r.endMin - r.startMin) / cm) - (r.disabledSubSlots ?? []).length)
+              : 1;
+          const sourceName =
+            r.source === "focus" ? "FOCUS SYNC"
+            : r.source === "quicksync" ? "QUICK SYNC"
+            : r.source === "event-access" ? "EVENT ACCESS"
+            : (r.typeLabel || "AVAILABILITY").toUpperCase();
+          const pad = (n: number) => n.toString().padStart(2, "0");
           return (
             <div
               key={r.id}
-              title={`${r.typeLabel} · ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}`}
+              title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)})`}
               className={cn(
                 "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 transition",
                 sourceColor[r.source] ?? "bg-primary",
@@ -792,6 +803,10 @@ export const DailyOccupancy = ({ date }: { date?: string }) => {
     mode: b.mode,
     typeLabel: b.typeLabel,
     handlers: {},
+    callMin: b.callMin,
+    bookedSubSlots: b.bookedSubSlots,
+    disabledSubSlots: b.disabledSubSlots,
+    editedSubSlots: b.editedSubSlots,
   }));
 
   // Sum actionable sub-slots, not just parent windows.
