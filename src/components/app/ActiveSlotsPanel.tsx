@@ -85,6 +85,76 @@ const computeStatus = (iso: string): ActiveSlotStatus => {
   return "upcoming";
 };
 
+/** Clone-target calendar with Shift+Click range support and live preview. */
+const CloneRangeCalendar = ({
+  onPick,
+}: {
+  onPick: (from: string, to?: string) => void;
+}) => {
+  const [from, setFrom] = useState<Date | null>(null);
+  const [to, setTo] = useState<Date | null>(null);
+  const dayCount = (() => {
+    if (!from) return 0;
+    if (!to) return 1;
+    const ms = to.getTime() - from.getTime();
+    return Math.max(1, Math.round(ms / 86400000) + 1);
+  })();
+  return (
+    <div className="w-[280px]">
+      <div className="px-3 pt-3 pb-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+          Click = single date · Shift+Click = range
+        </p>
+      </div>
+      <Calendar
+        mode="single"
+        selected={!to ? from ?? undefined : undefined}
+        modifiers={
+          from && to
+            ? {
+                range_start: from,
+                range_end: to,
+                range_middle: { after: from, before: to },
+              }
+            : undefined
+        }
+        modifiersClassNames={{
+          range_start: "bg-primary text-primary-foreground rounded-l-md",
+          range_end: "bg-primary text-primary-foreground rounded-r-md",
+          range_middle: "bg-accent text-accent-foreground",
+        }}
+        onDayClick={(day, _m, e) => {
+          const shift = (e as React.MouseEvent).shiftKey;
+          if (shift && from) {
+            if (day < from) setTo(from), setFrom(day);
+            else setTo(day);
+          } else {
+            setFrom(day);
+            setTo(null);
+          }
+        }}
+        initialFocus
+        className={cn("p-3 pointer-events-auto")}
+      />
+      <div className="px-3 pb-3 pt-1 flex items-center justify-between gap-2">
+        <p className="text-[11px] text-muted-foreground">
+          {from
+            ? `Cloning to ${dayCount} date${dayCount === 1 ? "" : "s"}`
+            : "Pick a target date"}
+        </p>
+        <button
+          type="button"
+          disabled={!from}
+          onClick={() => from && onPick(localISO(from), to ? localISO(to) : undefined)}
+          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[11px] font-bold disabled:opacity-40"
+        >
+          Clone
+        </button>
+      </div>
+    </div>
+  );
+};
+
 interface Props {
   /** Eyebrow for the heading; defaults to "UNIFIED AVAILABILITY". */
   eyebrow?: string;
