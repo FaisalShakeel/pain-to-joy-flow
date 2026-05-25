@@ -431,7 +431,7 @@ const ActiveSlotsPanel = ({
   );
 };
 
-const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) => {
+const SlotRow = ({ row, highlight = false, createdGlow = false }: { row: Row; highlight?: boolean; createdGlow?: boolean }) => {
   const [dupOpen, setDupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const status = computeStatus(row.date);
@@ -445,6 +445,7 @@ const SlotRow = ({ row, highlight = false }: { row: Row; highlight?: boolean }) 
       className={cn(
         "rounded-2xl bg-surface-lowest ghost-border shadow-ambient/40 hover:shadow-ambient transition",
         highlight && "ring-2 ring-rose-500/70 animate-[shake_0.45s_ease-in-out_2] bg-rose-500/5",
+        createdGlow && "ring-2 ring-emerald-500/70 bg-emerald-500/5 animate-[pulse_1.2s_ease-in-out_2]",
       )}
     >
       <div className="grid grid-cols-12 items-center gap-3 px-5 py-4">
