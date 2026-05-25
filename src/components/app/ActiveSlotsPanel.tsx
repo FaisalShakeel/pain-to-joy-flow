@@ -9,7 +9,15 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useAvailability, useConflictHighlight, availabilityStore, type AvailabilityBlock } from "@/lib/availabilityStore";
+import {
+  useAvailability,
+  useConflictHighlight,
+  useLastCreated,
+  getLastCreatedId,
+  availabilityStore,
+  type AvailabilityBlock,
+} from "@/lib/availabilityStore";
+import { useRef } from "react";
 
 /** Local-time yyyy-mm-dd (avoids UTC off-by-one from toISOString). */
 const localISO = (d: Date = new Date()) => format(d, "yyyy-MM-dd");
@@ -123,6 +131,25 @@ const ActiveSlotsPanel = ({
 
   const blocks = useAvailability();
   const highlightId = useConflictHighlight();
+  const lastCreatedKey = useLastCreated();
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [createdGlowId, setCreatedGlowId] = useState<string | null>(null);
+
+  // Auto-scroll + highlight when a slot is newly created (any source).
+  useEffect(() => {
+    const id = getLastCreatedId();
+    if (!id) return;
+    // Wait a tick for rows to render after store sync.
+    const t = setTimeout(() => {
+      const el = rowRefs.current[id];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setCreatedGlowId(id);
+        setTimeout(() => setCreatedGlowId((cur) => (cur === id ? null : cur)), 2400);
+      }
+    }, 80);
+    return () => clearTimeout(t);
+  }, [lastCreatedKey]);
 
   const rows: Row[] = useMemo(() => {
     const fromStore: Row[] = blocks.map((b: AvailabilityBlock) => ({
