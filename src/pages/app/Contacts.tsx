@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone, Maximize2, Minimize2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -73,6 +73,13 @@ const Contacts = () => {
   const [view, setView] = useState<View>("grid");
   const [filter, setFilter] = useState<Filter>("all");
   const [density, setDensity] = useState<Density>(8);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [vh, setVh] = useState<number>(typeof window !== "undefined" ? window.innerHeight : 800);
+  useEffect(() => {
+    const onResize = () => setVh(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const birdsEye = true;
   const [searchOpen, setSearchOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -222,19 +229,18 @@ const Contacts = () => {
     setSearchOpen(false);
   };
 
+  // True density scaling: different column counts per density so tiles
+  // visibly shrink. Visible rows stay at 2 so the total visible count
+  // matches the selected density on desktop (4×2=8, 6×2=12, 8×2=16).
   const densityCols: Record<Density, string> = {
-    8:  "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
-    12: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4",
-    16: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4",
+    8:  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+    12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
+    16: "grid-cols-4 sm:grid-cols-6 lg:grid-cols-8",
   };
-
-  // Approximate per-tile heights (px) used to compute the visible window height.
-  const densityRowHeight: Record<Density, number> = { 8: 168, 12: 128, 16: 104 };
-  const visibleRows: Record<Density, number> = { 8: 2, 12: 3, 16: 2 };
-  const baseHeight =
-    visibleRows[density] * densityRowHeight[density] + (visibleRows[density] - 1) * 12 + 16;
-  // For 16-view show ~8 fully visible tiles + a partial row peeking below.
-  const scrollMaxHeight = density === 16 ? baseHeight + Math.round(densityRowHeight[16] * 0.45) : baseHeight;
+  const visibleRows = 2;
+  const headerOffset = fullscreen ? 96 : 240;
+  const containerHeight = Math.max(360, vh - headerOffset);
+  const rowHeight = Math.max(96, Math.floor((containerHeight - 24) / visibleRows));
 
   const statusDot: Record<string, string> = {
     available: "bg-emerald-500",
@@ -254,6 +260,8 @@ const Contacts = () => {
       hideBell={false}
       subtitle="Real-time availability visibility for respectful, effective reach-outs"
       title="The Contact Vault"
+      fullscreen={fullscreen}
+      onExitFullscreen={() => setFullscreen(false)}
     >
       <div className="flex items-center gap-2 flex-wrap mb-4">
           <button
@@ -406,6 +414,15 @@ const Contacts = () => {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setFullscreen((v) => !v)}
+            title={fullscreen ? "Exit fullscreen" : "Fullscreen directory"}
+            aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen directory"}
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-lowest ghost-border text-primary hover:bg-surface-low transition shadow-sm"
+          >
+            {fullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
         </div>
       </div>
       {filtered.length === 0 ? (
@@ -430,18 +447,23 @@ const Contacts = () => {
         </div>
       ) : (
         <div
-          className="mt-4 overflow-y-auto pr-1 rounded-2xl"
-          style={{ maxHeight: scrollMaxHeight }}
+          className="mt-3 overflow-y-auto pr-1 rounded-2xl"
+          style={{ height: containerHeight }}
         >
-          <ul className={cn("grid auto-rows-fr", density === 8 ? "gap-3" : density === 12 ? "gap-2.5" : "gap-2", densityCols[density])}>
+          <ul
+            className={cn(
+              "grid",
+              density === 8 ? "gap-3" : density === 12 ? "gap-2" : "gap-1.5",
+              densityCols[density],
+            )}
+            style={{ gridAutoRows: `${rowHeight}px` }}
+          >
             {filtered.map((c) => {
               const isPinned = pinned.includes(c.id);
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
-              // 8-view mirrors the previous "12" mid layout (large detailed cards),
-              // 12-view is a slightly tighter mid, 16-view stays compact.
-              const roomy = false;
-              const mid = density === 8 || density === 12;
-              const tight = density === 12;
+              const roomy = density === 8;
+              const mid = density === 12;
+              const tight = density === 16;
               return (
                 <li key={c.id} className="relative h-full">
                   {unseenForContact(c.id) > 0 && (
@@ -463,13 +485,13 @@ const Contacts = () => {
                     title={`${c.name} · ${c.org} — ${c.availabilityContext}`}
                     className={cn(
                       "group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200",
-                      density === 8 ? "p-4" : tight ? "p-3.5" : "p-3",
+                      roomy ? "p-4" : mid ? "p-3" : "p-2.5",
                       isPinned && "ring-1 ring-accent/40 bg-accent/5",
                     )}
                   >
                     {/* Header: avatar + top-right actions */}
                     <div className="flex items-start justify-between gap-2">
-                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : mid ? "md" : "sm"} />
+                      <Avatar initials={c.initials} accent={c.accent} status={c.status} size={roomy ? "lg" : mid ? "sm" : "sm"} />
                       <div className={cn("flex items-center", roomy ? "gap-1.5" : "gap-1", "opacity-70 group-hover:opacity-100 transition")}>
                         <button
                           type="button"
@@ -510,34 +532,36 @@ const Contacts = () => {
 
                     {/* Body */}
                     <div className={cn("min-w-0", roomy ? "mt-4" : mid ? "mt-3" : "mt-2")}>
-                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : mid ? "text-sm" : "text-[12px]")}>
+                      <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-base" : mid ? "text-[12px]" : "text-[11px]")}>
                         {c.name}
                       </p>
                       <div className={cn("flex items-center gap-1.5", roomy ? "mt-1.5" : "mt-1")}>
                         <span className={cn("inline-block rounded-full", statusDot[c.status], roomy ? "w-2 h-2" : "w-1.5 h-1.5")} />
-                        <span className={cn("text-muted-foreground font-medium", roomy ? "text-xs" : "text-[10px]")}>
+                        <span className={cn("text-muted-foreground font-medium", roomy ? "text-xs" : "text-[9px]")}>
                           {statusLabel[c.status]}
                         </span>
                       </div>
-                      <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-3 text-[12px] line-clamp-3" : mid ? "mt-2 text-[11px] line-clamp-2" : "mt-1.5 text-[10px] line-clamp-2")}>
-                        {c.availabilityContext}
-                      </p>
+                      {!tight && (
+                        <p className={cn("text-foreground/70 leading-snug", roomy ? "mt-3 text-[12px] line-clamp-3" : "mt-2 text-[10px] line-clamp-2")}>
+                          {c.availabilityContext}
+                        </p>
+                      )}
                     </div>
 
                     {/* Footer: quick actions */}
-                    <div className={cn("flex items-center justify-between gap-2", roomy ? "mt-4 pt-3 border-t border-border/40" : mid ? "mt-3 pt-2 border-t border-border/40" : "mt-2")}>
+                    <div className={cn("flex items-center justify-between gap-2 mt-auto", roomy ? "pt-3 border-t border-border/40" : mid ? "pt-2 border-t border-border/40" : "pt-1.5")}>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/app/contact/${c.id}/log`); }}
                           title="Connection Log"
                           aria-label="Connection Log"
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition"
+                          className={cn("inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-accent hover:bg-surface-low transition", tight ? "w-6 h-6" : "w-7 h-7")}
                         >
                           <Activity className="w-3.5 h-3.5" />
                         </button>
-                        <AlertIcons alerts={c.alerts} size={mid ? "sm" : "xs"} />
-                        {mid && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
+                        <AlertIcons alerts={c.alerts} size={roomy ? "sm" : "xs"} />
+                        {roomy && <AccessChip state={c.syncStatus} size="sm" className="ml-1" />}
                       </div>
                       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                         <PingButton contact={c} size="sm" />

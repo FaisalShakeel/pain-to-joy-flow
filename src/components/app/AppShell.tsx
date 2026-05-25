@@ -101,12 +101,17 @@ interface Props {
   actions?: ReactNode;
   headerInline?: ReactNode;
   hideBell?: boolean;
+  /** When true, collapses sidebar/header/bottom-nav and removes main padding for maximum content area. */
+  fullscreen?: boolean;
+  /** Called when the user clicks the built-in exit-fullscreen affordance. */
+  onExitFullscreen?: () => void;
 }
 
-const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell }: Props) => {
+const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell, fullscreen, onExitFullscreen }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
+  const sidebarActuallyHidden = sidebarHidden || !!fullscreen;
   const [openGroup, setOpenGroup] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem("nav.openGroup");
@@ -161,7 +166,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       <aside
         className={cn(
           "w-64 lg:w-72 shrink-0 flex-col bg-surface-lowest/72 backdrop-blur-2xl border-r border-outline-variant/30 sticky top-0 h-screen transition-all shadow-soft",
-          sidebarHidden ? "hidden" : "hidden md:flex",
+          sidebarActuallyHidden ? "hidden" : "hidden md:flex",
         )}
       >
         <Link to="/app" className="flex items-center px-6 py-6" aria-label="Availock home">
@@ -307,8 +312,9 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       </aside>
 
       {/* Main column */}
-      <div className="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
+      <div className={cn("flex-1 min-w-0 flex flex-col", fullscreen ? "pb-0" : "pb-20 md:pb-0")}>
         {/* Top bar */}
+        {!fullscreen && (
         <header className="sticky top-0 z-30 glass-panel border-b border-outline-variant/30 !rounded-none">
           <div className="px-4 md:px-8 py-1 flex items-center gap-3">
             <button
@@ -423,8 +429,20 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
             </div>
           )}
         </header>
+        )}
+        {fullscreen && (
+          <button
+            type="button"
+            onClick={onExitFullscreen}
+            className="fixed top-3 right-3 z-40 inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface-lowest ghost-border text-[11px] font-semibold text-primary shadow-elevated hover:bg-surface-low transition"
+            aria-label="Exit fullscreen"
+            title="Exit fullscreen"
+          >
+            <X className="w-3.5 h-3.5" /> Exit fullscreen
+          </button>
+        )}
 
-        <main className="flex-1 min-w-0 overflow-x-hidden px-4 md:px-10 py-6 md:py-9">{children}</main>
+        <main className={cn("flex-1 min-w-0 overflow-x-hidden", fullscreen ? "px-2 md:px-3 py-2" : "px-4 md:px-10 py-6 md:py-9")}>{children}</main>
       </div>
 
       {/* Mobile drawer */}
@@ -540,6 +558,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
       )}
 
       {/* Mobile bottom nav */}
+      {!fullscreen && (
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-lowest border-t border-border/50">
         <ul className="grid grid-cols-5">
           {[
@@ -569,6 +588,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
           ))}
         </ul>
       </nav>
+      )}
     </div>
   );
 };
