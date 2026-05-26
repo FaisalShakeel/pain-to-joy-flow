@@ -816,7 +816,10 @@ const PortalTile = ({
     variant === "emerald"
       ? "bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/30"
       : "bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20";
-  const iconBox = variant === "emerald" ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-white";
+  const iconBox =
+    variant === "emerald"
+      ? "bg-emerald-500/20 text-emerald-400"
+      : "bg-white/10 text-white/60 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors";
 
   const ctaContent = (
     <>
@@ -826,7 +829,7 @@ const PortalTile = ({
   const ctaClassName = `w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
+    <div className={`group relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
       <div className="space-y-2.5 relative z-10">
         <div className="flex items-center justify-between">
           <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
