@@ -926,12 +926,15 @@ export default QuickSyncBuilder;
 
 // ---------- Clone Date Picker (Step 5) ----------
 const CloneDatePicker = ({
-  baseDate, baseDateTo, value, onChange,
+  baseDate, baseDateTo, value, onChange, startMin, endMin, excludeId,
 }: {
   baseDate: string;
   baseDateTo?: string;
   value: string[];
   onChange: (next: string[]) => void;
+  startMin: number;
+  endMin: number;
+  excludeId?: string;
 }) => {
   const baseSet = useMemo(() => {
     const s = new Set<string>();
@@ -942,6 +945,12 @@ const CloneDatePicker = ({
   }, [baseDate, baseDateTo]);
 
   const selected = useMemo(() => value.map((d) => new Date(d)), [value]);
+  const conflictISO = useMemo(
+    () => value.filter((d) => !!findConflict(d, startMin, endMin, excludeId)),
+    [value, startMin, endMin, excludeId],
+  );
+  const conflictSet = useMemo(() => new Set(conflictISO), [conflictISO]);
+  const removeConflicts = () => onChange(value.filter((d) => !conflictSet.has(d)));
 
   const handleDayClick = (day: Date) => {
     const iso = toISO(day);
@@ -960,6 +969,16 @@ const CloneDatePicker = ({
           <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold">
             {value.length} clone{value.length === 1 ? "" : "s"}
           </span>
+          {conflictISO.length > 0 && (
+            <button
+              type="button"
+              onClick={removeConflicts}
+              className="px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-bold hover:bg-destructive/25"
+              title="Remove all conflicted dates"
+            >
+              Remove {conflictISO.length} conflict{conflictISO.length === 1 ? "" : "s"}
+            </button>
+          )}
           {value.length > 0 && (
             <button
               type="button"
@@ -975,9 +994,14 @@ const CloneDatePicker = ({
         mode="multiple"
         selected={selected}
         onDayClick={handleDayClick}
-        modifiers={{ source: Array.from(baseSet).map((d) => new Date(d)) }}
+        modifiers={{
+          source: Array.from(baseSet).map((d) => new Date(d)),
+          conflict: conflictISO.map((d) => new Date(d)),
+        }}
         modifiersClassNames={{
           source: "bg-accent text-accent-foreground rounded-md",
+          conflict:
+            "bg-destructive/20 text-destructive ring-1 ring-destructive/60 rounded-md",
         }}
         disabled={(d) => baseSet.has(toISO(d))}
         className={cn("p-2 pointer-events-auto")}
@@ -989,13 +1013,23 @@ const CloneDatePicker = ({
               key={d}
               type="button"
               onClick={() => onChange(value.filter((x) => x !== d))}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20"
-              title="Remove clone date"
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold",
+                conflictSet.has(d)
+                  ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
+                  : "bg-primary/10 text-primary hover:bg-primary/20",
+              )}
+              title={conflictSet.has(d) ? "Conflict — already occupied. Click to remove." : "Remove clone date"}
             >
               {format(new Date(d), "MMM d")} <X className="w-2.5 h-2.5" />
             </button>
           ))}
         </div>
+      )}
+      {conflictISO.length > 0 && (
+        <p className="mt-2 text-[10px] text-destructive font-bold">
+          {conflictISO.length} selected date{conflictISO.length === 1 ? "" : "s"} already contain occupied availability.
+        </p>
       )}
     </div>
   );
