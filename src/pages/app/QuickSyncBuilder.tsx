@@ -168,9 +168,47 @@ const QuickSyncBuilder = () => {
     for (const cd of draft.cloneDates ?? []) {
       if (!dates.includes(cd)) dates.push(cd);
     }
-    for (const dt of dates) {
-      if (conflictToast(dt, draft.startMin, draft.endMin, draft.id)) return;
+    const conflicts = dates
+      .map((dt) => ({ date: dt, block: findConflict(dt, draft.startMin, draft.endMin, draft.id) }))
+      .filter((c): c is { date: string; block: NonNullable<ReturnType<typeof findConflict>> } => !!c.block);
+    if (conflicts.length) {
+      if (conflicts[0].block) flashConflict(conflicts[0].block.id);
+      const validDates = dates.filter((d) => !conflicts.some((c) => c.date === d));
+      const baseISO = toISO(new Date(draft.date));
+      const baseToISO = draft.dateTo ? toISO(new Date(draft.dateTo)) : baseISO;
+      const skipSet = new Set(conflicts.map((c) => c.date));
+      const baseConflicts = skipSet.has(baseISO) || skipSet.has(baseToISO);
+      const list = conflicts
+        .map(
+          (c) =>
+            `• ${format(new Date(c.date), "MMM d, yyyy")} — occupied by ${c.block.typeLabel} (${fmtTimeHM(c.block.startMin)}–${fmtTimeHM(c.block.endMin)})`,
+        )
+        .join("\n");
+      sonner.error(
+        `Conflict detected on ${conflicts.length} date${conflicts.length === 1 ? "" : "s"}`,
+        {
+          description: list,
+          duration: 12000,
+          closeButton: true,
+          action:
+            !isEditing && validDates.length && !baseConflicts
+              ? {
+                  label: `Skip & create ${validDates.length}`,
+                  onClick: () => {
+                    const nextClones = (draft.cloneDates ?? []).filter((d) => !skipSet.has(d));
+                    set("cloneDates", nextClones);
+                    proceed(validDates);
+                  },
+                }
+              : undefined,
+        },
+      );
+      return;
     }
+    proceed(dates);
+  };
+
+  const proceed = (dates: string[]) => {
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Quick Sync updated" });
