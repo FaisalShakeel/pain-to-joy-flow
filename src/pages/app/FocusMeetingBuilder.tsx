@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
-  ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Repeat, Lock, Check,
+  ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
   ChevronRight, X, CheckCircle2, CalendarPlus, Video, MapPin,
 } from "lucide-react";
@@ -39,7 +39,8 @@ interface MTSlot {
   callMin: CallMin;
   bufferMin: BufferMin;
   repeats: Repeats;
-  weekdays?: number[]; // 0..6 if weekly
+  weekdays?: number[]; // 0..6 if weekly (legacy)
+  cloneDates?: string[]; // additional dates to clone this slot to on creation
   booking: Booking;
   access: Access;
   pricing: Pricing;
@@ -87,6 +88,7 @@ const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
   bufferMin: 5,
   repeats: "none",
   weekdays: [],
+  cloneDates: [],
   booking: "approval",
   access: "contacts",
   pricing: defaultPricing,
