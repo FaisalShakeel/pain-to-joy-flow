@@ -380,209 +380,97 @@ const ScheduleCall = () => {
 };
 
 // ---------- Subcomponents ----------
-function BookingTab({
-  active, onClick, icon, title, sub, accent, count,
-}: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; sub: string; accent: "primary" | "gold"; count: number }) {
+const TYPE_TONE: Record<"focus" | "quick" | "event", { idle: string; active: string; dot: string; iconIdle: string }> = {
+  focus: {
+    idle:      "bg-indigo-500/10 text-indigo-700 border-indigo-500/30 hover:bg-indigo-500/15",
+    active:    "bg-indigo-500 text-white border-indigo-500 shadow-elevated",
+    dot:       "bg-indigo-500",
+    iconIdle:  "text-indigo-600",
+  },
+  quick: {
+    idle:      "bg-amber-500/10 text-amber-800 border-amber-500/30 hover:bg-amber-500/20",
+    active:    "bg-amber-500 text-white border-amber-500 shadow-elevated",
+    dot:       "bg-amber-500",
+    iconIdle:  "text-amber-700",
+  },
+  event: {
+    idle:      "bg-amber-900/10 text-amber-900 border-amber-900/30 hover:bg-amber-900/15",
+    active:    "bg-amber-900 text-white border-amber-900 shadow-elevated",
+    dot:       "bg-amber-900",
+    iconIdle:  "text-amber-900",
+  },
+};
+
+function TypeTab({
+  active, onClick, icon, label, count, tone,
+}: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; count: number; tone: "focus" | "quick" | "event" }) {
+  const t = TYPE_TONE[tone];
   return (
     <button
       onClick={onClick}
-      className={`text-left p-5 rounded-3xl ghost-border transition shadow-ambient ${
-        active
-          ? accent === "primary"
-            ? "bg-primary text-primary-foreground border-primary shadow-elevated"
-            : "bg-amber-500 text-white border-amber-500 shadow-elevated"
-          : "bg-surface-lowest text-primary hover:bg-surface"
+      className={`min-w-0 flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl border text-[12px] sm:text-sm font-semibold transition ${
+        active ? t.active : `${t.idle} ghost-border`
       }`}
     >
-      <div className="flex items-center justify-between">
-        <span className={`grid place-items-center w-11 h-11 rounded-2xl ${
-          active ? "bg-white/15" : accent === "primary" ? "bg-primary/10 text-primary" : "bg-amber-500/15 text-amber-700"
-        }`}>{icon}</span>
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-          active ? "bg-white/15" : "bg-surface ghost-border text-muted-foreground"
-        }`}>
-          {count} today
-        </span>
-      </div>
-      <p className="mt-3 font-headline font-bold text-lg leading-tight">{title}</p>
-      <p className={`text-xs mt-0.5 ${active ? "text-white/80" : "text-muted-foreground"}`}>{sub}</p>
+      <span className={active ? "text-white" : t.iconIdle}>{icon}</span>
+      <span className="truncate">{label}</span>
+      <span className={`ml-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-surface ghost-border text-muted-foreground"}`}>
+        {count}
+      </span>
     </button>
   );
 }
 
-function MeetingCard({
-  slot, active, onPick, hybridPick, onPickChannel,
-}: {
-  slot: MeetingSlot;
-  active: boolean;
-  onPick: () => void;
-  hybridPick: HybridPick;
-  onPickChannel: (ch: HybridPick) => void;
-}) {
-  const C = channelMeta[slot.channel];
+function SlotMini({ slot, active, onPick }: { slot: Slot; active: boolean; onPick: () => void }) {
   const disabled = slot.full;
-  const durations = clampMeetingDurations(slot.durations);
-  const maxDur = durations[durations.length - 1];
-  const endTime = addMinutes(slot.time, maxDur);
+  const isQuick = slot.kind === "quick";
+  const dur = isQuick ? clampQuickDuration((slot as QuickSlot).duration) : clampMeetingDurations((slot as MeetingSlot).durations)[0];
+  const endTime = addMinutes(slot.time, dur);
+  const channel: Channel | "quick" = isQuick ? "quick" : (slot as MeetingSlot).channel;
+  const paid = slot.pricing?.mode === "paid";
+  const approval = slot.approval;
   return (
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-2 rounded-lg border transition ${
+      className={`text-left p-2.5 rounded-xl border transition ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
-          ? "bg-primary text-primary-foreground border-primary shadow-elevated"
-          : "bg-surface-low ghost-border text-primary hover:bg-surface hover:shadow-ambient"
+          ? "bg-primary/5 border-primary/60 ring-1 ring-primary/40 text-primary shadow-ambient"
+          : "bg-surface-lowest ghost-border text-primary hover:bg-surface-low hover:shadow-ambient"
       }`}
     >
-      <div className="flex items-center justify-between gap-1.5">
-        <span className="font-headline font-bold text-[12px] tabular-nums leading-none">
-          {slot.time}<span className="opacity-70">–{endTime}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-headline font-bold text-[13px] tabular-nums leading-none">
+          {slot.time}<span className="opacity-60">–{endTime}</span>
         </span>
         <span className="inline-flex items-center gap-1">
-          {slot.channel === "hybrid" ? (
+          {channel === "hybrid" && (
             <>
-              <HybridIcon
-                Icon={Video}
-                title="Online"
-                active={active && hybridPick === "online"}
-                taken={slot.taken === "online"}
-                onClick={(e) => { e.stopPropagation(); onPickChannel("online"); }}
-                tone="sky"
-                cardActive={active}
-              />
-              <HybridIcon
-                Icon={MapPin}
-                title="On-site"
-                active={active && hybridPick === "onsite"}
-                taken={slot.taken === "onsite"}
-                onClick={(e) => { e.stopPropagation(); onPickChannel("onsite"); }}
-                tone="indigo"
-                cardActive={active}
-              />
+              <Video className="w-3.5 h-3.5 text-sky-600" />
+              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
             </>
-          ) : (
-            <C.icon className={`w-3 h-3 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
           )}
+          {channel === "online" && <Video className="w-3.5 h-3.5 text-sky-600" />}
+          {channel === "onsite" && <MapPin className="w-3.5 h-3.5 text-indigo-600" />}
+          {channel === "quick" && <Zap className="w-3.5 h-3.5 text-amber-600" />}
         </span>
       </div>
-      <p className={`mt-0.5 text-[10px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-        {durations[0]}–{maxDur} min
-        {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
-      </p>
-      <div className="mt-1">
-        <PriceTag pricing={slot.pricing} />
-      </div>
-      <div className={`mt-1 flex items-center flex-wrap gap-x-1.5 gap-y-0.5 text-[9px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-        <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> 3m buf</span>
-        {slot.approval && <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>}
-        {slot.channel === "hybrid" && slot.taken && (
-          <span>{slot.taken === "online" ? "On-site only" : "Online only"}</span>
-        )}
-        {slot.channel === "hybrid" && !slot.taken && active && (
-          <span className="font-semibold">
-            · {hybridPick === "online" ? "Online" : "On-site"}
-          </span>
-        )}
-      </div>
-    </button>
-  );
-}
-
-function HybridIcon({
-  Icon, title, active, taken, onClick, tone, cardActive,
-}: {
-  Icon: React.ComponentType<any>;
-  title: string;
-  active: boolean;
-  taken: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  tone: "sky" | "indigo";
-  cardActive: boolean;
-}) {
-  const toneRing = tone === "sky" ? "ring-sky-400 bg-sky-500/15 text-sky-700" : "ring-indigo-400 bg-indigo-500/15 text-indigo-700";
-  return (
-    <span
-      role="button"
-      title={title}
-      aria-pressed={active}
-      onClick={taken ? undefined : onClick}
-      className={`grid place-items-center w-6 h-6 rounded-md transition cursor-pointer ${
-        taken
-          ? "opacity-30 cursor-not-allowed"
-          : active
-          ? `ring-2 ${toneRing}`
-          : cardActive
-          ? "bg-white/15 text-primary-foreground hover:bg-white/25"
-          : `${toneRing} hover:brightness-110`
-      }`}
-    >
-      <Icon className="w-3.5 h-3.5" />
-    </span>
-  );
-}
-
-function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean; onPick: () => void }) {
-  const disabled = slot.full;
-  const dur = clampQuickDuration(slot.duration);
-  const endTime = addMinutes(slot.time, dur);
-  return (
-    <button
-      onClick={onPick}
-      disabled={disabled}
-      className={`text-left p-2 rounded-lg border transition relative overflow-hidden ${
-        disabled
-          ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
-          : active
-          ? "bg-amber-500 text-white border-amber-500 shadow-elevated"
-          : "bg-amber-500/5 border-amber-500/30 text-primary hover:bg-amber-500/10"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-1.5">
-        <span className="font-headline font-bold text-[12px] tabular-nums inline-flex items-center gap-1 leading-none">
-          <Zap className={`w-3 h-3 ${active ? "text-white" : "text-amber-600"}`} />
-          {slot.time}<span className="opacity-70">–{endTime}</span>
+      <div className="mt-1.5 flex items-center flex-wrap gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground">
+        <span className="inline-flex items-center gap-0.5 font-semibold text-primary/80">
+          <Clock className="w-2.5 h-2.5" /> {dur}m
         </span>
-        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
-          {dur} min
+        <span className="inline-flex items-center gap-0.5">
+          <Timer className="w-2.5 h-2.5" /> 3m buf
         </span>
-      </div>
-      <p className={`mt-0.5 text-[10px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
-        <Video className="w-2.5 h-2.5" /> Online · one-tap
-      </p>
-      <div className="mt-1">
-        <PriceTag pricing={slot.pricing} />
-      </div>
-      <div className={`mt-1 flex items-center gap-1.5 text-[9px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
-        {slot.approval ? <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>
-          : <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> Instant</span>}
-      </div>
-    </button>
-  );
-}
-
-function ChannelBtn({
-  picked, onClick, icon, title, sub, disabled,
-}: { picked: boolean; onClick: () => void; icon: React.ReactNode; title: string; sub: string; disabled?: boolean }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex items-start gap-3 p-4 rounded-2xl text-left transition ${
-        disabled
-          ? "bg-muted/40 ghost-border text-muted-foreground cursor-not-allowed"
-          : picked
-          ? "bg-primary text-primary-foreground shadow-elevated"
-          : "bg-surface-low ghost-border text-primary hover:bg-surface"
-      }`}
-    >
-      <span className={`grid place-items-center w-10 h-10 rounded-xl ${picked && !disabled ? "bg-white/15" : "bg-primary/10 text-primary"}`}>
-        {icon}
-      </span>
-      <div>
-        <p className="font-semibold">{title}</p>
-        <p className={`text-xs ${picked && !disabled ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{sub}</p>
+        <span className={`inline-flex items-center gap-0.5 ${approval ? "text-amber-700" : "text-emerald-700"}`}>
+          {approval ? <Lock className="w-2.5 h-2.5" /> : <Check className="w-2.5 h-2.5" />}
+          {approval ? "Approval" : "Instant"}
+        </span>
+        <span className={`inline-flex items-center gap-0.5 font-semibold ${paid ? "text-primary" : "text-emerald-700"}`}>
+          {paid ? formatPrice(slot.pricing) : "Free"}
+        </span>
       </div>
     </button>
   );
