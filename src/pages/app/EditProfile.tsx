@@ -72,8 +72,6 @@ const EditProfile = () => {
   const [profile, setProfile] = useState<OwnerProfile>(myOwnerProfile);
   const [twoFa, setTwoFa] = useState(true);
   const [discoverable, setDiscoverable] = useState(false);
-  const [discovery, setDiscovery] = useState<DiscoverySettings>(DEFAULT_DISCOVERY);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const update = <K extends keyof OwnerProfile>(k: K, v: OwnerProfile[K]) =>
     setProfile((p) => ({ ...p, [k]: v }));
