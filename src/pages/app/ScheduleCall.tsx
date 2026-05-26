@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft, ArrowRight, CalendarDays, Phone, Video, Check, MapPin, Zap,
-  Lock, Globe, Sparkles, Clock, Timer, MessageSquare, ChevronLeft, ChevronRight,
+  CalendarDays, Video, Check, MapPin, Zap, Users,
+  Lock, Globe, Sparkles, Clock, Timer, ChevronLeft, ChevronRight, X,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -10,12 +10,13 @@ import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { PriceTag, formatPrice, type Pricing } from "@/components/app/PricingField";
 import MockPaymentDialog from "@/components/app/MockPaymentDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 // =============================================================================
 //  Availock Calendar — Book the right time, in the right format, instantly.
 // =============================================================================
 
-type BookingType = "meeting" | "quick";
+type BookingType = "meeting" | "quick" | "event";
 type Channel = "online" | "onsite" | "hybrid";
 type HybridPick = "online" | "onsite";
 
