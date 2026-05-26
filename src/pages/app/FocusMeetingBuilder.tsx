@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
-  ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Repeat, Lock, Check,
+  ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
   ChevronRight, X, CheckCircle2, CalendarPlus, Video, MapPin,
 } from "lucide-react";
@@ -39,7 +39,8 @@ interface MTSlot {
   callMin: CallMin;
   bufferMin: BufferMin;
   repeats: Repeats;
-  weekdays?: number[]; // 0..6 if weekly
+  weekdays?: number[]; // 0..6 if weekly (legacy)
+  cloneDates?: string[]; // additional dates to clone this slot to on creation
   booking: Booking;
   access: Access;
   pricing: Pricing;
@@ -87,6 +88,7 @@ const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
   bufferMin: 5,
   repeats: "none",
   weekdays: [],
+  cloneDates: [],
   booking: "approval",
   access: "contacts",
   pricing: defaultPricing,
@@ -163,6 +165,10 @@ const FocusMeetingBuilder = () => {
     const startD = new Date(draft.date);
     const endD = draft.dateTo ? new Date(draft.dateTo) : startD;
     for (let d = new Date(startD); d <= endD; d = addDays(d, 1)) dates.push(toISO(d));
+    // Merge clone dates (extra non-contiguous days selected in Step 5).
+    for (const cd of draft.cloneDates ?? []) {
+      if (!dates.includes(cd)) dates.push(cd);
+    }
     for (const dt of dates) {
       if (conflictToast(dt, draft.startMin, draft.endMin, draft.id)) return;
     }
@@ -354,7 +360,7 @@ const FocusMeetingBuilder = () => {
           </button>
           <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
             {[
-              "Date", "Call Size", "Window", "Buffer", "Repeat", "Booking", "Access", "Pricing",
+              "Date", "Call Size", "Window", "Buffer", "Clone", "Booking", "Access", "Pricing",
             ].map((label, i) => {
               const n = i + 1;
               const active = step === n;
@@ -459,49 +465,13 @@ const FocusMeetingBuilder = () => {
             )}
 
             {step === 5 && (
-              <Section title="Step 5 — Repeat" icon={Repeat} hint="Set up recurrence">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {([
-                    ["none", "Do not repeat"],
-                    ["daily", "Daily (D)"],
-                    ["weekly", "Weekly (W)"],
-                    ["monthly", "Monthly (M)"],
-                  ] as const).map(([k, l]) => (
-                    <button
-                      key={k}
-                      onClick={() => set("repeats", k)}
-                      className={cn(
-                        "p-3 rounded-xl text-xs font-bold transition text-left",
-                        draft.repeats === k ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
-                      )}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-                {draft.repeats === "weekly" && (
-                  <Field label="Weekdays">
-                    <div className="flex flex-wrap gap-1.5">
-                      {weekdayShort.map((d, i) => {
-                        const on = draft.weekdays?.includes(i);
-                        return (
-                          <button
-                            key={d}
-                            onClick={() => {
-                              const cur = new Set(draft.weekdays ?? []);
-                              on ? cur.delete(i) : cur.add(i);
-                              set("weekdays", Array.from(cur).sort());
-                            }}
-                            className={cn(
-                              "w-10 h-10 rounded-full text-[11px] font-bold transition",
-                              on ? "bg-primary text-primary-foreground" : "bg-surface-low text-muted-foreground hover:text-primary",
-                            )}
-                          >{d}</button>
-                        );
-                      })}
-                    </div>
-                  </Field>
-                )}
+              <Section title="Step 5 — Clone" icon={CloneIcon} hint="Pick additional dates to clone this slot to. Click again to unselect.">
+                <CloneDatePicker
+                  baseDate={draft.date}
+                  baseDateTo={draft.dateTo}
+                  value={draft.cloneDates ?? []}
+                  onChange={(arr) => set("cloneDates", arr)}
+                />
               </Section>
             )}
 
@@ -584,7 +554,7 @@ const FocusMeetingBuilder = () => {
               <Stat label="Duration" value={`${draft.callMin}m`} />
               <Stat label="Buffer" value={`${draft.bufferMin}m`} />
               <Stat label="Sub-slots" value={`${count}`} />
-              <Stat label="Repeat" value={draft.repeats === "none" ? "—" : draft.repeats[0].toUpperCase()} />
+              <Stat label="Clones" value={`${(draft.cloneDates ?? []).length}`} />
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
                   {draft.booking === "instant" ? "Instant" : "Approval"}
@@ -729,7 +699,7 @@ const MeetingCard = ({
         </Chip>
         <Chip>{count} meetings total</Chip>
         <Chip>
-          <Repeat className="w-3 h-3" /> {slot.repeats === "none" ? "Once" : slot.repeats}
+          <CloneIcon className="w-3 h-3" /> {slot.repeats === "none" ? "Single" : slot.repeats}
         </Chip>
       </div>
 
@@ -947,3 +917,80 @@ const TimelineView = ({ items }: { items: { kind: "call" | "buffer"; start: numb
 };
 
 export default FocusMeetingBuilder;
+
+// ---------- Clone Date Picker (Step 5) ----------
+const CloneDatePicker = ({
+  baseDate, baseDateTo, value, onChange,
+}: {
+  baseDate: string;
+  baseDateTo?: string;
+  value: string[];
+  onChange: (next: string[]) => void;
+}) => {
+  const baseSet = useMemo(() => {
+    const s = new Set<string>();
+    const start = new Date(baseDate);
+    const end = baseDateTo ? new Date(baseDateTo) : start;
+    for (let d = new Date(start); d <= end; d = addDays(d, 1)) s.add(toISO(d));
+    return s;
+  }, [baseDate, baseDateTo]);
+
+  const selected = useMemo(() => value.map((d) => new Date(d)), [value]);
+
+  const handleDayClick = (day: Date) => {
+    const iso = toISO(day);
+    if (baseSet.has(iso)) return; // can't clone onto the source date
+    const next = value.includes(iso) ? value.filter((d) => d !== iso) : [...value, iso].sort();
+    onChange(next);
+  };
+
+  return (
+    <div className="rounded-2xl ghost-border bg-surface-lowest p-3">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+          Click a date to clone · click again to remove
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold">
+            {value.length} clone{value.length === 1 ? "" : "s"}
+          </span>
+          {value.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              className="text-[10px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+            >
+              <X className="w-3 h-3" /> Clear
+            </button>
+          )}
+        </div>
+      </div>
+      <Calendar
+        mode="multiple"
+        selected={selected}
+        onDayClick={handleDayClick}
+        modifiers={{ source: Array.from(baseSet).map((d) => new Date(d)) }}
+        modifiersClassNames={{
+          source: "bg-accent text-accent-foreground rounded-md",
+        }}
+        disabled={(d) => baseSet.has(toISO(d))}
+        className={cn("p-2 pointer-events-auto")}
+      />
+      {value.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {value.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => onChange(value.filter((x) => x !== d))}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20"
+              title="Remove clone date"
+            >
+              {format(new Date(d), "MMM d")} <X className="w-2.5 h-2.5" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
