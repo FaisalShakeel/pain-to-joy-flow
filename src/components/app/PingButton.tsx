@@ -71,15 +71,12 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
   const [sentKind, setSentKind] = useState<PingKind | null>(null);
   const [callPing, setCallPing] = useState<CallPing | null>(() => readCallPing(contact.id));
   const [, setTick] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
 
+  // Tick every 30s while popover open so countdowns refresh.
   useEffect(() => {
     if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    const t = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(t);
   }, [open]);
 
   // Tick every 30s while popover open so countdowns refresh.
