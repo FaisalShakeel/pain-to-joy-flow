@@ -25,6 +25,7 @@ import {
   Zap,
   UsersRound,
   Radio,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/availock-icon.png";
