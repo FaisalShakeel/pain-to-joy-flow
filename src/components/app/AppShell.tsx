@@ -105,9 +105,11 @@ interface Props {
   fullscreen?: boolean;
   /** Called when the user clicks the built-in exit-fullscreen affordance. */
   onExitFullscreen?: () => void;
+  /** When provided, renders an inline back arrow before the title that navigates to this route. */
+  backTo?: string;
 }
 
-const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell, fullscreen, onExitFullscreen }: Props) => {
+const AppShell = ({ children, title, subtitle, description, actions, headerInline, hideBell, fullscreen, onExitFullscreen, backTo }: Props) => {
   const [role] = useRole();
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
@@ -414,8 +416,17 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                     </p>
                   )}
                   {title && (
-                    <h1 className="font-headline font-semibold text-primary text-[1.2rem] md:text-[1.5rem] leading-[1.05] tracking-[-0.022em]">
-                      {title}
+                    <h1 className="font-headline font-semibold text-primary text-[1.2rem] md:text-[1.5rem] leading-[1.05] tracking-[-0.022em] flex items-center gap-2">
+                      {backTo && (
+                        <Link
+                          to={backTo}
+                          aria-label="Back"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-low text-muted-foreground hover:text-primary transition"
+                        >
+                          <ArrowLeft className="w-4 h-4" />
+                        </Link>
+                      )}
+                      <span className="truncate">{title}</span>
                     </h1>
                   )}
                 </div>
