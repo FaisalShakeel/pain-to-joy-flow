@@ -165,6 +165,10 @@ const FocusMeetingBuilder = () => {
     const startD = new Date(draft.date);
     const endD = draft.dateTo ? new Date(draft.dateTo) : startD;
     for (let d = new Date(startD); d <= endD; d = addDays(d, 1)) dates.push(toISO(d));
+    // Merge clone dates (extra non-contiguous days selected in Step 5).
+    for (const cd of draft.cloneDates ?? []) {
+      if (!dates.includes(cd)) dates.push(cd);
+    }
     for (const dt of dates) {
       if (conflictToast(dt, draft.startMin, draft.endMin, draft.id)) return;
     }
