@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
-  ArrowLeft, Zap, Calendar as CalIcon, Clock, Timer, Repeat, Lock, Check,
+  ArrowLeft, Zap, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
   ChevronRight, X, CheckCircle2,
 } from "lucide-react";
@@ -38,7 +38,8 @@ interface QSSlot {
   callMin: CallMin;
   bufferMin: BufferMin;
   repeats: Repeats;
-  weekdays?: number[]; // 0..6 if weekly
+  weekdays?: number[]; // legacy
+  cloneDates?: string[];
   booking: Booking;
   access: Access;
   createdAt: number;
@@ -85,6 +86,7 @@ const blank = (): Omit<QSSlot, "id" | "createdAt"> => ({
   bufferMin: 1,
   repeats: "none",
   weekdays: [],
+  cloneDates: [],
   booking: "instant",
   access: "contacts",
 });
@@ -163,6 +165,9 @@ const QuickSyncBuilder = () => {
     const startD = new Date(draft.date);
     const endD = draft.dateTo ? new Date(draft.dateTo) : startD;
     for (let d = new Date(startD); d <= endD; d = addDays(d, 1)) dates.push(toISO(d));
+    for (const cd of draft.cloneDates ?? []) {
+      if (!dates.includes(cd)) dates.push(cd);
+    }
     for (const dt of dates) {
       if (conflictToast(dt, draft.startMin, draft.endMin, draft.id)) return;
     }
@@ -329,7 +334,7 @@ const QuickSyncBuilder = () => {
           </button>
           <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
             {[
-              "Date", "Call Size", "Window", "Buffer", "Repeat", "Booking", "Access",
+              "Date", "Call Size", "Window", "Buffer", "Clone", "Booking", "Access",
             ].map((label, i) => {
               const n = i + 1;
               const active = step === n;
@@ -434,49 +439,13 @@ const QuickSyncBuilder = () => {
             )}
 
             {step === 5 && (
-              <Section title="Step 5 — Repeat" icon={Repeat} hint="Set up recurrence">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {([
-                    ["none", "Do not repeat"],
-                    ["daily", "Daily (D)"],
-                    ["weekly", "Weekly (W)"],
-                    ["monthly", "Monthly (M)"],
-                  ] as const).map(([k, l]) => (
-                    <button
-                      key={k}
-                      onClick={() => set("repeats", k)}
-                      className={cn(
-                        "p-3 rounded-xl text-xs font-bold transition text-left",
-                        draft.repeats === k ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
-                      )}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-                {draft.repeats === "weekly" && (
-                  <Field label="Weekdays">
-                    <div className="flex flex-wrap gap-1.5">
-                      {weekdayShort.map((d, i) => {
-                        const on = draft.weekdays?.includes(i);
-                        return (
-                          <button
-                            key={d}
-                            onClick={() => {
-                              const cur = new Set(draft.weekdays ?? []);
-                              on ? cur.delete(i) : cur.add(i);
-                              set("weekdays", Array.from(cur).sort());
-                            }}
-                            className={cn(
-                              "w-10 h-10 rounded-full text-[11px] font-bold transition",
-                              on ? "bg-primary text-primary-foreground" : "bg-surface-low text-muted-foreground hover:text-primary",
-                            )}
-                          >{d}</button>
-                        );
-                      })}
-                    </div>
-                  </Field>
-                )}
+              <Section title="Step 5 — Clone" icon={CloneIcon} hint="Pick additional dates to clone this slot to. Click again to unselect.">
+                <CloneDatePicker
+                  baseDate={draft.date}
+                  baseDateTo={draft.dateTo}
+                  value={draft.cloneDates ?? []}
+                  onChange={(arr) => set("cloneDates", arr)}
+                />
               </Section>
             )}
 
@@ -553,7 +522,7 @@ const QuickSyncBuilder = () => {
               <Stat label="Call" value={`${draft.callMin}m`} />
               <Stat label="Buffer" value={`${draft.bufferMin}m`} />
               <Stat label="Sub-slots" value={`${count}`} />
-              <Stat label="Repeat" value={draft.repeats === "none" ? "—" : draft.repeats[0].toUpperCase()} />
+              <Stat label="Clones" value={`${(draft.cloneDates ?? []).length}`} />
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
                   {draft.booking === "instant" ? "Instant" : "Approval"}
@@ -693,7 +662,7 @@ const QuickSyncCard = ({
         </Chip>
         <Chip>{count} slots total</Chip>
         <Chip>
-          <Repeat className="w-3 h-3" /> {slot.repeats === "none" ? "Once" : slot.repeats}
+          <CloneIcon className="w-3 h-3" /> {slot.repeats === "none" ? "Single" : slot.repeats}
         </Chip>
       </div>
 
