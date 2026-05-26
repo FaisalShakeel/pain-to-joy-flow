@@ -1,38 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio, Clock, CalendarDays, Globe2, MapPin, Building2 } from "lucide-react";
+import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Clock, CalendarDays, Globe2, MapPin, Building2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
 import { me, transactions, myOwnerProfile } from "@/lib/mockData";
-import { useRole, setRole } from "@/lib/role";
 import { toast } from "@/hooks/use-toast";
 
-const availabilityPresets = [
-  "Available now",
-  "Available after 2:00 PM",
-  "In a meeting — leave a message",
-  "Deep focus — async only",
-  "Office hours Tue & Thu, 2–4 PM",
-  "Travelling — limited windows",
-  "Free after 5:00 PM today",
-  "Out of office — back Monday",
-];
-
 const AccountSettings = () => {
-  const [role] = useRole();
   const navigate = useNavigate();
-  // Local mirror of the live status so the dropdown updates instantly.
-  const [status, setStatus] = useState<string>(myOwnerProfile.availabilityContext);
-
-  const updateStatus = (v: string) => {
-    const next = v.slice(0, 80);
-    setStatus(next);
-    // Persist to the mock profile so other views (contacts, view profile) reflect it.
-    myOwnerProfile.availabilityContext = next;
-  };
-
-  const isPreset = availabilityPresets.includes(status);
 
   return (
     <AppShell subtitle="Account" title="Settings">
@@ -43,58 +18,14 @@ const AccountSettings = () => {
             <Avatar initials={me.initials} size="xl" />
             <div className="flex-1 min-w-0">
               <p className="font-headline font-bold text-primary">{me.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{me.email}</p>
-              <p className="text-xs text-muted-foreground">{me.phone}</p>
+              <p className="text-xs text-muted-foreground truncate">Availock Technologies</p>
+              <p className="text-xs text-muted-foreground">Director of Strategic Operations</p>
             </div>
             <Link to="/app/settings/edit" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full ghost-border bg-surface-low text-sm font-semibold text-primary hover:bg-surface transition">
               <Pencil className="w-3.5 h-3.5" /> Edit
             </Link>
           </div>
 
-          {/* Current availability context */}
-          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent inline-flex items-center gap-1.5">
-                  <Radio className="w-3 h-3" /> Availability context
-                </p>
-                <p className="mt-2 font-headline font-semibold text-primary leading-snug">
-                  {status || <span className="text-muted-foreground italic">No status set</span>}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Visible to {myOwnerProfile.visibility.availabilityContext} · Typical reply {myOwnerProfile.responseTime}
-                </p>
-              </div>
-            </div>
-
-            {/* Quick status — preset dropdown + custom line, right under the status */}
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
-              <input
-                value={status}
-                onChange={(e) => updateStatus(e.target.value)}
-                placeholder="Write a custom line… e.g. Free after 6 PM"
-                maxLength={80}
-                className="w-full px-4 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
-              />
-              <select
-                value={isPreset ? status : ""}
-                onChange={(e) => e.target.value && updateStatus(e.target.value)}
-                className="px-3 py-2.5 rounded-xl bg-surface-low ghost-border outline-none text-sm focus:ring-2 focus:ring-primary/20"
-                aria-label="Choose preset status"
-              >
-                <option value="">Pick preset…</option>
-                {availabilityPresets.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-[10px] text-muted-foreground">
-                Updates instantly on your profile and contact card.
-              </p>
-              <p className="text-[10px] text-muted-foreground">{status.length}/80</p>
-            </div>
-          </div>
 
           {/* Operations Center */}
           <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -119,21 +50,6 @@ const AccountSettings = () => {
             </div>
           </div>
 
-          {/* Role switch */}
-          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Mode</p>
-            <h3 className="mt-1 font-headline font-bold text-primary">Use Availock as a {role === "provider" ? "Provider" : "Seeker"}</h3>
-            <div className="mt-4 inline-flex p-1 rounded-full bg-surface-low">
-              <button
-                onClick={() => { setRole("seeker"); toast({ title: "Switched to Seeker" }); }}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-full ${role === "seeker" ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground"}`}
-              >Seeker</button>
-              <button
-                onClick={() => { setRole("provider"); toast({ title: "Switched to Provider" }); }}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-full ${role === "provider" ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground"}`}
-              >Provider</button>
-            </div>
-          </div>
 
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />
