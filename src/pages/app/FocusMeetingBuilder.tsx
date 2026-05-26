@@ -176,6 +176,10 @@ const FocusMeetingBuilder = () => {
     if (conflicts.length) {
       if (conflicts[0].block) flashConflict(conflicts[0].block.id);
       const validDates = dates.filter((d) => !conflicts.some((c) => c.date === d));
+      const baseISO = toISO(new Date(draft.date));
+      const baseToISO = draft.dateTo ? toISO(new Date(draft.dateTo)) : baseISO;
+      const skipSet = new Set(conflicts.map((c) => c.date));
+      const baseConflicts = skipSet.has(baseISO) || skipSet.has(baseToISO);
       const list = conflicts
         .map(
           (c) =>
@@ -189,25 +193,16 @@ const FocusMeetingBuilder = () => {
           duration: 12000,
           closeButton: true,
           action:
-            !isEditing && validDates.length
+            !isEditing && validDates.length && !baseConflicts
               ? {
                   label: `Skip & create ${validDates.length}`,
                   onClick: () => {
-                    // Drop conflicting dates from the clone list, leave base alone if valid.
-                    const baseISO = toISO(new Date(draft.date));
-                    const baseToISO = draft.dateTo ? toISO(new Date(draft.dateTo)) : baseISO;
-                    const skipSet = new Set(conflicts.map((c) => c.date));
+                    // Drop conflicting dates from the clone list and run the
+                    // creation path directly with the validated dates so we
+                    // don't depend on async React state.
                     const nextClones = (draft.cloneDates ?? []).filter((d) => !skipSet.has(d));
                     set("cloneDates", nextClones);
-                    // If base/range itself conflicts, we still cannot proceed automatically.
-                    if (skipSet.has(baseISO) || skipSet.has(baseToISO)) {
-                      sonner.error("Source date still conflicts", {
-                        description: "Adjust Step 1 date or time before continuing.",
-                      });
-                      return;
-                    }
-                    // Re-trigger save on a fresh tick with the trimmed list.
-                    setTimeout(() => save(), 0);
+                    proceed(validDates);
                   },
                 }
               : undefined,
@@ -215,6 +210,10 @@ const FocusMeetingBuilder = () => {
       );
       return;
     }
+    proceed(dates);
+  };
+
+  const proceed = (dates: string[]) => {
     if (isEditing) {
       setSlots((p) => p.map((s) => (s.id === draft.id ? { ...s, ...draft, id: draft.id! } : s)));
       toast({ title: "Meeting updated" });
