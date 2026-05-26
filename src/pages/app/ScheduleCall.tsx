@@ -8,7 +8,7 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
-import { PriceTag, formatPrice, type Pricing } from "@/components/app/PricingField";
+import { formatPrice, type Pricing } from "@/components/app/PricingField";
 import MockPaymentDialog from "@/components/app/MockPaymentDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
@@ -122,7 +122,6 @@ const ScheduleCall = () => {
   const [slotId, setSlotId] = useState<string | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
   const [hybridPick, setHybridPick] = useState<HybridPick>("online");
-  const [notes, setNotes] = useState("");
   const [tz] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
