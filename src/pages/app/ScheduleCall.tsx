@@ -465,7 +465,14 @@ function TypeTab({
   );
 }
 
-function SlotMini({ slot, active, onPick }: { slot: Slot; active: boolean; onPick: () => void }) {
+function SlotMini({
+  slot, active, activeHybrid, onPick,
+}: {
+  slot: Slot;
+  active: boolean;
+  activeHybrid?: HybridPick;
+  onPick: (hybrid?: HybridPick) => void;
+}) {
   const disabled = slot.full;
   const isQuick = slot.kind === "quick";
   const dur = isQuick ? clampQuickDuration((slot as QuickSlot).duration) : clampMeetingDurations((slot as MeetingSlot).durations)[0];
@@ -473,16 +480,17 @@ function SlotMini({ slot, active, onPick }: { slot: Slot; active: boolean; onPic
   const channel: Channel | "quick" = isQuick ? "quick" : (slot as MeetingSlot).channel;
   const paid = slot.pricing?.mode === "paid";
   const approval = slot.approval;
+  const takenSide = !isQuick ? (slot as MeetingSlot).taken : undefined;
   return (
     <button
-      onClick={onPick}
+      onClick={() => onPick()}
       disabled={disabled}
-      className={`text-left p-2.5 rounded-xl border transition ${
+      className={`text-left p-2.5 rounded-xl border transition-all duration-200 will-change-transform ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
-          ? "bg-primary/5 border-primary/60 ring-1 ring-primary/40 text-primary shadow-ambient"
-          : "bg-surface-lowest ghost-border text-primary hover:bg-surface-low hover:shadow-ambient"
+          ? "bg-primary/5 border-primary/60 ring-1 ring-primary/40 text-primary shadow-ambient -translate-y-0.5"
+          : "bg-surface-lowest ghost-border text-primary hover:-translate-y-0.5 hover:shadow-lg hover:bg-surface-low"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
@@ -492,8 +500,44 @@ function SlotMini({ slot, active, onPick }: { slot: Slot; active: boolean; onPic
         <span className="inline-flex items-center gap-1">
           {channel === "hybrid" && (
             <>
-              <Video className="w-3.5 h-3.5 text-sky-600" />
-              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+              <span
+                role="button"
+                tabIndex={0}
+                title="Book online"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (takenSide === "online") return;
+                  onPick("online");
+                }}
+                className={`inline-flex items-center justify-center w-5 h-5 rounded-md transition ${
+                  takenSide === "online"
+                    ? "opacity-30 cursor-not-allowed"
+                    : activeHybrid === "online"
+                    ? "bg-sky-500 text-white ring-1 ring-sky-500"
+                    : "text-sky-600 hover:bg-sky-500/15"
+                }`}
+              >
+                <Video className="w-3.5 h-3.5" />
+              </span>
+              <span
+                role="button"
+                tabIndex={0}
+                title="Book on-site"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (takenSide === "onsite") return;
+                  onPick("onsite");
+                }}
+                className={`inline-flex items-center justify-center w-5 h-5 rounded-md transition ${
+                  takenSide === "onsite"
+                    ? "opacity-30 cursor-not-allowed"
+                    : activeHybrid === "onsite"
+                    ? "bg-indigo-500 text-white ring-1 ring-indigo-500"
+                    : "text-indigo-600 hover:bg-indigo-500/15"
+                }`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+              </span>
             </>
           )}
           {channel === "online" && <Video className="w-3.5 h-3.5 text-sky-600" />}
