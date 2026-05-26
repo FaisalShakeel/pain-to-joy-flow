@@ -202,7 +202,7 @@ const ShareProfile = () => {
                 {MODE_COPY[mode]}
               </p>
               <p className="mt-1.5 text-[12.5px] text-muted-foreground">
-                Scan to view availability &amp; communication permissions
+                Pre-granted communication access.
               </p>
             </div>
 
