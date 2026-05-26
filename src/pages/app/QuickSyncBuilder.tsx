@@ -882,3 +882,80 @@ const TimelineView = ({ items }: { items: { kind: "call" | "buffer"; start: numb
 };
 
 export default QuickSyncBuilder;
+
+// ---------- Clone Date Picker (Step 5) ----------
+const CloneDatePicker = ({
+  baseDate, baseDateTo, value, onChange,
+}: {
+  baseDate: string;
+  baseDateTo?: string;
+  value: string[];
+  onChange: (next: string[]) => void;
+}) => {
+  const baseSet = useMemo(() => {
+    const s = new Set<string>();
+    const start = new Date(baseDate);
+    const end = baseDateTo ? new Date(baseDateTo) : start;
+    for (let d = new Date(start); d <= end; d = addDays(d, 1)) s.add(toISO(d));
+    return s;
+  }, [baseDate, baseDateTo]);
+
+  const selected = useMemo(() => value.map((d) => new Date(d)), [value]);
+
+  const handleDayClick = (day: Date) => {
+    const iso = toISO(day);
+    if (baseSet.has(iso)) return;
+    const next = value.includes(iso) ? value.filter((d) => d !== iso) : [...value, iso].sort();
+    onChange(next);
+  };
+
+  return (
+    <div className="rounded-2xl ghost-border bg-surface-lowest p-3">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+          Click a date to clone · click again to remove
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold">
+            {value.length} clone{value.length === 1 ? "" : "s"}
+          </span>
+          {value.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              className="text-[10px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+            >
+              <X className="w-3 h-3" /> Clear
+            </button>
+          )}
+        </div>
+      </div>
+      <Calendar
+        mode="multiple"
+        selected={selected}
+        onDayClick={handleDayClick}
+        modifiers={{ source: Array.from(baseSet).map((d) => new Date(d)) }}
+        modifiersClassNames={{
+          source: "bg-accent text-accent-foreground rounded-md",
+        }}
+        disabled={(d) => baseSet.has(toISO(d))}
+        className={cn("p-2 pointer-events-auto")}
+      />
+      {value.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {value.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => onChange(value.filter((x) => x !== d))}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20"
+              title="Remove clone date"
+            >
+              {format(new Date(d), "MMM d")} <X className="w-2.5 h-2.5" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
