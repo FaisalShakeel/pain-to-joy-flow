@@ -497,9 +497,9 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   desc="Direct high-priority audio line"
                   cta={isApproved ? "Request Sync" : isPending ? "Pending" : "Locked"}
                   ctaIcon={Phone}
-                  ctaClass={isApproved ? "bg-white text-primary hover:bg-white/90" : "bg-white/10 text-white/60 cursor-not-allowed"}
+                  ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? `/app/contact/${contact.id}/call` : null}
-                  variant="default"
+                  variant={isApproved ? "emerald" : "default"}
                 />
                 {/* Message */}
                 <PortalTile
@@ -512,7 +512,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   ctaIcon={Send}
                   ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? "/app/messages" : null}
-                  variant="emerald"
+                  variant={isApproved ? "emerald" : "default"}
                 />
                 {/* Schedule */}
                 <PortalTile
@@ -522,9 +522,9 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   dots
                   cta={isApproved ? "View Calendar" : isPending ? "Pending" : "Locked"}
                   ctaIcon={CalendarDays}
-                  ctaClass={isApproved ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white" : "bg-white/10 text-white/60 cursor-not-allowed"}
+                  ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? `/app/schedule/${contact.id}` : null}
-                  variant="default"
+                  variant={isApproved ? "emerald" : "default"}
                   topRight={
                     null
                   }
@@ -532,15 +532,15 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                 {/* Ping */}
                 <PortalTile
                   icon={Radio}
-                  badge={{ label: "ACTIVE", color: "bg-amber-500" }}
+                  badge={isApproved ? { label: "ACTIVE", color: "bg-emerald-500" } : null}
                   title="Ping"
                   desc="Send a quick awareness signal"
-                  cta="Send Ping"
+                  cta={isApproved ? "Send Ping" : isPending ? "Pending" : "Locked"}
                   ctaIcon={Bell}
-                  ctaClass="bg-white/10 border border-white/20 hover:bg-white/20 text-white"
+                  ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={null}
-                  onClick={onPing}
-                  variant="default"
+                  onClick={isApproved ? onPing : undefined}
+                  variant={isApproved ? "emerald" : "default"}
                 />
           </div>
 
