@@ -156,14 +156,6 @@ const EditProfile = () => {
             </div>
           </div>
 
-          {/* Who Can Find Me */}
-          <WhoCanFindMe
-            settings={discovery}
-            onChange={setDiscovery}
-            advancedOpen={advancedOpen}
-            onToggleAdvanced={() => setAdvancedOpen((o) => !o)}
-          />
-
           {/* Identity (always public) */}
           <Section title="Identity" hint="Always public — this is how people find you">
             <Field label="Full name" value={profile.name} onChange={(v) => update("name", v)} />
