@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell, PhoneCall, MessageSquare, Calendar, Check, Car, X, Lock } from "lucide-react";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Contact, AvailabilityStatus } from "@/lib/mockData";
@@ -70,15 +71,12 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
   const [sentKind, setSentKind] = useState<PingKind | null>(null);
   const [callPing, setCallPing] = useState<CallPing | null>(() => readCallPing(contact.id));
   const [, setTick] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
 
+  // Tick every 30s while popover open so countdowns refresh.
   useEffect(() => {
     if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    const t = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(t);
   }, [open]);
 
   // Tick every 30s while popover open so countdowns refresh.
@@ -144,34 +142,49 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
   const iconSize = size === "md" ? "w-4 h-4" : size === "xs" ? "w-3 h-3" : "w-3.5 h-3.5";
 
   return (
-    <div ref={ref} className={cn("relative inline-flex", className)}>
-      <button
-        type="button"
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen((v) => !v); }}
-        title={`Quick Ping ${contact.name.split(" ")[0]}`}
-        aria-label={`Quick Ping ${contact.name}`}
-        className={cn(
-          "grid place-items-center rounded-full transition relative",
-          sizing,
-          priority
-            ? "bg-gradient-to-br from-amber-400/25 to-rose-500/25 text-amber-700 hover:from-amber-400/40 hover:to-rose-500/40 ring-1 ring-amber-400/40"
-            : "bg-primary/10 text-primary hover:bg-primary/20",
-        )}
-      >
-        <Bell className={cn(iconSize, "relative")} />
-        {priority && (
-          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 ring-2 ring-surface-lowest" />
-        )}
-        {callActive && (
-          <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-surface-lowest animate-pulse" />
-        )}
-      </button>
+    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+      <PopoverPrimitive.Trigger asChild>
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); }}
+          title={`Quick Ping ${contact.name.split(" ")[0]}`}
+          aria-label={`Quick Ping ${contact.name}`}
+          className={cn(
+            "grid place-items-center rounded-full transition relative",
+            sizing,
+            priority
+              ? "bg-gradient-to-br from-amber-400/25 to-rose-500/25 text-amber-700 hover:from-amber-400/40 hover:to-rose-500/40 ring-1 ring-amber-400/40"
+              : "bg-primary/10 text-primary hover:bg-primary/20",
+            className,
+          )}
+        >
+          <Bell className={cn(iconSize, "relative")} />
+          {priority && (
+            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 ring-2 ring-surface-lowest" />
+          )}
+          {callActive && (
+            <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-surface-lowest animate-pulse" />
+          )}
+        </button>
+      </PopoverPrimitive.Trigger>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute left-0 top-full mt-2 z-40 w-72 rounded-2xl ghost-border bg-surface-lowest shadow-elevated p-2 animate-in fade-in zoom-in-95 duration-150"
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          align="end"
+          side="bottom"
+          sideOffset={8}
+          collisionPadding={16}
           onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "z-[100] w-72 rounded-2xl ghost-border bg-surface-lowest shadow-elevated p-2 outline-none",
+            "data-[state=open]:animate-in data-[state=closed]:animate-out",
+            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            "data-[side=bottom]:slide-in-from-top-2",
+            "data-[side=left]:slide-in-from-right-2",
+            "data-[side=right]:slide-in-from-left-2",
+            "data-[side=top]:slide-in-from-bottom-2",
+          )}
         >
           <div className="flex items-center justify-between px-2 py-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Quick Ping</p>
@@ -275,9 +288,9 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
             Call Ping: 1 active per contact · 2h cooldown.
             {priority && " Priority bypass for cooldown."}
           </p>
-        </div>
-      )}
-    </div>
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
   );
 };
 
