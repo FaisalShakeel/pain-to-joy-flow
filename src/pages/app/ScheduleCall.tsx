@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   CalendarDays, Video, Check, MapPin, Zap, Users,
-  Lock, Globe, Sparkles, Clock, Timer, ChevronLeft, ChevronRight, X,
+  Lock, Globe, Sparkles, Clock, Timer, X, CalendarRange,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -11,6 +11,9 @@ import { toast } from "@/hooks/use-toast";
 import { formatPrice, type Pricing } from "@/components/app/PricingField";
 import MockPaymentDialog from "@/components/app/MockPaymentDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 // =============================================================================
 //  Availock Calendar — Book the right time, in the right format, instantly.
@@ -118,13 +121,25 @@ const ScheduleCall = () => {
   const navigate = useNavigate();
 
   const [bookingType, setBookingType] = useState<BookingType>("meeting");
-  const [activeDate, setActiveDate] = useState<string>(todayISO(0));
+  const [activeDates, setActiveDates] = useState<string[]>([todayISO(0)]);
   const [slotId, setSlotId] = useState<string | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
   const [hybridPick, setHybridPick] = useState<HybridPick>("online");
   const [tz] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [monthOpen, setMonthOpen] = useState(false);
+
+  const toggleDate = (iso: string) => {
+    setSlotId(null);
+    setDuration(null);
+    setActiveDates((prev) =>
+      prev.includes(iso) ? prev.filter((d) => d !== iso) : [...prev, iso].sort()
+    );
+  };
+
+  const activeSet = useMemo(() => new Set(activeDates), [activeDates]);
+  const headerDate = activeDates[0] ?? todayISO(0);
 
   // 14-day strip
   const dayStrip = useMemo(() => Array.from({ length: 14 }, (_, i) => todayISO(i)), []);
@@ -134,18 +149,21 @@ const ScheduleCall = () => {
     () =>
       bookingType === "event"
         ? []
-        : SLOTS.filter((s) => s.date === activeDate && s.kind === slotKindForType),
-    [activeDate, bookingType, slotKindForType]
+        : SLOTS.filter((s) => activeSet.has(s.date) && s.kind === slotKindForType)
+            .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)),
+    [activeSet, bookingType, slotKindForType]
   );
 
   const selected = useMemo(() => SLOTS.find((s) => s.id === slotId) || null, [slotId]);
 
   // Reset duration when slot changes
-  const pickSlot = (s: Slot) => {
+  const pickSlot = (s: Slot, hybridChoice?: HybridPick) => {
     setSlotId(s.id);
     if (s.kind === "meeting") {
       setDuration(s.durations[0]);
-      if (s.channel === "hybrid") setHybridPick(s.taken === "online" ? "onsite" : "online");
+      if (s.channel === "hybrid") {
+        setHybridPick(hybridChoice ?? (s.taken === "online" ? "onsite" : "online"));
+      }
     } else {
       setDuration(s.duration);
     }
@@ -194,8 +212,8 @@ const ScheduleCall = () => {
     navigate("/app");
   };
 
-  const meetingCount = SLOTS.filter(s => s.date === activeDate && s.kind === "meeting").length;
-  const quickCount   = SLOTS.filter(s => s.date === activeDate && s.kind === "quick").length;
+  const meetingCount = SLOTS.filter(s => activeSet.has(s.date) && s.kind === "meeting").length;
+  const quickCount   = SLOTS.filter(s => activeSet.has(s.date) && s.kind === "quick").length;
   const eventCount   = 0;
 
   return (
@@ -237,24 +255,45 @@ const ScheduleCall = () => {
           {/* Day strip */}
           <div className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
             <div className="flex items-center justify-between mb-3">
-              <p className="font-headline font-bold text-primary">{monthLabel(activeDate)}</p>
+              <p className="font-headline font-bold text-primary">{monthLabel(headerDate)}</p>
               <div className="flex items-center gap-2">
                 <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] text-muted-foreground bg-surface-low ghost-border rounded-full px-2.5 py-1">
                   <Globe className="w-3 h-3" /> {tz}
                 </span>
-                <button className="p-1.5 rounded-lg hover:bg-surface ghost-border" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
-                <button className="p-1.5 rounded-lg hover:bg-surface ghost-border" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
+                <Popover open={monthOpen} onOpenChange={setMonthOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-low ghost-border text-[11px] font-semibold text-primary hover:bg-surface transition"
+                    >
+                      <CalendarRange className="w-3.5 h-3.5" />
+                      Open Full Month
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-auto p-0 z-[60]">
+                    <Calendar
+                      mode="multiple"
+                      selected={activeDates.map((d) => new Date(d))}
+                      onDayClick={(day) => {
+                        const iso = day.toISOString().slice(0, 10);
+                        toggleDate(iso);
+                      }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x">
               {dayStrip.map((iso) => {
                 const d = dayShort(iso);
                 const has = bookingType !== "event" && SLOTS.some(s => s.date === iso && s.kind === slotKindForType);
-                const isActive = iso === activeDate;
+                const isActive = activeSet.has(iso);
                 return (
                   <button
                     key={iso}
-                    onClick={() => { setActiveDate(iso); setSlotId(null); setDuration(null); }}
+                    onClick={() => toggleDate(iso)}
                     className={`snap-start shrink-0 w-14 py-2.5 rounded-2xl text-center transition flex flex-col items-center gap-0.5 ${
                       isActive
                         ? "bg-primary text-primary-foreground shadow-glass"
@@ -287,7 +326,13 @@ const ScheduleCall = () => {
               ) : (
                 <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {filtered.map((s) => (
-                    <SlotMini key={s.id} slot={s} active={s.id === slotId} onPick={() => pickSlot(s)} />
+                    <SlotMini
+                      key={s.id}
+                      slot={s}
+                      active={s.id === slotId}
+                      activeHybrid={s.id === slotId && s.kind === "meeting" && (s as MeetingSlot).channel === "hybrid" ? hybridPick : undefined}
+                      onPick={(hyb) => pickSlot(s, hyb)}
+                    />
                   ))}
                 </div>
               )}
