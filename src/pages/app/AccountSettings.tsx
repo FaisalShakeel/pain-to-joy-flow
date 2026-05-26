@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Clock, CalendarDays, Globe2, MapPin, Building2 } from "lucide-react";
+import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
