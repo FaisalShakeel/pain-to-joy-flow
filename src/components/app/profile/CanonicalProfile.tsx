@@ -497,9 +497,9 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   desc="Direct high-priority audio line"
                   cta={isApproved ? "Request Sync" : isPending ? "Pending" : "Locked"}
                   ctaIcon={Phone}
-                  ctaClass={isApproved ? "bg-white text-primary hover:bg-white/90" : "bg-white/10 text-white/60 cursor-not-allowed"}
+                  ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? `/app/contact/${contact.id}/call` : null}
-                  variant="default"
+                  variant={isApproved ? "emerald" : "default"}
                 />
                 {/* Message */}
                 <PortalTile
@@ -512,7 +512,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   ctaIcon={Send}
                   ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? "/app/messages" : null}
-                  variant="emerald"
+                  variant={isApproved ? "emerald" : "default"}
                 />
                 {/* Schedule */}
                 <PortalTile
@@ -522,9 +522,9 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   dots
                   cta={isApproved ? "View Calendar" : isPending ? "Pending" : "Locked"}
                   ctaIcon={CalendarDays}
-                  ctaClass={isApproved ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white" : "bg-white/10 text-white/60 cursor-not-allowed"}
+                  ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={isApproved ? `/app/schedule/${contact.id}` : null}
-                  variant="default"
+                  variant={isApproved ? "emerald" : "default"}
                   topRight={
                     null
                   }
@@ -532,15 +532,15 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                 {/* Ping */}
                 <PortalTile
                   icon={Radio}
-                  badge={{ label: "ACTIVE", color: "bg-amber-500" }}
+                  badge={isApproved ? { label: "ACTIVE", color: "bg-emerald-500" } : null}
                   title="Ping"
                   desc="Send a quick awareness signal"
-                  cta="Send Ping"
+                  cta={isApproved ? "Send Ping" : isPending ? "Pending" : "Locked"}
                   ctaIcon={Bell}
-                  ctaClass="bg-white/10 border border-white/20 hover:bg-white/20 text-white"
+                  ctaClass={isApproved ? "bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-900/40" : "bg-white/10 text-white/60 cursor-not-allowed"}
                   to={null}
-                  onClick={onPing}
-                  variant="default"
+                  onClick={isApproved ? onPing : undefined}
+                  variant={isApproved ? "emerald" : "default"}
                 />
           </div>
 
@@ -816,7 +816,10 @@ const PortalTile = ({
     variant === "emerald"
       ? "bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/30"
       : "bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20";
-  const iconBox = variant === "emerald" ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-white";
+  const iconBox =
+    variant === "emerald"
+      ? "bg-emerald-500/20 text-emerald-400"
+      : "bg-white/10 text-white/60 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors";
 
   const ctaContent = (
     <>
@@ -826,7 +829,7 @@ const PortalTile = ({
   const ctaClassName = `w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
+    <div className={`group relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
       <div className="space-y-2.5 relative z-10">
         <div className="flex items-center justify-between">
           <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
