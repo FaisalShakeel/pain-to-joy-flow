@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell, PhoneCall, MessageSquare, Calendar, Check, Car, X, Lock } from "lucide-react";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Contact, AvailabilityStatus } from "@/lib/mockData";
