@@ -1,21 +1,22 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft, ArrowRight, CalendarDays, Phone, Video, Check, MapPin, Zap,
-  Lock, Globe, Sparkles, Clock, Timer, MessageSquare, ChevronLeft, ChevronRight,
+  CalendarDays, Video, Check, MapPin, Zap, Users,
+  Lock, Globe, Sparkles, Clock, Timer, ChevronLeft, ChevronRight, X,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import { findContact } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
-import { PriceTag, formatPrice, type Pricing } from "@/components/app/PricingField";
+import { formatPrice, type Pricing } from "@/components/app/PricingField";
 import MockPaymentDialog from "@/components/app/MockPaymentDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 // =============================================================================
 //  Availock Calendar — Book the right time, in the right format, instantly.
 // =============================================================================
 
-type BookingType = "meeting" | "quick";
+type BookingType = "meeting" | "quick" | "event";
 type Channel = "online" | "onsite" | "hybrid";
 type HybridPick = "online" | "onsite";
 
@@ -121,16 +122,20 @@ const ScheduleCall = () => {
   const [slotId, setSlotId] = useState<string | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
   const [hybridPick, setHybridPick] = useState<HybridPick>("online");
-  const [notes, setNotes] = useState("");
   const [tz] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   // 14-day strip
   const dayStrip = useMemo(() => Array.from({ length: 14 }, (_, i) => todayISO(i)), []);
 
+  const slotKindForType = bookingType === "quick" ? "quick" : "meeting";
   const filtered = useMemo(
-    () => SLOTS.filter((s) => s.date === activeDate && s.kind === (bookingType === "meeting" ? "meeting" : "quick")),
-    [activeDate, bookingType]
+    () =>
+      bookingType === "event"
+        ? []
+        : SLOTS.filter((s) => s.date === activeDate && s.kind === slotKindForType),
+    [activeDate, bookingType, slotKindForType]
   );
 
   const selected = useMemo(() => SLOTS.find((s) => s.id === slotId) || null, [slotId]);
@@ -144,6 +149,7 @@ const ScheduleCall = () => {
     } else {
       setDuration(s.duration);
     }
+    setSummaryOpen(true);
   };
 
   if (!contact) {
@@ -190,55 +196,52 @@ const ScheduleCall = () => {
 
   const meetingCount = SLOTS.filter(s => s.date === activeDate && s.kind === "meeting").length;
   const quickCount   = SLOTS.filter(s => s.date === activeDate && s.kind === "quick").length;
+  const eventCount   = 0;
 
   return (
-    <AppShell subtitle="Book the right time, in the right format" title={`Schedule with ${contact.name.split(" ")[0]}`}>
-      <Link to={`/app/contact/${contact.id}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
-        <ArrowLeft className="w-4 h-4" /> Back to profile
-      </Link>
+    <AppShell
+      backTo={`/app/contact/${contact.id}`}
+      title={contact.name}
+      subtitle="Schedule"
+    >
+      <div className="space-y-5 max-w-3xl mx-auto">
+        {/* THREE EQUAL TABS */}
+        <div className="grid grid-cols-3 gap-2">
+          <TypeTab
+            active={bookingType === "meeting"}
+            onClick={() => { setBookingType("meeting"); setSlotId(null); setDuration(null); }}
+            icon={<Video className="w-4 h-4" />}
+            label="Focus Meeting"
+            count={meetingCount}
+            tone="focus"
+          />
+          <TypeTab
+            active={bookingType === "quick"}
+            onClick={() => { setBookingType("quick"); setSlotId(null); setDuration(null); }}
+            icon={<Zap className="w-4 h-4" />}
+            label="Quick Sync"
+            count={quickCount}
+            tone="quick"
+          />
+          <TypeTab
+            active={bookingType === "event"}
+            onClick={() => { setBookingType("event"); setSlotId(null); setDuration(null); }}
+            icon={<Users className="w-4 h-4" />}
+            label="Event Access"
+            count={eventCount}
+            tone="event"
+          />
+        </div>
 
-      <div className="grid lg:grid-cols-[1fr_360px] gap-5 pb-28 lg:pb-0">
-        {/* ============================ MAIN ============================ */}
-        <div className="space-y-5">
-          {/* Provider mini header */}
-          <div className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient flex items-center gap-4">
-            <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} />
-            <div className="min-w-0 flex-1">
-              <p className="font-headline font-bold text-primary truncate">{contact.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{contact.title} · {contact.org}</p>
-            </div>
-            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground bg-surface-low ghost-border rounded-full px-3 py-1.5">
-              <Globe className="w-3.5 h-3.5" /> {tz}
-            </div>
-          </div>
-
-          {/* BookingTypeTabs */}
-          <div className="grid sm:grid-cols-2 gap-3">
-            <BookingTab
-              active={bookingType === "meeting"}
-              onClick={() => { setBookingType("meeting"); setSlotId(null); setDuration(null); }}
-              icon={<CalendarDays className="w-5 h-5" />}
-              title="Meeting"
-              sub="15 – 35 min · depth conversations"
-              accent="primary"
-              count={meetingCount}
-            />
-            <BookingTab
-              active={bookingType === "quick"}
-              onClick={() => { setBookingType("quick"); setSlotId(null); setDuration(null); }}
-              icon={<Zap className="w-5 h-5" />}
-              title="Quick Sync"
-              sub="3 / 5 / 8 min · rapid sync"
-              accent="gold"
-              count={quickCount}
-            />
-          </div>
-
+        <div>
           {/* Day strip */}
           <div className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient">
             <div className="flex items-center justify-between mb-3">
               <p className="font-headline font-bold text-primary">{monthLabel(activeDate)}</p>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] text-muted-foreground bg-surface-low ghost-border rounded-full px-2.5 py-1">
+                  <Globe className="w-3 h-3" /> {tz}
+                </span>
                 <button className="p-1.5 rounded-lg hover:bg-surface ghost-border" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
                 <button className="p-1.5 rounded-lg hover:bg-surface ghost-border" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
               </div>
@@ -246,7 +249,7 @@ const ScheduleCall = () => {
             <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x">
               {dayStrip.map((iso) => {
                 const d = dayShort(iso);
-                const has = SLOTS.some(s => s.date === iso && s.kind === (bookingType === "meeting" ? "meeting" : "quick"));
+                const has = bookingType !== "event" && SLOTS.some(s => s.date === iso && s.kind === slotKindForType);
                 const isActive = iso === activeDate;
                 return (
                   <button
@@ -262,7 +265,7 @@ const ScheduleCall = () => {
                   >
                     <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{d.dow}</span>
                     <span className="text-base font-bold leading-none">{d.num}</span>
-                    <span className={`mt-1 w-1.5 h-1.5 rounded-full ${has ? (isActive ? "bg-gold" : bookingType === "meeting" ? "bg-primary" : "bg-amber-500") : "bg-transparent"}`} />
+                    <span className={`mt-1 w-1.5 h-1.5 rounded-full ${has ? (isActive ? "bg-gold" : bookingType === "meeting" ? "bg-indigo-500" : bookingType === "quick" ? "bg-amber-500" : "bg-amber-900") : "bg-transparent"}`} />
                   </button>
                 );
               })}
@@ -272,210 +275,94 @@ const ScheduleCall = () => {
             <div className="mt-5">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-                  {bookingType === "meeting" ? "Meeting slots" : "Quick Syncs"} · {filtered.length} open
+                  {bookingType === "meeting" ? "Focus Meetings" : bookingType === "quick" ? "Quick Syncs" : "Event Access"} · {filtered.length} open
                 </p>
                 <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {tz}</span>
               </div>
 
               {filtered.length === 0 ? (
                 <div className="mt-3 rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                  No {bookingType === "meeting" ? "meeting" : "Quick Sync"} slots on this day.
+                  No {bookingType === "meeting" ? "Focus Meeting" : bookingType === "quick" ? "Quick Sync" : "Event Access"} slots on this day.
                 </div>
               ) : (
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                   {filtered.map((s) =>
-                     s.kind === "meeting" ? (
-                       <MeetingCard
-                         key={s.id}
-                         slot={s}
-                         active={s.id === slotId}
-                         hybridPick={hybridPick}
-                         onPick={() => pickSlot(s)}
-                         onPickChannel={(ch) => { pickSlot(s); setHybridPick(ch); }}
-                       />
-                     ) : (
-                      <QuickCard key={s.id} slot={s} active={s.id === slotId} onPick={() => pickSlot(s)} />
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Slot configuration: Channel + Duration */}
-          {selected && (
-            <div className="rounded-3xl bg-surface-lowest ghost-border p-5 shadow-ambient space-y-5">
-              {/* Channel for hybrid */}
-              {selected.kind === "meeting" && selected.channel === "hybrid" && (
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Channel · choose one</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Booking either auto-closes the alternate for this time block.</p>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    <ChannelBtn
-                      picked={hybridPick === "online"}
-                      disabled={selected.taken === "online"}
-                      onClick={() => setHybridPick("online")}
-                      icon={<Video className="w-5 h-5" />}
-                      title="Online meeting"
-                      sub={selected.taken === "online" ? "Already booked" : "Secure link generated"}
-                    />
-                    <ChannelBtn
-                      picked={hybridPick === "onsite"}
-                      disabled={selected.taken === "onsite"}
-                      onClick={() => setHybridPick("onsite")}
-                      icon={<MapPin className="w-5 h-5" />}
-                      title="On-site"
-                      sub={selected.taken === "onsite" ? "Already booked" : selected.location || "Studio"}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Duration selector */}
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-                  {selected.kind === "meeting" ? "Meeting length" : "Call length"}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {(selected.kind === "meeting"
-                    ? clampMeetingDurations(selected.durations)
-                    : [clampQuickDuration(selected.duration)]
-                  ).map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setDuration(d)}
-                      className={`px-4 py-2 rounded-full text-sm font-semibold transition ghost-border ${
-                        duration === d
-                          ? selected.kind === "meeting"
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-amber-500 text-white border-amber-500"
-                          : "bg-surface-low text-primary hover:bg-surface"
-                      }`}
-                    >
-                      {d} min
-                    </button>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {filtered.map((s) => (
+                    <SlotMini key={s.id} slot={s} active={s.id === slotId} onPick={() => pickSlot(s)} />
                   ))}
                 </div>
-                {selected.kind === "meeting" && (
-                  <div className="mt-3 flex items-start gap-2 rounded-xl bg-primary/5 ghost-border p-3 text-xs text-muted-foreground">
-                    <Timer className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <p>
-                      <span className="font-semibold text-primary">3-minute buffer included.</span>{" "}
-                      Client can join 3 min before the scheduled time, and the call may extend up to 3 min beyond the allocated duration.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">Notes (optional)</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={2}
-                  placeholder="Anything they should know before the call?"
-                  className="mt-2 w-full rounded-2xl bg-surface-low ghost-border p-3 text-sm text-primary placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ============================ SUMMARY ============================ */}
-        <aside className="hidden lg:block rounded-3xl bg-gradient-vault text-primary-foreground p-6 shadow-elevated h-fit lg:sticky lg:top-24">
-          <div className="flex items-center gap-3">
-            <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} />
-            <div>
-              <p className="font-headline font-bold">{contact.name}</p>
-              <p className="text-xs text-primary-foreground/80">{contact.title}</p>
-            </div>
-          </div>
-
-          <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Booking summary</p>
-          {selected && duration ? (
-            <ul className="mt-3 space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-gold" />
-                {dayShort(selected.date).dow} {dayShort(selected.date).num} · {selected.time}
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gold" />
-                {duration} minutes
-              </li>
-              <li className="flex items-center gap-2">
-                {selected.kind === "quick" ? <Zap className="w-4 h-4 text-gold" />
-                  : selected.channel === "hybrid"
-                  ? (hybridPick === "online" ? <Video className="w-4 h-4 text-gold" /> : <MapPin className="w-4 h-4 text-gold" />)
-                  : selected.channel === "online" ? <Video className="w-4 h-4 text-gold" />
-                  : <MapPin className="w-4 h-4 text-gold" />}
-                <span>{channelLabelForSelected()}</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-primary-foreground/85">
-                <Globe className="w-3.5 h-3.5 text-gold" /> {tz}
-              </li>
-              <li className="flex items-center gap-2 text-xs text-primary-foreground/85">
-                {selected.approval ? <Lock className="w-3.5 h-3.5 text-gold" /> : <Check className="w-3.5 h-3.5 text-gold" />}
-                {selected.approval ? "Requires approval" : "Instant booking"}
-              </li>
-              <li className="flex items-center gap-2 text-xs">
-                <Sparkles className="w-3.5 h-3.5 text-gold" />
-                <span className="font-bold">{formatPrice(selected.pricing)}</span>
-                {selected.pricing?.mode === "paid" && (
-                  <span className="text-[10px] uppercase tracking-wider text-gold/80">Paid</span>
-                )}
-              </li>
-              {notes && (
-                <li className="flex items-start gap-2 text-xs text-primary-foreground/80">
-                  <MessageSquare className="w-3.5 h-3.5 text-gold mt-0.5" /> {notes}
-                </li>
               )}
-            </ul>
-          ) : (
-            <p className="mt-3 text-xs text-primary-foreground/75">
-              Pick a {bookingType === "meeting" ? "meeting" : "Quick Sync"} slot to continue.
-            </p>
-          )}
-
-          <button
-            onClick={confirm}
-            disabled={!selected || !duration}
-            className="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-gold text-primary font-bold hover:bg-gold/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <Check className="w-4 h-4" />
-            {selected?.pricing?.mode === "paid"
-              ? `Pay ${formatPrice(selected.pricing)} & ${selected.approval ? "request" : "book"}`
-              : selected?.approval ? "Request booking" : "Confirm booking"}
-          </button>
-          <Link to={`/app/contact/${contact.id}/call`} className="mt-3 block text-center text-xs font-semibold text-gold hover:underline">
-            Or try Live Call now <ArrowRight className="w-3 h-3 inline" />
-          </Link>
-          <p className="mt-4 text-center text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50">
-            Availock Calendar
-          </p>
-        </aside>
-      </div>
-
-      {/* Mobile sticky CTA */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-lowest/95 backdrop-blur ghost-border border-t p-3">
-        <div className="max-w-md mx-auto flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Summary</p>
-            <p className="text-sm text-primary truncate font-semibold">
-              {selected && duration
-                ? `${selected.time} · ${duration}m · ${channelLabelForSelected()}`
-                : `Pick a ${bookingType === "meeting" ? "meeting" : "Quick Sync"} slot`}
-            </p>
+            </div>
           </div>
-          <button
-            onClick={confirm}
-            disabled={!selected || !duration}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold disabled:opacity-40"
-          >
-            <Check className="w-4 h-4" /> {selected?.approval ? "Request" : "Confirm"}
-          </button>
         </div>
       </div>
+
+      {/* Booking Summary Dialog */}
+      <Dialog open={summaryOpen && !!selected} onOpenChange={setSummaryOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-headline">Booking summary</DialogTitle>
+          </DialogHeader>
+          {selected && duration && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-low ghost-border">
+                <Avatar initials={contact.initials} accent={contact.accent} status={contact.status} />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-primary truncate">{contact.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{contact.title}</p>
+                </div>
+              </div>
+              <ul className="space-y-2 text-sm text-primary">
+                <li className="flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4 text-accent" />
+                  {dayShort(selected.date).dow} {dayShort(selected.date).num} · {selected.time}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-accent" />
+                  {duration} min
+                  <span className="text-xs text-muted-foreground">· 3m buffer</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  {selected.kind === "quick" ? <Zap className="w-4 h-4 text-accent" />
+                    : selected.channel === "hybrid"
+                    ? (hybridPick === "online" ? <Video className="w-4 h-4 text-accent" /> : <MapPin className="w-4 h-4 text-accent" />)
+                    : selected.channel === "online" ? <Video className="w-4 h-4 text-accent" />
+                    : <MapPin className="w-4 h-4 text-accent" />}
+                  <span>{channelLabelForSelected()}</span>
+                </li>
+                <li className="flex items-center gap-2 text-xs">
+                  {selected.approval ? <Lock className="w-3.5 h-3.5 text-accent" /> : <Check className="w-3.5 h-3.5 text-accent" />}
+                  {selected.approval ? "Requires approval" : "Instant booking"}
+                </li>
+                <li className="flex items-center gap-2 text-xs">
+                  <Sparkles className="w-3.5 h-3.5 text-accent" />
+                  <span className="font-semibold">{formatPrice(selected.pricing)}</span>
+                </li>
+                <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Globe className="w-3.5 h-3.5" /> {tz}
+                </li>
+              </ul>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <button
+              onClick={() => setSummaryOpen(false)}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-surface-low ghost-border text-sm font-semibold text-primary hover:bg-surface transition"
+            >
+              <X className="w-4 h-4" /> Cancel
+            </button>
+            <button
+              onClick={() => { setSummaryOpen(false); confirm(); }}
+              disabled={!selected || !duration}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-bold disabled:opacity-40 hover:bg-primary/90 transition"
+            >
+              <Check className="w-4 h-4" />
+              {selected?.pricing?.mode === "paid"
+                ? `Pay & ${selected.approval ? "request" : "book"}`
+                : selected?.approval ? "Request booking" : "Confirm booking"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {selected?.pricing?.mode === "paid" && (
         <MockPaymentDialog
@@ -492,209 +379,97 @@ const ScheduleCall = () => {
 };
 
 // ---------- Subcomponents ----------
-function BookingTab({
-  active, onClick, icon, title, sub, accent, count,
-}: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; sub: string; accent: "primary" | "gold"; count: number }) {
+const TYPE_TONE: Record<"focus" | "quick" | "event", { idle: string; active: string; dot: string; iconIdle: string }> = {
+  focus: {
+    idle:      "bg-indigo-500/10 text-indigo-700 border-indigo-500/30 hover:bg-indigo-500/15",
+    active:    "bg-indigo-500 text-white border-indigo-500 shadow-elevated",
+    dot:       "bg-indigo-500",
+    iconIdle:  "text-indigo-600",
+  },
+  quick: {
+    idle:      "bg-amber-500/10 text-amber-800 border-amber-500/30 hover:bg-amber-500/20",
+    active:    "bg-amber-500 text-white border-amber-500 shadow-elevated",
+    dot:       "bg-amber-500",
+    iconIdle:  "text-amber-700",
+  },
+  event: {
+    idle:      "bg-amber-900/10 text-amber-900 border-amber-900/30 hover:bg-amber-900/15",
+    active:    "bg-amber-900 text-white border-amber-900 shadow-elevated",
+    dot:       "bg-amber-900",
+    iconIdle:  "text-amber-900",
+  },
+};
+
+function TypeTab({
+  active, onClick, icon, label, count, tone,
+}: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; count: number; tone: "focus" | "quick" | "event" }) {
+  const t = TYPE_TONE[tone];
   return (
     <button
       onClick={onClick}
-      className={`text-left p-5 rounded-3xl ghost-border transition shadow-ambient ${
-        active
-          ? accent === "primary"
-            ? "bg-primary text-primary-foreground border-primary shadow-elevated"
-            : "bg-amber-500 text-white border-amber-500 shadow-elevated"
-          : "bg-surface-lowest text-primary hover:bg-surface"
+      className={`min-w-0 flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl border text-[12px] sm:text-sm font-semibold transition ${
+        active ? t.active : `${t.idle} ghost-border`
       }`}
     >
-      <div className="flex items-center justify-between">
-        <span className={`grid place-items-center w-11 h-11 rounded-2xl ${
-          active ? "bg-white/15" : accent === "primary" ? "bg-primary/10 text-primary" : "bg-amber-500/15 text-amber-700"
-        }`}>{icon}</span>
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-          active ? "bg-white/15" : "bg-surface ghost-border text-muted-foreground"
-        }`}>
-          {count} today
-        </span>
-      </div>
-      <p className="mt-3 font-headline font-bold text-lg leading-tight">{title}</p>
-      <p className={`text-xs mt-0.5 ${active ? "text-white/80" : "text-muted-foreground"}`}>{sub}</p>
+      <span className={active ? "text-white" : t.iconIdle}>{icon}</span>
+      <span className="truncate">{label}</span>
+      <span className={`ml-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-surface ghost-border text-muted-foreground"}`}>
+        {count}
+      </span>
     </button>
   );
 }
 
-function MeetingCard({
-  slot, active, onPick, hybridPick, onPickChannel,
-}: {
-  slot: MeetingSlot;
-  active: boolean;
-  onPick: () => void;
-  hybridPick: HybridPick;
-  onPickChannel: (ch: HybridPick) => void;
-}) {
-  const C = channelMeta[slot.channel];
+function SlotMini({ slot, active, onPick }: { slot: Slot; active: boolean; onPick: () => void }) {
   const disabled = slot.full;
-  const durations = clampMeetingDurations(slot.durations);
-  const maxDur = durations[durations.length - 1];
-  const endTime = addMinutes(slot.time, maxDur);
+  const isQuick = slot.kind === "quick";
+  const dur = isQuick ? clampQuickDuration((slot as QuickSlot).duration) : clampMeetingDurations((slot as MeetingSlot).durations)[0];
+  const endTime = addMinutes(slot.time, dur);
+  const channel: Channel | "quick" = isQuick ? "quick" : (slot as MeetingSlot).channel;
+  const paid = slot.pricing?.mode === "paid";
+  const approval = slot.approval;
   return (
     <button
       onClick={onPick}
       disabled={disabled}
-      className={`text-left p-2 rounded-lg border transition ${
+      className={`text-left p-2.5 rounded-xl border transition ${
         disabled
           ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
           : active
-          ? "bg-primary text-primary-foreground border-primary shadow-elevated"
-          : "bg-surface-low ghost-border text-primary hover:bg-surface hover:shadow-ambient"
+          ? "bg-primary/5 border-primary/60 ring-1 ring-primary/40 text-primary shadow-ambient"
+          : "bg-surface-lowest ghost-border text-primary hover:bg-surface-low hover:shadow-ambient"
       }`}
     >
-      <div className="flex items-center justify-between gap-1.5">
-        <span className="font-headline font-bold text-[12px] tabular-nums leading-none">
-          {slot.time}<span className="opacity-70">–{endTime}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-headline font-bold text-[13px] tabular-nums leading-none">
+          {slot.time}<span className="opacity-60">–{endTime}</span>
         </span>
         <span className="inline-flex items-center gap-1">
-          {slot.channel === "hybrid" ? (
+          {channel === "hybrid" && (
             <>
-              <HybridIcon
-                Icon={Video}
-                title="Online"
-                active={active && hybridPick === "online"}
-                taken={slot.taken === "online"}
-                onClick={(e) => { e.stopPropagation(); onPickChannel("online"); }}
-                tone="sky"
-                cardActive={active}
-              />
-              <HybridIcon
-                Icon={MapPin}
-                title="On-site"
-                active={active && hybridPick === "onsite"}
-                taken={slot.taken === "onsite"}
-                onClick={(e) => { e.stopPropagation(); onPickChannel("onsite"); }}
-                tone="indigo"
-                cardActive={active}
-              />
+              <Video className="w-3.5 h-3.5 text-sky-600" />
+              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
             </>
-          ) : (
-            <C.icon className={`w-3 h-3 ${active ? "text-primary-foreground" : slot.channel === "online" ? "text-sky-600" : "text-indigo-600"}`} />
           )}
+          {channel === "online" && <Video className="w-3.5 h-3.5 text-sky-600" />}
+          {channel === "onsite" && <MapPin className="w-3.5 h-3.5 text-indigo-600" />}
+          {channel === "quick" && <Zap className="w-3.5 h-3.5 text-amber-600" />}
         </span>
       </div>
-      <p className={`mt-0.5 text-[10px] leading-tight ${active ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-        {durations[0]}–{maxDur} min
-        {slot.location && slot.channel !== "online" ? ` · ${slot.location}` : ""}
-      </p>
-      <div className="mt-1">
-        <PriceTag pricing={slot.pricing} />
-      </div>
-      <div className={`mt-1 flex items-center flex-wrap gap-x-1.5 gap-y-0.5 text-[9px] ${active ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-        <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> 3m buf</span>
-        {slot.approval && <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>}
-        {slot.channel === "hybrid" && slot.taken && (
-          <span>{slot.taken === "online" ? "On-site only" : "Online only"}</span>
-        )}
-        {slot.channel === "hybrid" && !slot.taken && active && (
-          <span className="font-semibold">
-            · {hybridPick === "online" ? "Online" : "On-site"}
-          </span>
-        )}
-      </div>
-    </button>
-  );
-}
-
-function HybridIcon({
-  Icon, title, active, taken, onClick, tone, cardActive,
-}: {
-  Icon: React.ComponentType<any>;
-  title: string;
-  active: boolean;
-  taken: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  tone: "sky" | "indigo";
-  cardActive: boolean;
-}) {
-  const toneRing = tone === "sky" ? "ring-sky-400 bg-sky-500/15 text-sky-700" : "ring-indigo-400 bg-indigo-500/15 text-indigo-700";
-  return (
-    <span
-      role="button"
-      title={title}
-      aria-pressed={active}
-      onClick={taken ? undefined : onClick}
-      className={`grid place-items-center w-6 h-6 rounded-md transition cursor-pointer ${
-        taken
-          ? "opacity-30 cursor-not-allowed"
-          : active
-          ? `ring-2 ${toneRing}`
-          : cardActive
-          ? "bg-white/15 text-primary-foreground hover:bg-white/25"
-          : `${toneRing} hover:brightness-110`
-      }`}
-    >
-      <Icon className="w-3.5 h-3.5" />
-    </span>
-  );
-}
-
-function QuickCard({ slot, active, onPick }: { slot: QuickSlot; active: boolean; onPick: () => void }) {
-  const disabled = slot.full;
-  const dur = clampQuickDuration(slot.duration);
-  const endTime = addMinutes(slot.time, dur);
-  return (
-    <button
-      onClick={onPick}
-      disabled={disabled}
-      className={`text-left p-2 rounded-lg border transition relative overflow-hidden ${
-        disabled
-          ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed line-through"
-          : active
-          ? "bg-amber-500 text-white border-amber-500 shadow-elevated"
-          : "bg-amber-500/5 border-amber-500/30 text-primary hover:bg-amber-500/10"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-1.5">
-        <span className="font-headline font-bold text-[12px] tabular-nums inline-flex items-center gap-1 leading-none">
-          <Zap className={`w-3 h-3 ${active ? "text-white" : "text-amber-600"}`} />
-          {slot.time}<span className="opacity-70">–{endTime}</span>
+      <div className="mt-1.5 flex items-center flex-wrap gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground">
+        <span className="inline-flex items-center gap-0.5 font-semibold text-primary/80">
+          <Clock className="w-2.5 h-2.5" /> {dur}m
         </span>
-        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-amber-500/15 text-amber-700"}`}>
-          {dur} min
+        <span className="inline-flex items-center gap-0.5">
+          <Timer className="w-2.5 h-2.5" /> 3m buf
         </span>
-      </div>
-      <p className={`mt-0.5 text-[10px] leading-tight inline-flex items-center gap-1 ${active ? "text-white/85" : "text-muted-foreground"}`}>
-        <Video className="w-2.5 h-2.5" /> Online · one-tap
-      </p>
-      <div className="mt-1">
-        <PriceTag pricing={slot.pricing} />
-      </div>
-      <div className={`mt-1 flex items-center gap-1.5 text-[9px] ${active ? "text-white/75" : "text-muted-foreground"}`}>
-        {slot.approval ? <span className="inline-flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Approval</span>
-          : <span className="inline-flex items-center gap-0.5"><Timer className="w-2.5 h-2.5" /> Instant</span>}
-      </div>
-    </button>
-  );
-}
-
-function ChannelBtn({
-  picked, onClick, icon, title, sub, disabled,
-}: { picked: boolean; onClick: () => void; icon: React.ReactNode; title: string; sub: string; disabled?: boolean }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex items-start gap-3 p-4 rounded-2xl text-left transition ${
-        disabled
-          ? "bg-muted/40 ghost-border text-muted-foreground cursor-not-allowed"
-          : picked
-          ? "bg-primary text-primary-foreground shadow-elevated"
-          : "bg-surface-low ghost-border text-primary hover:bg-surface"
-      }`}
-    >
-      <span className={`grid place-items-center w-10 h-10 rounded-xl ${picked && !disabled ? "bg-white/15" : "bg-primary/10 text-primary"}`}>
-        {icon}
-      </span>
-      <div>
-        <p className="font-semibold">{title}</p>
-        <p className={`text-xs ${picked && !disabled ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{sub}</p>
+        <span className={`inline-flex items-center gap-0.5 ${approval ? "text-amber-700" : "text-emerald-700"}`}>
+          {approval ? <Lock className="w-2.5 h-2.5" /> : <Check className="w-2.5 h-2.5" />}
+          {approval ? "Approval" : "Instant"}
+        </span>
+        <span className={`inline-flex items-center gap-0.5 font-semibold ${paid ? "text-primary" : "text-emerald-700"}`}>
+          {paid ? formatPrice(slot.pricing) : "Free"}
+        </span>
       </div>
     </button>
   );
