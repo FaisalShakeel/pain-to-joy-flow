@@ -27,6 +27,8 @@ const AccountSettings = () => {
             </Link>
           </div>
 
+          {/* Who can find me */}
+          <WhoCanFindMePanel />
 
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />
