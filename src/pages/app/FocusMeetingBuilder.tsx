@@ -513,6 +513,9 @@ const FocusMeetingBuilder = () => {
                   baseDateTo={draft.dateTo}
                   value={draft.cloneDates ?? []}
                   onChange={(arr) => set("cloneDates", arr)}
+                  startMin={draft.startMin}
+                  endMin={draft.endMin}
+                  excludeId={draft.id}
                 />
               </Section>
             )}
