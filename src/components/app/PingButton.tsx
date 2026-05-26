@@ -10,7 +10,7 @@ type PingKind = "call" | "message" | "calendar";
 interface Props {
   contact: Contact;
   drivingOverride?: boolean;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
   className?: string;
 }
 
@@ -140,8 +140,8 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
     toast({ title: "Call Ping cleared", description: "You can send a new one anytime." });
   };
 
-  const sizing = size === "md" ? "w-10 h-10" : "w-8 h-8";
-  const iconSize = size === "md" ? "w-4 h-4" : "w-3.5 h-3.5";
+  const sizing = size === "md" ? "w-10 h-10" : size === "xs" ? "w-6 h-6" : "w-8 h-8";
+  const iconSize = size === "md" ? "w-4 h-4" : size === "xs" ? "w-3 h-3" : "w-3.5 h-3.5";
 
   return (
     <div ref={ref} className={cn("relative inline-flex", className)}>
