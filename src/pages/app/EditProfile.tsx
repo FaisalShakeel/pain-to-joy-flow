@@ -177,40 +177,6 @@ const EditProfile = () => {
             </FieldRow>
           </Section>
 
-          {/* Narrative */}
-          <Section title="Narrative">
-            <FieldRow>
-              <TextareaField
-                label="Bio / Spotlight"
-                value={profile.bio}
-                onChange={(v) => update("bio", v)}
-              />
-              <VisibilityPicker value={profile.visibility.bio} onChange={(v) => setFieldVisibility("bio", v)} />
-            </FieldRow>
-            <FieldRow>
-              <Field
-                label="Tags (comma-separated)"
-                value={profile.tags.join(", ")}
-                onChange={(v) => update("tags", v.split(",").map((t) => t.trim()).filter(Boolean))}
-              />
-              <VisibilityPicker value={profile.visibility.tags} onChange={(v) => setFieldVisibility("tags", v)} />
-            </FieldRow>
-            <FieldRow>
-              <div className="block">
-                <span className="text-xs font-semibold text-muted-foreground">Availability context</span>
-                <div className="mt-1 px-4 py-2.5 rounded-xl bg-surface-low ghost-border text-sm text-muted-foreground">
-                  {profile.availabilityContext || <span className="italic">No status set</span>}
-                  <span className="ml-2 text-[10px]">· Set this from your profile page.</span>
-                </div>
-              </div>
-              <VisibilityPicker
-                value={profile.visibility.availabilityContext}
-                onChange={(v) => setFieldVisibility("availabilityContext", v)}
-              />
-            </FieldRow>
-            <Field label="Typical response time" value={profile.responseTime} onChange={(v) => update("responseTime", v)} />
-          </Section>
-
           {/* Operations Center */}
           <Section title="Operations Center">
             <FieldRow>
