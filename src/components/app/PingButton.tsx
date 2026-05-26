@@ -79,13 +79,6 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
     return () => clearInterval(t);
   }, [open]);
 
-  // Tick every 30s while popover open so countdowns refresh.
-  useEffect(() => {
-    if (!open) return;
-    const t = setInterval(() => setTick((n) => n + 1), 30_000);
-    return () => clearInterval(t);
-  }, [open]);
-
   const status: AvailabilityStatus | "driving" = drivingOverride ? "driving" : contact.status;
   const priority = isPriority(contact);
   const alerts = contact.alerts ?? [];
@@ -146,7 +139,11 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
       <PopoverPrimitive.Trigger asChild>
         <button
           type="button"
-          onClick={(e) => { e.preventDefault(); }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen((current) => !current);
+          }}
           title={`Quick Ping ${contact.name.split(" ")[0]}`}
           aria-label={`Quick Ping ${contact.name}`}
           className={cn(
@@ -176,7 +173,7 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
           collisionPadding={16}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "z-[100] w-72 rounded-2xl ghost-border bg-surface-lowest shadow-elevated p-2 outline-none",
+            "z-[9999] w-72 rounded-2xl ghost-border bg-surface-lowest shadow-elevated p-2 outline-none",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
