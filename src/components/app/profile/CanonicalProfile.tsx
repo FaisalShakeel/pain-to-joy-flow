@@ -243,37 +243,37 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       )}
 
       {/* TOP SECTION — Profile identity */}
-      <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch scroll-mt-4">
+      <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
-        <div className="lg:col-span-3">
-          <div className={`aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
-            <span className="text-white font-headline font-extrabold text-7xl tracking-tight drop-shadow-2xl select-none">
+        <div className="lg:col-span-3 flex justify-center lg:block">
+          <div className={`w-32 sm:w-40 lg:w-auto aspect-square sm:aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
+            <span className="text-white font-headline font-extrabold text-4xl sm:text-5xl lg:text-7xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
-            <div className={`absolute top-3 right-3 h-3.5 w-3.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg z-10 animate-pulse`} />
+            <div className={`absolute top-2.5 right-2.5 h-3 w-3 sm:h-3.5 sm:w-3.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg z-10 animate-pulse`} />
           </div>
         </div>
 
         {/* Hero info card */}
         <div className="lg:col-span-9">
-          <div className="bg-surface-lowest rounded-2xl p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-              <div className="space-y-2 min-w-0 flex-1">
-                <h1 className="text-5xl md:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+          <div className="bg-surface-lowest rounded-2xl p-4 sm:p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
+              <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1 text-center md:text-left">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
                   {firstName}
                 </h1>
                 {show("org") && (
-                  <div className="flex items-center gap-1.5 text-foreground/70 font-semibold tracking-wide text-sm">
-                    <Building2 className="w-4 h-4 text-primary" />
-                    <span>{owner.org}</span>
+                  <div className="flex items-center justify-center md:justify-start gap-1.5 text-foreground/70 font-semibold tracking-wide text-xs sm:text-sm">
+                    <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+                    <span className="truncate">{owner.org}</span>
                   </div>
                 )}
                 {show("title") && (
-                  <p className="text-lg md:text-xl font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
                 )}
               </div>
               {/* Right-aligned 3-row status stack: status · context · quick sync */}
-              <div className="flex flex-col items-start md:items-end gap-1.5 shrink-0">
+              <div className="flex flex-col items-center md:items-end gap-1.5 shrink-0">
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full shadow-sm border ${statusData.chipClass}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
                   <span className="text-[10px] font-extrabold tracking-wider uppercase">{statusData.label}</span>
@@ -303,11 +303,11 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
             {/* Operations Center */}
             {(show("operationDays") || show("operationHours") || show("headquarters")) && (
-              <div className="mt-6 pt-5 border-t border-surface-container">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4 flex items-center gap-2">
+              <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-surface-container">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 sm:mb-4 flex items-center gap-2">
                   <span className="h-px w-8 bg-border" /> Operations Center
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
                   {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
                   {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
                   {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
