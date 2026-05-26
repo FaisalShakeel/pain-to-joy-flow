@@ -3,6 +3,7 @@ import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown } from "luci
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
+import WhoCanFindMePanel from "@/components/app/WhoCanFindMePanel";
 import { me, transactions } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -26,6 +27,8 @@ const AccountSettings = () => {
             </Link>
           </div>
 
+          {/* Who can find me */}
+          <WhoCanFindMePanel />
 
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />
