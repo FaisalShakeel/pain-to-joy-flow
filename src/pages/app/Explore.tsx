@@ -3,8 +3,6 @@ import {
   Search,
   BadgeCheck,
   MapPin,
-  Heart,
-  MessageCircle,
   Share2,
   UserPlus,
   QrCode,
@@ -95,7 +93,6 @@ const Explore = () => {
   const [chip, setChip] = useState<Chip>("All");
   const [query, setQuery] = useState("");
   const [connected, setConnected] = useState<Record<string, boolean>>({});
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [qrOpen, setQrOpen] = useState(false);
 
   const filtered = useMemo(() => {
@@ -236,7 +233,6 @@ const Explore = () => {
         <div className="space-y-3">
           {POSTS.map((post) => {
             const a = personById(post.authorId);
-            const isLiked = !!liked[post.id];
             return (
               <article key={post.id} className="rounded-2xl bg-surface-lowest border border-border/60 p-4 shadow-sm">
                 <header className="flex items-center gap-3">
@@ -260,20 +256,6 @@ const Explore = () => {
                 <p className="mt-3 text-sm text-foreground/90 leading-relaxed">{post.text}</p>
 
                 <footer className="mt-3 flex items-center gap-1 text-muted-foreground">
-                  <button
-                    onClick={() => setLiked((l) => ({ ...l, [post.id]: !l[post.id] }))}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs hover:bg-surface-low transition",
-                      isLiked && "text-rose-500",
-                    )}
-                  >
-                    <Heart className={cn("w-4 h-4", isLiked && "fill-current")} />
-                    {post.likes + (isLiked ? 1 : 0)}
-                  </button>
-                  <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs hover:bg-surface-low transition">
-                    <MessageCircle className="w-4 h-4" />
-                    {post.comments}
-                  </button>
                   <button
                     onClick={() => toast({ title: "Share link copied" })}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs hover:bg-surface-low transition"
