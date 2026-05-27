@@ -657,7 +657,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Identity selector */}
-          <div className="flex flex-wrap items-center gap-3 pt-5">
+          <div className="flex flex-wrap items-center gap-2 pt-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Select Identity:</span>
             <div className="flex flex-wrap gap-1.5">
               {(["client", "colleague", "partner"] as const).map((r) => {
@@ -666,7 +666,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   <button
                     key={r}
                     onClick={() => setIdentity(r)}
-                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    className={`px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${
                       active
                         ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
                         : "border-white/10 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
