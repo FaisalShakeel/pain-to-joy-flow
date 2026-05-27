@@ -303,19 +303,19 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Three-column details */}
-          <div className="mt-6 pt-5 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-4 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Primary Comms</h3>
-              <div className="space-y-3.5">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
+              <div className="space-y-2">
                 {visiblePrimaryComms.length === 0 && (
                   <p className="text-xs text-muted-foreground italic">Owner has hidden all channels</p>
                 )}
                 {visiblePrimaryComms.map((c) => {
                   const Icon = commsIcon(c.kind);
                   return (
-                    <div key={c.label} className="flex gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-                        <Icon className="w-3.5 h-3.5 text-primary" />
+                    <div key={c.label} className="flex gap-2">
+                      <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                        <Icon className="w-3 h-3 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.label}</p>
@@ -327,17 +327,17 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Social Protocols</h3>
-              <div className="space-y-3.5">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Social Protocols</h3>
+              <div className="space-y-2">
                 {visibleSocials.length === 0 && (
                   <p className="text-xs text-muted-foreground italic">Owner has hidden all handles</p>
                 )}
                 {visibleSocials.map((s) => {
                   const Icon = socialIcon(s.kind);
                   return (
-                    <div key={s.label} className="flex gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-                        <Icon className="w-3.5 h-3.5 text-primary" />
+                    <div key={s.label} className="flex gap-2">
+                      <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                        <Icon className="w-3 h-3 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
@@ -349,8 +349,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Operations Center</h3>
-              <div className="space-y-3.5">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Operations Center</h3>
+              <div className="space-y-2">
                 {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
                 {show("operationHours") && <OpsItem icon={Briefcase} label="Hours" value={owner.operationHours} />}
                 {show("headquarters") && <OpsItem icon={MapPin} label="HQ" value={owner.headquarters} sub={owner.headquartersSub} />}
