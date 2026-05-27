@@ -1,10 +1,12 @@
-import { Check, X, MessageCircle, UserPlus, Clock3, Users, CalendarClock, CalendarDays, Building2, Radio, Zap } from "lucide-react";
+import { Check, X, MessageCircle, UserPlus, Clock3, Users, CalendarClock, CalendarDays, Building2, Radio, Zap, Phone, BellOff } from "lucide-react";
 import { useWaitingList } from "@/hooks/use-metrics";
 import { updateWaitingStatus, trackMetric } from "@/lib/metrics";
 import { useRequests } from "@/components/app/RequestsContext";
 import { contacts } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useCallWatch } from "@/lib/callWatchStore";
+import { Link } from "react-router-dom";
 
 type PAChannel = "Meeting" | "Webinar" | "Venue" | "QS";
 
@@ -62,7 +64,12 @@ const WaitingList = () => {
     .map((r) => ({ r, channel: assignChannel(r.id), at: parseReceived(r.receivedAt) }))
     .sort((a, b) => b.at - a.at);
 
-  const total = qs.length + pending.length;
+  const { ids: watchIds, disableWatch, toggleWatch } = useCallWatch();
+  const watched = watchIds
+    .map((id) => contacts.find((c) => c.id === id))
+    .filter(Boolean) as typeof contacts;
+
+  const total = qs.length + pending.length + watched.length;
 
   return (
     <div className="dashboard-module p-4 md:p-5">
@@ -170,6 +177,82 @@ const WaitingList = () => {
                     act(r.id, "denied");
                     toast({ title: "Rejected", description: `${name}'s request was declined.` });
                   }}><X className="w-3.5 h-3.5" /></ActionBtn>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div className="my-3 h-px bg-border/60" aria-hidden />
+
+      {/* Section C — Call Watch */}
+      <SubHeader
+        label="Call Watch"
+        hint="Alerts when a watched contact becomes available"
+        count={watched.length}
+      />
+      {watched.length === 0 ? (
+        <EmptyRow text="Tap the phone icon on any Explore contact to watch their availability." />
+      ) : (
+        <ul className="space-y-2">
+          {watched.map((c) => {
+            const available = c.status === "available";
+            return (
+              <li key={c.id} className="flex items-center gap-2.5 p-2 rounded-xl nested-surface">
+                <span className="relative grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+                  {c.initials}
+                  {available && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-background animate-pulse" />
+                  )}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+                        available
+                          ? "bg-emerald-500/15 text-emerald-700"
+                          : "bg-surface-low text-muted-foreground",
+                      )}
+                    >
+                      {available ? "Available now" : c.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {available
+                      ? `${c.name} is now available for a direct call`
+                      : `${c.title || "Contact"} · waiting for availability`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  {available && (
+                    <Link
+                      to={`/app/contact/${c.id}`}
+                      onClick={() => {
+                        disableWatch(c.id);
+                        trackMetric("ping_to_connect", { dedupeKey: `callwatch:${c.id}` });
+                        toast({ title: "Calling now", description: `Opening direct call with ${c.name}.` });
+                      }}
+                      title="Call now"
+                      aria-label="Call now"
+                      className="inline-flex items-center gap-1 px-2.5 h-7 rounded-full bg-emerald-500 text-white text-[11px] font-semibold hover:bg-emerald-500/90 transition"
+                    >
+                      <Phone className="w-3 h-3" />
+                      Call now
+                    </Link>
+                  )}
+                  <ActionBtn
+                    title="Stop watching"
+                    tone="muted"
+                    onClick={() => {
+                      toggleWatch(c.id);
+                      toast({ title: "Call Watch removed", description: `${c.name} removed from your Call Watch list.` });
+                    }}
+                  >
+                    <BellOff className="w-3.5 h-3.5" />
+                  </ActionBtn>
                 </div>
               </li>
             );
