@@ -10,6 +10,7 @@ import {
   Users,
   X,
   Sparkles,
+  Phone,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
@@ -37,6 +38,7 @@ import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import AccessRequestComposer from "@/components/app/AccessRequestComposer";
 import type { Contact } from "@/lib/mockData";
+import { useCallWatch } from "@/lib/callWatchStore";
 
 type Person = {
   id: string;
@@ -98,6 +100,7 @@ const Explore = () => {
   const [qrOpen, setQrOpen] = useState(false);
   const [density, setDensity] = useState<8 | 12>(8);
   const [composerFor, setComposerFor] = useState<Person | null>(null);
+  const { isWatching, toggleWatch } = useCallWatch();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -176,6 +179,19 @@ const Explore = () => {
   const PersonTile = ({ p }: { p: Person }) => {
     const roomy = density === 8;
     const isConnected = !!connected[p.id];
+    const watching = isWatching(p.id);
+    const handleWatch = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const result = toggleWatch(p.id);
+      toast({
+        title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
+        description:
+          result === "added"
+            ? `You'll be alerted the moment ${p.name} is available for a direct call.`
+            : `${p.name} removed from your Call Watch list.`,
+      });
+    };
     return (
       <li className="relative h-full">
         <Link
@@ -185,7 +201,37 @@ const Explore = () => {
         >
           <div className="flex items-start justify-between gap-1.5">
             <Avatar initials={p.initials} accent={p.accent} status={p.status} size="sm" />
-            {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" />}
+            <div className="flex items-center gap-1 shrink-0">
+              {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-sky-500" />}
+              <button
+                type="button"
+                onClick={handleWatch}
+                title={
+                  watching
+                    ? "Call Watch on — we'll alert you the moment they're available"
+                    : "Call Watch — get alerted when this contact becomes available for a direct call"
+                }
+                aria-label={watching ? "Disable Call Watch alert" : "Enable Call Watch alert"}
+                aria-pressed={watching}
+                className={cn(
+                  "relative grid place-items-center w-6 h-6 rounded-full transition-colors",
+                  watching
+                    ? "bg-emerald-500/15 text-emerald-600"
+                    : "bg-surface-low text-muted-foreground hover:text-primary hover:bg-surface",
+                )}
+              >
+                <Phone className="w-3 h-3" />
+                <span
+                  className={cn(
+                    "pointer-events-none absolute inset-0 rounded-full",
+                    watching
+                      ? "ring-1 ring-emerald-400/60 animate-ping opacity-60"
+                      : "ring-1 ring-border/40 opacity-40",
+                  )}
+                  aria-hidden
+                />
+              </button>
+            </div>
           </div>
           <div className="min-w-0 mt-1.5">
             <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-[12px]" : "text-[11px]")}>
