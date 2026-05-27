@@ -453,19 +453,19 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       </section>
 
       {/* THREE-COLUMN ROW: Spotlight | Primary Comms | Social Protocols */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
         {/* Spotlight */}
-        <div className="bg-surface-lowest rounded-2xl p-5 ghost-border shadow-ambient flex flex-col">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-surface-lowest rounded-2xl p-4 ghost-border shadow-ambient flex flex-col">
+          <div className="flex items-center justify-between mb-2">
             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary inline-flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Spotlight
             </h4>
             <Zap className="w-3.5 h-3.5 text-primary/30" />
           </div>
-          <p className="text-sm font-headline font-light italic leading-snug text-foreground flex-1">
+          <p className="text-xs font-headline font-light italic leading-snug text-foreground flex-1">
             "{contact.bio}"
           </p>
-          <div className="mt-4 pt-3 border-t border-primary/5 flex items-center justify-between">
+          <div className="mt-2 pt-2 border-t border-primary/5 flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">Security Layer</span>
               <span className="text-[10px] font-mono text-primary/60">v2.4 handshake</span>
