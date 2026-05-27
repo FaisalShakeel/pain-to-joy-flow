@@ -183,7 +183,15 @@ const Explore = () => {
     const handleWatch = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      const result = toggleWatch(p.id);
+      const result = toggleWatch({
+        id: p.id,
+        name: p.name,
+        initials: p.initials,
+        accent: p.accent,
+        title: p.title,
+        company: p.company,
+        status: p.status,
+      });
       toast({
         title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
         description:
