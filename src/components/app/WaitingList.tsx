@@ -76,7 +76,7 @@ const WaitingList = () => {
         initials: w.initials || c?.initials || "?",
         title: w.title || c?.title || "",
         org: w.company || c?.org || "",
-        status: (w.status as typeof c extends infer T ? T extends { status: infer S } ? S : string : string) || c?.status || "offline",
+        status: (w.status || c?.status || "offline") as string,
         addedAt: w.addedAt,
       };
     })
