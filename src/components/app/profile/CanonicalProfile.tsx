@@ -504,32 +504,10 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           }))}
         />
       </section>
+      </>
+      )}
 
-      {/* Soft gradient divider + scroll affordance */}
-      <div className="relative h-12 md:h-14 mt-5 flex items-center justify-center">
-        <div className="inline-flex flex-col rounded-full bg-surface-lowest shadow-ambient ghost-border overflow-hidden">
-          <button
-            type="button"
-            onClick={() =>
-              document.getElementById("contact-actions")?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            className="grid place-items-center w-10 h-10 hover:bg-surface-low transition"
-            aria-label="Jump to contact actions"
-          >
-            <ArrowDown className="w-3.5 h-3.5 text-primary" />
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              document.getElementById("profile-identity")?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            className="grid place-items-center w-10 h-10 border-t border-surface-container hover:bg-surface-low transition"
-            aria-label="Back to profile identity"
-          >
-            <ArrowUp className="w-3.5 h-3.5 text-primary" />
-          </button>
-        </div>
-      </div>
+      <div className="h-5" aria-hidden />
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer (blue contact/sync) */}
       <section
