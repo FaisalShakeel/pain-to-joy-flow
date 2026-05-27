@@ -507,7 +507,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       </>
       )}
 
-      <div className="h-5" aria-hidden />
+      <div className="h-2" aria-hidden />
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer (blue contact/sync) */}
       <section
@@ -517,7 +517,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.4),transparent_60%)]" />
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 p-5 md:p-6">
+        <div className="relative z-10 p-3 md:p-4">
           {/* Header row: title left, identity card right */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-5">
             <div className="lg:col-span-8 space-y-3">
