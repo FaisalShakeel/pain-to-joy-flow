@@ -437,11 +437,11 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
             {/* Operations Center */}
             {(show("operationDays") || show("operationHours") || show("headquarters")) && (
-              <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-surface-container">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="mt-3 pt-3 border-t border-surface-container">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2 flex items-center gap-2">
                   <span className="h-px w-8 bg-border" /> Operations Center
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
                   {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
                   {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
