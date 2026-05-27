@@ -3,8 +3,6 @@ import {
   Search,
   BadgeCheck,
   MapPin,
-  Heart,
-  MessageCircle,
   Share2,
   UserPlus,
   QrCode,
