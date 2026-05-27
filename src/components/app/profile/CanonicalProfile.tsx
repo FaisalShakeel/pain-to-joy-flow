@@ -236,14 +236,14 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       {/* LEFT — Portrait card with identity inside */}
       <div className="lg:col-span-5">
         <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low h-full flex flex-col`}>
-          <div className={`relative aspect-[4/5] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
-            <span className="text-white font-headline font-extrabold text-6xl lg:text-7xl tracking-tight drop-shadow-2xl select-none">
+          <div className={`relative aspect-[3/4] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
+            <span className="text-white font-headline font-extrabold text-5xl lg:text-6xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
             <div className={`absolute top-3 right-3 h-3 w-3 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg`} />
           </div>
-          <div className="p-5 sm:p-6 space-y-1.5">
-            <h1 className="text-3xl sm:text-4xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+          <div className="p-4 sm:p-5 space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
               {firstName}
             </h1>
             {show("org") && (
@@ -253,7 +253,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             )}
             {show("title") && (
-              <p className="text-sm font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
+              <p className="text-xs font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
             )}
           </div>
         </div>
@@ -261,41 +261,41 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
       {/* RIGHT — Details card */}
       <div className="lg:col-span-7">
-        <div className="bg-surface-lowest rounded-2xl p-5 sm:p-6 md:p-7 shadow-ambient h-full flex flex-col">
+        <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient h-full flex flex-col">
           {/* Header row */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
-            <div className="md:col-span-3 space-y-3">
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="md:col-span-3 space-y-2">
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
                 <span className="text-[10px] font-extrabold tracking-wider uppercase">{statusData.label}</span>
               </div>
-              <p className="italic text-sm text-foreground/70">Available for technical sync</p>
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-headline tracking-tight text-primary uppercase leading-tight">
+              <p className="italic text-xs text-foreground/70">Available for technical sync</p>
+              <h2 className="text-xl sm:text-2xl font-extrabold font-headline tracking-tight text-primary uppercase leading-tight">
                 Hopen 4 Business.
               </h2>
               {syncWindows.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setQsOpen(true)}
-                  className="block w-full text-left rounded-2xl bg-emerald-50/60 border border-emerald-100 p-4 hover:bg-emerald-50 transition"
+                  className="block w-full text-left rounded-2xl bg-emerald-50/60 border border-emerald-100 p-3 hover:bg-emerald-50 transition"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Quick Sync Slots</p>
-                  <p className="text-lg font-bold text-emerald-700 tabular-nums">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1">Quick Sync Slots</p>
+                  <p className="text-base font-bold text-emerald-700 tabular-nums">
                     {syncWindows.map((w) => `${w.start}–${w.end}`).join("  |  ")}
                   </p>
                 </button>
               )}
             </div>
             {/* Spotlight */}
-            <div className="md:col-span-2 rounded-2xl bg-surface-low p-5 flex flex-col">
-              <div className="flex items-center justify-between mb-2">
+            <div className="md:col-span-2 rounded-2xl bg-surface-low p-4 flex flex-col">
+              <div className="flex items-center justify-between mb-1.5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               </div>
-              <p className="text-sm font-headline font-light italic leading-snug text-foreground flex-1">
+              <p className="text-xs font-headline font-light italic leading-snug text-foreground flex-1">
                 "{contact.bio}"
               </p>
-              <div className="mt-4 pt-3 flex items-center justify-between border-t border-primary/5">
+              <div className="mt-2 pt-2 flex items-center justify-between border-t border-primary/5">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">v2.4 handshake</span>
                 <Zap className="w-3.5 h-3.5 text-primary/40" />
               </div>
@@ -303,19 +303,19 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Three-column details */}
-          <div className="mt-6 pt-5 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-4 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Primary Comms</h3>
-              <div className="space-y-3.5">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
+              <div className="space-y-2">
                 {visiblePrimaryComms.length === 0 && (
                   <p className="text-xs text-muted-foreground italic">Owner has hidden all channels</p>
                 )}
                 {visiblePrimaryComms.map((c) => {
                   const Icon = commsIcon(c.kind);
                   return (
-                    <div key={c.label} className="flex gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-                        <Icon className="w-3.5 h-3.5 text-primary" />
+                    <div key={c.label} className="flex gap-2">
+                      <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                        <Icon className="w-3 h-3 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.label}</p>
@@ -327,17 +327,17 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Social Protocols</h3>
-              <div className="space-y-3.5">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Social Protocols</h3>
+              <div className="space-y-2">
                 {visibleSocials.length === 0 && (
                   <p className="text-xs text-muted-foreground italic">Owner has hidden all handles</p>
                 )}
                 {visibleSocials.map((s) => {
                   const Icon = socialIcon(s.kind);
                   return (
-                    <div key={s.label} className="flex gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-                        <Icon className="w-3.5 h-3.5 text-primary" />
+                    <div key={s.label} className="flex gap-2">
+                      <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                        <Icon className="w-3 h-3 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
@@ -349,8 +349,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Operations Center</h3>
-              <div className="space-y-3.5">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Operations Center</h3>
+              <div className="space-y-2">
                 {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
                 {show("operationHours") && <OpsItem icon={Briefcase} label="Hours" value={owner.operationHours} />}
                 {show("headquarters") && <OpsItem icon={MapPin} label="HQ" value={owner.headquarters} sub={owner.headquartersSub} />}
@@ -380,8 +380,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
         <div className="lg:col-span-3 flex justify-center lg:block">
-          <div className={`w-32 sm:w-40 lg:w-auto aspect-square sm:aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
-            <span className="text-white font-headline font-extrabold text-4xl sm:text-5xl lg:text-7xl tracking-tight drop-shadow-2xl select-none">
+          <div className={`w-28 sm:w-36 lg:w-auto aspect-square sm:aspect-[3/4] lg:aspect-auto lg:h-full lg:min-h-[180px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
+            <span className="text-white font-headline font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
             <div className={`absolute top-2.5 right-2.5 h-3 w-3 sm:h-3.5 sm:w-3.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg z-10 animate-pulse`} />
@@ -390,20 +390,20 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
         {/* Hero info card */}
         <div className="lg:col-span-9">
-          <div className="bg-surface-lowest rounded-2xl p-4 sm:p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
-              <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1 text-center md:text-left">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+          <div className="bg-surface-lowest rounded-2xl p-3 sm:p-5 shadow-ambient relative overflow-hidden h-full">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-3">
+              <div className="space-y-1 min-w-0 flex-1 text-center md:text-left">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
                   {firstName}
                 </h1>
                 {show("org") && (
-                  <div className="flex items-center justify-center md:justify-start gap-1.5 text-foreground/70 font-semibold tracking-wide text-xs sm:text-sm">
-                    <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+                  <div className="flex items-center justify-center md:justify-start gap-1.5 text-foreground/70 font-semibold tracking-wide text-xs">
+                    <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span className="truncate">{owner.org}</span>
                   </div>
                 )}
                 {show("title") && (
-                  <p className="text-sm sm:text-base md:text-lg lg:text-xl font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+                  <p className="text-xs sm:text-sm md:text-base font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
                 )}
               </div>
               {/* Right-aligned 3-row status stack: status · context · quick sync */}
@@ -437,11 +437,11 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
             {/* Operations Center */}
             {(show("operationDays") || show("operationHours") || show("headquarters")) && (
-              <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-surface-container">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="mt-3 pt-3 border-t border-surface-container">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2 flex items-center gap-2">
                   <span className="h-px w-8 bg-border" /> Operations Center
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
                   {show("operationHours") && <OpsItem icon={Briefcase} label="Operation Hours" value={owner.operationHours} />}
                   {show("headquarters") && <OpsItem icon={MapPin} label="Headquarters" value={owner.headquarters} sub={owner.headquartersSub} />}
@@ -453,19 +453,19 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       </section>
 
       {/* THREE-COLUMN ROW: Spotlight | Primary Comms | Social Protocols */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
         {/* Spotlight */}
-        <div className="bg-surface-lowest rounded-2xl p-5 ghost-border shadow-ambient flex flex-col">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-surface-lowest rounded-2xl p-4 ghost-border shadow-ambient flex flex-col">
+          <div className="flex items-center justify-between mb-2">
             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary inline-flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Spotlight
             </h4>
             <Zap className="w-3.5 h-3.5 text-primary/30" />
           </div>
-          <p className="text-sm font-headline font-light italic leading-snug text-foreground flex-1">
+          <p className="text-xs font-headline font-light italic leading-snug text-foreground flex-1">
             "{contact.bio}"
           </p>
-          <div className="mt-4 pt-3 border-t border-primary/5 flex items-center justify-between">
+          <div className="mt-2 pt-2 border-t border-primary/5 flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">Security Layer</span>
               <span className="text-[10px] font-mono text-primary/60">v2.4 handshake</span>
@@ -507,7 +507,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       </>
       )}
 
-      <div className="h-5" aria-hidden />
+      <div className="h-2" aria-hidden />
 
       {/* BOTTOM: Connection Portal — Secure Interaction Layer (blue contact/sync) */}
       <section
@@ -517,18 +517,18 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.4),transparent_60%)]" />
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 p-5 md:p-6">
+        <div className="relative z-10 p-3 md:p-4">
           {/* Header row: title left, identity card right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-5">
-            <div className="lg:col-span-8 space-y-3">
-              <div className={`inline-flex items-center gap-2 ${syncBannerData.chipBg} px-3 py-1.5 rounded-full border backdrop-blur-md`}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start mb-2">
+            <div className="lg:col-span-8 space-y-1.5">
+              <div className={`inline-flex items-center gap-2 ${syncBannerData.chipBg} px-3 py-1 rounded-full border backdrop-blur-md`}>
                 <syncBannerData.icon className={`w-3 h-3 ${syncBannerData.textColor}`} />
                 <span className={`${syncBannerData.textColor} text-[10px] uppercase font-bold tracking-[0.2em]`}>{syncBannerData.label}</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-headline font-extrabold tracking-tight leading-tight">
+              <h2 className="text-2xl md:text-3xl font-headline font-extrabold tracking-tight leading-tight">
                 Secure Interaction Layer
               </h2>
-              <p className="text-primary-foreground/70 text-sm leading-relaxed font-light max-w-xl">
+              <p className="text-primary-foreground/70 text-xs leading-relaxed font-light max-w-xl">
                 {isApproved && "Strategic alignment established. Select your context to initiate optimized communication protocols for this session."}
                 {isPending && `${firstName} is reviewing your request — typically responds within ${contact.responseTime}. Channels unlock on approval.`}
                 {isLocked && `Send an access request to unlock secure communication channels with ${firstName}.`}
@@ -537,20 +537,20 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
             {/* Identity Verified card */}
             <div className="lg:col-span-4">
-              <div className="bg-white/5 rounded-2xl border border-white/10 backdrop-blur-3xl p-5 flex flex-col items-center text-center relative overflow-hidden">
-                <div className={`w-12 h-12 rounded-full grid place-items-center mb-3 ${
+              <div className="bg-white/5 rounded-2xl border border-white/10 backdrop-blur-3xl p-3 flex flex-col items-center text-center relative overflow-hidden">
+              <div className={`w-10 h-10 rounded-full grid place-items-center mb-2 ${
                   isApproved ? "bg-emerald-500/20" : isPending ? "bg-amber-500/20" : "bg-rose-500/20"
                 }`}>
-                  {isApproved && <BadgeCheck className="w-7 h-7 text-emerald-400" strokeWidth={1.75} />}
-                  {isPending && <Clock className="w-6 h-6 text-amber-400" strokeWidth={1.75} />}
-                  {isLocked && <Lock className="w-6 h-6 text-rose-300" strokeWidth={1.75} />}
+                  {isApproved && <BadgeCheck className="w-5 h-5 text-emerald-400" strokeWidth={1.75} />}
+                  {isPending && <Clock className="w-5 h-5 text-amber-400" strokeWidth={1.75} />}
+                  {isLocked && <Lock className="w-5 h-5 text-rose-300" strokeWidth={1.75} />}
                 </div>
-                <h4 className="font-headline font-extrabold text-base">
+                <h4 className="font-headline font-extrabold text-sm">
                   {isApproved && "Identity Verified"}
                   {isPending && "Awaiting Approval"}
                   {isLocked && "Access Required"}
                 </h4>
-                <p className="text-primary-foreground/60 text-[11px] mb-3">
+                <p className="text-primary-foreground/60 text-[10px] mb-2">
                   {isApproved && `Level: ${identity.charAt(0).toUpperCase() + identity.slice(1)} Alpha Prime`}
                   {isPending && `Reviews within ${contact.responseTime}`}
                   {isLocked && "Channels are sealed"}
@@ -558,22 +558,22 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                 {isApproved && (
                   <button
                     onClick={() => toast({ title: "Access approved", description: `You have full access to ${firstName}'s channels.` })}
-                    className="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-headline font-bold text-xs shadow-lg shadow-emerald-900/40 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-emerald-500 text-white py-2 rounded-xl font-headline font-bold text-[10px] shadow-lg shadow-emerald-900/40 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
                   >
-                    ACCESS APPROVED <Check className="w-3.5 h-3.5" />
+                    ACCESS APPROVED <Check className="w-3 h-3" />
                   </button>
                 )}
                 {isLocked && (
                   <button
                     onClick={() => setOpenSent(true)}
-                    className="w-full bg-white text-primary py-2.5 rounded-xl font-headline font-bold text-xs shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-white text-primary py-2 rounded-xl font-headline font-bold text-[10px] shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                   >
-                    REQUEST ACCESS <ShieldCheck className="w-3.5 h-3.5" />
+                    REQUEST ACCESS <ShieldCheck className="w-3 h-3" />
                   </button>
                 )}
                 {isPending && (
-                  <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-300 py-2.5 rounded-xl font-headline font-semibold text-xs flex items-center justify-center gap-2">
-                    <Clock className="w-3.5 h-3.5" /> Request pending
+                  <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-300 py-2 rounded-xl font-headline font-semibold text-[10px] flex items-center justify-center gap-2">
+                    <Clock className="w-3 h-3" /> Request pending
                   </div>
                 )}
               </div>
@@ -581,19 +581,19 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Bypass full-width row */}
-          <div className="rounded-2xl bg-white/5 border border-emerald-400/20 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <span className="grid place-items-center w-9 h-9 rounded-lg bg-emerald-400/10 text-emerald-300">
-                <ShieldCheck className="w-4 h-4" />
+          <div className="rounded-2xl bg-white/5 border border-emerald-400/20 backdrop-blur-md px-3 py-2 flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="grid place-items-center w-8 h-8 rounded-lg bg-emerald-400/10 text-emerald-300">
+                <ShieldCheck className="w-3.5 h-3.5" />
               </span>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-300">Bypass Call &amp; Message</p>
-                <p className="text-[11px] text-primary-foreground/60">Direct priority override for mission-critical sync</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Bypass Call &amp; Message</p>
+                <p className="text-[10px] text-primary-foreground/60">Direct priority override for mission-critical sync</p>
               </div>
             </div>
             <button
               onClick={() => navigate(`/app/contact/${contact.id}/call`)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80"
             >
               Activate Vault <ArrowRight className="w-3 h-3" />
             </button>
@@ -657,7 +657,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Identity selector */}
-          <div className="flex flex-wrap items-center gap-3 pt-5">
+          <div className="flex flex-wrap items-center gap-2 pt-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Select Identity:</span>
             <div className="flex flex-wrap gap-1.5">
               {(["client", "colleague", "partner"] as const).map((r) => {
@@ -666,7 +666,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                   <button
                     key={r}
                     onClick={() => setIdentity(r)}
-                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    className={`px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${
                       active
                         ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
                         : "border-white/10 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
@@ -840,14 +840,14 @@ const hrefFor = (kind: string, value: string) => {
 };
 
 const OpsItem = ({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) => (
-  <div className="flex gap-2.5">
-    <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-      <Icon className="w-4 h-4 text-primary" />
+  <div className="flex gap-2">
+    <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+      <Icon className="w-3.5 h-3.5 text-primary" />
     </div>
     <div className="min-w-0">
       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-primary truncate">{value}</p>
-      {sub && <p className="text-[11px] font-medium text-muted-foreground truncate">{sub}</p>}
+      <p className="text-xs font-semibold text-primary truncate">{value}</p>
+      {sub && <p className="text-[10px] font-medium text-muted-foreground truncate">{sub}</p>}
     </div>
   </div>
 );
@@ -862,8 +862,8 @@ const CommsCard = ({
   footer?: string;
   emptyLabel?: string;
 }) => (
-  <div className="bg-surface-lowest rounded-2xl p-5 ghost-border shadow-ambient flex flex-col relative">
-    <div className="flex justify-between items-start mb-4">
+  <div className="bg-surface-lowest rounded-2xl p-4 ghost-border shadow-ambient flex flex-col relative">
+    <div className="flex justify-between items-start mb-2">
       <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent flex items-center gap-2">
         <span className="h-px w-6 bg-surface-container" /> {title}
       </h3>
@@ -872,22 +872,22 @@ const CommsCard = ({
       </span>
     </div>
     <div className="relative">
-      <div className={`space-y-3 ${locked ? "select-none pointer-events-none" : ""}`}>
+      <div className={`space-y-2 ${locked ? "select-none pointer-events-none" : ""}`}>
         {items.length === 0 && !locked && emptyLabel && (
-          <p className="text-xs text-muted-foreground italic py-2">{emptyLabel}</p>
+          <p className="text-xs text-muted-foreground italic py-1">{emptyLabel}</p>
         )}
         {items.map((it) => (
         <a key={it.label} href={locked ? "#" : it.href} className="flex items-center justify-between group">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
-              <it.icon className="w-3.5 h-3.5 text-primary" />
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
+              <it.icon className="w-3 h-3 text-primary" />
             </div>
             <div className={`min-w-0 ${locked ? "blur-sm" : ""}`}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{it.label}</p>
               <p className="text-xs font-semibold text-primary truncate">{it.value}</p>
             </div>
           </div>
-          {!locked && <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />}
+          {!locked && <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />}
         </a>
         ))}
       </div>
@@ -900,7 +900,7 @@ const CommsCard = ({
       )}
     </div>
     {footer && !locked && (
-      <p className="mt-auto pt-3 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
+      <p className="mt-auto pt-2 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
         {footer}
       </p>
     )}
@@ -935,17 +935,17 @@ const PortalTile = ({
 
   const ctaContent = (
     <>
-      <CtaIcon className="w-3.5 h-3.5" /> {cta}
+      <CtaIcon className="w-3 h-3" /> {cta}
     </>
   );
-  const ctaClassName = `w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
+  const ctaClassName = `w-full mt-2 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
 
   return (
-    <div className={`group relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
-      <div className="space-y-2.5 relative z-10">
+    <div className={`group relative overflow-hidden rounded-2xl backdrop-blur-xl p-3 transition-all flex flex-col justify-between min-h-[120px] shadow-xl ${wrapperBase}`}>
+      <div className="space-y-1.5 relative z-10">
         <div className="flex items-center justify-between">
-          <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
-            <Icon className="w-4 h-4" />
+          <div className={`h-8 w-8 rounded-xl grid place-items-center ${iconBox}`}>
+            <Icon className="w-3.5 h-3.5" />
           </div>
           {topRight ? topRight : badge && (
             <span className={`${badge.color} text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
@@ -954,7 +954,7 @@ const PortalTile = ({
           )}
         </div>
         {preview && (
-          <div className="bg-black/20 px-2.5 py-1.5 rounded-lg border border-white/5">
+          <div className="bg-black/20 px-2 py-1 rounded-lg border border-white/5">
             <p className="text-emerald-400/60 text-[9px] italic font-mono uppercase tracking-wider">{preview}</p>
           </div>
         )}
@@ -966,8 +966,8 @@ const PortalTile = ({
           </div>
         )}
         <div>
-          <h5 className="font-bold text-sm font-headline">{title}</h5>
-          <p className="text-primary-foreground/60 text-[11px] mt-1 leading-relaxed">{desc}</p>
+          <h5 className="font-bold text-xs font-headline">{title}</h5>
+          <p className="text-primary-foreground/60 text-[10px] mt-0.5 leading-relaxed">{desc}</p>
         </div>
       </div>
       {to ? (
