@@ -519,16 +519,16 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
         <div className="relative z-10 p-3 md:p-4">
           {/* Header row: title left, identity card right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-5">
-            <div className="lg:col-span-8 space-y-3">
-              <div className={`inline-flex items-center gap-2 ${syncBannerData.chipBg} px-3 py-1.5 rounded-full border backdrop-blur-md`}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start mb-2">
+            <div className="lg:col-span-8 space-y-1.5">
+              <div className={`inline-flex items-center gap-2 ${syncBannerData.chipBg} px-3 py-1 rounded-full border backdrop-blur-md`}>
                 <syncBannerData.icon className={`w-3 h-3 ${syncBannerData.textColor}`} />
                 <span className={`${syncBannerData.textColor} text-[10px] uppercase font-bold tracking-[0.2em]`}>{syncBannerData.label}</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-headline font-extrabold tracking-tight leading-tight">
+              <h2 className="text-2xl md:text-3xl font-headline font-extrabold tracking-tight leading-tight">
                 Secure Interaction Layer
               </h2>
-              <p className="text-primary-foreground/70 text-sm leading-relaxed font-light max-w-xl">
+              <p className="text-primary-foreground/70 text-xs leading-relaxed font-light max-w-xl">
                 {isApproved && "Strategic alignment established. Select your context to initiate optimized communication protocols for this session."}
                 {isPending && `${firstName} is reviewing your request — typically responds within ${contact.responseTime}. Channels unlock on approval.`}
                 {isLocked && `Send an access request to unlock secure communication channels with ${firstName}.`}
@@ -537,7 +537,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
             {/* Identity Verified card */}
             <div className="lg:col-span-4">
-              <div className="bg-white/5 rounded-2xl border border-white/10 backdrop-blur-3xl p-5 flex flex-col items-center text-center relative overflow-hidden">
+              <div className="bg-white/5 rounded-2xl border border-white/10 backdrop-blur-3xl p-3 flex flex-col items-center text-center relative overflow-hidden">
                 <div className={`w-12 h-12 rounded-full grid place-items-center mb-3 ${
                   isApproved ? "bg-emerald-500/20" : isPending ? "bg-amber-500/20" : "bg-rose-500/20"
                 }`}>
