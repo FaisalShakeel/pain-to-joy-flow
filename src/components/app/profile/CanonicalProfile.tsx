@@ -840,14 +840,14 @@ const hrefFor = (kind: string, value: string) => {
 };
 
 const OpsItem = ({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) => (
-  <div className="flex gap-2.5">
-    <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-      <Icon className="w-4 h-4 text-primary" />
+  <div className="flex gap-2">
+    <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+      <Icon className="w-3.5 h-3.5 text-primary" />
     </div>
     <div className="min-w-0">
       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-primary truncate">{value}</p>
-      {sub && <p className="text-[11px] font-medium text-muted-foreground truncate">{sub}</p>}
+      <p className="text-xs font-semibold text-primary truncate">{value}</p>
+      {sub && <p className="text-[10px] font-medium text-muted-foreground truncate">{sub}</p>}
     </div>
   </div>
 );
