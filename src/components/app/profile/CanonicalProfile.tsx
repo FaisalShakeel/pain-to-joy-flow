@@ -862,8 +862,8 @@ const CommsCard = ({
   footer?: string;
   emptyLabel?: string;
 }) => (
-  <div className="bg-surface-lowest rounded-2xl p-5 ghost-border shadow-ambient flex flex-col relative">
-    <div className="flex justify-between items-start mb-4">
+  <div className="bg-surface-lowest rounded-2xl p-4 ghost-border shadow-ambient flex flex-col relative">
+    <div className="flex justify-between items-start mb-2">
       <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent flex items-center gap-2">
         <span className="h-px w-6 bg-surface-container" /> {title}
       </h3>
@@ -872,22 +872,22 @@ const CommsCard = ({
       </span>
     </div>
     <div className="relative">
-      <div className={`space-y-3 ${locked ? "select-none pointer-events-none" : ""}`}>
+      <div className={`space-y-2 ${locked ? "select-none pointer-events-none" : ""}`}>
         {items.length === 0 && !locked && emptyLabel && (
-          <p className="text-xs text-muted-foreground italic py-2">{emptyLabel}</p>
+          <p className="text-xs text-muted-foreground italic py-1">{emptyLabel}</p>
         )}
         {items.map((it) => (
         <a key={it.label} href={locked ? "#" : it.href} className="flex items-center justify-between group">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
-              <it.icon className="w-3.5 h-3.5 text-primary" />
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center group-hover:bg-primary/5 transition-colors flex-shrink-0">
+              <it.icon className="w-3 h-3 text-primary" />
             </div>
             <div className={`min-w-0 ${locked ? "blur-sm" : ""}`}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{it.label}</p>
               <p className="text-xs font-semibold text-primary truncate">{it.value}</p>
             </div>
           </div>
-          {!locked && <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />}
+          {!locked && <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />}
         </a>
         ))}
       </div>
@@ -900,7 +900,7 @@ const CommsCard = ({
       )}
     </div>
     {footer && !locked && (
-      <p className="mt-auto pt-3 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
+      <p className="mt-auto pt-2 text-[10px] text-muted-foreground italic text-center border-t border-surface-container">
         {footer}
       </p>
     )}
