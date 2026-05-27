@@ -35,6 +35,8 @@ import { SlidersHorizontal, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import AccessRequestComposer from "@/components/app/AccessRequestComposer";
+import type { Contact } from "@/lib/mockData";
 
 type Person = {
   id: string;
@@ -94,6 +96,8 @@ const Explore = () => {
   const [query, setQuery] = useState("");
   const [connected, setConnected] = useState<Record<string, boolean>>({});
   const [qrOpen, setQrOpen] = useState(false);
+  const [density, setDensity] = useState<8 | 12>(8);
+  const [composerFor, setComposerFor] = useState<Person | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -128,6 +132,99 @@ const Explore = () => {
   };
 
   const personById = (id: string) => PEOPLE.find((p) => p.id === id)!;
+
+  const personToContact = (p: Person): Contact => ({
+    id: p.id,
+    name: p.name,
+    title: p.title,
+    org: p.company,
+    initials: p.initials,
+    accent: p.accent,
+    status: p.status === "driving" || p.status === "unavailable" ? "busy" : p.status,
+    syncStatus: "locked",
+    bio: "",
+    responseTime: "",
+    tags: p.tags,
+    availabilityContext: `${p.title} @ ${p.company}${p.city ? ` · ${p.city}` : ""}`,
+    relationship: "colleague",
+  });
+
+  const openComposer = (p: Person) => setComposerFor(p);
+
+  const densityCols: Record<8 | 12, string> = {
+    8: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+    12: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
+  };
+
+  const statusDot: Record<string, string> = {
+    available: "bg-emerald-500",
+    busy: "bg-amber-500",
+    focus: "bg-sky-500",
+    offline: "bg-muted-foreground",
+    driving: "bg-amber-500",
+    unavailable: "bg-muted-foreground",
+  };
+  const statusLabel: Record<string, string> = {
+    available: "Available",
+    busy: "Busy",
+    focus: "In focus",
+    offline: "Offline",
+    driving: "Driving",
+    unavailable: "Unavailable",
+  };
+
+  const PersonTile = ({ p }: { p: Person }) => {
+    const roomy = density === 8;
+    const isConnected = !!connected[p.id];
+    return (
+      <li className="relative h-full">
+        <Link
+          to={`/app/contact/${p.id}`}
+          title={`${p.name} · ${p.company}`}
+          className="group flex flex-col h-full w-full rounded-2xl border border-border/60 bg-surface-lowest hover:border-border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200 p-2.5"
+        >
+          <div className="flex items-start justify-between gap-1.5">
+            <Avatar initials={p.initials} accent={p.accent} status={p.status} size="sm" />
+            {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" />}
+          </div>
+          <div className="min-w-0 mt-1.5">
+            <p className={cn("font-semibold text-primary truncate leading-tight", roomy ? "text-[12px]" : "text-[11px]")}>
+              {p.name}
+            </p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className={cn("inline-block rounded-full w-1.5 h-1.5", statusDot[p.status])} />
+              <span className={cn("text-muted-foreground font-medium", roomy ? "text-[9.5px]" : "text-[9px]")}>
+                {statusLabel[p.status]}
+              </span>
+            </div>
+            <p className={cn("text-foreground/70 leading-snug mt-1 line-clamp-2", roomy ? "text-[10.5px]" : "text-[10px]")}>
+              {p.title} @ {p.company}
+            </p>
+          </div>
+          <div className="flex items-center justify-between gap-1.5 mt-auto pt-1.5 border-t border-border/40">
+            {p.mutual ? (
+              <span className="text-[9.5px] text-muted-foreground inline-flex items-center gap-0.5">
+                <Users className="w-2.5 h-2.5" /> {p.mutual}
+              </span>
+            ) : <span />}
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); openComposer(p); }}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold transition",
+                isConnected
+                  ? "bg-surface-low text-muted-foreground ghost-border"
+                  : "bg-primary text-primary-foreground hover:opacity-90",
+              )}
+            >
+              <UserPlus className="w-3 h-3" />
+              {isConnected ? "Requested" : "Connect"}
+            </button>
+          </div>
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <AppShell title="Explore" subtitle="Discover Your Network through the Lens of Consent" hideBell>
@@ -178,47 +275,35 @@ const Explore = () => {
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">For you</p>
             <h2 className="font-headline font-extrabold text-primary text-lg">People you may know</h2>
           </div>
-          <button className="text-xs font-semibold text-muted-foreground hover:text-primary">See all</button>
-        </div>
-
-        <div className="-mx-4 md:-mx-8 px-4 md:px-8">
-          <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-2">
-            {featured.length === 0 && (
-              <div className="text-sm text-muted-foreground py-6">No matches. Try another filter.</div>
-            )}
-            {featured.map((p) => (
-              <article
-                key={p.id}
-                className="snap-start shrink-0 w-56 rounded-2xl bg-surface-lowest border border-border/60 p-4 shadow-sm hover:shadow-md transition"
-              >
-                <div className="flex flex-col items-center text-center">
-                  <Avatar initials={p.initials} accent={p.accent} status={p.status} size="lg" />
-                  <div className="mt-2 flex items-center gap-1">
-                    <p className="font-semibold text-primary text-sm truncate max-w-[10rem]">{p.name}</p>
-                    {p.verified && <BadgeCheck className="w-4 h-4 text-sky-500" aria-label="Verified" />}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 truncate max-w-[12rem]">
-                    {p.title} @ {p.company}
-                  </p>
-                  {p.mutual ? (
-                    <p className="mt-1 text-[10px] text-muted-foreground flex items-center gap-1">
-                      <Users className="w-3 h-3" /> {p.mutual} mutual
-                    </p>
-                  ) : null}
-                  <Button
-                    size="sm"
-                    variant={connected[p.id] ? "outline" : "default"}
-                    className="mt-3 w-full h-8 rounded-full text-xs"
-                    onClick={() => toggleConnect(p.id, p.name)}
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                    {connected[p.id] ? "Requested" : "Connect"}
-                  </Button>
-                </div>
-              </article>
-            ))}
+          <div className="inline-flex items-center gap-1.5">
+            <div className="inline-flex p-0.5 rounded-full bg-surface-low ghost-border">
+              {([8, 12] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDensity(d)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-[11px] font-semibold transition min-w-[2rem]",
+                    density === d ? "bg-gradient-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary",
+                  )}
+                  aria-label={`Show ${d} per row`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+
+        {filtered.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-6">No matches. Try another filter.</div>
+        ) : (
+          <ul
+            className={cn("grid", density === 8 ? "gap-3" : "gap-2", densityCols[density])}
+            style={{ gridAutoRows: `${density === 8 ? 188 : 200}px` }}
+          >
+            {filtered.map((p) => <PersonTile key={p.id} p={p} />)}
+          </ul>
+        )}
       </section>
 
       {/* Activity feed */}
@@ -268,7 +353,7 @@ const Explore = () => {
                     size="sm"
                     variant={connected[a.id] ? "outline" : "secondary"}
                     className="h-8 rounded-full text-xs"
-                    onClick={() => toggleConnect(a.id, a.name)}
+                    onClick={() => openComposer(a)}
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     {connected[a.id] ? "Requested" : "Connect"}
@@ -308,7 +393,7 @@ const Explore = () => {
                 size="sm"
                 variant={connected[p.id] ? "outline" : "default"}
                 className="h-8 rounded-full text-xs"
-                onClick={() => toggleConnect(p.id, p.name)}
+                onClick={() => openComposer(p)}
               >
                 {connected[p.id] ? "Requested" : "Connect"}
               </Button>
@@ -350,7 +435,7 @@ const Explore = () => {
                   size="sm"
                   variant={connected[p.id] ? "outline" : "secondary"}
                   className="h-8 rounded-full text-xs"
-                  onClick={() => toggleConnect(p.id, p.name)}
+                  onClick={() => openComposer(p)}
                 >
                   {connected[p.id] ? "Requested" : "Connect"}
                 </Button>
@@ -418,6 +503,17 @@ const Explore = () => {
           })()}
         </DialogContent>
       </Dialog>
+
+      {composerFor && (
+        <AccessRequestComposer
+          open={!!composerFor}
+          onOpenChange={(v) => { if (!v) setComposerFor(null); }}
+          contact={personToContact(composerFor)}
+          onSubmitted={() => {
+            setConnected((c) => ({ ...c, [composerFor.id]: true }));
+          }}
+        />
+      )}
     </AppShell>
   );
 };
