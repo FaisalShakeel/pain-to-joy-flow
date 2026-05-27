@@ -390,20 +390,20 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
         {/* Hero info card */}
         <div className="lg:col-span-9">
-          <div className="bg-surface-lowest rounded-2xl p-4 sm:p-6 md:p-7 shadow-ambient relative overflow-hidden h-full">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
-              <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1 text-center md:text-left">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+          <div className="bg-surface-lowest rounded-2xl p-3 sm:p-5 shadow-ambient relative overflow-hidden h-full">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-3">
+              <div className="space-y-1 min-w-0 flex-1 text-center md:text-left">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
                   {firstName}
                 </h1>
                 {show("org") && (
-                  <div className="flex items-center justify-center md:justify-start gap-1.5 text-foreground/70 font-semibold tracking-wide text-xs sm:text-sm">
-                    <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+                  <div className="flex items-center justify-center md:justify-start gap-1.5 text-foreground/70 font-semibold tracking-wide text-xs">
+                    <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span className="truncate">{owner.org}</span>
                   </div>
                 )}
                 {show("title") && (
-                  <p className="text-sm sm:text-base md:text-lg lg:text-xl font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
+                  <p className="text-xs sm:text-sm md:text-base font-light text-foreground/80 font-headline leading-snug">{owner.title}</p>
                 )}
               </div>
               {/* Right-aligned 3-row status stack: status · context · quick sync */}
