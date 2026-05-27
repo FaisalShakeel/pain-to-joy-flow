@@ -232,18 +232,18 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
   // === GUEST (demo /v/:id) — restructured white profile details ===
   const guestTopSection = (
-    <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch scroll-mt-4">
+    <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start scroll-mt-4">
       {/* LEFT — Portrait card with identity inside */}
       <div className="lg:col-span-5">
-        <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low h-full flex flex-col`}>
-          <div className={`relative aspect-[3/4] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
-            <span className="text-white font-headline font-extrabold text-5xl lg:text-6xl tracking-tight drop-shadow-2xl select-none">
+        <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low flex flex-col`}>
+          <div className={`relative aspect-[5/4] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
+            <span className="text-white font-headline font-extrabold text-4xl lg:text-5xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
-            <div className={`absolute top-3 right-3 h-3 w-3 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg`} />
+            <div className={`absolute top-2 right-2 h-2.5 w-2.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg`} />
           </div>
-          <div className="p-4 sm:p-5 space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+          <div className="p-3 sm:p-4 space-y-1">
+            <h1 className="text-xl sm:text-2xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
               {firstName}
             </h1>
             {show("org") && (
@@ -253,7 +253,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             )}
             {show("title") && (
-              <p className="text-xs font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
+              <p className="text-[11px] font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
             )}
           </div>
         </div>
@@ -261,9 +261,9 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
       {/* RIGHT — Details card */}
       <div className="lg:col-span-7">
-        <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient h-full flex flex-col">
+        <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient">
           {/* Header row */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <div className="md:col-span-3 space-y-2">
               <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
@@ -287,12 +287,12 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               )}
             </div>
             {/* Spotlight */}
-            <div className="md:col-span-2 rounded-2xl bg-surface-low p-4 flex flex-col">
+            <div className="md:col-span-2 rounded-2xl bg-surface-low p-3 flex flex-col">
               <div className="flex items-center justify-between mb-1.5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               </div>
-              <p className="text-xs font-headline font-light italic leading-snug text-foreground flex-1">
+              <p className="text-xs font-headline font-light italic leading-snug text-foreground">
                 "{contact.bio}"
               </p>
               <div className="mt-2 pt-2 flex items-center justify-between border-t border-primary/5">
@@ -303,7 +303,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Three-column details */}
-          <div className="mt-4 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-3 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
               <div className="space-y-2">
