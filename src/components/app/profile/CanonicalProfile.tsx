@@ -380,8 +380,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
         <div className="lg:col-span-3 flex justify-center lg:block">
-          <div className={`w-32 sm:w-40 lg:w-auto aspect-square sm:aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[280px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
-            <span className="text-white font-headline font-extrabold text-4xl sm:text-5xl lg:text-7xl tracking-tight drop-shadow-2xl select-none">
+          <div className={`w-28 sm:w-36 lg:w-auto aspect-square sm:aspect-[3/4] lg:aspect-auto lg:h-full lg:min-h-[180px] rounded-2xl overflow-hidden shadow-ambient bg-gradient-to-br ${contact.accent} ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low relative grid place-items-center transition-[--tw-ring-color] duration-500`}>
+            <span className="text-white font-headline font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
             <div className={`absolute top-2.5 right-2.5 h-3 w-3 sm:h-3.5 sm:w-3.5 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg z-10 animate-pulse`} />
