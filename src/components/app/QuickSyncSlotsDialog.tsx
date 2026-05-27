@@ -46,11 +46,10 @@ const isMockBooked = (slot: string) => {
 
 const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Props) => {
   const [locallyBooked, setLocallyBooked] = useState<Set<string>>(new Set());
-  const [waitlisted, setWaitlisted] = useState<Set<string>>(new Set());
   const [globalWaitJoined, setGlobalWaitJoined] = useState(false);
-  // Track THIS user's single active reservation (slot string) and which window it belongs to.
-  const [mySlot, setMySlot] = useState<string | null>(null);
-  const [myWindow, setMyWindow] = useState<string | null>(null);
+  // Track THIS user's active reservation PER WINDOW (one per contact + date + window).
+  // Key: window label (e.g. "09:00-09:30"), value: slot string (e.g. "09:06").
+  const [myReservations, setMyReservations] = useState<Record<string, string>>({});
   const [windowWaitJoined, setWindowWaitJoined] = useState<Set<string>>(new Set());
 
   const expanded = useMemo(
@@ -59,10 +58,10 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
   );
 
   const bookSlot = (slot: string, windowLabel: string) => {
-    if (mySlot) {
+    if (myReservations[windowLabel]) {
       toast({
-        title: "You already hold an active sync reservation",
-        description: "Cancel or reschedule your current slot before booking another.",
+        title: "You already hold an active sync reservation in this window",
+        description: "Cancel or reschedule it before booking another slot in the same window.",
       });
       return;
     }
@@ -71,8 +70,7 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
       next.add(slot);
       return next;
     });
-    setMySlot(slot);
-    setMyWindow(windowLabel);
+    setMyReservations((prev) => ({ ...prev, [windowLabel]: slot }));
     trackMetric("quick_sync_completed", { dedupeKey: `qs:${slot}` });
     trackMetric("qs_batched", { dedupeKey: `qs-batch:${slot}` });
     toast({
@@ -81,16 +79,19 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
     });
   };
 
-  const cancelMySlot = () => {
-    if (!mySlot) return;
-    const slot = mySlot;
+  const cancelMySlot = (windowLabel: string) => {
+    const slot = myReservations[windowLabel];
+    if (!slot) return;
     setLocallyBooked((prev) => {
       const next = new Set(prev);
       next.delete(slot);
       return next;
     });
-    setMySlot(null);
-    setMyWindow(null);
+    setMyReservations((prev) => {
+      const n = { ...prev };
+      delete n[windowLabel];
+      return n;
+    });
     toast({
       title: "Reservation cancelled",
       description: `Your ${slot} Quick Sync with ${contactName} was released. Waitlisted users will be notified.`,
@@ -110,29 +111,11 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
     });
   };
 
-  const joinQueue = (windowLabel: string, slot?: string) => {
-    joinWaitingList({
-      name: contactName,
-      note: `Wants Quick Sync in ${windowLabel} window`,
-    });
-    if (slot) {
-      setWaitlisted((prev) => {
-        const n = new Set(prev);
-        n.add(slot);
-        return n;
-      });
-    }
-    toast({
-      title: "You're on the waiting list",
-      description: `${contactName} will manually approve and offer you a slot if one opens.`,
-    });
-  };
-
   const allSlots = expanded.flatMap(({ slots }) => slots);
   const totalAll = allSlots.length;
-  const takenAll = allSlots.filter((s) => (isMockBooked(s) || locallyBooked.has(s)) && !waitlisted.has(s)).length;
-  const waitingCount = waitlisted.size;
-  const freeAll = totalAll - takenAll - waitingCount;
+  const takenAll = allSlots.filter((s) => isMockBooked(s) || locallyBooked.has(s)).length;
+  const waitingCount = windowWaitJoined.size;
+  const freeAll = totalAll - takenAll;
   const allBooked = freeAll <= 0;
   const windowLabel = windows.length
     ? `${windows[0].start} – ${windows[windows.length - 1].end}`
@@ -216,40 +199,36 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                 <div className="grid grid-cols-5 gap-1.5">
                   {slots.map((s) => {
                     const booked = isMockBooked(s) || locallyBooked.has(s);
-                    const waiting = waitlisted.has(s);
-                    const isMine = mySlot === s;
-                    const state: "available" | "booked" | "waiting" | "mine" = isMine
+                    const isMine = myReservations[wLabel] === s;
+                    const hasMineInWindow = !!myReservations[wLabel];
+                    const state: "available" | "booked" | "mine" = isMine
                       ? "mine"
-                      : waiting
-                        ? "waiting"
-                        : booked
-                          ? "booked"
-                          : "available";
-                    const disabledByMine = !!mySlot && state === "available";
+                      : booked
+                        ? "booked"
+                        : "available";
+                    const disabledByMine = hasMineInWindow && state === "available";
                     const onClick = () => {
-                      if (state === "mine") return cancelMySlot();
+                      if (state === "mine") return cancelMySlot(wLabel);
                       if (state === "available") {
                         if (disabledByMine) return;
                         return bookSlot(s, wLabel);
                       }
-                      if (state === "booked") return joinQueue(wLabel, s);
+                      // booked slots taken by others are non-interactive
                     };
                     return (
                       <button
                         key={s}
                         type="button"
                         onClick={onClick}
-                        disabled={state === "waiting" || disabledByMine}
+                        disabled={state === "booked" || disabledByMine}
                         title={
                           state === "mine"
                             ? "Your reservation — tap to cancel"
                             : disabledByMine
-                              ? "You already hold an active reservation"
+                              ? "You already hold an active reservation in this window"
                               : state === "available"
                                 ? "Open — tap to book"
-                                : state === "booked"
-                                  ? "Booked — tap to join waiting list"
-                                  : "On waiting list"
+                                : "Booked"
                         }
                         className={cn(
                           "inline-flex items-center justify-center gap-0.5 px-1.5 py-1 rounded-md text-[10px] font-semibold tabular-nums transition",
@@ -258,15 +237,12 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                           state === "available" && disabledByMine &&
                             "bg-surface-low text-muted-foreground/60 ghost-border cursor-not-allowed opacity-60",
                           state === "booked" &&
-                            "bg-surface-low text-muted-foreground ghost-border hover:bg-amber-500/15 hover:text-amber-700",
-                          state === "waiting" &&
-                            "bg-amber-500/15 text-amber-700 ghost-border cursor-default",
+                            "bg-surface-low text-muted-foreground/70 ghost-border cursor-not-allowed opacity-70",
                           state === "mine" &&
                             "bg-primary text-primary-foreground ring-2 ring-primary/40 shadow-elevated hover:bg-primary/90",
                         )}
                       >
                         {state === "booked" && <Lock className="w-2.5 h-2.5" />}
-                        {state === "waiting" && <AlertCircle className="w-2.5 h-2.5" />}
                         {state === "mine" && <CheckCircle2 className="w-2.5 h-2.5" />}
                         {s}
                       </button>
@@ -274,8 +250,29 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
                   })}
                 </div>
 
-                {/* Per-window waiting window CTA */}
-                {windowFull && (
+                {/* Inline "my reservation" state for THIS window */}
+                {myReservations[wLabel] && (
+                  <div className="mt-2 flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-primary/5 ghost-border">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <CheckCircle2 className="w-3 h-3 text-primary shrink-0" />
+                      <p className="text-[10px] text-primary truncate">
+                        You already hold an active sync reservation ·{" "}
+                        <span className="font-bold tabular-nums">{myReservations[wLabel]}</span>{" "}
+                        <span className="text-muted-foreground">· {contactName} · Today</span>
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => cancelMySlot(wLabel)}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 transition shrink-0"
+                    >
+                      <X className="w-2.5 h-2.5" /> Cancel
+                    </button>
+                  </div>
+                )}
+
+                {/* Per-window waiting CTA — only when window is fully booked */}
+                {windowFull && !myReservations[wLabel] && (
                   <button
                     type="button"
                     onClick={() => !joinedWindow && joinWindowWaitlist(wLabel)}
@@ -295,25 +292,6 @@ const QuickSyncSlotsDialog = ({ open, onOpenChange, contactName, windows }: Prop
             );
           })}
         </div>
-
-        {/* My active reservation banner */}
-        {mySlot && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 ghost-border">
-            <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-[11px] text-primary flex-1">
-              You already hold an active sync reservation at{" "}
-              <span className="font-bold tabular-nums">{mySlot}</span>
-              {myWindow && <span className="text-muted-foreground"> · {myWindow}</span>}
-            </p>
-            <button
-              type="button"
-              onClick={cancelMySlot}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 transition"
-            >
-              <X className="w-3 h-3" /> Cancel / Reschedule
-            </button>
-          </div>
-        )}
 
         <DialogFooter className="mt-2 gap-2 flex-wrap sm:justify-between">
           <p className="text-[10px] text-muted-foreground mr-auto inline-flex items-center gap-1.5">
