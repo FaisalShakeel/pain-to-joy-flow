@@ -236,14 +236,14 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
       {/* LEFT — Portrait card with identity inside */}
       <div className="lg:col-span-5">
         <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low h-full flex flex-col`}>
-          <div className={`relative aspect-[4/5] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
-            <span className="text-white font-headline font-extrabold text-6xl lg:text-7xl tracking-tight drop-shadow-2xl select-none">
+          <div className={`relative aspect-[3/4] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
+            <span className="text-white font-headline font-extrabold text-5xl lg:text-6xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
             </span>
             <div className={`absolute top-3 right-3 h-3 w-3 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg`} />
           </div>
-          <div className="p-5 sm:p-6 space-y-1.5">
-            <h1 className="text-3xl sm:text-4xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+          <div className="p-4 sm:p-5 space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
               {firstName}
             </h1>
             {show("org") && (
@@ -253,7 +253,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             )}
             {show("title") && (
-              <p className="text-sm font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
+              <p className="text-xs font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
             )}
           </div>
         </div>
