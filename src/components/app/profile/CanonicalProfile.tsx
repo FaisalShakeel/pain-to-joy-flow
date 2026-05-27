@@ -581,19 +581,19 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
           </div>
 
           {/* Bypass full-width row */}
-          <div className="rounded-2xl bg-white/5 border border-emerald-400/20 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <span className="grid place-items-center w-9 h-9 rounded-lg bg-emerald-400/10 text-emerald-300">
-                <ShieldCheck className="w-4 h-4" />
+          <div className="rounded-2xl bg-white/5 border border-emerald-400/20 backdrop-blur-md px-3 py-2 flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="grid place-items-center w-8 h-8 rounded-lg bg-emerald-400/10 text-emerald-300">
+                <ShieldCheck className="w-3.5 h-3.5" />
               </span>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-300">Bypass Call &amp; Message</p>
-                <p className="text-[11px] text-primary-foreground/60">Direct priority override for mission-critical sync</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Bypass Call &amp; Message</p>
+                <p className="text-[10px] text-primary-foreground/60">Direct priority override for mission-critical sync</p>
               </div>
             </div>
             <button
               onClick={() => navigate(`/app/contact/${contact.id}/call`)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80"
             >
               Activate Vault <ArrowRight className="w-3 h-3" />
             </button>
