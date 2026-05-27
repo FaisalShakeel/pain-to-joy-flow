@@ -935,17 +935,17 @@ const PortalTile = ({
 
   const ctaContent = (
     <>
-      <CtaIcon className="w-3.5 h-3.5" /> {cta}
+      <CtaIcon className="w-3 h-3" /> {cta}
     </>
   );
-  const ctaClassName = `w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
+  const ctaClassName = `w-full mt-2 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-2 ${ctaClass}`;
 
   return (
-    <div className={`group relative overflow-hidden rounded-2xl backdrop-blur-xl p-4 transition-all flex flex-col justify-between min-h-[170px] shadow-xl ${wrapperBase}`}>
-      <div className="space-y-2.5 relative z-10">
+    <div className={`group relative overflow-hidden rounded-2xl backdrop-blur-xl p-3 transition-all flex flex-col justify-between min-h-[120px] shadow-xl ${wrapperBase}`}>
+      <div className="space-y-1.5 relative z-10">
         <div className="flex items-center justify-between">
-          <div className={`h-9 w-9 rounded-xl grid place-items-center ${iconBox}`}>
-            <Icon className="w-4 h-4" />
+          <div className={`h-8 w-8 rounded-xl grid place-items-center ${iconBox}`}>
+            <Icon className="w-3.5 h-3.5" />
           </div>
           {topRight ? topRight : badge && (
             <span className={`${badge.color} text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badge.label === "POWER CALL" ? "animate-pulse" : ""}`}>
@@ -954,7 +954,7 @@ const PortalTile = ({
           )}
         </div>
         {preview && (
-          <div className="bg-black/20 px-2.5 py-1.5 rounded-lg border border-white/5">
+          <div className="bg-black/20 px-2 py-1 rounded-lg border border-white/5">
             <p className="text-emerald-400/60 text-[9px] italic font-mono uppercase tracking-wider">{preview}</p>
           </div>
         )}
@@ -966,8 +966,8 @@ const PortalTile = ({
           </div>
         )}
         <div>
-          <h5 className="font-bold text-sm font-headline">{title}</h5>
-          <p className="text-primary-foreground/60 text-[11px] mt-1 leading-relaxed">{desc}</p>
+          <h5 className="font-bold text-xs font-headline">{title}</h5>
+          <p className="text-primary-foreground/60 text-[10px] mt-0.5 leading-relaxed">{desc}</p>
         </div>
       </div>
       {to ? (
