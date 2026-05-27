@@ -64,10 +64,28 @@ const WaitingList = () => {
     .map((r) => ({ r, channel: assignChannel(r.id), at: parseReceived(r.receivedAt) }))
     .sort((a, b) => b.at - a.at);
 
-  const { ids: watchIds, disableWatch, toggleWatch } = useCallWatch();
-  const watched = watchIds
-    .map((id) => contacts.find((c) => c.id === id))
-    .filter(Boolean) as typeof contacts;
+  const { items: watchItems, disableWatch, toggleWatch } = useCallWatch();
+  // Merge store records with any extra info from the contacts mock when ids match,
+  // then prioritize available contacts to the top of the queue.
+  const watched = watchItems
+    .map((w) => {
+      const c = contacts.find((x) => x.id === w.id);
+      return {
+        id: w.id,
+        name: w.name || c?.name || "Unknown",
+        initials: w.initials || c?.initials || "?",
+        title: w.title || c?.title || "",
+        org: w.company || c?.org || "",
+        status: (w.status as typeof c extends infer T ? T extends { status: infer S } ? S : string : string) || c?.status || "offline",
+        addedAt: w.addedAt,
+      };
+    })
+    .sort((a, b) => {
+      const aAvail = a.status === "available" ? 1 : 0;
+      const bAvail = b.status === "available" ? 1 : 0;
+      if (aAvail !== bAvail) return bAvail - aAvail;
+      return (b.addedAt || 0) - (a.addedAt || 0);
+    });
 
   const total = qs.length + pending.length + watched.length;
 
@@ -223,7 +241,7 @@ const WaitingList = () => {
                   <p className="text-[11px] text-muted-foreground truncate">
                     {available
                       ? `${c.name} is now available for a direct call`
-                      : `${c.title || "Contact"} · waiting for availability`}
+                      : `${c.title || c.org || "Contact"} · waiting for availability`}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
