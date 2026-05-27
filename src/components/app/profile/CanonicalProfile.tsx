@@ -230,6 +230,138 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
     });
   };
 
+  // === GUEST (demo /v/:id) — restructured white profile details ===
+  const guestTopSection = (
+    <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch scroll-mt-4">
+      {/* LEFT — Portrait card with identity inside */}
+      <div className="lg:col-span-5">
+        <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low h-full flex flex-col`}>
+          <div className={`relative aspect-[4/5] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
+            <span className="text-white font-headline font-extrabold text-6xl lg:text-7xl tracking-tight drop-shadow-2xl select-none">
+              {contact.initials}
+            </span>
+            <div className={`absolute top-3 right-3 h-3 w-3 ${statusData.dotClass} rounded-full ring-[3px] ring-white shadow-lg`} />
+          </div>
+          <div className="p-5 sm:p-6 space-y-1.5">
+            <h1 className="text-3xl sm:text-4xl font-extrabold font-headline tracking-tighter text-primary leading-[1.05]">
+              {firstName}
+            </h1>
+            {show("org") && (
+              <div className="flex items-center gap-1.5 text-foreground/70 font-semibold tracking-wide text-[11px] uppercase">
+                <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="truncate">{owner.org}</span>
+              </div>
+            )}
+            {show("title") && (
+              <p className="text-sm font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT — Details card */}
+      <div className="lg:col-span-7">
+        <div className="bg-surface-lowest rounded-2xl p-5 sm:p-6 md:p-7 shadow-ambient h-full flex flex-col">
+          {/* Header row */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+            <div className="md:col-span-3 space-y-3">
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
+                <span className="text-[10px] font-extrabold tracking-wider uppercase">{statusData.label}</span>
+              </div>
+              <p className="italic text-sm text-foreground/70">Available for technical sync</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold font-headline tracking-tight text-primary uppercase leading-tight">
+                Hopen 4 Business.
+              </h2>
+              {syncWindows.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setQsOpen(true)}
+                  className="block w-full text-left rounded-2xl bg-emerald-50/60 border border-emerald-100 p-4 hover:bg-emerald-50 transition"
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Quick Sync Slots</p>
+                  <p className="text-lg font-bold text-emerald-700 tabular-nums">
+                    {syncWindows.map((w) => `${w.start}–${w.end}`).join("  |  ")}
+                  </p>
+                </button>
+              )}
+            </div>
+            {/* Spotlight */}
+            <div className="md:col-span-2 rounded-2xl bg-surface-low p-5 flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              </div>
+              <p className="text-sm font-headline font-light italic leading-snug text-foreground flex-1">
+                "{contact.bio}"
+              </p>
+              <div className="mt-4 pt-3 flex items-center justify-between border-t border-primary/5">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">v2.4 handshake</span>
+                <Zap className="w-3.5 h-3.5 text-primary/40" />
+              </div>
+            </div>
+          </div>
+
+          {/* Three-column details */}
+          <div className="mt-6 pt-5 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Primary Comms</h3>
+              <div className="space-y-3.5">
+                {visiblePrimaryComms.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">Owner has hidden all channels</p>
+                )}
+                {visiblePrimaryComms.map((c) => {
+                  const Icon = commsIcon(c.kind);
+                  return (
+                    <div key={c.label} className="flex gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                        <Icon className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.label}</p>
+                        <p className="text-xs font-semibold text-primary truncate">{c.value}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Social Protocols</h3>
+              <div className="space-y-3.5">
+                {visibleSocials.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">Owner has hidden all handles</p>
+                )}
+                {visibleSocials.map((s) => {
+                  const Icon = socialIcon(s.kind);
+                  return (
+                    <div key={s.label} className="flex gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                        <Icon className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                        <p className="text-xs font-semibold text-primary truncate">{s.value}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Operations Center</h3>
+              <div className="space-y-3.5">
+                {show("operationDays") && <OpsItem icon={CalendarDays} label="Operation Days" value={owner.operationDays} sub={owner.operationDaysSub} />}
+                {show("operationHours") && <OpsItem icon={Briefcase} label="Hours" value={owner.operationHours} />}
+                {show("headquarters") && <OpsItem icon={MapPin} label="HQ" value={owner.headquarters} sub={owner.headquartersSub} />}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
   const body = (
     <>
       {!guestMode && (
@@ -242,6 +374,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         </button>
       )}
 
+      {guestMode ? guestTopSection : (
+      <>
       {/* TOP SECTION — Profile identity */}
       <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch scroll-mt-4">
         {/* Portrait */}
