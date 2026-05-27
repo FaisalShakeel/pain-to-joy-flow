@@ -261,41 +261,41 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
       {/* RIGHT — Details card */}
       <div className="lg:col-span-7">
-        <div className="bg-surface-lowest rounded-2xl p-5 sm:p-6 md:p-7 shadow-ambient h-full flex flex-col">
+        <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient h-full flex flex-col">
           {/* Header row */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
-            <div className="md:col-span-3 space-y-3">
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="md:col-span-3 space-y-2">
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
                 <span className="text-[10px] font-extrabold tracking-wider uppercase">{statusData.label}</span>
               </div>
-              <p className="italic text-sm text-foreground/70">Available for technical sync</p>
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-headline tracking-tight text-primary uppercase leading-tight">
+              <p className="italic text-xs text-foreground/70">Available for technical sync</p>
+              <h2 className="text-xl sm:text-2xl font-extrabold font-headline tracking-tight text-primary uppercase leading-tight">
                 Hopen 4 Business.
               </h2>
               {syncWindows.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setQsOpen(true)}
-                  className="block w-full text-left rounded-2xl bg-emerald-50/60 border border-emerald-100 p-4 hover:bg-emerald-50 transition"
+                  className="block w-full text-left rounded-2xl bg-emerald-50/60 border border-emerald-100 p-3 hover:bg-emerald-50 transition"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Quick Sync Slots</p>
-                  <p className="text-lg font-bold text-emerald-700 tabular-nums">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1">Quick Sync Slots</p>
+                  <p className="text-base font-bold text-emerald-700 tabular-nums">
                     {syncWindows.map((w) => `${w.start}–${w.end}`).join("  |  ")}
                   </p>
                 </button>
               )}
             </div>
             {/* Spotlight */}
-            <div className="md:col-span-2 rounded-2xl bg-surface-low p-5 flex flex-col">
-              <div className="flex items-center justify-between mb-2">
+            <div className="md:col-span-2 rounded-2xl bg-surface-low p-4 flex flex-col">
+              <div className="flex items-center justify-between mb-1.5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               </div>
-              <p className="text-sm font-headline font-light italic leading-snug text-foreground flex-1">
+              <p className="text-xs font-headline font-light italic leading-snug text-foreground flex-1">
                 "{contact.bio}"
               </p>
-              <div className="mt-4 pt-3 flex items-center justify-between border-t border-primary/5">
+              <div className="mt-2 pt-2 flex items-center justify-between border-t border-primary/5">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">v2.4 handshake</span>
                 <Zap className="w-3.5 h-3.5 text-primary/40" />
               </div>
