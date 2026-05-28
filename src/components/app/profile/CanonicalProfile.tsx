@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Calendar, Mail, Smartphone,
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Check,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
-  Linkedin, Github, Globe, MessageCircle, Radio, Bell,
+  Linkedin, Github, Globe, MessageCircle, Radio, Bell, Twitter,
   ArrowDown, ArrowUp, Activity,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -827,7 +827,7 @@ const socialIcon = (kind: string) => {
     case "github": return Github;
     case "instagram": return Camera;
     case "website": return Globe;
-    case "x": return Share2;
+    case "x": return Twitter;
     default: return Share2;
   }
 };
