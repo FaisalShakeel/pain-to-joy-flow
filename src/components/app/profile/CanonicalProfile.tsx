@@ -302,35 +302,37 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
           </div>
+
+          {/* Primary Comms — fills the vacant bottom of the focus card */}
+          <div className="mt-3 pt-3 border-t border-surface-container">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {visiblePrimaryComms.length === 0 && (
+                <p className="text-xs text-muted-foreground italic">Owner has hidden all channels</p>
+              )}
+              {visiblePrimaryComms.map((c) => {
+                const Icon = commsIcon(c.kind);
+                return (
+                  <div key={c.label} className="flex gap-2">
+                    <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                      <Icon className="w-3 h-3 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.label}</p>
+                      <p className="text-xs font-semibold text-primary truncate">{c.value}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
       </div>
 
-      {/* Three-column details: Primary Comms | Social Protocols | Operations Center */}
+      {/* Two-column details: Social Protocols | Operations Center */}
       <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
-              <div className="space-y-2">
-                {visiblePrimaryComms.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">Owner has hidden all channels</p>
-                )}
-                {visiblePrimaryComms.map((c) => {
-                  const Icon = commsIcon(c.kind);
-                  return (
-                    <div key={c.label} className="flex gap-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-                        <Icon className="w-3 h-3 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.label}</p>
-                        <p className="text-xs font-semibold text-primary truncate">{c.value}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Social Protocols</h3>
               <div className="space-y-2">
