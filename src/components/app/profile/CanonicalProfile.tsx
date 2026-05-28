@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Phone, MessageSquare, CalendarDays, Calendar, Mail, Smartphone,
   MapPin, Briefcase, Clock, Building2, Share2, Camera, Send, Check,
   ShieldCheck, Lock, Zap, BadgeCheck, BellRing, BellOff, PhoneCall,
-  Linkedin, Github, Globe, MessageCircle, Radio, Bell,
+  Linkedin, Github, Globe, MessageCircle, Radio, Bell, Twitter,
   ArrowDown, ArrowUp, Activity,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -233,8 +233,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
   // === GUEST (demo /v/:id) — restructured white profile details ===
   const guestTopSection = (
     <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start scroll-mt-4">
-      {/* LEFT — Portrait card with identity inside */}
-      <div className="lg:col-span-5">
+      {/* LEFT — Portrait card with identity inside + Social Protocols below */}
+      <div className="lg:col-span-5 space-y-4 sm:space-y-6">
         <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low flex flex-col`}>
           <div className={`relative aspect-[5/4] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
             <span className="text-white font-headline font-extrabold text-4xl lg:text-5xl tracking-tight drop-shadow-2xl select-none">
@@ -255,6 +255,30 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
             {show("title") && (
               <p className="text-[11px] font-light italic text-foreground/80 font-headline leading-snug">{owner.title}</p>
             )}
+          </div>
+        </div>
+
+        {/* Social Protocols — sized to match the avatar window above */}
+        <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3">Social Protocols</h3>
+          <div className="space-y-2.5">
+            {visibleSocials.length === 0 && (
+              <p className="text-xs text-muted-foreground italic">Owner has hidden all handles</p>
+            )}
+            {visibleSocials.map((s) => {
+              const Icon = socialIcon(s.kind);
+              return (
+                <div key={s.label} className="flex gap-2">
+                  <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
+                    <Icon className="w-3 h-3 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                    <p className="text-xs font-semibold text-primary truncate">{s.value}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -302,8 +326,8 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
             </div>
           </div>
 
-          {/* Three-column details */}
-          <div className="mt-3 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Two-column details (Social Protocols moved to left column) */}
+          <div className="mt-3 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
               <div className="space-y-2">
@@ -320,28 +344,6 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.label}</p>
                         <p className="text-xs font-semibold text-primary truncate">{c.value}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Social Protocols</h3>
-              <div className="space-y-2">
-                {visibleSocials.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">Owner has hidden all handles</p>
-                )}
-                {visibleSocials.map((s) => {
-                  const Icon = socialIcon(s.kind);
-                  return (
-                    <div key={s.label} className="flex gap-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-low grid place-items-center flex-shrink-0">
-                        <Icon className="w-3 h-3 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
-                        <p className="text-xs font-semibold text-primary truncate">{s.value}</p>
                       </div>
                     </div>
                   );
@@ -827,7 +829,7 @@ const socialIcon = (kind: string) => {
     case "github": return Github;
     case "instagram": return Camera;
     case "website": return Globe;
-    case "x": return Share2;
+    case "x": return Twitter;
     default: return Share2;
   }
 };
