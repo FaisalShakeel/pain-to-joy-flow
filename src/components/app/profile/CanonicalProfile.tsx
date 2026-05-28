@@ -232,10 +232,11 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
 
   // === GUEST (demo /v/:id) — restructured white profile details ===
   const guestTopSection = (
-    <section id="profile-identity" className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start scroll-mt-4">
+    <section id="profile-identity" className="scroll-mt-4 space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
       {/* LEFT — Portrait card with identity inside */}
-      <div className="lg:col-span-5">
-        <div className={`rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low flex flex-col`}>
+      <div className="lg:col-span-5 flex">
+        <div className={`flex-1 rounded-2xl overflow-hidden bg-surface-lowest shadow-ambient ring-4 ${statusData.ringClass} ring-offset-2 ring-offset-surface-low flex flex-col`}>
           <div className={`relative aspect-[5/4] bg-gradient-to-br ${contact.accent} grid place-items-center`}>
             <span className="text-white font-headline font-extrabold text-4xl lg:text-5xl tracking-tight drop-shadow-2xl select-none">
               {contact.initials}
@@ -259,11 +260,11 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
         </div>
       </div>
 
-      {/* RIGHT — Details card */}
-      <div className="lg:col-span-7">
-        <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient">
+      {/* RIGHT — Focus/Status header card, height-matched to avatar */}
+      <div className="lg:col-span-7 flex">
+        <div className="flex-1 bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient flex flex-col">
           {/* Header row */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 flex-1">
             <div className="md:col-span-3 space-y-2">
               <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full shadow-sm border ${statusData.chipClass} w-fit`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
@@ -287,7 +288,7 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               )}
             </div>
             {/* Spotlight */}
-            <div className="md:col-span-2 rounded-2xl bg-surface-low p-3 flex flex-col">
+            <div className="md:col-span-2 rounded-2xl bg-surface-low p-3 flex flex-col h-full">
               <div className="flex items-center justify-between mb-1.5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -301,9 +302,13 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      </div>
 
-          {/* Three-column details: Primary Comms | Social Protocols | Operations Center */}
-          <div className="mt-3 pt-3 border-t border-surface-container grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Three-column details: Primary Comms | Social Protocols | Operations Center */}
+      <div className="bg-surface-lowest rounded-2xl p-4 sm:p-5 shadow-ambient">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Primary Comms</h3>
               <div className="space-y-2">
@@ -357,7 +362,6 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
               </div>
             </div>
           </div>
-        </div>
       </div>
     </section>
   );
