@@ -646,11 +646,12 @@ export const ownerProfileFor = (c: Contact): OwnerProfile => {
     primaryComms: [
       { id: "email", kind: "email", label: "Email", value: email, visibility: "approved" },
       { id: "office", kind: "phone", label: "Office Number", value: "+44 20 7946 0123", visibility: "approved" },
-      { id: "mobile", kind: "mobile", label: "Mobile Number", value: "+44 7700 900 123", visibility: "approved" },
+      { id: "mobile", kind: "mobile", label: "Mobile Number", value: "+44 77 0090 0123", visibility: "approved" },
     ],
     socialHandles: [
       { id: "x", kind: "x", label: "X (Twitter)", value: `@${handle}`, href: "#", visibility: "public" },
       { id: "ig", kind: "instagram", label: "Instagram", value: `@${handle.split("_")[0]}.work`, href: "#", visibility: "public" },
+      { id: "li", kind: "linkedin", label: "LinkedIn", value: `in/${handle.replace(/_/g, "-")}`, href: "#", visibility: "public" },
     ],
     visibility: { ...defaultVisibility },
   };
