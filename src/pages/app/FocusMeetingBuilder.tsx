@@ -22,6 +22,7 @@ import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/compon
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { DailyOccupancy, type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
 import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
