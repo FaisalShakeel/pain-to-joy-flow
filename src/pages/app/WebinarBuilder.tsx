@@ -23,6 +23,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { DailyOccupancy } from "@/components/app/ActiveSlotsPanel";
 import { Activity, Eye, Layers } from "lucide-react";
 import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
@@ -272,6 +273,7 @@ const WebinarBuilder = () => {
               <Activity className="w-3 h-3" /> Live View
             </button>
           </div>
+          <SchedulingSwitcher current="event" />
           <button
             onClick={() => navigate("/app/availability/builder")}
             className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low"
