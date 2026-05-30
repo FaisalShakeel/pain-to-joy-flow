@@ -23,6 +23,7 @@ import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { DailyOccupancy } from "@/components/app/ActiveSlotsPanel";
 import { Activity, Eye, Layers } from "lucide-react";
 import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
 
 // ---------- Types ----------
 type Visibility = "public" | "contacts" | "private";
