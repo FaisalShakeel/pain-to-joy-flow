@@ -54,7 +54,7 @@ const Footer = () => (
             The encrypted identity vault. Share availability, not access.
           </p>
           <p className="text-xs text-muted-foreground mt-4">
-            Operated by ANGILL TECHNOLOGIESS FZE LLC · UAE
+            Operated by ANGILL TECHNOLOGIES FZE LLC · UAE
           </p>
         </div>
         {columns.map((c) => (
@@ -108,7 +108,7 @@ const Footer = () => (
             </p>
             <p className="text-foreground/80 pt-2">
               <span className="font-semibold text-primary">Patent Pending</span> — Owned and/or operated by{" "}
-              <span className="font-semibold">ANGILL TECHNOLOGIESS FZE LLC</span>, registered in the United Arab Emirates.
+              <span className="font-semibold">ANGILL TECHNOLOGIES FZE LLC</span>, registered in the United Arab Emirates.
             </p>
             <p>
               For licensing, partnership, or intellectual property inquiries, please contact:{" "}
