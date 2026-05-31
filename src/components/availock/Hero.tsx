@@ -120,7 +120,7 @@ const Hero = () => {
                 <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Vault Holder</span>
               </div>
               <p className="font-headline font-extrabold text-primary text-lg leading-tight">Julian Thorne</p>
-              <p className="mt-1 text-[10px] text-muted-foreground font-medium">Tap or scan to open vault</p>
+              <p className="mt-1 text-[10px] text-muted-foreground font-medium">Tap to View Demo Profile.</p>
             </div>
           </Link>
         </div>
