@@ -22,7 +22,7 @@ const PatentPending = () => (
     <H2>Ownership</H2>
     <P>
       <strong className="text-primary">Patent Pending</strong> — Owned and/or operated by{" "}
-      <strong className="text-primary">ANGILL TECHNOLOGIESS FZE LLC</strong>, registered in
+      <strong className="text-primary">ANGILL TECHNOLOGIES FZE LLC</strong>, registered in
       the United Arab Emirates.
     </P>
 

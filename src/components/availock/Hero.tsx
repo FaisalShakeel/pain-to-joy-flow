@@ -49,17 +49,20 @@ const Hero = () => {
               permission.
             </span>
           </h1>
-          <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-xl font-light leading-relaxed">
-            Stop getting awkward calls at the wrong time. Availock re-architects
-            communication by putting{" "}
+          <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl font-light leading-relaxed">
+            Stop getting awkward calls at the wrong time. People aren't rude to
+            interrupt; they're simply blind to your availability. Availock
+            re-architects communication by putting{" "}
             <span className="text-primary font-medium">intention before interruption</span>.
+            Create your availability profile and let people know when you're
+            actually reachable.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <a
               href="#claim"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-primary text-primary-foreground font-semibold shadow-elevated hover:shadow-glass transition-all active:scale-[0.98]"
             >
-              Claim your Vault ID
+              Create My Profile
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
             <button
