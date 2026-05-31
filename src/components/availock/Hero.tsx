@@ -49,7 +49,7 @@ const Hero = () => {
               permission.
             </span>
           </h1>
-          <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl font-light leading-relaxed">
+          <p className="mt-8 text-base md:text-lg text-muted-foreground max-w-3xl font-light leading-relaxed">
             Stop getting awkward calls at the wrong time. People aren't rude to
             interrupt; they're simply blind to your availability. Availock
             re-architects communication by putting{" "}

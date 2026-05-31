@@ -15,7 +15,7 @@ const Contact = () => (
         <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-accent mb-2">Company</p>
         <p className="font-headline font-bold text-primary text-lg">Availock</p>
         <p className="text-muted-foreground text-sm mt-1">
-          Operated by ANGILL TECHNOLOGIESS FZE LLC
+          Operated by ANGILL TECHNOLOGIES FZE LLC
           <br />
           Registered in the United Arab Emirates
         </p>
