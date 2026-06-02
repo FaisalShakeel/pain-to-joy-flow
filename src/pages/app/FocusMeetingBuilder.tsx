@@ -445,21 +445,39 @@ const FocusMeetingBuilder = () => {
           {isEditing && dirty ? (
             <button
               onClick={save}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
+              disabled={hasDraftConflict}
+              title={hasDraftConflict ? "Resolve date/time conflict before saving" : undefined}
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="w-3 h-3" /> Update
             </button>
           ) : step < 8 ? (
             <button
               onClick={() => setStep((s) => Math.min(8, s + 1))}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
+              disabled={hasDraftConflict || justCreated}
+              title={
+                hasDraftConflict
+                  ? "Time conflict on this date — change date or window"
+                  : justCreated
+                  ? "Press + to start a new slot"
+                  : undefined
+              }
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Next <ChevronRight className="w-3 h-3" />
             </button>
           ) : (
             <button
               onClick={save}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated"
+              disabled={hasDraftConflict || justCreated}
+              title={
+                hasDraftConflict
+                  ? "Time conflict on this date — change date or window"
+                  : justCreated
+                  ? "Press + to start a new slot"
+                  : undefined
+              }
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Done" : "Create"}
             </button>
