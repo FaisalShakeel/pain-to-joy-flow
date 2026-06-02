@@ -16,7 +16,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { format as fmtDate } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   useAvailability,
