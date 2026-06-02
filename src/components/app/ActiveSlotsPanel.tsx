@@ -717,48 +717,16 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
               ? "bg-amber-500/15 text-amber-800 hover:bg-amber-500/25"
               : "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/25";
           return (
-            <Popover key={s.key}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  title={s.state === "booked" ? "Booked (owner view — not bookable)" : "Open · tap to edit or delete"}
-                  className={cn(
-                    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums ghost-border",
-                    cls,
-                  )}
-                >
-                  {s.state === "booked" ? (
-                    <Lock className="w-2.5 h-2.5" />
-                  ) : (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  )}
-                  {label}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-40 p-1 z-[60]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
-                  Sub-slot · {label}
-                </p>
-                <button
-                  onClick={() => availabilityStore.editSubSlot(row.id, s.key, -5)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low inline-flex items-center gap-2"
-                >
-                  <Minus className="w-3 h-3" /> Shift −5 min
-                </button>
-                <button
-                  onClick={() => availabilityStore.editSubSlot(row.id, s.key, 5)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low inline-flex items-center gap-2"
-                >
-                  <Plus className="w-3 h-3" /> Shift +5 min
-                </button>
-                <button
-                  onClick={() => availabilityStore.disableSubSlot(row.id, s.key)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-destructive/10 text-destructive inline-flex items-center gap-2"
-                >
-                  <X className="w-3 h-3" /> Delete sub-slot
-                </button>
-              </PopoverContent>
-            </Popover>
+            <SubSlotEditor
+              key={s.key}
+              row={row}
+              sub={s}
+              label={label}
+              triggerClass={cn(
+                "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums ghost-border",
+                cls,
+              )}
+            />
           );
         })}
       </div>
