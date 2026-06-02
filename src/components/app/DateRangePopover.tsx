@@ -128,15 +128,6 @@ const DateRangePopover = ({ from, to, onChange, singleOnly, className, triggerLa
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
-      {/* legacy popover removed above */}
-      {false && (
-      <Popover open={false} onOpenChange={setOpen}>
-        <PopoverTrigger asChild><button /></PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-[60]" align="start">
-          <div />
-        </PopoverContent>
-      </Popover>
-      )}
     </div>
   );
 };
