@@ -108,6 +108,7 @@ const WebinarBuilder = () => {
   const [items, setItems] = useState<Webinar[]>(seed);
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [dirty, setDirty] = useState(false);
+  const [justCreated, setJustCreated] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
   const [viewMode, setViewMode] = useState<"editor" | "live">("editor");
@@ -117,9 +118,16 @@ const WebinarBuilder = () => {
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => {
     setDraft((d) => ({ ...d, [k]: v }));
     setDirty(true);
+    setJustCreated(false);
   };
 
-  const reset = () => { setDraft(blank()); setDirty(false); };
+  const reset = () => { setDraft(blank()); setDirty(false); setJustCreated(false); };
+
+  const hasDraftConflict = useMemo(
+    () => !!findConflict(draft.date, draft.startMin, draft.startMin + draft.durationMin, draft.id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [draft.date, draft.startMin, draft.durationMin, draft.id, items],
+  );
 
   const conflictToast = (date: string, startMin: number, endMin: number, excludeId?: string) => {
     const c = findConflict(date, startMin, endMin, excludeId);
@@ -195,7 +203,8 @@ const WebinarBuilder = () => {
         toast({ title: "Relayed to Spotlight" });
       }
     }
-    reset();
+    setJustCreated(true);
+    setDirty(false);
   };
 
   const editOne = (w: Webinar) => {
@@ -484,8 +493,15 @@ const WebinarBuilder = () => {
               )}
               <button
                 onClick={save}
-                disabled={isEditing && !dirty}
-                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
+                disabled={(isEditing && !dirty) || hasDraftConflict || (!isEditing && justCreated)}
+                title={
+                  hasDraftConflict
+                    ? "Time conflict on this date — change date or window"
+                    : !isEditing && justCreated
+                    ? "Press Cancel/New to create another session"
+                    : undefined
+                }
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update session" : "Publish session"}
               </button>
