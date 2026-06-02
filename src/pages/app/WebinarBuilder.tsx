@@ -493,8 +493,15 @@ const WebinarBuilder = () => {
               )}
               <button
                 onClick={save}
-                disabled={isEditing && !dirty}
-                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated"
+                disabled={(isEditing && !dirty) || hasDraftConflict || (!isEditing && justCreated)}
+                title={
+                  hasDraftConflict
+                    ? "Time conflict on this date — change date or window"
+                    : !isEditing && justCreated
+                    ? "Press Cancel/New to create another session"
+                    : undefined
+                }
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update session" : "Publish session"}
               </button>
