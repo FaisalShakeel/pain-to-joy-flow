@@ -8,6 +8,14 @@ import {
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
   useAvailability,
@@ -709,48 +717,16 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
               ? "bg-amber-500/15 text-amber-800 hover:bg-amber-500/25"
               : "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/25";
           return (
-            <Popover key={s.key}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  title={s.state === "booked" ? "Booked (owner view — not bookable)" : "Open · tap to edit or delete"}
-                  className={cn(
-                    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums ghost-border",
-                    cls,
-                  )}
-                >
-                  {s.state === "booked" ? (
-                    <Lock className="w-2.5 h-2.5" />
-                  ) : (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  )}
-                  {label}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-40 p-1 z-[60]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
-                  Sub-slot · {label}
-                </p>
-                <button
-                  onClick={() => availabilityStore.editSubSlot(row.id, s.key, -5)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low inline-flex items-center gap-2"
-                >
-                  <Minus className="w-3 h-3" /> Shift −5 min
-                </button>
-                <button
-                  onClick={() => availabilityStore.editSubSlot(row.id, s.key, 5)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-surface-low inline-flex items-center gap-2"
-                >
-                  <Plus className="w-3 h-3" /> Shift +5 min
-                </button>
-                <button
-                  onClick={() => availabilityStore.disableSubSlot(row.id, s.key)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-destructive/10 text-destructive inline-flex items-center gap-2"
-                >
-                  <X className="w-3 h-3" /> Delete sub-slot
-                </button>
-              </PopoverContent>
-            </Popover>
+            <SubSlotEditor
+              key={s.key}
+              row={row}
+              sub={s}
+              label={label}
+              triggerClass={cn(
+                "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tabular-nums ghost-border",
+                cls,
+              )}
+            />
           );
         })}
       </div>
@@ -759,6 +735,193 @@ const SubSlotsStrip = ({ row }: { row: Row }) => {
 };
 
 export default ActiveSlotsPanel;
+
+// ---------- Sub-slot editor dialog (creator-facing) ----------
+type SubInfo = { key: number; start: number; end: number; state: "available" | "booked" | "expired" };
+
+const minsToInput = (m: number) =>
+  `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+const inputToMins = (v: string) => {
+  const [h, m] = v.split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+};
+
+const SubSlotEditor = ({
+  row,
+  sub,
+  label,
+  triggerClass,
+}: {
+  row: Row;
+  sub: SubInfo;
+  label: string;
+  triggerClass: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const callMin = row.callMin ?? sub.end - sub.start;
+  const [startVal, setStartVal] = useState(minsToInput(sub.start));
+  const endMin = inputToMins(startVal) + callMin;
+
+  // Reset state when dialog re-opens (so latest stored time is reflected).
+  useEffect(() => {
+    if (open) setStartVal(minsToInput(sub.start));
+  }, [open, sub.start]);
+
+  const srcMeta = row.source !== "legacy" ? sourceMeta[row.source] : null;
+  const mm = modeMeta[row.mode];
+  const isBooked = sub.state === "booked";
+
+  const save = () => {
+    const desired = inputToMins(startVal);
+    const delta = desired - sub.key;
+    if (delta !== 0) availabilityStore.editSubSlot(row.id, sub.key, delta);
+    setOpen(false);
+  };
+
+  const remove = () => {
+    availabilityStore.disableSubSlot(row.id, sub.key);
+    setOpen(false);
+  };
+
+  const dateLabel = (() => {
+    try { return format(parseLocalISO(row.date), "EEEE · MMM d, yyyy"); }
+    catch { return row.date; }
+  })();
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        title={isBooked ? "Booked · tap to view & edit" : "Tap to edit sub-slot"}
+        className={triggerClass}
+      >
+        {isBooked ? <Lock className="w-2.5 h-2.5" /> : <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+        {label}
+      </button>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-headline text-primary">{row.typeLabel}</DialogTitle>
+          <DialogDescription>
+            Sub-slot booking window · {dateLabel}
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Meta strip */}
+        <div className="flex flex-wrap gap-2">
+          {srcMeta && (
+            <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold", srcMeta.cls)}>
+              <srcMeta.icon className="w-3 h-3" /> {srcMeta.label}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
+            {mm.icons.map((Ic, i) => <Ic key={i} className="w-3 h-3" />)}
+            {mm.label}
+          </span>
+          <span className={cn(
+            "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold",
+            isBooked ? "bg-amber-500/15 text-amber-800" : "bg-emerald-500/15 text-emerald-700",
+          )}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", isBooked ? "bg-amber-500" : "bg-emerald-500")} />
+            {isBooked ? "Booked" : "Available"}
+          </span>
+        </div>
+
+        {/* Details grid */}
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="rounded-lg bg-surface-low/40 ghost-border p-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Parent window</p>
+            <p className="mt-1 font-bold text-primary tabular-nums">
+              {fmtTime(row.startMin).replace(/\s.*/, "")} – {fmtTime(row.endMin)}
+            </p>
+          </div>
+          <div className="rounded-lg bg-surface-low/40 ghost-border p-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Duration</p>
+            <p className="mt-1 font-bold text-primary tabular-nums">{callMin} min</p>
+          </div>
+          <div className="rounded-lg bg-surface-low/40 ghost-border p-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Buffer</p>
+            <p className="mt-1 font-bold text-primary tabular-nums">{row.bufferMin} min</p>
+          </div>
+          <div className="rounded-lg bg-surface-low/40 ghost-border p-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Original start</p>
+            <p className="mt-1 font-bold text-primary tabular-nums">{fmtTime(sub.key)}</p>
+          </div>
+        </div>
+
+        {/* Editable timing */}
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Reschedule sub-slot</p>
+          <div className="grid grid-cols-2 gap-3 items-end">
+            <label className="block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Start</span>
+              <input
+                type="time"
+                value={startVal}
+                onChange={(e) => setStartVal(e.target.value)}
+                className="mt-1 w-full rounded-md ghost-border bg-surface-lowest px-2 py-1.5 text-sm font-bold text-primary"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">End</span>
+              <input
+                type="time"
+                value={minsToInput(endMin)}
+                readOnly
+                className="mt-1 w-full rounded-md ghost-border bg-surface-low/40 px-2 py-1.5 text-sm font-bold text-muted-foreground"
+              />
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setStartVal(minsToInput(Math.max(row.startMin, inputToMins(startVal) - 5)))}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md ghost-border bg-surface-lowest text-[11px] font-bold hover:bg-primary/10 text-primary"
+            >
+              <Minus className="w-3 h-3" /> 5 min
+            </button>
+            <button
+              type="button"
+              onClick={() => setStartVal(minsToInput(Math.min(row.endMin - callMin, inputToMins(startVal) + 5)))}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md ghost-border bg-surface-lowest text-[11px] font-bold hover:bg-primary/10 text-primary"
+            >
+              <Plus className="w-3 h-3" /> 5 min
+            </button>
+            <p className="ml-auto text-[10px] text-muted-foreground italic">
+              Must stay inside parent window
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-2">
+          <button
+            type="button"
+            onClick={remove}
+            className="inline-flex items-center gap-1 px-3 py-2 rounded-md ghost-border text-destructive hover:bg-destructive/10 text-xs font-bold"
+          >
+            <X className="w-3 h-3" /> Delete sub-slot
+          </button>
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="px-3 py-2 rounded-md ghost-border bg-surface-lowest text-xs font-bold text-muted-foreground hover:text-primary"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={inputToMins(startVal) < row.startMin || inputToMins(startVal) + callMin > row.endMin}
+            className="px-3 py-2 rounded-md bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 disabled:opacity-40"
+          >
+            Save changes
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 // ---------- Daily Occupancy Rail ----------
 const RAIL_START = 8 * 60;   // 08:00
