@@ -261,7 +261,8 @@ const QuickSyncBuilder = () => {
         toast({ title: "Relayed to Spotlight" });
       }
     }
-    reset();
+    setJustCreated(true);
+    setDirty(false);
   };
 
   const editSlot = (s: QSSlot) => {
