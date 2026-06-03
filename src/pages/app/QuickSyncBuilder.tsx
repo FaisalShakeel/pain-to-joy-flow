@@ -273,6 +273,21 @@ const QuickSyncBuilder = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Open the editor when arriving from Daily Occupancy on another page.
+  useEffect(() => {
+    const id = searchParams.get("edit");
+    if (!id) return;
+    const s = slots.find((x) => x.id === id);
+    if (s) {
+      editSlot(s);
+      setTimeout(() => markCreated(s.id), 300);
+      const next = new URLSearchParams(searchParams);
+      next.delete("edit");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, slots]);
+
   const deleteSlot = (id: string) => {
     setSlots((p) => p.filter((s) => s.id !== id));
     setConfirmDelete(null);
