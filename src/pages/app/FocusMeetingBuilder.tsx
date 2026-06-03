@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
   ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
@@ -111,6 +111,7 @@ const seed: MTSlot[] = [
 // ---------- Page ----------
 const FocusMeetingBuilder = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [slots, setSlots] = useState<MTSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
