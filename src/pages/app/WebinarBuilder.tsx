@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import {
   ArrowLeft, Users as UsersIcon, Calendar as CalIcon, Clock, Globe,
@@ -105,6 +105,7 @@ const seed: Webinar[] = [
 
 const WebinarBuilder = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<Webinar[]>(seed);
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [dirty, setDirty] = useState(false);
@@ -234,6 +235,21 @@ const WebinarBuilder = () => {
     setConfirmDelete(null);
     toast({ title: "Session deleted" });
   };
+
+  // Open editor when arriving from Daily Occupancy on another page.
+  useEffect(() => {
+    const id = searchParams.get("edit");
+    if (!id) return;
+    const w = items.find((x) => x.id === id);
+    if (w) {
+      editOne(w);
+      setTimeout(() => markCreated(w.id), 300);
+      const next = new URLSearchParams(searchParams);
+      next.delete("edit");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, items]);
 
   // Sync to unified availability store
   useEffect(() => {

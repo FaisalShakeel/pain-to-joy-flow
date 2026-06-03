@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
   ArrowLeft, Briefcase, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
@@ -111,6 +111,7 @@ const seed: MTSlot[] = [
 // ---------- Page ----------
 const FocusMeetingBuilder = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [slots, setSlots] = useState<MTSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
@@ -279,6 +280,21 @@ const FocusMeetingBuilder = () => {
     setDirty(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Open the editor when arriving from Daily Occupancy on another page.
+  useEffect(() => {
+    const id = searchParams.get("edit");
+    if (!id) return;
+    const s = slots.find((x) => x.id === id);
+    if (s) {
+      editSlot(s);
+      setTimeout(() => markCreated(s.id), 300);
+      const next = new URLSearchParams(searchParams);
+      next.delete("edit");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, slots]);
 
   const deleteSlot = (id: string) => {
     setSlots((p) => p.filter((s) => s.id !== id));

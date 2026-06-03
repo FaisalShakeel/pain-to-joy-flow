@@ -6,6 +6,7 @@ import {
   Clock,
 } from "lucide-react";
 import { format } from "date-fns";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -937,6 +938,13 @@ const sourceColor: Record<string, string> = {
 
 const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { rows: Row[]; dateLabel: string; hideHeader?: boolean; onBlockClick?: (id: string) => void }) => {
   const [now, setNow] = useState(() => new Date());
+  const navigate = useNavigate();
+  const location = useLocation();
+  const sourceRoute: Record<string, string> = {
+    focus: "/app/availability/focus-meetings",
+    quicksync: "/app/availability/quick-sync",
+    "event-access": "/app/availability/webinars",
+  };
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(t);
@@ -999,6 +1007,13 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { 
               title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)}) · click to open in live preview`}
               onClick={(ev) => {
                 ev.stopPropagation();
+                const route = sourceRoute[r.source];
+                // If the block was created by a different settings page, jump there
+                // and ask that page to open the matching configuration for editing.
+                if (route && location.pathname !== route) {
+                  navigate(`${route}?edit=${encodeURIComponent(r.id)}`);
+                  return;
+                }
                 if (onBlockClick) onBlockClick(r.id);
                 else markCreated(r.id);
               }}
