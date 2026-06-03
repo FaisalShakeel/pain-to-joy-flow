@@ -39,6 +39,7 @@ import { Link } from "react-router-dom";
 import AccessRequestComposer from "@/components/app/AccessRequestComposer";
 import type { Contact } from "@/lib/mockData";
 import { useCallWatch } from "@/lib/callWatchStore";
+import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
 
 type Person = {
   id: string;
@@ -101,6 +102,7 @@ const Explore = () => {
   const [density, setDensity] = useState<8 | 12>(8);
   const [composerFor, setComposerFor] = useState<Person | null>(null);
   const { isWatching, toggleWatch } = useCallWatch();
+  const { settings: callWatchSettings } = useCallWatchSettings();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -211,6 +213,7 @@ const Explore = () => {
             <Avatar initials={p.initials} accent={p.accent} status={p.status} size="sm" />
             <div className="flex items-center gap-1 shrink-0">
               {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-sky-500" />}
+              {callWatchSettings.enabled && (
               <button
                 type="button"
                 onClick={handleWatch}
@@ -239,6 +242,7 @@ const Explore = () => {
                   aria-hidden
                 />
               </button>
+              )}
             </div>
           </div>
           <div className="min-w-0 mt-1.5">
