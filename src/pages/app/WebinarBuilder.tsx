@@ -236,6 +236,21 @@ const WebinarBuilder = () => {
     toast({ title: "Session deleted" });
   };
 
+  // Open editor when arriving from Daily Occupancy on another page.
+  useEffect(() => {
+    const id = searchParams.get("edit");
+    if (!id) return;
+    const w = items.find((x) => x.id === id);
+    if (w) {
+      editOne(w);
+      setTimeout(() => markCreated(w.id), 300);
+      const next = new URLSearchParams(searchParams);
+      next.delete("edit");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, items]);
+
   // Sync to unified availability store
   useEffect(() => {
     availabilityStore.syncSource(
