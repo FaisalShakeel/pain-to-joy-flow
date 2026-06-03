@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import {
   ArrowLeft, Users as UsersIcon, Calendar as CalIcon, Clock, Globe,
@@ -105,6 +105,7 @@ const seed: Webinar[] = [
 
 const WebinarBuilder = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<Webinar[]>(seed);
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [dirty, setDirty] = useState(false);
