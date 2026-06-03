@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, addDays, addWeeks } from "date-fns";
 import {
   ArrowLeft, Zap, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
@@ -117,6 +117,7 @@ const seed: QSSlot[] = [
 // ---------- Page ----------
 const QuickSyncBuilder = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [slots, setSlots] = useState<QSSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<QSSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
