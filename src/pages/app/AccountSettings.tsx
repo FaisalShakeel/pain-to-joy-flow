@@ -4,6 +4,7 @@ import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
 import WhoCanFindMePanel from "@/components/app/WhoCanFindMePanel";
+import CallWatchSettingsPanel from "@/components/app/CallWatchSettingsPanel";
 import { me, transactions } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -29,6 +30,9 @@ const AccountSettings = () => {
 
           {/* Who can find me */}
           <WhoCanFindMePanel />
+
+          {/* Call Watch */}
+          <CallWatchSettingsPanel />
 
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />
