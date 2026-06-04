@@ -121,8 +121,8 @@ const ContactRow = ({
             </p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1.5">
-          {callWatchSettings.enabled && (
+        <div className="flex flex-col items-end justify-between gap-2 self-stretch shrink-0">
+          {callWatchSettings.enabled ? (
             <button
               type="button"
               onClick={handleWatch}
@@ -134,23 +134,22 @@ const ContactRow = ({
               aria-label={watching ? "Disable Call Watch alert" : "Enable Call Watch alert"}
               aria-pressed={watching}
               className={cn(
-                "relative grid place-items-center w-7 h-7 rounded-full transition-colors",
+                "relative grid place-items-center w-6 h-6 rounded-full transition-colors",
                 watching
                   ? "bg-emerald-500/15 text-emerald-600"
-                  : "bg-surface-lowest text-muted-foreground hover:text-primary hover:bg-surface",
+                  : "bg-surface-low text-muted-foreground hover:text-primary hover:bg-surface",
               )}
             >
-              <Phone className="w-3.5 h-3.5" />
-              <span
-                className={cn(
-                  "pointer-events-none absolute inset-0 rounded-full",
-                  watching
-                    ? "ring-1 ring-emerald-400/60 animate-ping opacity-60"
-                    : "ring-1 ring-border/40 opacity-40",
-                )}
-                aria-hidden
-              />
+              <Phone className="w-3 h-3" />
+              {watching && (
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-emerald-400/60 animate-ping opacity-60"
+                  aria-hidden
+                />
+              )}
             </button>
+          ) : (
+            <span className="w-6 h-6" aria-hidden />
           )}
           <div className="flex items-center gap-1.5">
             {showPin && (
