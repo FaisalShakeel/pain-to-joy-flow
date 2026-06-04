@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Search, Maximize2, X, Star, Pin, PinOff,
+  Search, Maximize2, X, Star, Pin, PinOff, Phone,
   Users as UsersIcon, ArrowRight, Car, Megaphone, Activity,
 } from "lucide-react";
 import Avatar from "./Avatar";
@@ -11,6 +11,8 @@ import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { useSpotlight } from "./SpotlightContext";
 import { usePins } from "@/lib/pinsStore";
+import { useCallWatch } from "@/lib/callWatchStore";
+import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
 import { toast } from "@/hooks/use-toast";
 
 type Filter = "all" | "available" | "busy" | "focus" | "driving" | "offline" | "pinned";
@@ -43,6 +45,30 @@ const ContactRow = ({
   const effective: AvailabilityStatus | "driving" = driving ? "driving" : c.status;
   const { unseenForContact, markSeen, markContactPostsViewed } = useSpotlight();
   const unseen = unseenForContact(c.id);
+  const { isWatching, toggleWatch } = useCallWatch();
+  const { settings: callWatchSettings } = useCallWatchSettings();
+  const watching = isWatching(c.id);
+
+  const handleWatch = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const result = toggleWatch({
+      id: c.id,
+      name: c.name,
+      initials: c.initials,
+      accent: c.accent,
+      title: c.title,
+      company: c.org,
+      status: c.status,
+    });
+    toast({
+      title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
+      description:
+        result === "added"
+          ? `You'll be alerted the moment ${c.name} is available for a direct call.`
+          : `${c.name} removed from your Call Watch list.`,
+    });
+  };
 
   return (
     <div className="group relative p-3 rounded-2xl nested-surface hover:shadow-soft transition-all ease-premium">
@@ -96,19 +122,51 @@ const ContactRow = ({
           )}
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          {showPin && (
+          {callWatchSettings.enabled && (
             <button
-              onClick={() => onToggle(c.id)}
-              title={pinned ? "Unpin" : "Pin"}
+              type="button"
+              onClick={handleWatch}
+              title={
+                watching
+                  ? "Call Watch on — we'll alert you the moment they're available"
+                  : "Call Watch — get alerted when this contact becomes available for a direct call"
+              }
+              aria-label={watching ? "Disable Call Watch alert" : "Enable Call Watch alert"}
+              aria-pressed={watching}
               className={cn(
-                "grid place-items-center w-7 h-7 rounded-full transition",
-                pinned ? "bg-gold/20 text-gold" : "bg-surface-lowest text-muted-foreground hover:text-primary",
+                "relative grid place-items-center w-7 h-7 rounded-full transition-colors",
+                watching
+                  ? "bg-emerald-500/15 text-emerald-600"
+                  : "bg-surface-lowest text-muted-foreground hover:text-primary hover:bg-surface",
               )}
             >
-              {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
+              <Phone className="w-3.5 h-3.5" />
+              <span
+                className={cn(
+                  "pointer-events-none absolute inset-0 rounded-full",
+                  watching
+                    ? "ring-1 ring-emerald-400/60 animate-ping opacity-60"
+                    : "ring-1 ring-border/40 opacity-40",
+                )}
+                aria-hidden
+              />
             </button>
           )}
-          <PingButton contact={c} drivingOverride={driving} />
+          <div className="flex items-center gap-1.5">
+            {showPin && (
+              <button
+                onClick={() => onToggle(c.id)}
+                title={pinned ? "Unpin" : "Pin"}
+                className={cn(
+                  "grid place-items-center w-7 h-7 rounded-full transition",
+                  pinned ? "bg-gold/20 text-gold" : "bg-surface-lowest text-muted-foreground hover:text-primary",
+                )}
+              >
+                {pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
+              </button>
+            )}
+            <PingButton contact={c} drivingOverride={driving} />
+          </div>
         </div>
       </div>
     </div>
