@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Search, Maximize2, X, Star, Pin, PinOff,
+  Search, Maximize2, X, Star, Pin, PinOff, Phone,
   Users as UsersIcon, ArrowRight, Car, Megaphone, Activity,
 } from "lucide-react";
 import Avatar from "./Avatar";
@@ -11,6 +11,8 @@ import { contacts, type AvailabilityStatus } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { useSpotlight } from "./SpotlightContext";
 import { usePins } from "@/lib/pinsStore";
+import { useCallWatch } from "@/lib/callWatchStore";
+import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
 import { toast } from "@/hooks/use-toast";
 
 type Filter = "all" | "available" | "busy" | "focus" | "driving" | "offline" | "pinned";
