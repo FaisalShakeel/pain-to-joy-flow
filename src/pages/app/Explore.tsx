@@ -213,7 +213,7 @@ const Explore = () => {
             <Avatar initials={p.initials} accent={p.accent} status={p.status} size="sm" />
             <div className="flex items-center gap-1 shrink-0">
               {p.verified && <BadgeCheck className="w-3.5 h-3.5 text-sky-500" />}
-              {callWatchSettings.enabled && (
+              {callWatchSettings.enabled && p.status !== "available" && (
               <button
                 type="button"
                 onClick={handleWatch}

@@ -122,7 +122,7 @@ const ContactRow = ({
           )}
         </div>
         <div className="flex flex-col items-end justify-between gap-2 self-stretch shrink-0">
-          {callWatchSettings.enabled ? (
+          {callWatchSettings.enabled && effective !== "available" ? (
             <button
               type="button"
               onClick={handleWatch}
