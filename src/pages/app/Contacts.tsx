@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone, Maximize2, Minimize2 } from "lucide-react";
+import { Search, Plus, Users, ArrowRight, ArrowLeft, LayoutGrid, List, Star, Clock, Briefcase, Heart, UserCheck, TrendingUp, Building2, Eye, PhoneCall, MessageSquare, CalendarClock, Pin, PinOff, Phone, UserPlus, Send, X, CornerDownLeft, Circle, Dot, Moon, Focus as FocusIcon, SlidersHorizontal, ChevronDown, Activity, Megaphone, Maximize2, Minimize2 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import StatusPill from "@/components/app/StatusPill";
@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import AccessChip from "@/components/app/ui/AccessChip";
 import { usePins, MAX_PINS } from "@/lib/pinsStore";
 import { useSpotlight } from "@/components/app/SpotlightContext";
+import { useCallWatch } from "@/lib/callWatchStore";
+import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
 
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
@@ -88,6 +90,8 @@ const Contacts = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { pins: pinned, isPinned: isPinnedFn, canPin, togglePin: storeTogglePin } = usePins();
   const { unseenForContact, markSeen, markContactPostsViewed } = useSpotlight();
+  const { isWatching, toggleWatch } = useCallWatch();
+  const { settings: callWatchSettings } = useCallWatchSettings();
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -465,6 +469,27 @@ const Contacts = () => {
               const fav = favorites.includes(c.id) || (c.favorite && !favorites.includes(c.id));
               const roomy = density === 8;
               const mid = density === 12;
+              const watching = isWatching(c.id);
+              const handleWatch = (e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const result = toggleWatch({
+                  id: c.id,
+                  name: c.name,
+                  initials: c.initials,
+                  accent: c.accent,
+                  title: c.title,
+                  company: c.org,
+                  status: c.status,
+                });
+                toast({
+                  title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
+                  description:
+                    result === "added"
+                      ? `You'll be alerted the moment ${c.name} is available for a direct call.`
+                      : `${c.name} removed from your Call Watch list.`,
+                });
+              };
             return (
                 <li key={c.id} className="relative h-full">
                   <Link
@@ -515,22 +540,31 @@ const Contacts = () => {
                         >
                           <Star className={cn("w-3 h-3", fav && "fill-amber-500")} />
                         </button>
-                        {(isPinned || canPin) && (
+                        {callWatchSettings.enabled && (
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              togglePin(c.id);
-                            }}
-                            title={isPinned ? "Unpin contact" : "Pin contact"}
-                            aria-label={isPinned ? "Unpin contact" : "Pin contact"}
+                            onClick={handleWatch}
+                            title={
+                              watching
+                                ? "Call Watch on — we'll alert you the moment they're available"
+                                : "Call Watch — get alerted when this contact becomes available for a direct call"
+                            }
+                            aria-label={watching ? "Disable Call Watch alert" : "Enable Call Watch alert"}
+                            aria-pressed={watching}
                             className={cn(
-                              "inline-flex items-center justify-center rounded-full transition shrink-0 w-5 h-5 hover:bg-surface-low",
-                              isPinned ? "text-accent" : "text-muted-foreground hover:text-primary",
+                              "relative inline-flex items-center justify-center rounded-full transition shrink-0 w-5 h-5",
+                              watching
+                                ? "bg-emerald-500/15 text-emerald-600"
+                                : "text-muted-foreground hover:text-primary hover:bg-surface-low",
                             )}
                           >
-                            {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                            <Phone className="w-3 h-3" />
+                            {watching && (
+                              <span
+                                className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-emerald-400/60 animate-ping opacity-60"
+                                aria-hidden
+                              />
+                            )}
                           </button>
                         )}
                       </div>
@@ -568,7 +602,27 @@ const Contacts = () => {
                         <AccessChip state={c.syncStatus} size="sm" className="ml-0.5" />
                       </div>
                       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                      <div className="flex items-center gap-1">
+                        {(isPinned || canPin) && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              togglePin(c.id);
+                            }}
+                            title={isPinned ? "Unpin contact" : "Pin contact"}
+                            aria-label={isPinned ? "Unpin contact" : "Pin contact"}
+                            className={cn(
+                              "inline-flex items-center justify-center rounded-full transition shrink-0 w-6 h-6 hover:bg-surface-low",
+                              isPinned ? "text-accent" : "text-muted-foreground hover:text-primary",
+                            )}
+                          >
+                            {isPinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
+                          </button>
+                        )}
                         <PingButton contact={c} size="xs" />
+                      </div>
                       </div>
                     </div>
                   </Link>
