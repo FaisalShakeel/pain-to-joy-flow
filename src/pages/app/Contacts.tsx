@@ -540,7 +540,7 @@ const Contacts = () => {
                         >
                           <Star className={cn("w-3 h-3", fav && "fill-amber-500")} />
                         </button>
-                        {callWatchSettings.enabled && (
+                        {callWatchSettings.enabled && c.status !== "available" && (
                           <button
                             type="button"
                             onClick={handleWatch}
