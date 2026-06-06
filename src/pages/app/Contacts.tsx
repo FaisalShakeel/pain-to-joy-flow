@@ -482,7 +482,8 @@ const Contacts = () => {
                   company: c.org,
                   status: c.status,
                 });
-                toast({
+              feedback(result === "added" ? "callwatch.on" : "callwatch.off");
+              toast({
                   title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
                   description:
                     result === "added"

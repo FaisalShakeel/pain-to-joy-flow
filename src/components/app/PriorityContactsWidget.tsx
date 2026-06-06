@@ -61,6 +61,7 @@ const ContactRow = ({
       company: c.org,
       status: c.status,
     });
+    feedback(result === "added" ? "callwatch.on" : "callwatch.off");
     toast({
       title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
       description:
