@@ -1,4 +1,4 @@
-import { useMemo, useState } from "https://esm.sh/react@18.3.1?dts";
+import { useMemo, useState } from "react";
 import { CalendarDays, Search, Filter, Inbox } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import BookingCard from "@/components/app/booking/BookingCard";
@@ -125,7 +125,7 @@ const Reserved = () => {
 
           <TabsContent value="upcoming" className="mt-4">
             {upcoming.length === 0 ? (
-              <EmptyState icon={<CalendarDays className="w-5 h-5" />} title="No upcoming bookings" description="When you book a meeting or someone books with you, it appears here." />
+              <EmptyState icon={CalendarDays} title="No upcoming bookings" description="When you book a meeting or someone books with you, it appears here." />
             ) : (
               <div className="grid md:grid-cols-2 gap-3">
                 {upcoming.map((b) => <BookingCard key={b.id} booking={b} />)}
@@ -135,7 +135,7 @@ const Reserved = () => {
 
           <TabsContent value="mine" className="mt-4">
             {mine.length === 0 ? (
-              <EmptyState icon={<CalendarDays className="w-5 h-5" />} title="You haven't booked anyone yet" description="Bookings you create with other people show up here." />
+              <EmptyState icon={CalendarDays} title="You haven't booked anyone yet" description="Bookings you create with other people show up here." />
             ) : (
               <>
                 <Section title="Upcoming" items={mine.filter((b) => b.status === "upcoming" || b.status === "pending")} />
@@ -147,7 +147,7 @@ const Reserved = () => {
 
           <TabsContent value="with-me" className="mt-4">
             {withMe.length === 0 ? (
-              <EmptyState icon={<Inbox className="w-5 h-5" />} title="No bookings with you yet" description="When someone books a slot on your calendar, it appears here." />
+              <EmptyState icon={Inbox} title="No bookings with you yet" description="When someone books a slot on your calendar, it appears here." />
             ) : (
               <div className="grid md:grid-cols-2 gap-3">
                 {withMe.map((b) => <BookingCard key={b.id} booking={b} />)}
@@ -157,7 +157,7 @@ const Reserved = () => {
 
           <TabsContent value="completed" className="mt-4">
             {completed.length === 0 ? (
-              <EmptyState icon={<CalendarDays className="w-5 h-5" />} title="No completed bookings" description="Past bookings will be archived here automatically." />
+              <EmptyState icon={CalendarDays} title="No completed bookings" description="Past bookings will be archived here automatically." />
             ) : (
               <div className="grid md:grid-cols-2 gap-3">
                 {completed.map((b) => <BookingCard key={b.id} booking={b} />)}
@@ -167,7 +167,7 @@ const Reserved = () => {
 
           <TabsContent value="cancelled" className="mt-4">
             {cancelled.length === 0 ? (
-              <EmptyState icon={<CalendarDays className="w-5 h-5" />} title="No cancelled bookings" description="Cancelled bookings appear here so you can re-book quickly." />
+              <EmptyState icon={CalendarDays} title="No cancelled bookings" description="Cancelled bookings appear here so you can re-book quickly." />
             ) : (
               <div className="grid md:grid-cols-2 gap-3">
                 {cancelled.map((b) => <BookingCard key={b.id} booking={b} />)}
