@@ -2,6 +2,7 @@ import { Phone, Radar, Users, Star, Globe, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useCallWatchSettings, type CallWatchScope } from "@/lib/callWatchSettingsStore";
+import { feedback } from "@/lib/feedback";
 
 const scopeOptions: { id: CallWatchScope; label: string; desc: string; icon: typeof Globe }[] = [
   { id: "everyone", label: "Everyone", desc: "Anyone on Availock can add you to Call Watch", icon: Globe },
@@ -47,7 +48,7 @@ const CallWatchSettingsPanel = () => {
         </div>
         <Switch
           checked={settings.enabled}
-          onCheckedChange={(v) => setSettings({ enabled: v })}
+          onCheckedChange={(v) => { setSettings({ enabled: v }); feedback(v ? "callwatch.on" : "callwatch.off"); }}
         />
       </label>
 
