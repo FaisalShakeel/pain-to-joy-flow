@@ -13,6 +13,7 @@ import { useSpotlight } from "./SpotlightContext";
 import { usePins } from "@/lib/pinsStore";
 import { useCallWatch } from "@/lib/callWatchStore";
 import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
+import { feedback } from "@/lib/feedback";
 import { toast } from "@/hooks/use-toast";
 
 type Filter = "all" | "available" | "busy" | "focus" | "driving" | "offline" | "pinned";

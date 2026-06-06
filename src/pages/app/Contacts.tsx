@@ -14,6 +14,7 @@ import { usePins, MAX_PINS } from "@/lib/pinsStore";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import { useCallWatch } from "@/lib/callWatchStore";
 import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
+import { feedback } from "@/lib/feedback";
 
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";

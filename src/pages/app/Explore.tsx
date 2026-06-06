@@ -40,6 +40,7 @@ import AccessRequestComposer from "@/components/app/AccessRequestComposer";
 import type { Contact } from "@/lib/mockData";
 import { useCallWatch } from "@/lib/callWatchStore";
 import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
+import { feedback } from "@/lib/feedback";
 
 type Person = {
   id: string;
