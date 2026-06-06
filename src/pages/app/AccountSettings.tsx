@@ -5,6 +5,7 @@ import Avatar from "@/components/app/Avatar";
 import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
 import WhoCanFindMePanel from "@/components/app/WhoCanFindMePanel";
 import CallWatchSettingsPanel from "@/components/app/CallWatchSettingsPanel";
+import AccountFeedbackPanel from "@/components/app/AccountFeedbackPanel";
 import { me, transactions } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 
@@ -33,6 +34,9 @@ const AccountSettings = () => {
 
           {/* Call Watch */}
           <CallWatchSettingsPanel />
+
+          {/* Feedback identity — sound + haptics */}
+          <AccountFeedbackPanel />
 
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />

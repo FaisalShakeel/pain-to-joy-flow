@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Contact, AvailabilityStatus } from "@/lib/mockData";
 import { trackMetric } from "@/lib/metrics";
+import { feedback } from "@/lib/feedback";
 
 type PingKind = "call" | "message" | "calendar";
 
@@ -120,6 +121,7 @@ const PingButton = ({ contact, drivingOverride, size = "sm", className }: Props)
       actor: contact.id,
       dedupeKey: `ping:${contact.id}:${kind}:${new Date().toISOString().slice(0, 10)}`,
     });
+    feedback(kind === "call" ? "request.sent" : "ping");
     const copy = statusCopy(status, contact.name.split(" ")[0], kind);
     toast({ title: copy.title, description: copy.body });
     setTimeout(() => { setOpen(false); setSentKind(null); }, 1400);

@@ -14,6 +14,7 @@ import { usePins, MAX_PINS } from "@/lib/pinsStore";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import { useCallWatch } from "@/lib/callWatchStore";
 import { useCallWatchSettings } from "@/lib/callWatchSettingsStore";
+import { feedback } from "@/lib/feedback";
 
 type View = "grid" | "list";
 type StatusFilter = "available" | "busy" | "focus" | "offline";
@@ -482,7 +483,8 @@ const Contacts = () => {
                   company: c.org,
                   status: c.status,
                 });
-                toast({
+              feedback(result === "added" ? "callwatch.on" : "callwatch.off");
+              toast({
                   title: result === "added" ? "Call Watch enabled" : "Call Watch removed",
                   description:
                     result === "added"

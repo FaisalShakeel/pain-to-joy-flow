@@ -329,19 +329,15 @@ const Dashboard = () => {
             })()}
             {/* Line 2: Reserved + Waiting List shortcut */}
             <div className="flex items-center gap-1.5">
-              <a
-                href="#reserved-time"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById("reserved-time")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
+              <Link
+                to="/app/reserved"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-lowest/65 text-[11px] hover:bg-surface-low transition-all ease-premium shadow-soft"
-                aria-label="Jump to reserved time"
+                aria-label="Open Reserved booking hub"
               >
                 <CalendarDays className="w-3 h-3 text-accent" />
                 <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
                 <span className="font-bold text-primary">{RESERVED_COUNT}</span>
-              </a>
+              </Link>
               <button
                 type="button"
                 onClick={scrollToWaiting}
