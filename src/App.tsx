@@ -52,7 +52,9 @@ import AccountSettings from "./pages/app/AccountSettings.tsx";
 import EditProfile from "./pages/app/EditProfile.tsx";
 import Upgrade from "./pages/app/Upgrade.tsx";
 import Explore from "./pages/app/Explore.tsx";
+import Reserved from "./pages/app/Reserved.tsx";
 import Placeholder from "./components/app/Placeholder.tsx";
+import SfxLoader from "./components/app/feedback/SfxLoader.tsx";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <SfxLoader />
       <BrowserRouter>
         <ScrollToTop />
         <SpotlightProvider>
@@ -126,6 +129,7 @@ const App = () => (
           <Route path="/app/notifications" element={<Notifications />} />
           <Route path="/app/analytics" element={<Analytics />} />
           <Route path="/app/share" element={<ShareProfile />} />
+          <Route path="/app/reserved" element={<Reserved />} />
           <Route path="/app/settings" element={<AccountSettings />} />
           <Route path="/app/settings/edit" element={<EditProfile />} />
           <Route path="/app/upgrade" element={<Upgrade />} />
