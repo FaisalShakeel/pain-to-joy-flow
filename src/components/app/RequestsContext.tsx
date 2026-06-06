@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { requests as initial, type AccessRequest } from "@/lib/mockData";
+import { feedback } from "@/lib/feedback";
 
 type ActState = "approved" | "denied" | "scheduled";
 
@@ -17,6 +18,9 @@ export const RequestsProvider = ({ children }: { children: ReactNode }) => {
 
   const act = useCallback((id: string, state: ActState) => {
     setList((prev) => prev.map((r) => (r.id === id ? { ...r, state } : r)));
+    if (state === "approved") feedback("request.approved");
+    else if (state === "denied") feedback("request.denied");
+    else if (state === "scheduled") feedback("booking.confirmed");
   }, []);
 
   const value = useMemo<RequestsContextValue>(
