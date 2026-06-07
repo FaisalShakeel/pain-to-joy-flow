@@ -419,6 +419,71 @@ const Dashboard = () => {
           <WaitingList />
         </div>
 
+        {/* Today's Reserved Bookings — compact, click to expand. Driven by bookingsStore. */}
+        <div id="todays-reserved" className="lg:col-span-3 premium-card p-6 md:p-7 scroll-mt-24 animate-fade">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="module-eyebrow inline-flex items-center gap-1.5">
+                <CalendarDays className="w-3 h-3 text-accent/80" /> Today · Quick view
+              </p>
+              <h3 className="module-title mt-1.5">Today's reserved bookings</h3>
+              <p className="module-meta mt-1">Tap a booking for full details. Need history or upcoming? Open the hub.</p>
+            </div>
+            <Link
+              to="/app/reserved"
+              className="text-[11px] font-semibold text-accent hover:underline inline-flex items-center gap-1 uppercase tracking-wide shrink-0 mt-1"
+            >
+              Open hub <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="module-divider mt-5" />
+          {todaysBookings.length === 0 ? (
+            <p className="mt-5 text-xs text-muted-foreground italic">No bookings scheduled for today.</p>
+          ) : (
+            <ul className="mt-5 space-y-2.5">
+              {todaysBookings.map((b) => {
+                const isOpen = expandedBookingId === b.id;
+                return (
+                  <li key={b.id}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedBookingId(isOpen ? null : b.id)}
+                      aria-expanded={isOpen}
+                      className={cn(
+                        "w-full text-left flex items-center gap-3 p-3 nested-surface transition ease-premium",
+                        isOpen && "ring-1 ring-accent/30",
+                      )}
+                    >
+                      <span className="grid place-items-center w-14 h-10 rounded-xl bg-primary/[0.06] text-primary text-[11px] font-semibold shrink-0 num-tabular ring-1 ring-inset ring-primary/10">
+                        {b.time}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">
+                          {b.contactName}
+                        </p>
+                        <p className="text-[11.5px] text-muted-foreground/85 truncate">
+                          {b.channel}{b.purpose ? ` · ${b.purpose}` : ""}
+                        </p>
+                      </div>
+                      <ChevronRight
+                        className={cn(
+                          "w-4 h-4 text-muted-foreground shrink-0 transition-transform",
+                          isOpen && "rotate-90",
+                        )}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="mt-2 animate-fade-in">
+                        <BookingCard booking={b} />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
         <div id="reserved-time" className="lg:col-span-3 premium-card p-6 md:p-7 scroll-mt-24 animate-fade">
           <div className="flex items-start justify-between gap-4">
