@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays, ArrowRight, Inbox, Clock, Users, ChevronDown, Check,
-  Zap, CheckCircle2, Timer, Radio, Building2,
+  Zap, CheckCircle2, Timer, Radio, Building2, ChevronRight,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
@@ -11,8 +11,10 @@ import PriorityContactsWidget from "@/components/app/PriorityContactsWidget";
 import SpotlightWindow from "@/components/app/SpotlightWindow";
 import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRole } from "@/lib/role";
+import { useBookings, sortByDateTime } from "@/lib/bookingsStore";
+import BookingCard from "@/components/app/booking/BookingCard";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -173,6 +175,26 @@ const groupSyncWindows = (slots: { start: string; end: string }[]) => {
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
   const [quickSyncOpen, setQuickSyncOpen] = useState(false);
+  const navigate = useNavigate();
+  const { bookings } = useBookings();
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const todaysBookings = useMemo(
+    () => bookings.filter((b) => b.date === todayISO && (b.status === "upcoming" || b.status === "pending")).sort(sortByDateTime),
+    [bookings, todayISO],
+  );
+  const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
+  const todayCount = todaysBookings.length;
+
+  const handleReservedClick = () => {
+    if (todayCount > 0) {
+      const el = document.getElementById("todays-reserved");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+    navigate("/app/reserved");
+  };
   const [contextMessage, setContextMessage] = useState<string>(DEFAULT_CONTEXT.available);
   const [contextTouched, setContextTouched] = useState(false);
   const [lastCustom, setLastCustom] = useState<string>("");
@@ -329,15 +351,17 @@ const Dashboard = () => {
             })()}
             {/* Line 2: Reserved + Waiting List shortcut */}
             <div className="flex items-center gap-1.5">
-              <Link
-                to="/app/reserved"
+              <button
+                type="button"
+                onClick={handleReservedClick}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ghost-border bg-surface-lowest/65 text-[11px] hover:bg-surface-low transition-all ease-premium shadow-soft"
-                aria-label="Open Reserved booking hub"
+                aria-label={todayCount > 0 ? "Jump to today's reserved bookings" : "Open Reserved booking hub"}
+                title={todayCount > 0 ? "Jump to today's reserved bookings" : "Open Reserved booking hub"}
               >
                 <CalendarDays className="w-3 h-3 text-accent" />
                 <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[9px]">Reserved</span>
-                <span className="font-bold text-primary">{RESERVED_COUNT}</span>
-              </Link>
+                <span className="font-bold text-primary">{todayCount}</span>
+              </button>
               <button
                 type="button"
                 onClick={scrollToWaiting}
@@ -393,6 +417,71 @@ const Dashboard = () => {
         {/* Unified Waiting List — placed AFTER Priority Contacts */}
         <div id="waiting-list" className="lg:col-span-3 scroll-mt-24">
           <WaitingList />
+        </div>
+
+        {/* Today's Reserved Bookings — compact, click to expand. Driven by bookingsStore. */}
+        <div id="todays-reserved" className="lg:col-span-3 premium-card p-6 md:p-7 scroll-mt-24 animate-fade">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="module-eyebrow inline-flex items-center gap-1.5">
+                <CalendarDays className="w-3 h-3 text-accent/80" /> Today · Quick view
+              </p>
+              <h3 className="module-title mt-1.5">Today's reserved bookings</h3>
+              <p className="module-meta mt-1">Tap a booking for full details. Need history or upcoming? Open the hub.</p>
+            </div>
+            <Link
+              to="/app/reserved"
+              className="text-[11px] font-semibold text-accent hover:underline inline-flex items-center gap-1 uppercase tracking-wide shrink-0 mt-1"
+            >
+              Open hub <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="module-divider mt-5" />
+          {todaysBookings.length === 0 ? (
+            <p className="mt-5 text-xs text-muted-foreground italic">No bookings scheduled for today.</p>
+          ) : (
+            <ul className="mt-5 space-y-2.5">
+              {todaysBookings.map((b) => {
+                const isOpen = expandedBookingId === b.id;
+                return (
+                  <li key={b.id}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedBookingId(isOpen ? null : b.id)}
+                      aria-expanded={isOpen}
+                      className={cn(
+                        "w-full text-left flex items-center gap-3 p-3 nested-surface transition ease-premium",
+                        isOpen && "ring-1 ring-accent/30",
+                      )}
+                    >
+                      <span className="grid place-items-center w-14 h-10 rounded-xl bg-primary/[0.06] text-primary text-[11px] font-semibold shrink-0 num-tabular ring-1 ring-inset ring-primary/10">
+                        {b.time}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">
+                          {b.contactName}
+                        </p>
+                        <p className="text-[11.5px] text-muted-foreground/85 truncate">
+                          {b.channel}{b.purpose ? ` · ${b.purpose}` : ""}
+                        </p>
+                      </div>
+                      <ChevronRight
+                        className={cn(
+                          "w-4 h-4 text-muted-foreground shrink-0 transition-transform",
+                          isOpen && "rotate-90",
+                        )}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="mt-2 animate-fade-in">
+                        <BookingCard booking={b} />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
 
         {/* Reserved — confirmed only, grouped by channel in fixed order */}
