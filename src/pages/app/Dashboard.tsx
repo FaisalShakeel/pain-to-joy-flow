@@ -127,26 +127,6 @@ const CHANNEL_ICON: Record<BookingChannel, JSX.Element> = {
   Venue:        <Building2 className="w-2.5 h-2.5" />,
 };
 
-// Group slots into accumulative windows. New window when gap between
-// previous slot end and next slot start is >= 60 minutes.
-const groupSyncWindows = (slots: { start: string; end: string }[]) => {
-  if (!slots.length) return [];
-  const sorted = [...slots].sort((a, b) => toMin(a.start) - toMin(b.start));
-  const windows: { start: string; end: string }[] = [];
-  let cur = { ...sorted[0] };
-  for (let i = 1; i < sorted.length; i++) {
-    const s = sorted[i];
-    const gap = toMin(s.start) - toMin(cur.end);
-    if (gap >= 60) {
-      windows.push(cur);
-      cur = { ...s };
-    } else {
-      if (toMin(s.end) > toMin(cur.end)) cur.end = s.end;
-    }
-  }
-  windows.push(cur);
-  return windows;
-};
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
