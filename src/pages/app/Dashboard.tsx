@@ -414,11 +414,17 @@ const Dashboard = () => {
                         {b.time}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">
-                          {b.contactName}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">
+                            {b.contactName}
+                          </p>
+                          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-[0.14em] shrink-0", CHANNEL_TONE[b.channel])}>
+                            {CHANNEL_ICON[b.channel]}
+                            {b.channel}
+                          </span>
+                        </div>
                         <p className="text-[11.5px] text-muted-foreground/85 truncate">
-                          {b.channel}{b.purpose ? ` · ${b.purpose}` : ""}
+                          {b.purpose || b.source}
                         </p>
                       </div>
                       <ChevronRight
