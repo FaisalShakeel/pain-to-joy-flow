@@ -13,7 +13,7 @@ import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
 import { useMemo, useState } from "react";
 import { useRole } from "@/lib/role";
-import { useBookings, sortByDateTime } from "@/lib/bookingsStore";
+import { useBookings, sortByDateTime, type BookingChannel } from "@/lib/bookingsStore";
 import BookingCard from "@/components/app/booking/BookingCard";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
@@ -114,63 +114,19 @@ const QUICK_SYNC_SLOTS: { start: string; end: string }[] = [
 const RESERVED_COUNT = 5;
 
 // Reserved — confirmed-only mock data, channel-grouped (fixed channel order).
-type ReservedChannel = "Quick Sync" | "Meeting" | "Webinar" | "Venue";
-const RESERVED_CHANNELS: ReservedChannel[] = ["Quick Sync", "Meeting", "Webinar", "Venue"];
-const RESERVED_BY_CHANNEL: Record<ReservedChannel, { t: string; who: string; kind: string }[]> = {
-  "Quick Sync": [
-    { t: "10:00", who: "Sarah Jenkins", kind: "Board prep · 3 min" },
-    { t: "14:15", who: "Priya Mehta",   kind: "Pricing check-in · 3 min" },
-  ],
-  "Meeting": [
-    { t: "11:30", who: "Rashid Al-Amir", kind: "Technical sync · 30 min" },
-    { t: "15:00", who: "David Cho",      kind: "Account review · 45 min" },
-  ],
-  "Webinar": [
-    { t: "17:00", who: "Product Q&A",    kind: "Live audience · 60 min" },
-  ],
-  "Venue": [
-    { t: "18:30", who: "Studio B — Tribe meet", kind: "On-site · 90 min" },
-  ],
-};
-const CHANNEL_TONE: Record<ReservedChannel, string> = {
+const CHANNEL_TONE: Record<BookingChannel, string> = {
   "Quick Sync": "bg-amber-500/15 text-amber-700",
-  "Meeting":    "bg-sky-500/15 text-sky-700",
-  "Webinar":    "bg-orange-500/15 text-orange-700",
-  "Venue":      "bg-emerald-500/15 text-emerald-700",
+  Meeting:      "bg-sky-500/15 text-sky-700",
+  Webinar:      "bg-orange-500/15 text-orange-700",
+  Venue:        "bg-emerald-500/15 text-emerald-700",
 };
-const CHANNEL_ICON: Record<ReservedChannel, JSX.Element> = {
+const CHANNEL_ICON: Record<BookingChannel, JSX.Element> = {
   "Quick Sync": <Zap className="w-2.5 h-2.5" />,
-  "Meeting":    <CalendarDays className="w-2.5 h-2.5" />,
-  "Webinar":    <Radio className="w-2.5 h-2.5" />,
-  "Venue":      <Building2 className="w-2.5 h-2.5" />,
+  Meeting:      <CalendarDays className="w-2.5 h-2.5" />,
+  Webinar:      <Radio className="w-2.5 h-2.5" />,
+  Venue:        <Building2 className="w-2.5 h-2.5" />,
 };
 
-// Convert "HH:MM" -> minutes
-const toMin = (t: string) => {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-};
-
-// Group slots into accumulative windows. New window when gap between
-// previous slot end and next slot start is >= 60 minutes.
-const groupSyncWindows = (slots: { start: string; end: string }[]) => {
-  if (!slots.length) return [];
-  const sorted = [...slots].sort((a, b) => toMin(a.start) - toMin(b.start));
-  const windows: { start: string; end: string }[] = [];
-  let cur = { ...sorted[0] };
-  for (let i = 1; i < sorted.length; i++) {
-    const s = sorted[i];
-    const gap = toMin(s.start) - toMin(cur.end);
-    if (gap >= 60) {
-      windows.push(cur);
-      cur = { ...s };
-    } else {
-      if (toMin(s.end) > toMin(cur.end)) cur.end = s.end;
-    }
-  }
-  windows.push(cur);
-  return windows;
-};
 
 const Dashboard = () => {
   const [status, setStatus] = useState<StatusKey>("available");
@@ -458,11 +414,17 @@ const Dashboard = () => {
                         {b.time}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">
-                          {b.contactName}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">
+                            {b.contactName}
+                          </p>
+                          <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-[0.14em] shrink-0", CHANNEL_TONE[b.channel])}>
+                            {CHANNEL_ICON[b.channel]}
+                            {b.channel}
+                          </span>
+                        </div>
                         <p className="text-[11.5px] text-muted-foreground/85 truncate">
-                          {b.channel}{b.purpose ? ` · ${b.purpose}` : ""}
+                          {b.purpose || b.source}
                         </p>
                       </div>
                       <ChevronRight
@@ -484,51 +446,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Reserved — confirmed only, grouped by channel in fixed order */}
-        <div id="reserved-time" className="lg:col-span-3 premium-card p-6 md:p-7 scroll-mt-24 animate-fade">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="module-eyebrow inline-flex items-center gap-1.5">
-                <CalendarDays className="w-3 h-3 text-accent/80" /> Reserved · Confirmed only
-              </p>
-              <h3 className="module-title mt-1.5">Today's reserved time</h3>
-              <p className="module-meta mt-1">Channel-grouped — Quick Sync, Meeting, Webinar, Venue.</p>
-            </div>
-            <Link to="/app/availability" className="text-[11px] font-semibold text-accent hover:underline tracking-wide uppercase shrink-0 mt-1">View all</Link>
-          </div>
-          <div className="module-divider mt-5" />
-          {RESERVED_CHANNELS.map((ch) => {
-            const items = RESERVED_BY_CHANNEL[ch].sort((a, b) => toMin(a.t) - toMin(b.t));
-            return (
-              <div key={ch} className="mt-5">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em]", CHANNEL_TONE[ch])}>
-                    {CHANNEL_ICON[ch]}
-                    {ch}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground/80 num-tabular">{items.length} confirmed</span>
-                </div>
-                {items.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic px-1">No confirmed {ch.toLowerCase()} bookings.</p>
-                ) : (
-                  <ul className="grid md:grid-cols-3 gap-3">
-                    {items.map((s) => (
-                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-3 nested-surface">
-                        <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/[0.06] text-primary text-[11px] font-semibold shrink-0 num-tabular ring-1 ring-inset ring-primary/10">
-                          {s.t}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{s.who}</p>
-                          <p className="text-[11.5px] text-muted-foreground/85 truncate">{s.kind}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
-        </div>
 
         {/* Messages panel */}
         <div className="lg:col-span-3">
