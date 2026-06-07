@@ -114,41 +114,17 @@ const QUICK_SYNC_SLOTS: { start: string; end: string }[] = [
 const RESERVED_COUNT = 5;
 
 // Reserved — confirmed-only mock data, channel-grouped (fixed channel order).
-type ReservedChannel = "Quick Sync" | "Meeting" | "Webinar" | "Venue";
-const RESERVED_CHANNELS: ReservedChannel[] = ["Quick Sync", "Meeting", "Webinar", "Venue"];
-const RESERVED_BY_CHANNEL: Record<ReservedChannel, { t: string; who: string; kind: string }[]> = {
-  "Quick Sync": [
-    { t: "10:00", who: "Sarah Jenkins", kind: "Board prep · 3 min" },
-    { t: "14:15", who: "Priya Mehta",   kind: "Pricing check-in · 3 min" },
-  ],
-  "Meeting": [
-    { t: "11:30", who: "Rashid Al-Amir", kind: "Technical sync · 30 min" },
-    { t: "15:00", who: "David Cho",      kind: "Account review · 45 min" },
-  ],
-  "Webinar": [
-    { t: "17:00", who: "Product Q&A",    kind: "Live audience · 60 min" },
-  ],
-  "Venue": [
-    { t: "18:30", who: "Studio B — Tribe meet", kind: "On-site · 90 min" },
-  ],
-};
-const CHANNEL_TONE: Record<ReservedChannel, string> = {
+const CHANNEL_TONE: Record<BookingChannel, string> = {
   "Quick Sync": "bg-amber-500/15 text-amber-700",
-  "Meeting":    "bg-sky-500/15 text-sky-700",
-  "Webinar":    "bg-orange-500/15 text-orange-700",
-  "Venue":      "bg-emerald-500/15 text-emerald-700",
+  Meeting:      "bg-sky-500/15 text-sky-700",
+  Webinar:      "bg-orange-500/15 text-orange-700",
+  Venue:        "bg-emerald-500/15 text-emerald-700",
 };
-const CHANNEL_ICON: Record<ReservedChannel, JSX.Element> = {
+const CHANNEL_ICON: Record<BookingChannel, JSX.Element> = {
   "Quick Sync": <Zap className="w-2.5 h-2.5" />,
-  "Meeting":    <CalendarDays className="w-2.5 h-2.5" />,
-  "Webinar":    <Radio className="w-2.5 h-2.5" />,
-  "Venue":      <Building2 className="w-2.5 h-2.5" />,
-};
-
-// Convert "HH:MM" -> minutes
-const toMin = (t: string) => {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
+  Meeting:      <CalendarDays className="w-2.5 h-2.5" />,
+  Webinar:      <Radio className="w-2.5 h-2.5" />,
+  Venue:        <Building2 className="w-2.5 h-2.5" />,
 };
 
 // Group slots into accumulative windows. New window when gap between
