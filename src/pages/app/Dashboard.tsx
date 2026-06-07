@@ -460,51 +460,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Reserved — confirmed only, grouped by channel in fixed order */}
-        <div id="reserved-time" className="lg:col-span-3 premium-card p-6 md:p-7 scroll-mt-24 animate-fade">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="module-eyebrow inline-flex items-center gap-1.5">
-                <CalendarDays className="w-3 h-3 text-accent/80" /> Reserved · Confirmed only
-              </p>
-              <h3 className="module-title mt-1.5">Today's reserved time</h3>
-              <p className="module-meta mt-1">Channel-grouped — Quick Sync, Meeting, Webinar, Venue.</p>
-            </div>
-            <Link to="/app/availability" className="text-[11px] font-semibold text-accent hover:underline tracking-wide uppercase shrink-0 mt-1">View all</Link>
-          </div>
-          <div className="module-divider mt-5" />
-          {RESERVED_CHANNELS.map((ch) => {
-            const items = RESERVED_BY_CHANNEL[ch].sort((a, b) => toMin(a.t) - toMin(b.t));
-            return (
-              <div key={ch} className="mt-5">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em]", CHANNEL_TONE[ch])}>
-                    {CHANNEL_ICON[ch]}
-                    {ch}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground/80 num-tabular">{items.length} confirmed</span>
-                </div>
-                {items.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic px-1">No confirmed {ch.toLowerCase()} bookings.</p>
-                ) : (
-                  <ul className="grid md:grid-cols-3 gap-3">
-                    {items.map((s) => (
-                      <li key={`${ch}-${s.t}-${s.who}`} className="flex items-center gap-3 p-3 nested-surface">
-                        <span className="grid place-items-center w-12 h-10 rounded-xl bg-primary/[0.06] text-primary text-[11px] font-semibold shrink-0 num-tabular ring-1 ring-inset ring-primary/10">
-                          {s.t}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13.5px] font-semibold text-primary truncate tracking-[-0.005em]">{s.who}</p>
-                          <p className="text-[11.5px] text-muted-foreground/85 truncate">{s.kind}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
-        </div>
 
         {/* Messages panel */}
         <div className="lg:col-span-3">
