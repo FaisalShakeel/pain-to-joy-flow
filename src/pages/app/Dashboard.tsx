@@ -13,7 +13,7 @@ import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
 import { useMemo, useState } from "react";
 import { useRole } from "@/lib/role";
-import { useBookings, sortByDateTime } from "@/lib/bookingsStore";
+import { useBookings, sortByDateTime, type BookingChannel } from "@/lib/bookingsStore";
 import BookingCard from "@/components/app/booking/BookingCard";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
