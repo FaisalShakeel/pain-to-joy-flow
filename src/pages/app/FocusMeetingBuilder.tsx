@@ -378,7 +378,7 @@ const FocusMeetingBuilder = () => {
           </span>
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "Dedicated availability for meaningful conversations"}</p>
-            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Focus Sync Builder</h2>
+            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">One slot — double the exposure</h2>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <div className="rounded-xl ghost-border bg-surface-low p-1 flex items-center gap-1">
