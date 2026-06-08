@@ -377,7 +377,7 @@ const FocusMeetingBuilder = () => {
             <Briefcase className="w-4 h-4" />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "Dedicated availability for meaningful conversations"}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "NEW HYBRID SYNC"}</p>
             <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">One slot — double the exposure</h2>
           </div>
           <div className="ml-auto flex items-center gap-2">
