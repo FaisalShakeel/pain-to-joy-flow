@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type Key = "hybrid" | "quicksync" | "event";
 
 const TARGETS: Record<Key, { to: string; label: string; Icon: typeof Briefcase }> = {
-  hybrid:    { to: "/app/availability/focus-meetings", label: "Hybrid Scheduling",      Icon: Briefcase },
+  hybrid:    { to: "/app/availability/focus-meetings", label: "Focus Sync",      Icon: Briefcase },
   quicksync: { to: "/app/availability/quick-sync",     label: "Quick Sync",             Icon: Zap },
   event:     { to: "/app/availability/webinars",       label: "Event Access Scheduling", Icon: UsersRound },
 };
