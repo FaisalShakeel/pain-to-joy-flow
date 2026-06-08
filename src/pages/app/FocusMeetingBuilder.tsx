@@ -356,8 +356,8 @@ const FocusMeetingBuilder = () => {
 
   return (
     <AppShell
-      subtitle="One slot — double the exposure"
-      title="Dedicated availability for meaningful conversations"
+      subtitle="Dedicated availability for meaningful conversations"
+      title="Focus Sync Builder"
       actions={
         <div className="flex items-center gap-2">
           <SchedulingSwitcher current="hybrid" />
