@@ -21,8 +21,8 @@ type Plan = {
 
 const plans: Plan[] = [
   {
-    name: "Basic",
-    tagline: "Structured connection without unrestricted interruption.",
+    name: "Standard - Visibility",
+    tagline: "Let people know when I'm reachable.",
     sectionLabel: "Show availability",
     prices: { monthly: null, annual: null, kickstarter: null },
     freeLabel: "Free",
