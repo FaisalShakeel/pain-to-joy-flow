@@ -40,8 +40,8 @@ const plans: Plan[] = [
     ctaStyle: "soft",
   },
   {
-    name: "Personal",
-    tagline: "For professionals who value their attention.",
+    name: "Personal - Protection",
+    tagline: "Control who gets access to me.",
     sectionLabel: "Control access",
     prices: { monthly: 12, annual: 130, kickstarter: 91 },
     features: [
