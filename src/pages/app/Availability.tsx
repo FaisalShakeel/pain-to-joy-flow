@@ -188,12 +188,6 @@ const Availability = () => {
             >Month</button>
           </div>
 
-          <Link
-            to="/app/availability/builder"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full ghost-border bg-surface-lowest text-primary text-sm font-semibold hover:bg-surface-low transition"
-          >
-            <Sparkles className="w-4 h-4" /> Slot builder
-          </Link>
           <button
             onClick={() => toast({ title: "Window added", description: "A new open slot is now visible to approved contacts." })}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-semibold shadow-elevated hover:opacity-95 transition"

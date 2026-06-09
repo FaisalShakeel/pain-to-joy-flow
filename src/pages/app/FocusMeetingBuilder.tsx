@@ -361,12 +361,6 @@ const FocusMeetingBuilder = () => {
       actions={
         <div className="flex items-center gap-2">
           <SchedulingSwitcher current="hybrid" />
-          <button
-            onClick={() => navigate("/app/availability/builder")}
-            className="inline-flex items-center gap-2 px-3 py-2.5 rounded-full ghost-border bg-surface-lowest text-xs font-semibold text-primary hover:bg-surface-low"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Slot Builder
-          </button>
         </div>
       }
     >
