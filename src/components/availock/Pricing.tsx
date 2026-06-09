@@ -60,8 +60,8 @@ const plans: Plan[] = [
     ctaStyle: "soft",
   },
   {
-    name: "Professional",
-    tagline: "For consultants and experts who monetize access.",
+    name: "Professional - Monetization",
+    tagline: "My availability has value.",
     sectionLabel: "",
     prices: { monthly: 20, annual: 199, kickstarter: 139 },
     features: [
