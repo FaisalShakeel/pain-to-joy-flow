@@ -557,3 +557,135 @@ const SpotlightWindow = () => {
 };
 
 export default SpotlightWindow;
+
+/* ------------------------------------------------------------------ */
+/* Availability Panel                                                  */
+/* ------------------------------------------------------------------ */
+
+const STATUS_LABEL: Record<AvailabilityStatus, string> = {
+  available: "Available",
+  busy: "In Meeting",
+  focus: "Focus Mode",
+  offline: "Away",
+};
+
+const STATUS_CONTEXT: Record<AvailabilityStatus, string> = {
+  available: "Quick Sync Available",
+  busy: "Back-to-back today",
+  focus: "Deep work block",
+  offline: "Away from desk",
+};
+
+const STATUS_NEXT: Record<AvailabilityStatus, { label: string; value: string }> = {
+  available: { label: "Available", value: "Now" },
+  busy:      { label: "Available Again", value: "Today 3:00 PM" },
+  focus:     { label: "Available Again", value: "Today 5:00 PM" },
+  offline:   { label: "Quick Sync", value: "Available Tomorrow" },
+};
+
+const accessIntelFor = (c: Contact) => {
+  const items: { icon: typeof Calendar; label: string }[] = [];
+  if (c.syncStatus === "approved" || c.frequent) items.push({ icon: Calendar, label: "Calendar Shared" });
+  if (c.status === "available" || c.frequent) items.push({ icon: Zap, label: "Quick Sync Enabled" });
+  if (c.relationship === "client" || c.favorite) items.push({ icon: ShieldCheck, label: "Priority Access" });
+  if (c.tags.some((t) => /event|webinar|talk|stage/i.test(t))) items.push({ icon: Ticket, label: "Event Access" });
+  return items;
+};
+
+const AvailabilityPanel = () => {
+  const ordered = useMemo(() => {
+    const rank: Record<AvailabilityStatus, number> = { available: 0, busy: 2, focus: 1, offline: 3 };
+    return [...contacts].sort((a, b) => rank[a.status] - rank[b.status]).slice(0, 6);
+  }, []);
+
+  return (
+    <div className="px-3 md:px-5 pt-3 pb-4 space-y-2.5">
+      {ordered.map((c) => {
+        const tokens = statusFor(c.status);
+        const next = STATUS_NEXT[c.status];
+        const intel = accessIntelFor(c);
+        return (
+          <article
+            key={c.id}
+            className="rounded-2xl ghost-border bg-surface-lowest p-3 shadow-soft"
+          >
+            <div className="flex items-start gap-3 min-w-0">
+              <Avatar initials={c.initials} accent={c.accent} status={c.status} size="md" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="text-sm font-bold text-primary truncate">{c.name}</h4>
+                  <span className={cn(
+                    "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
+                    tokens.chipBg, tokens.chipText, tokens.chipBorder,
+                  )}>
+                    <span className={cn("w-1.5 h-1.5 rounded-full", tokens.dot)} />
+                    {STATUS_LABEL[c.status]}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground leading-snug">
+                  {STATUS_CONTEXT[c.status]}
+                </p>
+
+                {/* Next opportunity */}
+                <div className="mt-2 flex items-center gap-2 rounded-lg bg-surface-low/60 px-2 py-1.5">
+                  <Clock className="w-3 h-3 text-primary/70 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground leading-none">
+                      {next.label}
+                    </p>
+                    <p className="text-[12px] font-semibold text-primary leading-tight">{next.value}</p>
+                  </div>
+                </div>
+
+                {/* Access intelligence */}
+                {intel.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {intel.map((i) => {
+                      const I = i.icon;
+                      return (
+                        <span
+                          key={i.label}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/5 text-primary text-[9px] font-semibold border border-primary/15"
+                        >
+                          <I className="w-2.5 h-2.5" /> {i.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  <Link
+                    to={`/app/contact/${c.id}`}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider hover:opacity-95 transition"
+                  >
+                    <Eye className="w-2.5 h-2.5" /> View Availability
+                  </Link>
+                  <Link
+                    to={`/app/access-requests?to=${c.id}`}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-low text-primary text-[10px] font-bold uppercase tracking-wider border border-border hover:bg-surface-lowest transition"
+                  >
+                    <UserPlus className="w-2.5 h-2.5" /> Request Access
+                  </Link>
+                  <Link
+                    to={`/app/schedule-call?with=${c.id}`}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-low text-primary text-[10px] font-bold uppercase tracking-wider border border-border hover:bg-surface-lowest transition"
+                  >
+                    <CalendarPlus className="w-2.5 h-2.5" /> Book Time
+                  </Link>
+                  <Link
+                    to={`/app/availability/quick-sync?with=${c.id}`}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-low text-primary text-[10px] font-bold uppercase tracking-wider border border-border hover:bg-surface-lowest transition"
+                  >
+                    <Zap className="w-2.5 h-2.5" /> Quick Sync
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+};
