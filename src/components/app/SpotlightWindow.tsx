@@ -161,13 +161,14 @@ const SpotlightWindow = () => {
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground leading-none">Spotlight · Live</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground leading-none">Availability Intelligence</p>
             <h3 className="font-headline font-extrabold text-primary text-sm md:text-base leading-tight truncate">
-              Your operational visibility stream
+              SPOTLIGHT
             </h3>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {tab === "coordination" && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-border bg-surface-lowest text-primary hover:bg-surface-low transition">
@@ -187,6 +188,8 @@ const SpotlightWindow = () => {
               })}
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
+          {tab === "coordination" && (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
@@ -199,9 +202,36 @@ const SpotlightWindow = () => {
           >
             <Send className="w-4 h-4" />
           </button>
+          )}
         </div>
       </header>
 
+      {/* Section tabs */}
+      <div className="px-3 md:px-5 pt-3">
+        <div className="inline-flex rounded-full bg-surface-low p-0.5 ghost-border">
+          {([
+            { id: "availability", label: "Availability" },
+            { id: "coordination", label: "Coordination" },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={cn(
+                "px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition",
+                tab === t.id ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {tab === "availability" && <AvailabilityPanel />}
+
+      {tab === "coordination" && (
+      <>
       {/* Inline composer */}
       {expanded && (
         <div className="px-4 md:px-5 pt-3">
