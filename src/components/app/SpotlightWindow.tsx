@@ -550,6 +550,8 @@ const SpotlightWindow = () => {
           </>
         )}
       </div>
+      </>
+      )}
     </section>
   );
 };
