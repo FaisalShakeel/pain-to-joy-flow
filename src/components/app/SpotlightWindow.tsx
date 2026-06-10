@@ -3,6 +3,7 @@ import {
   Megaphone, Pin, Globe, Users as UsersIcon, Lock, Clock, ArrowRight, Send,
   Pencil, Trash2, Sparkles, AlertTriangle, Radio, Share2, Link2, Repeat2,
   MoreHorizontal, EyeOff, Zap, ChevronDown, X, Filter as FilterIcon,
+  Heart, Home, Briefcase, UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -19,20 +20,15 @@ import { toast } from "sonner";
 import { contacts, type Relationship } from "@/lib/mockData";
 import Avatar from "./Avatar";
 
-type FilterId =
-  | "all" | "live" | "team" | "urgent" | "ai" | "requests"
-  | "public" | "private" | "mine";
+type FilterId = "public" | "family" | "friends" | "groups" | "office" | "other";
 
 const FILTERS: { id: FilterId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "all",      label: "All",           icon: Radio },
-  { id: "live",     label: "Live",          icon: Zap },
-  { id: "team",     label: "Team",          icon: UsersIcon },
-  { id: "urgent",   label: "Urgent",        icon: AlertTriangle },
-  { id: "ai",       label: "AI Highlights", icon: Sparkles },
-  { id: "requests", label: "Requests",      icon: ArrowRight },
-  { id: "public",   label: "Public",        icon: Globe },
-  { id: "private",  label: "Private",       icon: Lock },
-  { id: "mine",     label: "My Updates",    icon: Megaphone },
+  { id: "public",  label: "Public",       icon: Globe },
+  { id: "family",  label: "Family",       icon: Home },
+  { id: "friends", label: "Friends",      icon: Heart },
+  { id: "groups",  label: "Groups",       icon: UsersIcon },
+  { id: "office",  label: "Office / Work", icon: Briefcase },
+  { id: "other",   label: "Other",        icon: UserCheck },
 ];
 
 const visMeta: Record<Visibility, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -66,7 +62,7 @@ const AI_SUGGESTIONS = [
 const SpotlightWindow = () => {
   const { posts, create, update, remove } = useSpotlight();
 
-  const [filter, setFilter] = useState<FilterId>("all");
+  const [filter, setFilter] = useState<FilterId>("public");
   const [expanded, setExpanded] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [title, setTitle] = useState("");
@@ -92,15 +88,12 @@ const SpotlightWindow = () => {
       return b.createdAt - a.createdAt;
     });
     return list.filter((p) => {
-      if (filter === "all") return true;
-      if (filter === "live") return !!p.expiresIn;
-      if (filter === "team") return p.audienceTag === "colleague";
-      if (filter === "urgent") return p.tone === "warn" || !!p.pinned;
-      if (filter === "ai") return false; // populated via suggestions strip
-      if (filter === "requests") return !!p.cta;
-      if (filter === "public") return p.visibility === "public";
-      if (filter === "private") return p.visibility === "private";
-      if (filter === "mine") return !p.authorId || p.authorId === "me";
+      if (filter === "public")  return p.visibility === "public";
+      if (filter === "family")  return p.audienceTag === "family";
+      if (filter === "friends") return p.audienceTag === "friend";
+      if (filter === "groups")  return p.audienceTag === "colleague";
+      if (filter === "office")  return p.audienceTag === "colleague" || p.audienceTag === "client";
+      if (filter === "other")   return p.audienceTag === "other";
       return true;
     });
   }, [posts, filter]);
@@ -171,9 +164,25 @@ const SpotlightWindow = () => {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-            <FilterIcon className="w-3 h-3" /> {FILTERS.find((f) => f.id === filter)?.label}
-          </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-border bg-surface-lowest text-primary hover:bg-surface-low transition">
+                <FilterIcon className="w-3 h-3" />
+                <span className="hidden sm:inline">Visibility:</span> {FILTERS.find((f) => f.id === filter)?.label}
+                <ChevronDown className="w-3 h-3 opacity-60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              {FILTERS.map((f) => {
+                const Icon = f.icon;
+                return (
+                  <DropdownMenuItem key={f.id} onClick={() => setFilter(f.id)}>
+                    <Icon className="w-3.5 h-3.5 mr-2" /> {f.label}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
@@ -188,32 +197,6 @@ const SpotlightWindow = () => {
           </button>
         </div>
       </header>
-
-      {/* Filter rail */}
-      <div className="mt-3 px-3 md:px-5 min-w-0">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
-          {FILTERS.map((f) => {
-            const active = filter === f.id;
-            const Icon = f.icon;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFilter(f.id)}
-                className={cn(
-                  "shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition",
-                  active
-                    ? "border-transparent bg-primary text-primary-foreground shadow-soft"
-                    : "border-border bg-surface-lowest text-muted-foreground hover:text-primary hover:bg-surface-low",
-                )}
-              >
-                <Icon className="w-3 h-3" />
-                {f.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Inline composer */}
       {expanded && (
