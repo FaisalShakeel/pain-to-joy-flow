@@ -66,6 +66,7 @@ const SpotlightWindow = () => {
   const { posts, create, update, remove } = useSpotlight();
 
   const [filter, setFilter] = useState<FilterId>("public");
+  const [tab, setTab] = useState<"availability" | "coordination">("availability");
   const [expanded, setExpanded] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [title, setTitle] = useState("");
