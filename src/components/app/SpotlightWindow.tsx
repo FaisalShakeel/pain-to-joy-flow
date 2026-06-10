@@ -4,6 +4,7 @@ import {
   Pencil, Trash2, Sparkles, AlertTriangle, Radio, Share2, Link2, Repeat2,
   MoreHorizontal, EyeOff, Zap, ChevronDown, X, Filter as FilterIcon,
   Heart, Home, Briefcase, UserCheck,
+  Calendar, ShieldCheck, Ticket, Eye, UserPlus, CalendarPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -17,8 +18,10 @@ import {
   type SpotlightPost, type Visibility, type Tone, type AudienceTag,
 } from "./SpotlightContext";
 import { toast } from "sonner";
-import { contacts, type Relationship } from "@/lib/mockData";
+import { contacts, type Relationship, type Contact, type AvailabilityStatus } from "@/lib/mockData";
 import Avatar from "./Avatar";
+import { statusFor } from "@/lib/statusColors";
+import { Link } from "react-router-dom";
 
 type FilterId = "public" | "family" | "friends" | "groups" | "office" | "other";
 
