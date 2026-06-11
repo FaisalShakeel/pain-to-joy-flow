@@ -115,7 +115,7 @@ const FocusMeetingBuilder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [slots, setSlots] = useState<MTSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [dirty, setDirty] = useState(false);
   const [justCreated, setJustCreated] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
