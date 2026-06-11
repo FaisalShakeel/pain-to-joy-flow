@@ -26,10 +26,10 @@ import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
-type BufferMin = 5 | 10;
+type BufferMin = 0 | 5 | 10 | 15 | 30;
 type Repeats = "none" | "daily" | "weekly" | "monthly";
 type Booking = "instant" | "approval";
-type Access = "public" | "contacts" | "priority" | "paid";
+type Access = "public" | "contacts" | "priority" | "paid" | "private";
 
 interface MTSlot {
   id: string;
@@ -75,6 +75,7 @@ const accessMeta: Record<Access, { label: string; icon: React.ComponentType<any>
   contacts: { label: "Contacts only",     icon: UsersIcon,cls: "bg-sky-500/15 text-sky-700" },
   priority: { label: "Priority contacts", icon: Crown,    cls: "bg-amber-500/20 text-amber-800" },
   paid:     { label: "Paid users",        icon: Sparkles, cls: "bg-violet-500/15 text-violet-700" },
+  private:  { label: "Private",           icon: Lock,     cls: "bg-rose-500/15 text-rose-700" },
 };
 
 const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -114,7 +115,7 @@ const FocusMeetingBuilder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [slots, setSlots] = useState<MTSlot[]>(seed);
   const [draft, setDraft] = useState<Omit<MTSlot, "id" | "createdAt"> & { id?: string }>(blank());
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [dirty, setDirty] = useState(false);
   const [justCreated, setJustCreated] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -356,333 +357,226 @@ const FocusMeetingBuilder = () => {
 
   return (
     <AppShell
-      subtitle="Dedicated availability for meaningful conversations"
-      title="Focus Sync Builder"
       actions={
         <div className="flex items-center gap-2">
           <SchedulingSwitcher current="hybrid" />
         </div>
       }
     >
-      {/* CREATION PANEL */}
-      <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground shrink-0">
-            <Briefcase className="w-4 h-4" />
+      {/* SECTION 1 — Daily Occupancy */}
+      <DailyOccupancy
+        date={draft.date}
+        onBlockClick={(id) => {
+          const s = slots.find((x) => x.id === id);
+          if (s) editSlot(s);
+        }}
+      />
+
+      {/* SECTION 2 — Live Preview */}
+      <aside className="mt-3 rounded-2xl bg-gradient-vault text-primary-foreground p-3 md:p-4 shadow-elevated">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live Preview</p>
+          <h4 className="font-headline font-extrabold text-sm capitalize">
+            Focus Sync · {channel}
+          </h4>
+          <span className="text-[11px] text-primary-foreground/85">
+            {format(new Date(draft.date), "EEEE, MMMM d, yyyy")}
           </span>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "NEW HYBRID SYNC"}</p>
-            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">One slot — double the exposure</h2>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="rounded-xl ghost-border bg-surface-low p-1 flex items-center gap-1">
-              {([
-                ["hybrid", "Hybrid", Sparkles],
-                ["online", "Online", Video],
-                ["onsite", "Onsite", MapPin],
-              ] as const).map(([k, l, Ic]) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setChannel(k)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition",
-                    channel === k
-                      ? "bg-primary text-primary-foreground shadow-glass"
-                      : "text-muted-foreground hover:text-primary",
-                  )}
-                  aria-pressed={channel === k}
-                >
-                  <Ic className="w-3.5 h-3.5" /> {l}
-                </button>
-              ))}
-            </div>
-            {isEditing && (
-              <button onClick={reset} className="text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-                <X className="w-3 h-3" /> Discard edit
-              </button>
+          <span className="text-[11px] text-primary-foreground/85">
+            {fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}
+          </span>
+          <span className="ml-auto px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
+            {count} Slot{count === 1 ? "" : "s"} Generated
+          </span>
+        </div>
+        {timeline.length > 0 && (
+          <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] font-mono text-primary-foreground/90">
+            {timeline.slice(0, 10).map((it, i) => (
+              <li key={i}>{fmtTime(it.start)}</li>
+            ))}
+            {timeline.length > 10 && (
+              <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 10} more</li>
             )}
+          </ul>
+        )}
+      </aside>
+
+      {/* SECTION 3 — Slot Builder */}
+      <section className="mt-4 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
+        <header className="mb-4 flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Slot Builder</p>
+            <h2 className="font-headline font-extrabold text-primary text-lg md:text-xl">
+              Create and publish a Focus Sync availability block.
+            </h2>
           </div>
-        </div>
-
-        {/* DAILY OCCUPANCY (today) */}
-        <div className="mb-5">
-          <DailyOccupancy
-            date={draft.date}
-            onBlockClick={(id) => {
-              const s = slots.find((x) => x.id === id);
-              if (s) editSlot(s);
-            }}
-          />
-        </div>
-
-        {/* Stepper with fixed Back/Next anchors */}
-        <div className="flex items-center gap-2 mb-5">
-          <button
-            onClick={reset}
-            title="Start a fresh slot"
-            aria-label="New slot"
-            className="shrink-0 grid place-items-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:opacity-90"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
-            {[
-              "Date", "Call Size", "Window", "Buffer", "Clone", "Booking", "Access", "Pricing",
-            ].map((label, i) => {
-              const n = i + 1;
-              const active = step === n;
-              const done = step > n;
-              return (
-                <button
-                  key={label}
-                  onClick={() => setStep(n)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition",
-                    active && "bg-indigo-600 text-white",
-                    !active && done && "bg-emerald-500/15 text-emerald-700",
-                    !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
-                  )}
-                >
-                  <span className={cn("grid place-items-center w-4 h-4 rounded-full text-[9px]", active ? "bg-white/25" : done ? "bg-emerald-500/20" : "bg-background/60")}>
-                    {done ? <Check className="w-2.5 h-2.5" /> : n}
-                  </span>
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          {isEditing && dirty ? (
-            <button
-              onClick={save}
-              disabled={hasDraftConflict}
-              title={hasDraftConflict ? "Resolve date/time conflict before saving" : undefined}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <CheckCircle2 className="w-3 h-3" /> Update
-            </button>
-          ) : step < 8 ? (
-            <button
-              onClick={() => setStep((s) => Math.min(8, s + 1))}
-              disabled={hasDraftConflict || justCreated}
-              title={
-                hasDraftConflict
-                  ? "Time conflict on this date — change date or window"
-                  : justCreated
-                  ? "Press + to start a new slot"
-                  : undefined
-              }
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Next <ChevronRight className="w-3 h-3" />
-            </button>
-          ) : (
-            <button
-              onClick={save}
-              disabled={hasDraftConflict || justCreated}
-              title={
-                hasDraftConflict
-                  ? "Time conflict on this date — change date or window"
-                  : justCreated
-                  ? "Press + to start a new slot"
-                  : undefined
-              }
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Done" : "Create"}
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          {/* Step content */}
-          <div className="space-y-4">
-            {step === 1 && (
-              <Section title="Step 1 — Select Date" icon={CalIcon} hint="Pick the day this Quick Sync block runs">
-                <DateRangePopover
-                  from={draft.date}
-                  to={draft.dateTo}
-                  onChange={(f, t) => { setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined })); setDirty(true); }}
-                />
-                {draft.dateTo && draft.dateTo !== draft.date && (
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    Creates one block per day across the selected range.
-                  </p>
+          <div className="flex items-center gap-1 rounded-full bg-surface-low p-1 text-[10px] font-bold">
+            {([1, 2] as const).map((n) => (
+              <button
+                key={n}
+                onClick={() => setStep(n)}
+                className={cn(
+                  "px-3 py-1 rounded-full transition",
+                  step === n ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary",
                 )}
-              </Section>
-            )}
-
-            {step === 2 && (
-              <Section title="Step 2 — Call Size" icon={Timer} hint="How long is each meeting?">
-                <div className="flex flex-wrap gap-2">
-                  {([15, 20, 25, 30, 35] as CallMin[]).map((d) => (
-                    <Pill key={d} active={draft.callMin === d} onClick={() => set("callMin", d)}>{d} minutes</Pill>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground">Each slot will be <strong className="text-primary">{draft.callMin} min</strong> long. Used to auto-build the window.</p>
-              </Section>
-            )}
-
-            {step === 3 && (
-              <Section title="Step 3 — Time Window" icon={Clock} hint="Set Start, End, and Slot Count — calculations update live.">
-                <WindowTabs
-                  startMin={draft.startMin}
-                  endMin={draft.endMin}
-                  callMin={draft.callMin}
-                  count={count}
-                  onStart={(v) => set("startMin", v)}
-                  onEnd={(v) => set("endMin", v)}
-                  onCount={(n) => set("endMin", Math.min(24 * 60, draft.startMin + Math.max(1, n) * draft.callMin))}
-                />
-              </Section>
-            )}
-
-            {step === 4 && (
-              <Section title="Step 4 — Flexible Buffer" icon={Timer} hint="Allows early-join and soft extension. Does NOT add gaps between slots.">
-                <div className="flex flex-wrap gap-2">
-                  {([5, 10] as BufferMin[]).map((b) => (
-                    <Pill key={b} active={draft.bufferMin === b} onClick={() => set("bufferMin", b)}>{b} minute{b > 1 ? "s" : ""}</Pill>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Participants may join during the buffer window before the scheduled start time, and the conductor may extend the sync duration beyond the originally scheduled time.
-                </p>
-              </Section>
-            )}
-
-            {step === 5 && (
-              <Section title="Step 5 — Clone" icon={CloneIcon} hint="Pick additional dates to clone this slot to. Click again to unselect.">
-                <CloneDatePicker
-                  baseDate={draft.date}
-                  baseDateTo={draft.dateTo}
-                  value={draft.cloneDates ?? []}
-                  onChange={(arr) => set("cloneDates", arr)}
-                  startMin={draft.startMin}
-                  endMin={draft.endMin}
-                  excludeId={draft.id}
-                />
-              </Section>
-            )}
-
-            {step === 6 && (
-              <Section title="Step 6 — Booking Mode" icon={Lock}>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["instant", "approval"] as const).map((b) => (
-                    <button
-                      key={b}
-                      onClick={() => set("booking", b)}
-                      className={cn(
-                        "p-3 rounded-xl text-left transition",
-                        draft.booking === b ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
-                      )}
-                    >
-                      <p className="text-xs font-bold flex items-center gap-1.5">
-                        {b === "instant" ? <Check className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                        {b === "instant" ? "Instant Booking" : "Approval Required"}
-                      </p>
-                      <p className="text-[10px] mt-1 opacity-80 leading-snug">
-                        {b === "instant" ? "Auto-reserved on selection" : "Manual approval before booking"}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {step === 7 && (
-              <Section title="Step 7 — Access Control" icon={UsersIcon} hint="Choose who can book">
-                <div className="grid grid-cols-2 gap-2">
-                  {(Object.keys(accessMeta) as Access[]).map((a) => {
-                    const M = accessMeta[a];
-                    return (
-                      <button
-                        key={a}
-                        onClick={() => set("access", a)}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition",
-                          draft.access === a ? "bg-primary text-primary-foreground" : `${M.cls} hover:opacity-90`,
-                        )}
-                      >
-                        <M.icon className="w-3.5 h-3.5" /> {M.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
-            )}
-
-            {step === 8 && (
-              <Section title="Step 8 — Pricing" icon={Sparkles} hint="Free by default. Switch to Paid to charge per booking.">
-                <PricingField value={draft.pricing} onChange={(p) => set("pricing", p)} />
-              </Section>
-            )}
-
+              >
+                Step {n}
+              </button>
+            ))}
           </div>
+        </header>
 
-          {/* Live preview — horizontal */}
-          <aside className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated">
-            <div className="flex items-center gap-2 mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
-              <span className="text-[10px] text-primary-foreground/50">·</span>
-              <h4 className="font-headline font-extrabold text-sm capitalize">Focus Sync · {channel}</h4>
-              {isEditing && draft.id && (
-                <div className="ml-auto flex items-center gap-1">
-                  <button onClick={() => setStep(1)} className="px-2 py-0.5 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-[10px] font-bold">Edit</button>
-                  <button onClick={() => { const s = slots.find((x) => x.id === draft.id); if (s) duplicate(s, "tomorrow"); }} className="px-2 py-0.5 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-[10px] font-bold">Clone</button>
-                  <button onClick={() => setConfirmDelete(draft.id!)} className="px-2 py-0.5 rounded-full bg-rose-500/30 hover:bg-rose-500/40 text-[10px] font-bold">Delete</button>
-                  <button onClick={reset} className="px-2 py-0.5 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 text-[10px] font-bold">Close</button>
-                </div>
+        {step === 1 && (
+          <div className="space-y-4">
+            <h3 className="font-headline font-bold text-primary text-sm">When & Slot Configuration</h3>
+
+            <Field label="Date">
+              <DateRangePopover
+                from={draft.date}
+                to={undefined}
+                singleOnly
+                onChange={(f) => { setDraft((d) => ({ ...d, date: f, dateTo: undefined })); setDirty(true); }}
+              />
+            </Field>
+
+            <Field label="Mode">
+              <div className="inline-flex rounded-xl ghost-border bg-surface-low p-1 gap-1">
+                {([
+                  ["online", "Online", Video],
+                  ["onsite", "Onsite", MapPin],
+                  ["hybrid", "Hybrid", Sparkles],
+                ] as const).map(([k, l, Ic]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setChannel(k)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition",
+                      channel === k ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary",
+                    )}
+                    aria-pressed={channel === k}
+                  >
+                    <Ic className="w-3.5 h-3.5" /> {l}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="Call Size">
+              <select
+                value={draft.callMin}
+                onChange={(e) => set("callMin", parseInt(e.target.value, 10) as CallMin)}
+                className="px-3 py-2 rounded-lg ghost-border bg-surface-lowest text-sm font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                {([15, 20, 25, 30, 35] as CallMin[]).map((d) => (
+                  <option key={d} value={d}>{d}-min meetings</option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Time Window">
+              <div className="flex items-center gap-2">
+                <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
+                <span className="text-muted-foreground text-sm font-bold">→</span>
+                <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
+              </div>
+            </Field>
+
+            <Field label="Buffer">
+              <select
+                value={draft.bufferMin}
+                onChange={(e) => set("bufferMin", parseInt(e.target.value, 10) as BufferMin)}
+                className="px-3 py-2 rounded-lg ghost-border bg-surface-lowest text-sm font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                {([0, 5, 10, 15, 30] as BufferMin[]).map((b) => (
+                  <option key={b} value={b}>{b} Min</option>
+                ))}
+              </select>
+            </Field>
+
+            <div className="pt-2">
+              <button
+                onClick={() => setStep(2)}
+                disabled={hasDraftConflict}
+                title={hasDraftConflict ? "Time conflict on this date — change date or window" : undefined}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Continue <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
+            <h3 className="font-headline font-bold text-primary text-sm">Booking & Access</h3>
+
+            <Field label="Booking Type">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                <Briefcase className="w-3.5 h-3.5" /> Focus Sync
+              </span>
+            </Field>
+
+            <Field label="Visibility">
+              <div className="flex flex-wrap gap-2">
+                {([
+                  ["public", "Public"],
+                  ["contacts", "Contacts Only"],
+                  ["priority", "Selected Contacts"],
+                  ["private", "Private"],
+                ] as [Access, string][]).map(([k, l]) => (
+                  <Pill key={k} active={draft.access === k} onClick={() => set("access", k)}>{l}</Pill>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="Payment">
+              <PricingField value={draft.pricing} onChange={(p) => set("pricing", p)} />
+            </Field>
+
+            <Field label="Approval">
+              <div className="flex gap-2">
+                <Pill active={draft.booking === "approval"} onClick={() => set("booking", "approval")}>Required</Pill>
+                <Pill active={draft.booking === "instant"} onClick={() => set("booking", "instant")}>Not Required</Pill>
+              </div>
+            </Field>
+
+            <Field label="Relay">
+              <div className="flex gap-2">
+                <Pill active={relay.enabled} onClick={() => setRelay({ ...relay, enabled: true })}>On</Pill>
+                <Pill active={!relay.enabled} onClick={() => setRelay({ ...relay, enabled: false })}>Off</Pill>
+              </div>
+            </Field>
+
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={() => setStep(1)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface-low text-muted-foreground hover:text-primary text-xs font-bold"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back
+              </button>
+              <button
+                onClick={save}
+                disabled={hasDraftConflict || justCreated}
+                title={
+                  hasDraftConflict
+                    ? "Time conflict on this date — change date or window"
+                    : justCreated
+                    ? "Press New to start another slot"
+                    : undefined
+                }
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> {isEditing ? "Update Focus Sync" : "Create Focus Sync"}
+              </button>
+              {justCreated && (
+                <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                  <Plus className="w-3.5 h-3.5" /> New
+                </button>
               )}
             </div>
-            <div className="flex flex-wrap items-stretch gap-3 text-[10px]">
-              <div className="flex-1 min-w-[140px]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60">When</p>
-                <p className="text-[11px] text-primary-foreground/90 mt-0.5">{format(new Date(draft.date), "EEE, MMM d")}</p>
-                <p className="text-[11px] text-primary-foreground/90">{fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}</p>
-              </div>
-              <Stat label="Duration" value={`${draft.callMin}m`} />
-              <Stat label="Buffer" value={`${draft.bufferMin}m`} />
-              <Stat label="Sub-slots" value={`${count}`} />
-              <Stat label="Clones" value={`${(draft.cloneDates ?? []).length}`} />
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-                  {draft.booking === "instant" ? "Instant" : "Approval"}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-                  {accessMeta[draft.access].label}
-                </span>
-                <PriceTag pricing={draft.pricing} />
-                <span className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-bold",
-                  relay.enabled ? "bg-emerald-400/25 text-emerald-100" : "bg-primary-foreground/10 text-primary-foreground/70",
-                )}>
-                  Relay {relay.enabled ? "ON" : "OFF"}
-                </span>
-              </div>
-            </div>
-            {timeline.length > 0 && (
-              <div className="mt-3 rounded-lg bg-primary-foreground/10 p-2">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60 mb-1">
-                  Generated sub-slots
-                </p>
-                <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] font-mono">
-                  {timeline.slice(0, 8).map((it, i) => (
-                    <li key={i} className="text-primary-foreground/90">
-                      {fmtTime(it.start)}–{fmtTime(it.end)}
-                    </li>
-                  ))}
-                  {timeline.length > 8 && (
-                    <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 8} more</li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </aside>
-        </div>
-
-        <div className="mt-5">
-          <RelayToSpotlightPanel value={relay} onChange={setRelay} />
-        </div>
+          </div>
+        )}
       </section>
 
       {/* ACTIVE SLOTS */}
