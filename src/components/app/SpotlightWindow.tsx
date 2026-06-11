@@ -22,6 +22,9 @@ import { contacts, type Relationship, type Contact, type AvailabilityStatus } fr
 import Avatar from "./Avatar";
 import { statusFor } from "@/lib/statusColors";
 import { Link } from "react-router-dom";
+import AwarenessRules from "./spotlight/AwarenessRules";
+import AvailabilityFeed from "./spotlight/AvailabilityFeed";
+import CoordinationPanel from "./spotlight/CoordinationPanel";
 
 type FilterId = "public" | "family" | "friends" | "groups" | "office" | "other";
 
