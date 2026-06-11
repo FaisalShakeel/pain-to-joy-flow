@@ -231,9 +231,19 @@ const SpotlightWindow = () => {
         </div>
       </div>
 
-      {tab === "availability" && <AvailabilityPanel />}
+      {tab === "availability" && (
+        <>
+          <AvailabilityPanel />
+          <div className="px-3 md:px-5 pb-4 space-y-2.5">
+            <AwarenessRules />
+            <AvailabilityFeed />
+          </div>
+        </>
+      )}
 
-      {tab === "coordination" && (
+      {tab === "coordination" && <CoordinationPanel />}
+
+      {false && (
       <>
       {/* Inline composer */}
       {expanded && (
