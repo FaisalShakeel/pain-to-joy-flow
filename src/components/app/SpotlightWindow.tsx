@@ -171,7 +171,7 @@ const SpotlightWindow = () => {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {tab === "coordination" && (
+          {false && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-border bg-surface-lowest text-primary hover:bg-surface-low transition">
@@ -192,7 +192,7 @@ const SpotlightWindow = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           )}
-          {tab === "coordination" && (
+          {false && (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
