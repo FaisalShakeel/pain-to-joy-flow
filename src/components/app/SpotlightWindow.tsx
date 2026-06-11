@@ -22,6 +22,9 @@ import { contacts, type Relationship, type Contact, type AvailabilityStatus } fr
 import Avatar from "./Avatar";
 import { statusFor } from "@/lib/statusColors";
 import { Link } from "react-router-dom";
+import AwarenessRules from "./spotlight/AwarenessRules";
+import AvailabilityFeed from "./spotlight/AvailabilityFeed";
+import CoordinationPanel from "./spotlight/CoordinationPanel";
 
 type FilterId = "public" | "family" | "friends" | "groups" | "office" | "other";
 
@@ -168,7 +171,7 @@ const SpotlightWindow = () => {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {tab === "coordination" && (
+          {false && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-border bg-surface-lowest text-primary hover:bg-surface-low transition">
@@ -189,7 +192,7 @@ const SpotlightWindow = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           )}
-          {tab === "coordination" && (
+          {false && (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
@@ -228,9 +231,19 @@ const SpotlightWindow = () => {
         </div>
       </div>
 
-      {tab === "availability" && <AvailabilityPanel />}
+      {tab === "availability" && (
+        <>
+          <AvailabilityPanel />
+          <div className="px-3 md:px-5 pb-4 space-y-2.5">
+            <AwarenessRules />
+            <AvailabilityFeed />
+          </div>
+        </>
+      )}
 
-      {tab === "coordination" && (
+      {tab === "coordination" && <CoordinationPanel />}
+
+      {false && (
       <>
       {/* Inline composer */}
       {expanded && (
