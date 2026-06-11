@@ -26,10 +26,10 @@ import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
 
 // ---------- Types ----------
 type CallMin = 15 | 20 | 25 | 30 | 35;
-type BufferMin = 5 | 10;
+type BufferMin = 0 | 5 | 10 | 15 | 30;
 type Repeats = "none" | "daily" | "weekly" | "monthly";
 type Booking = "instant" | "approval";
-type Access = "public" | "contacts" | "priority" | "paid";
+type Access = "public" | "contacts" | "priority" | "paid" | "private";
 
 interface MTSlot {
   id: string;
@@ -75,6 +75,7 @@ const accessMeta: Record<Access, { label: string; icon: React.ComponentType<any>
   contacts: { label: "Contacts only",     icon: UsersIcon,cls: "bg-sky-500/15 text-sky-700" },
   priority: { label: "Priority contacts", icon: Crown,    cls: "bg-amber-500/20 text-amber-800" },
   paid:     { label: "Paid users",        icon: Sparkles, cls: "bg-violet-500/15 text-violet-700" },
+  private:  { label: "Private",           icon: Lock,     cls: "bg-rose-500/15 text-rose-700" },
 };
 
 const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
