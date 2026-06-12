@@ -849,7 +849,7 @@ const TimeInput = ({ value, onChange }: { value: number; onChange: (v: number) =
         const [hs, ms] = e.target.value.split(":");
         onChange(parseInt(hs, 10) * 60 + parseInt(ms, 10));
       }}
-      className="w-full px-2 py-1.5 rounded-lg bg-surface-lowest ghost-border text-sm font-bold text-primary tabular-nums text-center outline-none focus:ring-2 focus:ring-primary/30"
+      className="w-full px-2 py-1 rounded-lg bg-surface-lowest ghost-border text-[12px] font-bold text-primary tabular-nums text-center outline-none focus:ring-2 focus:ring-primary/30"
     />
   );
 };
