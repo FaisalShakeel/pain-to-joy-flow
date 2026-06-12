@@ -403,24 +403,19 @@ const FocusMeetingBuilder = () => {
       </aside>
 
       {/* SECTION 3 — Slot Builder */}
-      <section className="mt-4 rounded-3xl bg-surface-lowest ghost-border p-4 md:p-5 shadow-ambient">
-        <header className="mb-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground shrink-0">
-              <CalIcon className="w-4 h-4" />
-            </span>
-            <h2 className="font-headline font-extrabold text-primary uppercase tracking-[0.18em] text-sm">
-              Slot Builder
-            </h2>
-          </div>
-          <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+      <section className="mt-3 rounded-2xl bg-surface-lowest ghost-border p-3 md:p-3.5 shadow-ambient">
+        <header className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            Slot Builder
+          </p>
+          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">
             {isEditing ? "Editing" : "Step 1"}
           </span>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
           {/* Date */}
-          <RowField icon={CalIcon} label="Date">
+          <RowField icon={CalIcon} label="Date" variant="fixed">
             <DateRangePopover
               from={draft.date}
               to={undefined}
@@ -430,7 +425,7 @@ const FocusMeetingBuilder = () => {
           </RowField>
 
           {/* Mode */}
-          <RowField icon={Wifi} label="Mode">
+          <RowField icon={Wifi} label="Mode" variant="fixed">
             <div className="inline-flex rounded-lg ghost-border bg-surface-lowest p-0.5 gap-0.5 w-full">
               {([
                 ["online", "Online"],
@@ -442,7 +437,7 @@ const FocusMeetingBuilder = () => {
                   type="button"
                   onClick={() => setChannel(k)}
                   className={cn(
-                    "flex-1 px-2 py-1.5 rounded-md text-[11px] font-bold transition",
+                    "flex-1 px-2 py-1 rounded-md text-[10px] font-bold transition",
                     channel === k ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary",
                   )}
                   aria-pressed={channel === k}
@@ -454,7 +449,7 @@ const FocusMeetingBuilder = () => {
           </RowField>
 
           {/* Call Size (Participants) */}
-          <RowField icon={UsersIcon} label="Call Size">
+          <RowField icon={UsersIcon} label="Call Size" variant="fixed">
             <CompactSelect
               value={String(draft.callMin)}
               onChange={(v) => set("callMin", parseInt(v, 10) as CallMin)}
@@ -481,9 +476,9 @@ const FocusMeetingBuilder = () => {
           </RowField>
         </div>
 
-        <div className="my-4 border-t border-border/60" />
+        <div className="my-2.5 border-t border-border/60" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
           {/* Visibility */}
           <RowField icon={Eye} label="Visibility">
             <CompactSelect
@@ -547,7 +542,7 @@ const FocusMeetingBuilder = () => {
           </RowField>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-border/60 flex items-center gap-2">
+        <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center gap-2">
           <button
             onClick={save}
             disabled={hasDraftConflict || justCreated}
@@ -558,12 +553,12 @@ const FocusMeetingBuilder = () => {
                 ? "Press New to start another slot"
                 : undefined
             }
-            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-[12px] font-bold shadow-elevated hover:opacity-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <CalendarPlus className="w-4 h-4" /> {isEditing ? "Update Focus Sync" : "Create Focus Sync"}
+            <CalendarPlus className="w-3.5 h-3.5" /> {isEditing ? "Update Focus Sync" : "Create Focus Sync"}
           </button>
           {justCreated && (
-            <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-3 rounded-xl bg-primary/10 text-primary text-xs font-bold">
+            <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 text-primary text-[11px] font-bold">
               <Plus className="w-3.5 h-3.5" /> New
             </button>
           )}
