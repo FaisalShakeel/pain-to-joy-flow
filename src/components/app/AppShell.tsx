@@ -276,19 +276,6 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
             ))}
           </ul>
 
-          <div className="mt-6 mx-1 rounded-2xl bg-gradient-vault p-4 text-primary-foreground shadow-elevated">
-            <Crown className="w-5 h-5 text-gold" />
-            <p className="mt-2 font-headline font-bold text-sm leading-snug">Unlock the Vault</p>
-            <p className="mt-1 text-[11px] text-primary-foreground/80 leading-relaxed">
-              Priority access, Direct Call Sync & Ping — from $91/yr with the 30% Early Supporter Offer.
-            </p>
-            <Link
-              to="/app/upgrade"
-              className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gold hover:text-gold/80"
-            >
-              Upgrade →
-            </Link>
-          </div>
         </nav>
 
         <div className="p-3 border-t border-border/50 flex items-center gap-2">
