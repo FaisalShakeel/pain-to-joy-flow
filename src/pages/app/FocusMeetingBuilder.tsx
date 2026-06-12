@@ -766,13 +766,32 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 );
 
 const RowField = ({
-  icon: Ic, label, children,
-}: { icon: React.ComponentType<any>; label: string; children: React.ReactNode }) => (
-  <div className="flex items-center gap-2.5 rounded-xl ghost-border bg-surface-lowest px-2.5 py-2 min-h-[44px]">
-    <span className="grid place-items-center w-7 h-7 rounded-full bg-surface-low text-primary shrink-0">
-      <Ic className="w-3.5 h-3.5" />
+  icon: Ic, label, children, variant = "default",
+}: { icon: React.ComponentType<any>; label: string; children: React.ReactNode; variant?: "default" | "fixed" }) => (
+  <div
+    className={cn(
+      "flex items-center gap-2 rounded-xl px-2 py-1.5 min-h-[36px]",
+      variant === "fixed"
+        ? "bg-gradient-to-br from-primary/10 to-accent/10 ring-1 ring-primary/25 shadow-glass"
+        : "ghost-border bg-surface-lowest",
+    )}
+  >
+    <span
+      className={cn(
+        "grid place-items-center w-6 h-6 rounded-full shrink-0",
+        variant === "fixed" ? "bg-primary text-primary-foreground" : "bg-surface-low text-primary",
+      )}
+    >
+      <Ic className="w-3 h-3" />
     </span>
-    <span className="text-[11px] font-bold text-primary shrink-0 w-[78px]">{label}</span>
+    <span
+      className={cn(
+        "text-[10px] font-bold shrink-0 w-[70px] uppercase tracking-wider",
+        variant === "fixed" ? "text-primary" : "text-muted-foreground",
+      )}
+    >
+      {label}
+    </span>
     <div className="flex-1 min-w-0 flex items-center justify-end [&>*]:max-w-full">{children}</div>
   </div>
 );
@@ -783,7 +802,7 @@ const CompactSelect = ({
   <select
     value={value}
     onChange={(e) => onChange(e.target.value)}
-    className="w-full px-2.5 py-1.5 rounded-lg ghost-border bg-surface-lowest text-[12px] font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+    className="w-full px-2 py-1 rounded-lg ghost-border bg-surface-lowest text-[11px] font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
   >
     {options.map((o) => (
       <option key={o.value} value={o.value}>{o.label}</option>
