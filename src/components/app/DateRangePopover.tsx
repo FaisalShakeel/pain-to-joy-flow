@@ -46,9 +46,10 @@ const DateRangePopover = ({ from, to, onChange, singleOnly, className, triggerLa
         type="button"
         onClick={goToday}
         title="Jump to today"
-        className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-[11px] font-bold hover:opacity-90"
+        aria-label="Jump to today"
+        className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground hover:opacity-90"
       >
-        <RotateCcw className="w-3 h-3" /> Today
+        <RotateCcw className="w-3.5 h-3.5" />
       </button>
       <div className="inline-flex items-stretch rounded-xl bg-surface-low ghost-border overflow-hidden">
         <button
