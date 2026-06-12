@@ -475,10 +475,15 @@ const FocusMeetingBuilder = () => {
             </Field>
 
             <Field label="Time Window">
-              <div className="flex items-center gap-2">
-                <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
-                <span className="text-muted-foreground text-sm font-bold">→</span>
-                <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Start</span>
+                  <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">End</span>
+                  <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
+                </div>
               </div>
             </Field>
 
