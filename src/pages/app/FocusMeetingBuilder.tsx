@@ -770,6 +770,32 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </label>
 );
 
+const RowField = ({
+  icon: Ic, label, children,
+}: { icon: React.ComponentType<any>; label: string; children: React.ReactNode }) => (
+  <div className="flex items-center gap-2.5 rounded-xl ghost-border bg-surface-lowest px-2.5 py-2 min-h-[44px]">
+    <span className="grid place-items-center w-7 h-7 rounded-full bg-surface-low text-primary shrink-0">
+      <Ic className="w-3.5 h-3.5" />
+    </span>
+    <span className="text-[11px] font-bold text-primary shrink-0 w-[78px]">{label}</span>
+    <div className="flex-1 min-w-0 flex items-center justify-end [&>*]:max-w-full">{children}</div>
+  </div>
+);
+
+const CompactSelect = ({
+  value, onChange, options,
+}: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) => (
+  <select
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full px-2.5 py-1.5 rounded-lg ghost-border bg-surface-lowest text-[12px] font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+  >
+    {options.map((o) => (
+      <option key={o.value} value={o.value}>{o.label}</option>
+    ))}
+  </select>
+);
+
 const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
   <button
     onClick={onClick}
