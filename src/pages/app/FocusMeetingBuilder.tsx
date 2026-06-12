@@ -6,6 +6,7 @@ import {
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
   ChevronRight, X, CheckCircle2, CalendarPlus, Video, MapPin,
 } from "lucide-react";
+import { Eye, Tag, ShieldCheck, Radio, Wifi } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
