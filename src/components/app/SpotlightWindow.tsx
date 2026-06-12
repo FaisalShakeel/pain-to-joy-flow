@@ -262,4 +262,3 @@ const SpotlightWindow = () => {
 };
 
 export default SpotlightWindow;
-};
