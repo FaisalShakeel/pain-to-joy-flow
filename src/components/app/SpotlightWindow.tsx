@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import {
-  Radio, ChevronDown, ArrowRight, Settings2, Briefcase, Heart,
-  Home, Star, Crown, Layers, Plus, Check,
+  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers,
+  Plus, Check, Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
@@ -46,44 +47,40 @@ const ACTION: Record<"qs" | "fs" | "ea", { label: string; cls: string; href: str
   ea: { label: "Event",      cls: "text-amber-700 bg-amber-500/15 hover:bg-amber-500/25",       href: "/app/availability/webinars" },
 };
 
-type WatchlistId = "family" | "friends" | "office" | "clients" | "vip" | "all";
+type WatchlistId = "mine" | "all" | "colleagues" | "clients" | "friends" | "family" | "groups";
 
 const WATCHLISTS: { id: WatchlistId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "all",     label: "My Watchlist", icon: Layers },
-  { id: "family",  label: "Family",       icon: Home },
-  { id: "friends", label: "Friends",      icon: Heart },
-  { id: "office",  label: "Office",       icon: Briefcase },
-  { id: "clients", label: "Clients",      icon: Star },
-  { id: "vip",     label: "VIP",          icon: Crown },
+  { id: "mine",       label: "My Watchlist", icon: Star },
+  { id: "all",        label: "All",          icon: Layers },
+  { id: "colleagues", label: "Colleagues",   icon: Briefcase },
+  { id: "clients",    label: "Clients",      icon: Crown },
+  { id: "friends",    label: "Friends",      icon: Heart },
+  { id: "family",     label: "Family",       icon: Home },
+  { id: "groups",     label: "Groups",       icon: Users },
 ];
 
-const ROSTER: Record<WatchlistId, RelayRow[]> = {
-  all: [
-    { id: "rashid", name: "Rashid", initials: "RA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Quick Sync Open",       activity: "Quick Sync Opened",    updatedMinAgo: 1,  action: "qs" },
-    { id: "maria",  name: "Maria",  initials: "MA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Full Session Open",     activity: "Recently Available",   updatedMinAgo: 4,  action: "fs" },
-    { id: "sarah",  name: "Sarah",  initials: "SA", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Free at 3:00 PM",       activity: "Focus Mode Started",   updatedMinAgo: 8,  action: "fs" },
-    { id: "ahmed",  name: "Ahmed",  initials: "AH", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "Meeting until 2:30 PM", activity: "Availability Updated", updatedMinAgo: 22, action: "ea" },
-    { id: "david",  name: "David",  initials: "DA", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Back by 4:00 PM",       activity: "Driving Started",      updatedMinAgo: 35 },
-    { id: "john",   name: "John",   initials: "JO", accent: "from-slate-500 to-slate-700",     status: "offline",   context: "Back tomorrow",         activity: "Went Offline",         updatedMinAgo: 90 },
-  ],
-  family:  [],
-  friends: [],
-  office:  [],
-  clients: [],
-  vip:     [],
-};
+const ALL_ROWS: RelayRow[] = [
+  { id: "rashid", name: "Rashid",   initials: "RA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago",     updatedMinAgo: 1,  action: "qs" },
+  { id: "sarah",  name: "Sarah",    initials: "SA", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",  activity: "2h steady",  updatedMinAgo: 8,  action: "fs" },
+  { id: "ahmed",  name: "Ahmed",    initials: "AH", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" },
+  { id: "david",  name: "David",    initials: "DA", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Traveling. Hands-free only. Desk by 4:00 PM.",    activity: "35m ago",    updatedMinAgo: 35 },
+  { id: "elena",  name: "Elena M.", initials: "EM", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Coffee shop co-working. Open for sync.",           activity: "Just now",   updatedMinAgo: 0,  action: "qs" },
+  { id: "jd",     name: "Jordan",   initials: "JD", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Deep work block until 5:00 PM.",                  activity: "12m",        updatedMinAgo: 12, action: "fs" },
+  { id: "kl",     name: "Kai L.",   initials: "KL", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "On a call. Try again at 4 PM.",                   activity: "18m",        updatedMinAgo: 18 },
+  { id: "rt",     name: "Riya T.",  initials: "RT", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Driving home. ETA 30 min.",                       activity: "5m",         updatedMinAgo: 5 },
+];
 
 const RELAY_RANK: Record<BoardStatus, number> = {
   available: 0, busy: 1, focus: 2, driving: 3, offline: 4,
 };
 
 const SpotlightWindow = () => {
-  const [watchlist, setWatchlist] = useState<WatchlistId>("all");
+  const [watchlist, setWatchlist] = useState<WatchlistId>("mine");
   const [following, setFollowing] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(ROSTER.all.map((r) => [r.id, true]))
+    () => Object.fromEntries(ALL_ROWS.map((r) => [r.id, true]))
   );
 
-  const base = ROSTER[watchlist].length ? ROSTER[watchlist] : ROSTER.all;
+  const base = ALL_ROWS;
   const followed = useMemo(() => base.filter((r) => following[r.id]), [base, following]);
 
   // Relay strip — priority order: Available → Busy → Focus → Driving → Offline
@@ -99,63 +96,57 @@ const SpotlightWindow = () => {
   );
 
   const active = WATCHLISTS.find((w) => w.id === watchlist) ?? WATCHLISTS[0];
-  const ActiveIcon = active.icon;
-
-  const fmtAgo = (m: number) =>
-    m < 1 ? "Just now" : m < 60 ? `${m}m ago` : `${Math.floor(m / 60)}h ago`;
 
   return (
-    <section className="w-full min-w-0 max-w-full rounded-2xl bg-slate-100 text-slate-900 ghost-border shadow-soft overflow-hidden">
-      {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="grid place-items-center w-6 h-6 rounded-md bg-primary/10 text-primary">
-            <Radio className="w-3.5 h-3.5" />
-          </span>
-          <h3 className="font-headline font-extrabold text-[12px] tracking-[0.14em] uppercase text-slate-900">
-            Spotlight
-          </h3>
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
-            <span className="relative grid place-items-center w-1.5 h-1.5">
-              <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
-              <span className="relative w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            </span>
-            Live
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 transition">
-                <ActiveIcon className="w-3 h-3 opacity-80" />
-                <span className="hidden xs:inline">{active.label}</span>
-                <span className="xs:hidden">{active.id === "all" ? "All" : active.label}</span>
-                <ChevronDown className="w-3 h-3 opacity-60" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              {WATCHLISTS.map((w) => {
-                const I = w.icon;
-                return (
-                  <DropdownMenuItem key={w.id} onClick={() => setWatchlist(w.id)}>
-                    <I className="w-3.5 h-3.5 mr-2" /> {w.label}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Sheet>
-            <SheetTrigger asChild>
-              <button
-                type="button"
-                className="grid place-items-center w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-                aria-label="Manage watchlist"
-                title="Manage watchlist"
-              >
-                <Settings2 className="w-3.5 h-3.5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[88vw] sm:w-[420px]">
+    <section className="w-full min-w-0 max-w-full rounded-2xl bg-white text-slate-900 ghost-border shadow-soft overflow-hidden">
+      {/* Availability Relay */}
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-500">
+            Availability Relay
+          </p>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="grid place-items-center w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
+                  aria-label="Filter watchlist"
+                  title={active.label}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-slate-500">
+                  Watchlists
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {WATCHLISTS.map((w) => {
+                  const I = w.icon;
+                  const on = w.id === watchlist;
+                  return (
+                    <DropdownMenuItem key={w.id} onClick={() => setWatchlist(w.id)}>
+                      <I className="w-3.5 h-3.5 mr-2" />
+                      <span className="flex-1">{w.label}</span>
+                      {on && <Check className="w-3.5 h-3.5 text-emerald-600" />}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className="grid place-items-center w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
+                  aria-label="Manage watchlist"
+                  title="Manage watchlist"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[88vw] sm:w-[420px]">
               <SheetHeader>
                 <SheetTitle>Manage Watchlist</SheetTitle>
               </SheetHeader>
@@ -191,109 +182,82 @@ const SpotlightWindow = () => {
             </SheetContent>
           </Sheet>
         </div>
-      </header>
+        </div>
 
-      {/* Watchlist filter chips — horizontal scroll */}
-      <div className="px-2 py-1.5 border-b border-slate-200 bg-slate-50/60 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-1.5 w-max">
-          {WATCHLISTS.map((w) => {
-            const I = w.icon;
-            const on = w.id === watchlist;
-            return (
-              <button
-                key={w.id}
-                type="button"
-                onClick={() => setWatchlist(w.id)}
-                className={cn(
-                  "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition whitespace-nowrap",
-                  on
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50",
-                )}
-              >
-                <I className="w-3 h-3" /> {w.label}
-              </button>
-            );
-          })}
+        {/* Tile strip */}
+        <div className="rounded-2xl bg-slate-50 border border-slate-200/70 px-3 py-3">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
+            {relay.map((r) => {
+              const s = STATUS[r.status];
+              return (
+                <Link
+                  key={r.id}
+                  to={`/app/contact/${r.id}`}
+                  title={`${r.name} · ${s.label}`}
+                  className="relative shrink-0"
+                >
+                  <Avatar initials={r.initials} accent={r.accent} size="md" />
+                  <span className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-slate-50", s.dot)} />
+                </Link>
+              );
+            })}
+            {relay.length === 0 && (
+              <p className="text-[11px] text-slate-500 px-2 py-3">No contacts followed.</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Relay strip — horizontal scroll, priority order */}
-      <div className="px-2 pt-2 pb-1.5 bg-slate-100">
-        <div className="flex items-center justify-between px-1 pb-1.5">
-          <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-500">Relay</p>
-          <p className="text-[9px] font-semibold text-slate-400">{relay.length} followed</p>
-        </div>
-        <div className="flex items-stretch gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
-          {relay.map((r) => {
-            const s = STATUS[r.status];
-            return (
-              <Link
-                key={r.id}
-                to={`/app/contact/${r.id}`}
-                title={`${r.name} · ${s.label}`}
-                className="flex flex-col items-center gap-1 shrink-0 w-[58px] rounded-lg bg-white border border-slate-200 px-1 py-1.5 hover:border-slate-300 transition"
-              >
-                <div className={cn("relative rounded-full ring-2 ring-offset-2 ring-offset-white", s.ring)}>
-                  <Avatar initials={r.initials} accent={r.accent} size="sm" />
-                  <span className={cn("absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white", s.dot)} />
-                </div>
-                <span className="text-[10px] font-semibold text-slate-800 truncate w-full text-center leading-tight">
-                  {r.name}
-                </span>
-              </Link>
-            );
-          })}
-          {relay.length === 0 && (
-            <p className="text-[11px] text-slate-500 px-2 py-3">No contacts followed yet.</p>
-          )}
-        </div>
-      </div>
+      {/* Activity Feed */}
+      <div className="px-3 pt-2 pb-3">
+        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-500 mb-2">
+          Live Pulse of Your Intentional Network
+        </p>
 
-      {/* Main feed — newest activity first */}
-      <div className="bg-slate-100 px-2 pb-2">
-        <div className="flex items-center justify-between px-1 pt-1.5 pb-1.5">
-          <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-500">Activity Feed</p>
-          <p className="text-[9px] font-semibold text-slate-400">Newest first</p>
+        {/* Column headers */}
+        <div className="grid grid-cols-[36px_minmax(64px,1fr)_88px_minmax(0,2fr)_60px] items-center gap-2 px-1 pb-1.5 border-b border-slate-200">
+          <span className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-400 leading-tight">Avatar</span>
+          <span className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-400">Member</span>
+          <span className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-400">Status</span>
+          <span className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-400">Availability Context</span>
+          <span className="text-[9px] font-bold tracking-[0.18em] uppercase text-slate-400 text-right">Activity</span>
         </div>
-        <ul className="space-y-1.5">
+
+        <ul className="divide-y divide-slate-100">
           {feed.map((r) => {
             const s = STATUS[r.status];
-            const a = r.action ? ACTION[r.action] : null;
             return (
               <li key={r.id}>
                 <Link
                   to={`/app/contact/${r.id}`}
-                  className="flex items-center gap-2 px-2 py-2 rounded-lg bg-white border border-slate-200 hover:border-slate-300 transition"
+                  className="grid grid-cols-[36px_minmax(64px,1fr)_88px_minmax(0,2fr)_60px] items-center gap-2 px-1 py-2.5 hover:bg-slate-50/70 transition"
                 >
-                  <div className={cn("relative rounded-full ring-2 ring-offset-2 ring-offset-white shrink-0", s.ring)}>
-                    <Avatar initials={r.initials} accent={r.accent} size="sm" />
-                    <span className={cn("absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white", s.dot)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-[13px] font-bold text-slate-900 truncate">{r.name}</span>
-                      <span className={cn("inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider", s.text)}>
-                        <span className={cn("w-1.5 h-1.5 rounded-full", s.dot)} />
-                        {s.label}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-600 truncate leading-tight">
-                      {r.context} · <span className="text-slate-400">{fmtAgo(r.updatedMinAgo)}</span>
-                    </p>
-                  </div>
-                  {a && (
-                    <span className={cn("shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition", a.cls)}>
-                      {a.label} <ArrowRight className="w-2.5 h-2.5" />
-                    </span>
-                  )}
+                  <Avatar initials={r.initials} accent={r.accent} size="sm" />
+                  <span className="text-[12px] font-bold text-slate-900 truncate">{r.name}</span>
+                  <span className={cn(
+                    "justify-self-start inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+                    s.text,
+                    r.status === "available" && "bg-emerald-500/15",
+                    r.status === "focus" && "bg-rose-500/15",
+                    r.status === "busy" && "bg-amber-500/15",
+                    r.status === "driving" && "bg-violet-500/15",
+                    r.status === "offline" && "bg-slate-400/15",
+                  )}>
+                    {s.label}
+                  </span>
+                  <p className="text-[11px] text-slate-600 truncate leading-tight">
+                    {r.context}
+                  </p>
+                  <span className="text-[10px] text-slate-400 text-right whitespace-nowrap">
+                    {r.activity}
+                  </span>
                 </Link>
               </li>
             );
           })}
           {feed.length === 0 && (
             <li className="text-[11px] text-slate-500 px-2 py-4 text-center">
-              No followed contacts in this watchlist.
+              No followed contacts.
             </li>
           )}
         </ul>
