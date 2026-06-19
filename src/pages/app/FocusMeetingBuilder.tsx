@@ -375,31 +375,27 @@ const FocusMeetingBuilder = () => {
 
       {/* SECTION 2 — Live Preview */}
       <aside className="mt-3 rounded-2xl bg-gradient-vault text-primary-foreground p-3 md:p-4 shadow-elevated">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live Preview</p>
-          <h4 className="font-headline font-extrabold text-sm capitalize">
-            Focus Sync · {channel}
-          </h4>
-          <span className="text-[11px] text-primary-foreground/85">
-            {format(new Date(draft.date), "EEEE, MMMM d, yyyy")}
-          </span>
-          <span className="text-[11px] text-primary-foreground/85">
-            {fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}
-          </span>
-          <span className="ml-auto px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-            {count} Slot{count === 1 ? "" : "s"} Generated
-          </span>
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-x-2 gap-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold shrink-0">Live Preview</span>
+          <span className="text-primary-foreground/30 hidden md:inline">/</span>
+          <p className="text-[11px] text-primary-foreground/90 leading-snug">
+            <span className="whitespace-nowrap">{format(new Date(draft.date), "MMMM d, yyyy")}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{channel.charAt(0).toUpperCase() + channel.slice(1)}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{draft.callMin} Min + {draft.bufferMin} Min Buffer</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{fmtTime(draft.startMin)}–{fmtTime(draft.endMin)}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">
+              {draft.access === "public" ? "Public" : draft.access === "contacts" ? "Contacts" : draft.access === "priority" ? "Selected" : draft.access === "paid" ? "Paid" : "Private"}
+            </span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{draft.booking === "instant" ? "Pre-Approved" : "Approval-Based"}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{count} Slot{count === 1 ? "" : "s"}</span>
+          </p>
         </div>
-        {timeline.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] font-mono text-primary-foreground/90">
-            {timeline.slice(0, 10).map((it, i) => (
-              <li key={i}>{fmtTime(it.start)}</li>
-            ))}
-            {timeline.length > 10 && (
-              <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 10} more</li>
-            )}
-          </ul>
-        )}
       </aside>
 
       {/* SECTION 3 — Slot Builder */}
