@@ -447,7 +447,7 @@ const FocusMeetingBuilder = () => {
                     className={cn(
                       "flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[11px] font-bold transition",
                       channel === k
-                        ? "bg-primary text-primary-foreground shadow-glass"
+                        ? "bg-emerald-500 text-white shadow-glass"
                         : "text-muted-foreground hover:text-primary",
                     )}
                   >
@@ -457,29 +457,67 @@ const FocusMeetingBuilder = () => {
               </div>
             </BuilderRow>
 
-            {/* Call size + Buffer merged */}
-            <BuilderRow label="Call · Buffer">
-              <div className="grid grid-cols-2 gap-1.5 w-full">
+            {/* Call Size + Buffer — inline labels, same row */}
+            <div className="py-1.5 flex items-center gap-3 border-b border-border/40">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Call Size
+                </span>
                 <CompactSelect
                   value={String(draft.callMin)}
-                  onChange={(v) => set("callMin", parseInt(v, 10) as CallMin)}
+                  onChange={(v) => {
+                    const next = parseInt(v, 10) as CallMin;
+                    const slots = Math.max(1, Math.round((draft.endMin - draft.startMin) / draft.callMin));
+                    setDraft((d) => ({ ...d, callMin: next, endMin: d.startMin + slots * next }));
+                    setDirty(true);
+                  }}
                   options={[15, 20, 25, 30, 35].map((d) => ({ value: String(d), label: `${d} Min` }))}
                 />
+              </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Buffer
+                </span>
                 <CompactSelect
                   value={String(draft.bufferMin)}
                   onChange={(v) => set("bufferMin", parseInt(v, 10) as BufferMin)}
-                  options={[0, 5, 10, 15, 30].map((b) => ({ value: String(b), label: `${b} Min` }))}
+                  options={[0, 5, 10].map((b) => ({ value: String(b), label: `${b} Min` }))}
                 />
               </div>
-            </BuilderRow>
+            </div>
 
-            {/* Time block */}
-            <BuilderRow label="Time block">
-              <div className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-1.5 w-full">
-                <Clock className="w-3.5 h-3.5 text-primary" />
-                <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
-                <span className="text-muted-foreground text-xs">→</span>
-                <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
+            {/* Time block — stepper */}
+            <BuilderRow label="Time Block">
+              <div className="inline-flex items-stretch rounded-lg ghost-border overflow-hidden w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const span = draft.endMin - draft.startMin;
+                    const next = Math.max(0, draft.startMin - 15);
+                    setDraft((d) => ({ ...d, startMin: next, endMin: next + span }));
+                    setDirty(true);
+                  }}
+                  className="px-3 grid place-items-center bg-surface-lowest hover:bg-primary/10 text-primary"
+                  aria-label="Earlier"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex-1 grid place-items-center text-[12px] font-bold text-primary tabular-nums bg-surface-lowest">
+                  {fmtTime(draft.startMin)}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const span = draft.endMin - draft.startMin;
+                    const next = Math.min(23 * 60 + 45, draft.startMin + 15);
+                    setDraft((d) => ({ ...d, startMin: next, endMin: next + span }));
+                    setDirty(true);
+                  }}
+                  className="px-3 grid place-items-center bg-primary text-primary-foreground hover:opacity-90"
+                  aria-label="Later"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               </div>
             </BuilderRow>
 
@@ -511,30 +549,36 @@ const FocusMeetingBuilder = () => {
               </div>
             </BuilderRow>
 
-            {/* Visibility + Approval side by side */}
-            <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-              <BuilderRow label="Visibility" stacked>
+            {/* Visibility + Approval — inline labels, single row */}
+            <div className="py-1.5 flex items-center gap-3 border-b border-border/40">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Visibility
+                </span>
                 <CompactSelect
                   value={draft.access}
                   onChange={(v) => set("access", v as Access)}
                   options={[
-                    { value: "public", label: "Anyone with link" },
+                    { value: "public", label: "Public" },
                     { value: "contacts", label: "Contacts" },
                     { value: "priority", label: "Selected" },
                     { value: "private", label: "Private" },
                   ]}
                 />
-              </BuilderRow>
-              <BuilderRow label="Approval" stacked>
+              </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Approval
+                </span>
                 <CompactSelect
                   value={draft.booking}
                   onChange={(v) => set("booking", v as Booking)}
                   options={[
-                    { value: "approval", label: "Required" },
-                    { value: "instant", label: "Not required" },
+                    { value: "instant", label: "Pre-Approved" },
+                    { value: "approval", label: "Approval-Based" },
                   ]}
                 />
-              </BuilderRow>
+              </div>
             </div>
 
             {/* Pricing + Relay row */}
