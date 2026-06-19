@@ -6,7 +6,7 @@ import {
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
   ChevronRight, X, CheckCircle2, CalendarPlus, Video, MapPin,
 } from "lucide-react";
-import { Eye, Tag, ShieldCheck, Radio, Wifi } from "lucide-react";
+import { Eye, Tag, ShieldCheck, Radio, Wifi, Monitor, Minus } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -403,165 +403,215 @@ const FocusMeetingBuilder = () => {
       </aside>
 
       {/* SECTION 3 — Slot Builder */}
-      <section className="mt-3 rounded-2xl bg-surface-lowest ghost-border p-3 md:p-3.5 shadow-ambient">
-        <header className="mb-2 flex items-center justify-between gap-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-            Slot Builder
-          </p>
-          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">
-            {isEditing ? "Editing" : "Step 1"}
-          </span>
-        </header>
+      <section className="mt-3 rounded-2xl bg-surface-lowest ghost-border p-3 md:p-4 shadow-ambient">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          {/* LEFT — Calendar */}
+          <div className="min-w-0">
+            <p className="font-headline font-extrabold text-primary text-[13px] uppercase tracking-[0.18em] mb-2">
+              Select a Date
+            </p>
+            <div className="rounded-xl ghost-border bg-surface-lowest p-1">
+              <Calendar
+                mode="single"
+                selected={new Date(draft.date)}
+                onSelect={(d) => { if (d) { setDraft((dr) => ({ ...dr, date: toISO(d), dateTo: undefined })); setDirty(true); } }}
+                className="pointer-events-auto w-full"
+              />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-          {/* Date */}
-          <RowField icon={CalIcon} label="Date" variant="fixed">
-            <DateRangePopover
-              from={draft.date}
-              to={undefined}
-              singleOnly
-              onChange={(f) => { setDraft((d) => ({ ...d, date: f, dateTo: undefined })); setDirty(true); }}
-            />
-          </RowField>
+          {/* RIGHT — Options */}
+          <div className="min-w-0 flex flex-col">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-headline font-extrabold text-primary text-[13px] uppercase tracking-[0.18em]">
+                Slot Builder
+              </p>
+              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">
+                {isEditing ? "Editing" : "New"}
+              </span>
+            </div>
 
-          {/* Mode */}
-          <RowField icon={Wifi} label="Mode" variant="fixed">
-            <div className="inline-flex rounded-lg ghost-border bg-surface-lowest p-0.5 gap-0.5 w-full">
-              {([
-                ["online", "Online"],
-                ["onsite", "Onsite"],
-                ["hybrid", "Hybrid"],
-              ] as const).map(([k, l]) => (
+            {/* Mode segmented */}
+            <BuilderRow label="Mode">
+              <div className="inline-flex w-full rounded-lg ghost-border bg-surface-lowest p-0.5 gap-0.5">
+                {([
+                  ["online", "Online", Monitor],
+                  ["onsite", "Onsite", MapPin],
+                  ["hybrid", "Hybrid", UsersIcon],
+                ] as const).map(([k, l, Ic]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setChannel(k)}
+                    aria-pressed={channel === k}
+                    className={cn(
+                      "flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[11px] font-bold transition",
+                      channel === k
+                        ? "bg-primary text-primary-foreground shadow-glass"
+                        : "text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    <Ic className="w-3.5 h-3.5" /> {l}
+                  </button>
+                ))}
+              </div>
+            </BuilderRow>
+
+            {/* Call size + Buffer merged */}
+            <BuilderRow label="Call · Buffer">
+              <div className="grid grid-cols-2 gap-1.5 w-full">
+                <CompactSelect
+                  value={String(draft.callMin)}
+                  onChange={(v) => set("callMin", parseInt(v, 10) as CallMin)}
+                  options={[15, 20, 25, 30, 35].map((d) => ({ value: String(d), label: `${d} Min` }))}
+                />
+                <CompactSelect
+                  value={String(draft.bufferMin)}
+                  onChange={(v) => set("bufferMin", parseInt(v, 10) as BufferMin)}
+                  options={[0, 5, 10, 15, 30].map((b) => ({ value: String(b), label: `${b} Min` }))}
+                />
+              </div>
+            </BuilderRow>
+
+            {/* Time block */}
+            <BuilderRow label="Time block">
+              <div className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-1.5 w-full">
+                <Clock className="w-3.5 h-3.5 text-primary" />
+                <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
+                <span className="text-muted-foreground text-xs">→</span>
+                <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
+              </div>
+            </BuilderRow>
+
+            {/* Slots stepper */}
+            <BuilderRow label="Slots">
+              <div className="inline-flex items-stretch rounded-lg ghost-border overflow-hidden w-full">
                 <button
-                  key={k}
                   type="button"
-                  onClick={() => setChannel(k)}
-                  className={cn(
-                    "flex-1 px-2 py-1 rounded-md text-[10px] font-bold transition",
-                    channel === k ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary",
-                  )}
-                  aria-pressed={channel === k}
+                  onClick={() => {
+                    if (count <= 1) return;
+                    set("endMin", draft.endMin - draft.callMin);
+                  }}
+                  className="px-3 grid place-items-center bg-surface-lowest hover:bg-primary/10 text-primary"
+                  aria-label="Decrease"
                 >
-                  {l}
+                  <Minus className="w-3.5 h-3.5" />
                 </button>
-              ))}
+                <div className="flex-1 grid place-items-center text-[12px] font-bold text-primary tabular-nums bg-surface-lowest">
+                  {count}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => set("endMin", draft.endMin + draft.callMin)}
+                  className="px-3 grid place-items-center bg-primary text-primary-foreground hover:opacity-90"
+                  aria-label="Increase"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </BuilderRow>
+
+            {/* Visibility + Approval side by side */}
+            <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+              <BuilderRow label="Visibility" stacked>
+                <CompactSelect
+                  value={draft.access}
+                  onChange={(v) => set("access", v as Access)}
+                  options={[
+                    { value: "public", label: "Anyone with link" },
+                    { value: "contacts", label: "Contacts" },
+                    { value: "priority", label: "Selected" },
+                    { value: "private", label: "Private" },
+                  ]}
+                />
+              </BuilderRow>
+              <BuilderRow label="Approval" stacked>
+                <CompactSelect
+                  value={draft.booking}
+                  onChange={(v) => set("booking", v as Booking)}
+                  options={[
+                    { value: "approval", label: "Required" },
+                    { value: "instant", label: "Not required" },
+                  ]}
+                />
+              </BuilderRow>
             </div>
-          </RowField>
 
-          {/* Call Size (Participants) */}
-          <RowField icon={UsersIcon} label="Call Size" variant="fixed">
-            <CompactSelect
-              value={String(draft.callMin)}
-              onChange={(v) => set("callMin", parseInt(v, 10) as CallMin)}
-              options={[15, 20, 25, 30, 35].map((d) => ({ value: String(d), label: `${d} min` }))}
-            />
-          </RowField>
+            {/* Pricing + Relay row */}
+            <div className="mt-2.5 flex items-center justify-between gap-3">
+              <div className="inline-flex rounded-lg ghost-border bg-surface-lowest p-0.5 gap-0.5">
+                {(["free", "paid"] as const).map((k) => {
+                  const active = (draft.pricing?.mode ?? "free") === k;
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() =>
+                        set(
+                          "pricing",
+                          k === "paid"
+                            ? ({ ...(draft.pricing ?? defaultPricing), mode: "paid", amount: draft.pricing?.amount ?? 25, currency: draft.pricing?.currency ?? "USD" } as Pricing)
+                            : { mode: "free" },
+                        )
+                      }
+                      className={cn(
+                        "px-3 py-1.5 rounded-md text-[11px] font-bold transition capitalize",
+                        active ? "bg-primary text-primary-foreground shadow-glass" : "text-muted-foreground hover:text-primary",
+                      )}
+                      aria-pressed={active}
+                    >
+                      {k}
+                    </button>
+                  );
+                })}
+              </div>
 
-          {/* Time Window */}
-          <RowField icon={Clock} label="Time Window">
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 w-full">
-              <TimeInput value={draft.startMin} onChange={(v) => set("startMin", v)} />
-              <span className="text-muted-foreground text-xs">→</span>
-              <TimeInput value={draft.endMin} onChange={(v) => set("endMin", v)} />
-            </div>
-          </RowField>
-
-          {/* Buffer */}
-          <RowField icon={Timer} label="Buffer">
-            <CompactSelect
-              value={String(draft.bufferMin)}
-              onChange={(v) => set("bufferMin", parseInt(v, 10) as BufferMin)}
-              options={[0, 5, 10, 15, 30].map((b) => ({ value: String(b), label: `${b} Min` }))}
-            />
-          </RowField>
-        </div>
-
-        <div className="my-2.5 border-t border-border/60" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-          {/* Visibility */}
-          <RowField icon={Eye} label="Visibility">
-            <CompactSelect
-              value={draft.access}
-              onChange={(v) => set("access", v as Access)}
-              options={[
-                { value: "public", label: "Public" },
-                { value: "contacts", label: "Contacts" },
-                { value: "priority", label: "Selected" },
-                { value: "private", label: "Private" },
-              ]}
-            />
-          </RowField>
-
-          {/* Payment */}
-          <RowField icon={Tag} label="Payment">
-            <CompactSelect
-              value={draft.pricing?.mode === "paid" ? "paid" : "free"}
-              onChange={(v) => set("pricing", v === "paid" ? { ...(draft.pricing ?? defaultPricing), mode: "paid", amount: draft.pricing?.amount ?? 25, currency: draft.pricing?.currency ?? "USD" } as Pricing : { mode: "free" })}
-              options={[
-                { value: "free", label: "Free" },
-                { value: "paid", label: "Paid" },
-              ]}
-            />
-          </RowField>
-
-          {/* Approval */}
-          <RowField icon={ShieldCheck} label="Approval">
-            <CompactSelect
-              value={draft.booking}
-              onChange={(v) => set("booking", v as Booking)}
-              options={[
-                { value: "approval", label: "Required" },
-                { value: "instant", label: "Not Required" },
-              ]}
-            />
-          </RowField>
-
-          {/* Relay */}
-          <RowField icon={Radio} label="Relay">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={relay.enabled}
-              onClick={() => setRelay({ ...relay, enabled: !relay.enabled })}
-              className="ml-auto inline-flex items-center gap-2 select-none"
-            >
-              <span className={cn("text-[11px] font-bold", relay.enabled ? "text-primary" : "text-muted-foreground")}>
-                {relay.enabled ? "On" : "Off"}
-              </span>
-              <span className={cn(
-                "relative inline-block w-9 h-5 rounded-full transition",
-                relay.enabled ? "bg-primary" : "bg-surface-low ghost-border",
-              )}>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={relay.enabled}
+                onClick={() => setRelay({ ...relay, enabled: !relay.enabled })}
+                className="inline-flex items-center gap-2 select-none"
+              >
+                <Radio className={cn("w-3.5 h-3.5", relay.enabled ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("text-[11px] font-bold", relay.enabled ? "text-primary" : "text-muted-foreground")}>
+                  Relay {relay.enabled ? "On" : "Off"}
+                </span>
                 <span className={cn(
-                  "absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-primary-foreground shadow transition-transform",
-                  relay.enabled && "translate-x-4",
-                )} />
-              </span>
-            </button>
-          </RowField>
-        </div>
+                  "relative inline-block w-9 h-5 rounded-full transition",
+                  relay.enabled ? "bg-primary" : "bg-surface-low ghost-border",
+                )}>
+                  <span className={cn(
+                    "absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-primary-foreground shadow transition-transform",
+                    relay.enabled && "translate-x-4",
+                  )} />
+                </span>
+              </button>
+            </div>
 
-        <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center gap-2">
-          <button
-            onClick={save}
-            disabled={hasDraftConflict || justCreated}
-            title={
-              hasDraftConflict
-                ? "Time conflict on this date — change date or window"
-                : justCreated
-                ? "Press New to start another slot"
-                : undefined
-            }
-            className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-[12px] font-bold shadow-elevated hover:opacity-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <CalendarPlus className="w-3.5 h-3.5" /> {isEditing ? "Update Focus Sync" : "Create Focus Sync"}
-          </button>
-          {justCreated && (
-            <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 text-primary text-[11px] font-bold">
-              <Plus className="w-3.5 h-3.5" /> New
-            </button>
-          )}
+            {/* Primary CTA */}
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={save}
+                disabled={hasDraftConflict || justCreated}
+                title={
+                  hasDraftConflict
+                    ? "Time conflict on this date — change date or window"
+                    : justCreated
+                    ? "Press New to start another slot"
+                    : undefined
+                }
+                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold shadow-elevated hover:opacity-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CalendarPlus className="w-4 h-4" /> {isEditing ? "Update Focus Sync" : "Create Focus Sync"}
+              </button>
+              {justCreated && (
+                <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-primary/10 text-primary text-[11px] font-bold">
+                  <Plus className="w-3.5 h-3.5" /> New
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -808,6 +858,29 @@ const CompactSelect = ({
       <option key={o.value} value={o.value}>{o.label}</option>
     ))}
   </select>
+);
+
+const BuilderRow = ({
+  label, children, stacked,
+}: { label: string; children: React.ReactNode; stacked?: boolean }) => (
+  <div
+    className={cn(
+      "py-1.5",
+      stacked
+        ? "flex flex-col gap-1"
+        : "flex items-center gap-3 border-b border-border/40 last:border-b-0",
+    )}
+  >
+    <span
+      className={cn(
+        "text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0",
+        !stacked && "w-[88px]",
+      )}
+    >
+      {label}
+    </span>
+    <div className="flex-1 min-w-0">{children}</div>
+  </div>
 );
 
 const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
