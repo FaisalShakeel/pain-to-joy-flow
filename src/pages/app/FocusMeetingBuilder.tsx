@@ -860,6 +860,29 @@ const CompactSelect = ({
   </select>
 );
 
+const BuilderRow = ({
+  label, children, stacked,
+}: { label: string; children: React.ReactNode; stacked?: boolean }) => (
+  <div
+    className={cn(
+      "py-1.5",
+      stacked
+        ? "flex flex-col gap-1"
+        : "flex items-center gap-3 border-b border-border/40 last:border-b-0",
+    )}
+  >
+    <span
+      className={cn(
+        "text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0",
+        !stacked && "w-[88px]",
+      )}
+    >
+      {label}
+    </span>
+    <div className="flex-1 min-w-0">{children}</div>
+  </div>
+);
+
 const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
   <button
     onClick={onClick}
