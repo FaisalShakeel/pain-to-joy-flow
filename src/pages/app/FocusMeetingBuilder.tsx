@@ -85,15 +85,15 @@ const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const blank = (): Omit<MTSlot, "id" | "createdAt"> => ({
   date: toISO(new Date()),
   dateTo: undefined,
-  startMin: 10 * 60,
-  endMin: 12 * 60,
-  callMin: 30,
+  startMin: 11 * 60,
+  endMin: 11 * 60 + 15,
+  callMin: 15,
   bufferMin: 5,
   repeats: "none",
   weekdays: [],
   cloneDates: [],
-  booking: "approval",
-  access: "contacts",
+  booking: "instant",
+  access: "public",
   pricing: defaultPricing,
 });
 
