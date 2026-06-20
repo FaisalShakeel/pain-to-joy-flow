@@ -128,6 +128,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem("nav.openGroup");
   });
+  const [openAdvanced, setOpenAdvanced] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const items = baseItems;
