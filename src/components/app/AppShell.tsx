@@ -44,6 +44,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface NavChild {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  advanced?: boolean;
+}
+
 interface NavItem {
   to: string;
   label: string;
@@ -51,7 +58,7 @@ interface NavItem {
   badge?: number;
   end?: boolean;
   providerOnly?: boolean;
-  children?: { to: string; label: string; icon: typeof LayoutDashboard }[];
+  children?: NavChild[];
 }
 
 const baseItems: NavItem[] = [
