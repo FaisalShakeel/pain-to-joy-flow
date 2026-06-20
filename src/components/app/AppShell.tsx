@@ -243,7 +243,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                       )}
                     >
                       <ul className="overflow-hidden ml-4 mt-2 border-l border-outline-variant/40 pl-2.5 space-y-1">
-                        {item.children.map((child) => (
+                        {item.children.filter((c) => !c.advanced).map((child) => (
                           <li key={child.to}>
                             <NavLink
                               to={child.to}
@@ -262,6 +262,50 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                             </NavLink>
                           </li>
                         ))}
+                        {item.children.some((c) => c.advanced) && (
+                          <>
+                            <li>
+                              <button
+                                type="button"
+                                onClick={() => setOpenAdvanced((v) => !v)}
+                                className={cn(
+                                  "w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold tracking-wide uppercase transition-colors cursor-pointer",
+                                  openAdvanced
+                                    ? "text-primary bg-primary/5"
+                                    : "text-muted-foreground/70 hover:text-muted-foreground hover:bg-surface-low/60",
+                                )}
+                              >
+                                <span className="flex-1 text-left">Advanced</span>
+                                <ChevronDown
+                                  className={cn(
+                                    "w-3 h-3 shrink-0 transition-transform duration-200",
+                                    openAdvanced && "rotate-180",
+                                  )}
+                                />
+                              </button>
+                            </li>
+                            {openAdvanced &&
+                              item.children.filter((c) => c.advanced).map((child) => (
+                                <li key={child.to}>
+                                  <NavLink
+                                    to={child.to}
+                                    end
+                                    className={({ isActive }) =>
+                                      cn(
+                                        "flex items-center gap-2.5 px-3 py-2 md:py-1.5 rounded-lg text-[12.5px] font-medium transition-all cursor-pointer",
+                                        isActive
+                                          ? "bg-primary/10 text-primary ring-1 ring-primary/30 shadow-soft font-semibold"
+                                          : "text-muted-foreground hover:text-primary hover:bg-primary/5 hover:translate-x-0.5",
+                                      )
+                                    }
+                                  >
+                                    <child.icon className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                                    <span className="truncate">{child.label}</span>
+                                  </NavLink>
+                                </li>
+                              ))}
+                          </>
+                        )}
                       </ul>
                     </div>
                   </>
