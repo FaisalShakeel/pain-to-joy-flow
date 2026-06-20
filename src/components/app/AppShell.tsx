@@ -21,6 +21,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ChevronRight,
+  ChevronDown,
   CalendarClock,
   Zap,
   UsersRound,
