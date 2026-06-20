@@ -151,6 +151,14 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
     if (parent) setOpenGroup(parent.to);
   }, [location.pathname]);
 
+  // Auto-expand Advanced subsection when an advanced child route is active
+  useEffect(() => {
+    const hasAdvancedActive = baseItems.some((i) =>
+      i.children?.some((c) => c.advanced && (location.pathname === c.to || location.pathname.startsWith(c.to + "/")))
+    );
+    if (hasAdvancedActive) setOpenAdvanced(true);
+  }, [location.pathname]);
+
   const toggleGroup = (to: string) => {
     setOpenGroup((prev) => {
       const next = prev === to ? null : to;
