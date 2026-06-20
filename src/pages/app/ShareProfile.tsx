@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
+import { Link } from "react-router-dom";
 import { me } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
