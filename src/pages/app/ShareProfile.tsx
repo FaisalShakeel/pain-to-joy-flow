@@ -7,8 +7,11 @@ import {
   ShieldCheck,
   Lock,
   Pin,
+  Maximize2,
+  X,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
+import { Link } from "react-router-dom";
 import { me } from "@/lib/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -98,11 +101,14 @@ const ShareProfile = () => {
   const [pendingVip, setPendingVip] = useState(false);
   const [tokenKey, setTokenKey] = useState(0);
   const [showDefaults, setShowDefaults] = useState(false);
+  const [presentMode, setPresentMode] = useState(false);
 
   const segRef = useRef<HTMLDivElement | null>(null);
   const [indicator, setIndicator] = useState<{ x: number; w: number }>({ x: 0, w: 0 });
 
-  const link = "availock.com/v/alistair-finch";
+  // Demo profile — sharing leads here so the recipient experiences the flow.
+  const demoPath = "/v/elena-vance";
+  const link = `availock.com${demoPath}`;
   const shareUrl = `https://${link}`;
   const activeIndex = MODES.findIndex((m) => m.id === mode);
 
@@ -162,52 +168,74 @@ const ShareProfile = () => {
     <AppShell subtitle="Communication access" title="Share Availability">
       <div className="share-stage -mx-4 md:-mx-10 -my-9 px-4 md:px-10 py-10 md:py-14 min-h-[calc(100vh-4rem)] flex items-start justify-center">
         <div className="relative w-full max-w-[440px]">
-          {/* Name — above the card, single source of truth */}
+          {/* Section eyebrow — hidden in present mode */}
+          {!presentMode && (
           <header className="mb-6 text-center">
             <p className="text-[10.5px] font-bold tracking-[0.22em] uppercase text-accent">
               Availock — Live Availability Access
             </p>
-            <h1 className="mt-2 font-headline font-bold text-[1.9rem] sm:text-[2.1rem] leading-[1.05] tracking-[-0.02em] text-foreground">
-              {me.name}
-            </h1>
           </header>
+          )}
 
           <div
             className={cn(
-              "share-card relative overflow-hidden px-7 sm:px-9 pt-7 pb-7 ring-1 transition-all duration-500",
+              "share-card relative overflow-hidden px-7 sm:px-9 pt-7 pb-6 ring-1 transition-all duration-500",
               modeRing[mode],
             )}
           >
-            {/* Status row on the card itself */}
-            <div className="relative flex items-center justify-between gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5 text-[11px] font-medium text-foreground/80">
-                <span className={cn("w-1.5 h-1.5 rounded-full", modeDot[mode])} />
-                <span>{modeStatus[mode]}</span>
+            {/* Card header — name + org, plus an access badge */}
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="font-headline font-bold text-[1.8rem] sm:text-[2rem] leading-[0.98] tracking-[-0.02em] text-foreground">
+                  {me.name}
+                </h1>
+                <p className="mt-2 text-[10px] font-bold tracking-[0.22em] uppercase text-muted-foreground">
+                  {me.title} <span className="text-accent">·</span> {me.org}
+                </p>
               </div>
-              <div className="access-badge" aria-label="Access active">
-                <ShieldCheck className="w-4 h-4" strokeWidth={2.2} />
-              </div>
+              <button
+                onClick={() => setPresentMode((p) => !p)}
+                className="access-badge shrink-0"
+                aria-label={presentMode ? "Exit present mode" : "Enter present mode"}
+                title={presentMode ? "Exit present mode" : "Present — hide controls"}
+              >
+                {presentMode ? (
+                  <X className="w-4 h-4" strokeWidth={2.2} />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" strokeWidth={2.2} />
+                )}
+              </button>
             </div>
 
             {/* QR frame */}
-            <div className="relative mt-7 qr-frame p-6 sm:p-7 grid place-items-center">
+            <div className="relative mt-6 qr-frame p-6 sm:p-7 grid place-items-center">
               <div className="qr-tile w-[68%] aspect-square p-4 sm:p-5 grid place-items-center" key={tokenKey}>
                 <PremiumQR seed={`${mode}-${tokenKey}`} />
               </div>
+              <Link
+                to={demoPath}
+                className="mt-3 text-[9px] font-bold tracking-[0.22em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {link}
+              </Link>
             </div>
 
             {/* Caption */}
-            <div className="relative mt-6 text-center">
-              <p className="text-[11.5px] font-bold tracking-[0.22em] uppercase text-foreground">
-                {MODE_COPY[mode]}
+            <div className="relative mt-5 text-center">
+              <p className="text-[11.5px] font-bold tracking-[0.22em] uppercase text-accent">
+                Vault Access Link
               </p>
               <p className="mt-1.5 text-[12.5px] text-muted-foreground">
-                {mode === "normal" ? "Request communication access." : "Pre-granted communication access."}
+                Scan to view availability &amp; request access
               </p>
             </div>
 
-            {/* Mode segmented switch */}
+            {/* Mode segmented switch — hidden in present mode */}
+            {!presentMode && (
             <div className="relative mt-6">
+              <p className="text-[9px] font-bold tracking-[0.22em] uppercase text-muted-foreground text-center mb-2">
+                Extend Connection As
+              </p>
               <div ref={segRef} className="mode-segment grid grid-cols-3">
                 <span
                   className="mode-indicator"
@@ -231,10 +259,17 @@ const ShareProfile = () => {
                   );
                 })}
               </div>
+              <button
+                onClick={() => setPresentMode(true)}
+                className="mt-3 w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-full bg-foreground text-background text-[10.5px] font-bold tracking-[0.2em] uppercase hover:opacity-95 transition"
+              >
+                <Maximize2 className="w-3 h-3" /> Present QR Only
+              </button>
             </div>
+            )}
 
             {/* Bottom action row */}
-            <div className="relative mt-7 flex items-center justify-between">
+            <div className="relative mt-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button onClick={sysShare} className="icon-button" aria-label="Share">
                   <Share2 className="w-4 h-4" strokeWidth={1.8} />
@@ -242,6 +277,8 @@ const ShareProfile = () => {
                 <button onClick={copyLink} className="icon-button" aria-label="Copy link">
                   <Copy className="w-4 h-4" strokeWidth={1.8} />
                 </button>
+                {!presentMode && (
+                <>
                 <button
                   onClick={() => toast({ title: "Looking for nearby devices…" })}
                   className="icon-button"
@@ -256,17 +293,25 @@ const ShareProfile = () => {
                 >
                   <Wallet className="w-4 h-4" strokeWidth={1.8} />
                 </button>
+                </>
+                )}
               </div>
-              <button
-                onClick={() => setShowDefaults((s) => !s)}
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-              >
-                <Pin className="w-3 h-3" /> Default · {MODES.find((m) => m.id === defaultMode)?.label}
-              </button>
+              {presentMode ? (
+                <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+                  v.04 / 2026
+                </span>
+              ) : (
+                <button
+                  onClick={() => setShowDefaults((s) => !s)}
+                  className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+                >
+                  <Pin className="w-3 h-3" /> Default · {MODES.find((m) => m.id === defaultMode)?.label}
+                </button>
+              )}
             </div>
 
             {/* Default mode pinner (subtle) */}
-            {showDefaults && (
+            {showDefaults && !presentMode && (
               <div className="relative mt-4 rounded-2xl bg-[hsl(220_16%_96%)] p-3 animate-fade">
                 <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-muted-foreground px-1">
                   Pin default access mode
@@ -297,9 +342,11 @@ const ShareProfile = () => {
             )}
           </div>
 
-          <p className="mt-5 text-center text-[10px] tracking-[0.28em] uppercase text-muted-foreground/70">
-            v.04 / 2026 · People access you through your rules
-          </p>
+          {!presentMode && (
+            <p className="mt-5 text-center text-[10px] tracking-[0.28em] uppercase text-muted-foreground/70">
+              v.04 / 2026 · People access you through your rules
+            </p>
+          )}
         </div>
       </div>
 
