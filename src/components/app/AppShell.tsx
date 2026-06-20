@@ -213,6 +213,7 @@ const AppShell = ({ children, title, subtitle, description, actions, headerInlin
                   );
                   if (!containsActive && openGroup === item.to) setOpenGroup(null);
                 } : undefined}
+                className={cn(item.children && item.children.some((c) => c.advanced) && "advanced-group")}
               >
                 {item.children ? (
                   <>
