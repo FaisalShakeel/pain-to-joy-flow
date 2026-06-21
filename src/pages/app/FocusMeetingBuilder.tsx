@@ -407,15 +407,141 @@ const FocusMeetingBuilder = () => {
           {/* LEFT — Calendar */}
           <div className="min-w-0">
             <p className="font-headline font-extrabold text-primary text-[13px] uppercase tracking-[0.18em] mb-2">
-              Select a Date
+              Select Date(s)
+            </p>
+            <p className="text-[10px] text-muted-foreground mb-2 leading-snug">
+              Tap to toggle · Shift-click (or tap a second date) for a continuous range
             </p>
             <div className="rounded-xl ghost-border bg-surface-lowest p-1">
-              <Calendar
-                mode="single"
-                selected={new Date(draft.date)}
-                onSelect={(d) => { if (d) { setDraft((dr) => ({ ...dr, date: toISO(d), dateTo: undefined })); setDirty(true); } }}
-                className="pointer-events-auto w-full"
-              />
+              {(() => {
+                // Build selected date set from draft (range + clones).
+                const selectedISO = new Set<string>();
+                const startD = new Date(draft.date);
+                const endD = draft.dateTo ? new Date(draft.dateTo) : startD;
+                for (let d = new Date(startD); d <= endD; d = addDays(d, 1)) selectedISO.add(toISO(d));
+                for (const c of draft.cloneDates ?? []) selectedISO.add(c);
+                const selectedDates = Array.from(selectedISO).map((s) => new Date(s));
+
+                const commit = (isoSet: Set<string>) => {
+                  const sorted = Array.from(isoSet).sort();
+                  if (sorted.length === 0) {
+                    setDraft((dr) => ({ ...dr, date: toISO(new Date()), dateTo: undefined, cloneDates: [] }));
+                    setDirty(true);
+                    return;
+                  }
+                  // Detect single contiguous run covering all selected dates.
+                  let contiguous = true;
+                  for (let i = 1; i < sorted.length; i++) {
+                    const prev = new Date(sorted[i - 1]);
+                    const cur = new Date(sorted[i]);
+                    if (toISO(addDays(prev, 1)) !== toISO(cur)) { contiguous = false; break; }
+                  }
+                  if (contiguous && sorted.length > 1) {
+                    setDraft((dr) => ({ ...dr, date: sorted[0], dateTo: sorted[sorted.length - 1], cloneDates: [] }));
+                  } else {
+                    setDraft((dr) => ({ ...dr, date: sorted[0], dateTo: undefined, cloneDates: sorted.slice(1) }));
+                  }
+                  setDirty(true);
+                };
+
+                // Compute contiguous-run modifiers for "connected" range visual.
+                const sortedSel = Array.from(selectedISO).sort();
+                const rangeStarts: Date[] = [];
+                const rangeEnds: Date[] = [];
+                const rangeMids: Date[] = [];
+                let runStart = 0;
+                for (let i = 0; i <= sortedSel.length; i++) {
+                  const endRun =
+                    i === sortedSel.length ||
+                    (i > 0 && toISO(addDays(new Date(sortedSel[i - 1]), 1)) !== sortedSel[i]);
+                  if (endRun) {
+                    const len = i - runStart;
+                    if (len >= 2) {
+                      rangeStarts.push(new Date(sortedSel[runStart]));
+                      rangeEnds.push(new Date(sortedSel[i - 1]));
+                      for (let k = runStart + 1; k < i - 1; k++) rangeMids.push(new Date(sortedSel[k]));
+                    }
+                    runStart = i;
+                  }
+                }
+
+                return (
+                  <Calendar
+                    mode="multiple"
+                    selected={selectedDates}
+                    modifiers={{
+                      range_start: rangeStarts,
+                      range_end: rangeEnds,
+                      range_middle: rangeMids,
+                    }}
+                    modifiersClassNames={{
+                      range_start: "bg-primary text-primary-foreground rounded-l-md rounded-r-none",
+                      range_end: "bg-primary text-primary-foreground rounded-r-md rounded-l-none",
+                      range_middle: "bg-primary/25 text-primary rounded-none",
+                    }}
+                    onDayClick={(day, _m, e) => {
+                      const iso = toISO(day);
+                      const shift = (e as React.MouseEvent).shiftKey;
+                      const next = new Set(selectedISO);
+                      if (shift && rangeAnchor) {
+                        const a = new Date(rangeAnchor);
+                        const b = day;
+                        const [from, to] = a <= b ? [a, b] : [b, a];
+                        for (let d = new Date(from); d <= to; d = addDays(d, 1)) next.add(toISO(d));
+                        commit(next);
+                        setRangeAnchor(iso);
+                        return;
+                      }
+                      if (rangeAnchor && rangeAnchor !== iso && !next.has(iso)) {
+                        // Second tap creates a continuous range (mobile-friendly).
+                        const a = new Date(rangeAnchor);
+                        const b = day;
+                        const [from, to] = a <= b ? [a, b] : [b, a];
+                        for (let d = new Date(from); d <= to; d = addDays(d, 1)) next.add(toISO(d));
+                        commit(next);
+                        setRangeAnchor(null);
+                        return;
+                      }
+                      // Toggle single date.
+                      if (next.has(iso)) {
+                        next.delete(iso);
+                        setRangeAnchor(null);
+                      } else {
+                        next.add(iso);
+                        setRangeAnchor(iso);
+                      }
+                      commit(next);
+                    }}
+                    className="pointer-events-auto w-full"
+                  />
+                );
+              })()}
+            </div>
+            {/* Selection summary */}
+            <div className="mt-2 rounded-xl ghost-border bg-surface-lowest px-3 py-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Selected</span>
+              {(() => {
+                const isoSet = new Set<string>();
+                const sD = new Date(draft.date);
+                const eD = draft.dateTo ? new Date(draft.dateTo) : sD;
+                for (let d = new Date(sD); d <= eD; d = addDays(d, 1)) isoSet.add(toISO(d));
+                for (const c of draft.cloneDates ?? []) isoSet.add(c);
+                const sorted = Array.from(isoSet).sort();
+                const n = sorted.length;
+                if (n === 0) return <span className="text-[11px] text-muted-foreground">None</span>;
+                if (draft.dateTo && draft.dateTo !== draft.date && (draft.cloneDates?.length ?? 0) === 0) {
+                  return (
+                    <span className="text-[11px] font-bold text-primary">
+                      {format(new Date(draft.date), "MMM d")} – {format(new Date(draft.dateTo), "MMM d")}
+                      <span className="ml-2 text-muted-foreground font-normal">· {n} Days</span>
+                    </span>
+                  );
+                }
+                if (n === 1) {
+                  return <span className="text-[11px] font-bold text-primary">{format(new Date(sorted[0]), "EEE, MMM d")}</span>;
+                }
+                return <span className="text-[11px] font-bold text-primary">{n} Dates</span>;
+              })()}
             </div>
           </div>
 
