@@ -936,14 +936,29 @@ const sourceColor: Record<string, string> = {
   legacy: "bg-slate-400",
 };
 
-const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { rows: Row[]; dateLabel: string; hideHeader?: boolean; onBlockClick?: (id: string) => void }) => {
+export type OccupancyBlockAction = "edit" | "clone" | "delete";
+
+const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { rows: Row[]; dateLabel: string; hideHeader?: boolean; onBlockClick?: (id: string, action: OccupancyBlockAction) => void }) => {
   const [now, setNow] = useState(() => new Date());
   const navigate = useNavigate();
   const location = useLocation();
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const sourceRoute: Record<string, string> = {
     focus: "/app/availability/focus-meetings",
     quicksync: "/app/availability/quick-sync",
     "event-access": "/app/availability/webinars",
+  };
+  const dispatch = (r: Row, action: OccupancyBlockAction) => {
+    setOpenId(null);
+    const route = sourceRoute[r.source];
+    if (route && location.pathname !== route) {
+      const qp = action === "edit" ? "edit" : action === "clone" ? "clone" : "delete";
+      navigate(`${route}?${qp}=${encodeURIComponent(r.id)}`);
+      return;
+    }
+    if (onBlockClick) onBlockClick(r.id, action);
+    else if (action === "edit") markCreated(r.id);
   };
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -1001,28 +1016,71 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { 
             : (r.typeLabel || "AVAILABILITY").toUpperCase();
           const pad = (n: number) => n.toString().padStart(2, "0");
           return (
-            <button
-              type="button"
-              key={r.id}
-              title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)}) · click to open in live preview`}
-              onClick={(ev) => {
-                ev.stopPropagation();
-                const route = sourceRoute[r.source];
-                // If the block was created by a different settings page, jump there
-                // and ask that page to open the matching configuration for editing.
-                if (route && location.pathname !== route) {
-                  navigate(`${route}?edit=${encodeURIComponent(r.id)}`);
-                  return;
-                }
-                if (onBlockClick) onBlockClick(r.id);
-                else markCreated(r.id);
-              }}
-              className={cn(
-                "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 hover:ring-2 hover:ring-primary/50 cursor-pointer transition",
-                sourceColor[r.source] ?? "bg-primary",
-              )}
-              style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
-            />
+            <Popover key={r.id} open={openId === r.id} onOpenChange={(o) => setOpenId(o ? r.id : null)}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  title={`${sourceName}  ${fmtTime(r.startMin)} – ${fmtTime(r.endMin)}  (${pad(subCount)})`}
+                  className={cn(
+                    "absolute top-0.5 bottom-0.5 rounded-md opacity-90 hover:opacity-100 hover:ring-2 hover:ring-primary/50 cursor-pointer transition",
+                    sourceColor[r.source] ?? "bg-primary",
+                  )}
+                  style={{ left: `${left}%`, width: `${Math.max(0.6, width)}%` }}
+                />
+              </PopoverTrigger>
+              <PopoverContent
+                align="center"
+                side="top"
+                sideOffset={8}
+                className="w-60 p-2 z-[80]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="px-2 py-1.5 border-b border-border/60 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent flex items-center gap-1.5">
+                    <span className={cn("w-2 h-2 rounded-sm", sourceColor[r.source] ?? "bg-primary")} />
+                    {sourceName}
+                  </p>
+                  <p className="text-sm font-bold text-primary tabular-nums mt-0.5">
+                    {fmtTime(r.startMin)} – {fmtTime(r.endMin)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{subCount} slot{subCount === 1 ? "" : "s"}</p>
+                </div>
+                {confirmDeleteId === r.id ? (
+                  <div className="px-2 py-2">
+                    <p className="text-xs text-primary font-bold mb-2">Delete this availability block?</p>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => { setConfirmDeleteId(null); dispatch(r, "delete"); }}
+                        className="flex-1 px-2 py-1.5 rounded-md bg-destructive text-destructive-foreground text-[11px] font-bold hover:opacity-90"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="flex-1 px-2 py-1.5 rounded-md ghost-border bg-surface-lowest text-[11px] font-bold text-primary hover:bg-surface-low"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    <button onClick={() => dispatch(r, "edit")} className="w-full text-left text-xs px-2 py-2 rounded-md hover:bg-surface-low text-primary font-bold inline-flex items-center gap-2">
+                      <Pencil className="w-3.5 h-3.5" /> Edit
+                    </button>
+                    <button onClick={() => dispatch(r, "clone")} className="w-full text-left text-xs px-2 py-2 rounded-md hover:bg-surface-low text-primary font-bold inline-flex items-center gap-2">
+                      <Copy className="w-3.5 h-3.5" /> Clone
+                    </button>
+                    <button onClick={() => setConfirmDeleteId(r.id)} className="w-full text-left text-xs px-2 py-2 rounded-md hover:bg-destructive/10 text-destructive font-bold inline-flex items-center gap-2">
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                    </button>
+                    <button onClick={() => setOpenId(null)} className="w-full text-left text-xs px-2 py-2 rounded-md hover:bg-surface-low text-muted-foreground inline-flex items-center gap-2">
+                      <X className="w-3.5 h-3.5" /> Cancel
+                    </button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
           );
         })}
         {/* Now indicator */}
@@ -1052,7 +1110,7 @@ const Legend = ({ color, label }: { color: string; label: string }) => (
 );
 
 // ---------- Standalone Daily Occupancy (header + rail) ----------
-export const DailyOccupancy = ({ date, onBlockClick }: { date?: string; onBlockClick?: (id: string) => void }) => {
+export const DailyOccupancy = ({ date, onBlockClick }: { date?: string; onBlockClick?: (id: string, action: OccupancyBlockAction) => void }) => {
   const blocks = useAvailability();
   const iso = date ?? localISO();
   const dayBlocks = blocks.filter((b) => b.date === iso);

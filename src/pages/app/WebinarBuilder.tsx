@@ -21,6 +21,9 @@ import PricingField, { Pricing, PriceTag, defaultPricing } from "@/components/ap
 import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/components/app/RelayToSpotlightPanel";
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { DailyOccupancy } from "@/components/app/ActiveSlotsPanel";
+import { loadPersisted, savePersisted } from "@/lib/persistSlots";
+
+const WB_PERSIST_KEY = "availock.eventaccess.items.v1";
 import { Activity, Eye, Layers } from "lucide-react";
 import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
 import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
@@ -106,7 +109,7 @@ const seed: Webinar[] = [
 const WebinarBuilder = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [items, setItems] = useState<Webinar[]>(seed);
+  const [items, setItems] = useState<Webinar[]>(() => loadPersisted<Webinar[]>(WB_PERSIST_KEY, seed));
   const [draft, setDraft] = useState<Omit<Webinar, "id" | "createdAt" | "bookedCount" | "waitlistCount"> & { id?: string }>(blank());
   const [dirty, setDirty] = useState(false);
   const [justCreated, setJustCreated] = useState(false);
@@ -239,14 +242,34 @@ const WebinarBuilder = () => {
   // Open editor when arriving from Daily Occupancy on another page.
   useEffect(() => {
     const id = searchParams.get("edit");
-    if (!id) return;
-    const w = items.find((x) => x.id === id);
-    if (w) {
-      editOne(w);
-      setTimeout(() => markCreated(w.id), 300);
+    const cloneId = searchParams.get("clone");
+    const delId = searchParams.get("delete");
+    if (!id && !cloneId && !delId) return;
+    const stripParam = (k: string) => {
       const next = new URLSearchParams(searchParams);
-      next.delete("edit");
+      next.delete(k);
       setSearchParams(next, { replace: true });
+    };
+    if (id) {
+      const w = items.find((x) => x.id === id);
+      if (w) {
+        editOne(w);
+        setTimeout(() => markCreated(w.id), 300);
+      }
+      stripParam("edit");
+    } else if (cloneId) {
+      const w = items.find((x) => x.id === cloneId);
+      if (w) {
+        editOne(w);
+        setDraft((d) => ({ ...d, id: undefined, title: `${w.title} (Copy)` }));
+        setDirty(true);
+        toast({ title: "Cloning event", description: "Adjust and save to create a duplicate." });
+      }
+      stripParam("clone");
+    } else if (delId) {
+      setItems((p) => p.filter((x) => x.id !== delId));
+      toast({ title: "Session deleted" });
+      stripParam("delete");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, items]);
@@ -270,6 +293,7 @@ const WebinarBuilder = () => {
         };
       }),
     );
+    savePersisted(WB_PERSIST_KEY, items);
   }, [items]);
 
   return (
@@ -306,9 +330,19 @@ const WebinarBuilder = () => {
       <div className="mb-5">
         <DailyOccupancy
           date={draft.date}
-          onBlockClick={(id) => {
+          onBlockClick={(id, action) => {
             const w = items.find((x) => x.id === id);
-            if (w) editOne(w);
+            if (!w) return;
+            if (action === "edit") editOne(w);
+            else if (action === "delete") {
+              setItems((p) => p.filter((x) => x.id !== id));
+              toast({ title: "Session deleted" });
+            } else if (action === "clone") {
+              editOne(w);
+              setDraft((d) => ({ ...d, id: undefined, title: `${w.title} (Copy)` }));
+              setDirty(true);
+              toast({ title: "Cloning event", description: "Adjust and save to create a duplicate." });
+            }
           }}
         />
       </div>
