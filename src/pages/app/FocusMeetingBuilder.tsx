@@ -122,6 +122,7 @@ const FocusMeetingBuilder = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [channel, setChannel] = useState<"hybrid" | "online" | "onsite">("hybrid");
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "info" });
+  const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
@@ -358,6 +359,8 @@ const FocusMeetingBuilder = () => {
 
   return (
     <AppShell
+      title="Focus Sync Builder"
+      subtitle="Dedicated availability for meaningful conversations."
       actions={
         <div className="flex items-center gap-2">
           <SchedulingSwitcher current="hybrid" />
