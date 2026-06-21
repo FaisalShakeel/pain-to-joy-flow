@@ -925,8 +925,8 @@ const SubSlotEditor = ({
 };
 
 // ---------- Daily Occupancy Rail ----------
-const RAIL_START = 8 * 60;   // 08:00
-const RAIL_END = 20 * 60;    // 20:00
+const RAIL_START = 7 * 60;   // 07:00
+const RAIL_END = 23 * 60;    // 23:00
 const RAIL_SPAN = RAIL_END - RAIL_START;
 
 const sourceColor: Record<string, string> = {
@@ -949,7 +949,7 @@ const OccupancyRail = ({ rows, dateLabel, hideHeader = false, onBlockClick }: { 
     const t = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(t);
   }, []);
-  const ticks = Array.from({ length: 7 }, (_, i) => 8 + i * 2); // 8,10,12,14,16,18,20
+  const ticks = Array.from({ length: 9 }, (_, i) => 7 + i * 2); // 7,9,11,13,15,17,19,21,23
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const nowPct =
     nowMin >= RAIL_START && nowMin <= RAIL_END
