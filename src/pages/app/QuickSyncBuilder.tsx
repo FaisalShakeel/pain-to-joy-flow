@@ -21,6 +21,9 @@ import RelayToSpotlightPanel, { DEFAULT_RELAY, type RelayConfig } from "@/compon
 import { useSpotlight } from "@/components/app/SpotlightContext";
 import ActiveSlotsPanel, { DailyOccupancy, type ActiveSlotItem } from "@/components/app/ActiveSlotsPanel";
 import { availabilityStore, findConflict, flashConflict, markCreated, suggestOpenings, fmtTimeHM } from "@/lib/availabilityStore";
+import { loadPersisted, savePersisted } from "@/lib/persistSlots";
+
+const QS_PERSIST_KEY = "availock.quicksync.slots.v1";
 import SchedulingSwitcher from "@/components/app/SchedulingSwitcher";
 
 // ---------- Types ----------
@@ -118,7 +121,7 @@ const seed: QSSlot[] = [
 const QuickSyncBuilder = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [slots, setSlots] = useState<QSSlot[]>(seed);
+  const [slots, setSlots] = useState<QSSlot[]>(() => loadPersisted<QSSlot[]>(QS_PERSIST_KEY, seed));
   const [draft, setDraft] = useState<Omit<QSSlot, "id" | "createdAt"> & { id?: string }>(blank());
   const [step, setStep] = useState(1);
   const [dirty, setDirty] = useState(false);
@@ -276,14 +279,35 @@ const QuickSyncBuilder = () => {
   // Open the editor when arriving from Daily Occupancy on another page.
   useEffect(() => {
     const id = searchParams.get("edit");
-    if (!id) return;
-    const s = slots.find((x) => x.id === id);
-    if (s) {
-      editSlot(s);
-      setTimeout(() => markCreated(s.id), 300);
+    const cloneId = searchParams.get("clone");
+    const delId = searchParams.get("delete");
+    if (!id && !cloneId && !delId) return;
+    const stripParam = (k: string) => {
       const next = new URLSearchParams(searchParams);
-      next.delete("edit");
+      next.delete(k);
       setSearchParams(next, { replace: true });
+    };
+    if (id) {
+      const s = slots.find((x) => x.id === id);
+      if (s) {
+        editSlot(s);
+        setTimeout(() => markCreated(s.id), 300);
+      }
+      stripParam("edit");
+    } else if (cloneId) {
+      const s = slots.find((x) => x.id === cloneId);
+      if (s) {
+        setDraft({ ...s, id: undefined, date: toISO(addDays(new Date(s.date), 1)), dateTo: undefined, cloneDates: [] });
+        setStep(1);
+        setDirty(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        toast({ title: "Cloning availability", description: "Pick a new date and save to create." });
+      }
+      stripParam("clone");
+    } else if (delId) {
+      setSlots((p) => p.filter((x) => x.id !== delId));
+      toast({ title: "Quick Sync deleted" });
+      stripParam("delete");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, slots]);
@@ -343,6 +367,7 @@ const QuickSyncBuilder = () => {
         callMin: s.callMin,
       })),
     );
+    savePersisted(QS_PERSIST_KEY, slots);
   }, [slots]);
 
   return (
@@ -376,9 +401,20 @@ const QuickSyncBuilder = () => {
         <div className="mb-5">
           <DailyOccupancy
             date={draft.date}
-            onBlockClick={(id) => {
+            onBlockClick={(id, action) => {
               const s = slots.find((x) => x.id === id);
-              if (s) editSlot(s);
+              if (!s) return;
+              if (action === "edit") editSlot(s);
+              else if (action === "delete") {
+                setSlots((p) => p.filter((x) => x.id !== id));
+                toast({ title: "Quick Sync deleted" });
+              } else if (action === "clone") {
+                setDraft({ ...s, id: undefined, date: toISO(addDays(new Date(s.date), 1)), dateTo: undefined, cloneDates: [] });
+                setStep(1);
+                setDirty(true);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                toast({ title: "Cloning availability", description: "Pick a new date and save to create." });
+              }
             }}
           />
         </div>
