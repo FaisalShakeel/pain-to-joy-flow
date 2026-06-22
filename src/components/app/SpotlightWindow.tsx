@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
-  Plus, Check, Users,
+  Plus, Check, Users, MoreHorizontal, Pencil, Trash2, Undo2, Search, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -11,6 +11,7 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 import Avatar from "./Avatar";
 import { Link } from "react-router-dom";
 
@@ -47,16 +48,20 @@ const ACTION: Record<"qs" | "fs" | "ea", { label: string; cls: string; href: str
   ea: { label: "Event",      cls: "text-amber-700 bg-amber-500/15 hover:bg-amber-500/25",       href: "/app/availability/webinars" },
 };
 
-type WatchlistId = "mine" | "all" | "colleagues" | "clients" | "friends" | "family" | "groups";
-
-const WATCHLISTS: { id: WatchlistId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "mine",       label: "My Watchlist", icon: Star },
-  { id: "all",        label: "All",          icon: Layers },
-  { id: "colleagues", label: "Colleagues",   icon: Briefcase },
-  { id: "clients",    label: "Clients",      icon: Crown },
-  { id: "friends",    label: "Friends",      icon: Heart },
-  { id: "family",     label: "Family",       icon: Home },
-  { id: "groups",     label: "Groups",       icon: Users },
+type IconKey = "star" | "layers" | "briefcase" | "crown" | "heart" | "home" | "users";
+const ICONS: Record<IconKey, React.ComponentType<{ className?: string }>> = {
+  star: Star, layers: Layers, briefcase: Briefcase, crown: Crown,
+  heart: Heart, home: Home, users: Users,
+};
+interface Watchlist { id: string; label: string; icon: IconKey; members: string[]; system?: boolean; }
+const ALL_IDS = (rows: RelayRow[]) => rows.map((r) => r.id);
+const DEFAULT_WATCHLISTS = (rows: RelayRow[]): Watchlist[] => [
+  { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true },
+  { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true },
+  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"] },
+  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"] },
+  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"] },
+  { id: "family",     label: "Family",       icon: "home",      members: [] },
 ];
 
 const ALL_ROWS: RelayRow[] = [
