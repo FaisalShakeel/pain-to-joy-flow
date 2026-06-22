@@ -74,6 +74,64 @@ const RELAY_RANK: Record<BoardStatus, number> = {
   available: 0, busy: 1, focus: 2, driving: 3, offline: 4,
 };
 
+/* -------- Coordination Board (12-person fixed layout) -------- */
+interface BoardTile {
+  id: string;
+  name: string;
+  initials: string;
+  status: BoardStatus;
+  context: string;
+  time: string;
+}
+const BOARD_COLOR: Record<BoardStatus, { bg: string; dot: string; text: string }> = {
+  available: { bg: "bg-emerald-500", dot: "bg-emerald-500", text: "text-emerald-600" },
+  busy:      { bg: "bg-amber-500",   dot: "bg-amber-500",   text: "text-amber-600"   },
+  offline:   { bg: "bg-slate-400",   dot: "bg-slate-400",   text: "text-slate-500"   },
+  focus:     { bg: "bg-rose-500",    dot: "bg-rose-500",    text: "text-rose-600"    },
+  driving:   { bg: "bg-violet-500",  dot: "bg-violet-500",  text: "text-violet-600"  },
+};
+const BOARD_LEFT: BoardTile[] = [
+  { id: "elena",  name: "Elena M.", initials: "EM", status: "available", context: "Coffee shop co-working. Open for sync.",            time: "2m ago" },
+  { id: "kl",     name: "Kai L.",   initials: "KL", status: "busy",      context: "On a call. Try again at 4 PM.",                     time: "2m ago" },
+  { id: "ahmed",  name: "Ahmed",    initials: "AH", status: "offline",   context: "Client meeting until 2:30 PM (Architectural Hub).", time: "2m ago" },
+  { id: "rashid", name: "Rashid",   initials: "RA", status: "available", context: "Open for Quick Sync calls after sprint review.",    time: "2m ago" },
+  { id: "lisa",   name: "Lisa S.",  initials: "LS", status: "available", context: "Available for support.",                            time: "2m ago" },
+  { id: "maya",   name: "Maya T.",  initials: "MT", status: "offline",   context: "Out of office. Back tomorrow.",                     time: "2m ago" },
+];
+const BOARD_RIGHT: BoardTile[] = [
+  { id: "sarah",  name: "Sarah",    initials: "SA", status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",   time: "2m ago" },
+  { id: "jd",     name: "Jordan",   initials: "JD", status: "focus",     context: "Deep work block until 5:00 PM.",                   time: "2m ago" },
+  { id: "rt",     name: "Riya T.",  initials: "RT", status: "driving",   context: "Driving home. ETA 30 min.",                        time: "2m ago" },
+  { id: "daniel", name: "Daniel S.",initials: "DS", status: "focus",     context: "Focus time. Do not disturb.",                      time: "2m ago" },
+  { id: "priya",  name: "Priya C.", initials: "PC", status: "focus",     context: "Code review focus block.",                         time: "2m ago" },
+  { id: "naveed", name: "Naveed W.",initials: "NW", status: "driving",   context: "On the way to client site.",                       time: "2m ago" },
+];
+
+const BoardRow = ({ t }: { t: BoardTile }) => {
+  const c = BOARD_COLOR[t.status];
+  return (
+    <Link
+      to={`/app/contact/${t.id}`}
+      className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0"
+      style={{ minHeight: 58 }}
+    >
+      <div className="relative shrink-0">
+        <div className={cn("w-9 h-9 rounded-full grid place-items-center text-white text-[11px] font-bold", c.bg)}>
+          {t.initials}
+        </div>
+        <span className={cn("absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white", c.dot)} />
+      </div>
+      <p className="flex-1 min-w-0 text-[13px] text-slate-700 leading-snug line-clamp-2">
+        {t.context}
+      </p>
+      <div className="text-right shrink-0">
+        <p className="text-[14px] font-semibold text-slate-900 leading-tight">{t.name}</p>
+        <p className="text-[11px] text-slate-400 leading-tight">{t.time}</p>
+      </div>
+    </Link>
+  );
+};
+
 const SpotlightWindow = () => {
   const [watchlist, setWatchlist] = useState<WatchlistId>("mine");
   const [tab, setTab] = useState<"relay" | "coordination">("relay");
