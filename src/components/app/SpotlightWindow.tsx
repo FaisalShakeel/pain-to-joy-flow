@@ -117,21 +117,21 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
   return (
     <Link
       to={`/app/contact/${t.id}`}
-      className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0"
-      style={{ minHeight: 58 }}
+      className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0"
+      style={{ height: 52 }}
     >
       <div className="relative shrink-0">
-        <div className={cn("w-9 h-9 rounded-full grid place-items-center text-white text-[11px] font-bold", c.bg)}>
+        <div className={cn("w-8 h-8 rounded-full grid place-items-center text-white text-[10px] font-bold", c.bg)}>
           {t.initials}
         </div>
-        <span className={cn("absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white", c.dot)} />
+        <span className={cn("absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-white", c.dot)} />
       </div>
-      <p className="flex-1 min-w-0 text-[13px] text-slate-700 leading-snug line-clamp-2">
+      <p className="flex-1 min-w-0 text-[12px] text-slate-700 leading-tight line-clamp-2">
         {t.context}
       </p>
       <div className="text-right shrink-0">
-        <p className="text-[14px] font-semibold text-slate-900 leading-tight">{t.name}</p>
-        <p className="text-[11px] text-slate-400 leading-tight">{t.time}</p>
+        <p className="text-[12px] font-semibold text-slate-900 leading-tight">{t.name}</p>
+        <p className="text-[10px] text-slate-400 leading-tight">{t.time}</p>
       </div>
     </Link>
   );
