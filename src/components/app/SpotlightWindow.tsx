@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers,
+  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
   Plus, Check, Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -76,6 +76,7 @@ const RELAY_RANK: Record<BoardStatus, number> = {
 
 const SpotlightWindow = () => {
   const [watchlist, setWatchlist] = useState<WatchlistId>("mine");
+  const [tab, setTab] = useState<"relay" | "coordination">("relay");
   const [following, setFollowing] = useState<Record<string, boolean>>(
     () => Object.fromEntries(ALL_ROWS.map((r) => [r.id, true]))
   );
