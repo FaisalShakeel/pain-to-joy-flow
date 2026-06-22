@@ -139,7 +139,7 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
 
 const SpotlightWindow = () => {
   const base = ALL_ROWS;
-  const [tab, setTab] = useState<"relay" | "coordination">("relay");
+  const [tab, setTab] = useState<"pulse" | "coordination">("pulse");
   const [lists, setLists] = useState<Watchlist[]>(() => DEFAULT_WATCHLISTS(base));
   const [activeId, setActiveId] = useState<string>("mine");
   const [manageOpen, setManageOpen] = useState(false);
@@ -252,20 +252,28 @@ const SpotlightWindow = () => {
 
   return (
     <section className="w-full min-w-0 max-w-full rounded-2xl bg-white text-slate-900 ghost-border shadow-soft overflow-hidden">
-      {/* Spotlight header with tabs */}
-      <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2 border-b border-slate-200">
-        <div className="flex items-center gap-3 min-w-0">
-          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-slate-900 shrink-0">Spotlight</p>
-          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5">
+      {/* Contact Pulse header — title + subtitle on left, controls on right */}
+      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
+        <div className="min-w-0">
+          <h2 className="text-[18px] font-bold tracking-tight text-slate-900 leading-tight">
+            {tab === "pulse" ? "Contact Pulse" : "Coordination"}
+          </h2>
+          <p className="text-[12px] font-normal text-slate-500 leading-snug mt-0.5">
+            {tab === "pulse"
+              ? "Live availability of people you care about right now."
+              : "Real-time board of who's reachable, busy, or focused."}
+          </p>
+          {/* Tab switcher */}
+          <div className="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-100 p-0.5">
             <button
               type="button"
-              onClick={() => setTab("relay")}
+              onClick={() => setTab("pulse")}
               className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.14em] uppercase transition",
-                tab === "relay" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                tab === "pulse" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
-              <Radio className="w-3 h-3" /> Availability Relay
+              <Radio className="w-3 h-3" /> Contact Pulse
             </button>
             <button
               type="button"
@@ -279,74 +287,68 @@ const SpotlightWindow = () => {
             </button>
           </div>
         </div>
+        {/* RIGHT: watchlist selector + filter + add */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[12px] font-semibold text-slate-700"
+                aria-label="Switch watch list"
+              >
+                {active && (() => { const I = ICONS[active.icon]; return <I className="w-3.5 h-3.5" />; })()}
+                <span className="max-w-[140px] truncate">{active?.label ?? "My Watch List"}</span>
+                <span className="text-slate-400">▾</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-slate-500">
+                Watch Lists
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {lists.map((w) => {
+                const I = ICONS[w.icon];
+                const on = w.id === activeId;
+                return (
+                  <DropdownMenuItem key={w.id} onClick={() => setActiveId(w.id)}>
+                    <I className="w-3.5 h-3.5 mr-2" />
+                    <span className="flex-1">{w.label}</span>
+                    <span className="text-[10px] text-slate-400 mr-1">{w.members.length}</span>
+                    {on && <Check className="w-3.5 h-3.5 text-emerald-600" />}
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setManageOpen(true)}>
+                <Pencil className="w-3.5 h-3.5 mr-2" /> Manage watch lists
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <button
+            type="button"
+            onClick={() => setManageOpen(true)}
+            className="grid place-items-center w-8 h-8 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
+            aria-label="Filter"
+            title="Filter"
+          >
+            <Filter className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setManageOpen(true)}
+            className="grid place-items-center w-8 h-8 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
+            aria-label="Add to watch list"
+            title="Add to watch list"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      {tab === "relay" ? (
+      {tab === "pulse" ? (
       <>
-      {/* Availability Relay */}
+      {/* Watchlist avatar strip */}
       <div className="px-3 pt-3 pb-2">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-500 shrink-0">
-              Availability Relay
-            </p>
-            {active && (() => {
-              const I = ICONS[active.icon];
-              return (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
-                  <I className="w-3 h-3" /> {active.label}
-                </span>
-              );
-            })()}
-          </div>
-          <div className="flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="grid place-items-center w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-                  aria-label="Filter watchlist"
-                  title={active?.label ?? "Watchlist"}
-                >
-                  <Filter className="w-3.5 h-3.5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-slate-500">
-                  Watchlists
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {lists.map((w) => {
-                  const I = ICONS[w.icon];
-                  const on = w.id === activeId;
-                  return (
-                    <DropdownMenuItem key={w.id} onClick={() => setActiveId(w.id)}>
-                      <I className="w-3.5 h-3.5 mr-2" />
-                      <span className="flex-1">{w.label}</span>
-                      <span className="text-[10px] text-slate-400 mr-1">{w.members.length}</span>
-                      {on && <Check className="w-3.5 h-3.5 text-emerald-600" />}
-                    </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setManageOpen(true)}>
-                  <Pencil className="w-3.5 h-3.5 mr-2" /> Manage watchlists
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <button
-              type="button"
-              onClick={() => setManageOpen(true)}
-              className="grid place-items-center w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-              aria-label="Manage watchlist"
-              title="Manage watchlists"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-        </div>
-        </div>
-
-        {/* Tile strip */}
         <div className="rounded-2xl bg-slate-50 border border-slate-200/70 px-3 py-3">
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
             {relay.map((r) => {
@@ -381,11 +383,8 @@ const SpotlightWindow = () => {
         </div>
       </div>
 
-      {/* Live Pulse — compact Spotlight board (12 entries) */}
+      {/* Compact Pulse board (12 entries) */}
       <div className="px-3 pt-2 pb-3">
-        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-500 mb-2">
-          Live Pulse of Your Intentional Network
-        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="rounded-lg bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="px-2.5 py-1.5 border-b border-slate-100 text-center">
@@ -426,9 +425,6 @@ const SpotlightWindow = () => {
       </>
       ) : (
       <div className="p-3 bg-[#F8FAFC]">
-        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-500 mb-2">
-          Live Pulse of Your Intentional Network
-        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* LEFT: Available / Busy / Offline */}
           <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
