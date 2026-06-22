@@ -7,7 +7,6 @@ import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
 import Avatar from "@/components/app/Avatar";
 import MessagesPanel from "@/components/app/MessagesPanel";
-import PriorityContactsWidget from "@/components/app/PriorityContactsWidget";
 import SpotlightWindow from "@/components/app/SpotlightWindow";
 import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
@@ -365,12 +364,7 @@ const Dashboard = () => {
           <SpotlightWindow />
         </div>
 
-        {/* Priority Contacts */}
-        <div className="lg:col-span-3">
-          <PriorityContactsWidget />
-        </div>
-
-        {/* Unified Waiting List — placed AFTER Priority Contacts */}
+        {/* Unified Waiting List */}
         <div id="waiting-list" className="lg:col-span-3 scroll-mt-24">
           <WaitingList />
         </div>
