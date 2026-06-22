@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers,
+  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
   Plus, Check, Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -74,8 +74,67 @@ const RELAY_RANK: Record<BoardStatus, number> = {
   available: 0, busy: 1, focus: 2, driving: 3, offline: 4,
 };
 
+/* -------- Coordination Board (12-person fixed layout) -------- */
+interface BoardTile {
+  id: string;
+  name: string;
+  initials: string;
+  status: BoardStatus;
+  context: string;
+  time: string;
+}
+const BOARD_COLOR: Record<BoardStatus, { bg: string; dot: string; text: string }> = {
+  available: { bg: "bg-emerald-500", dot: "bg-emerald-500", text: "text-emerald-600" },
+  busy:      { bg: "bg-amber-500",   dot: "bg-amber-500",   text: "text-amber-600"   },
+  offline:   { bg: "bg-slate-400",   dot: "bg-slate-400",   text: "text-slate-500"   },
+  focus:     { bg: "bg-rose-500",    dot: "bg-rose-500",    text: "text-rose-600"    },
+  driving:   { bg: "bg-violet-500",  dot: "bg-violet-500",  text: "text-violet-600"  },
+};
+const BOARD_LEFT: BoardTile[] = [
+  { id: "elena",  name: "Elena M.", initials: "EM", status: "available", context: "Coffee shop co-working. Open for sync.",            time: "2m ago" },
+  { id: "kl",     name: "Kai L.",   initials: "KL", status: "busy",      context: "On a call. Try again at 4 PM.",                     time: "2m ago" },
+  { id: "ahmed",  name: "Ahmed",    initials: "AH", status: "offline",   context: "Client meeting until 2:30 PM (Architectural Hub).", time: "2m ago" },
+  { id: "rashid", name: "Rashid",   initials: "RA", status: "available", context: "Open for Quick Sync calls after sprint review.",    time: "2m ago" },
+  { id: "lisa",   name: "Lisa S.",  initials: "LS", status: "available", context: "Available for support.",                            time: "2m ago" },
+  { id: "maya",   name: "Maya T.",  initials: "MT", status: "offline",   context: "Out of office. Back tomorrow.",                     time: "2m ago" },
+];
+const BOARD_RIGHT: BoardTile[] = [
+  { id: "sarah",  name: "Sarah",    initials: "SA", status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",   time: "2m ago" },
+  { id: "jd",     name: "Jordan",   initials: "JD", status: "focus",     context: "Deep work block until 5:00 PM.",                   time: "2m ago" },
+  { id: "rt",     name: "Riya T.",  initials: "RT", status: "driving",   context: "Driving home. ETA 30 min.",                        time: "2m ago" },
+  { id: "daniel", name: "Daniel S.",initials: "DS", status: "focus",     context: "Focus time. Do not disturb.",                      time: "2m ago" },
+  { id: "priya",  name: "Priya C.", initials: "PC", status: "focus",     context: "Code review focus block.",                         time: "2m ago" },
+  { id: "naveed", name: "Naveed W.",initials: "NW", status: "driving",   context: "On the way to client site.",                       time: "2m ago" },
+];
+
+const BoardRow = ({ t }: { t: BoardTile }) => {
+  const c = BOARD_COLOR[t.status];
+  return (
+    <Link
+      to={`/app/contact/${t.id}`}
+      className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0"
+      style={{ minHeight: 58 }}
+    >
+      <div className="relative shrink-0">
+        <div className={cn("w-9 h-9 rounded-full grid place-items-center text-white text-[11px] font-bold", c.bg)}>
+          {t.initials}
+        </div>
+        <span className={cn("absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white", c.dot)} />
+      </div>
+      <p className="flex-1 min-w-0 text-[13px] text-slate-700 leading-snug line-clamp-2">
+        {t.context}
+      </p>
+      <div className="text-right shrink-0">
+        <p className="text-[14px] font-semibold text-slate-900 leading-tight">{t.name}</p>
+        <p className="text-[11px] text-slate-400 leading-tight">{t.time}</p>
+      </div>
+    </Link>
+  );
+};
+
 const SpotlightWindow = () => {
   const [watchlist, setWatchlist] = useState<WatchlistId>("mine");
+  const [tab, setTab] = useState<"relay" | "coordination">("relay");
   const [following, setFollowing] = useState<Record<string, boolean>>(
     () => Object.fromEntries(ALL_ROWS.map((r) => [r.id, true]))
   );
@@ -99,6 +158,37 @@ const SpotlightWindow = () => {
 
   return (
     <section className="w-full min-w-0 max-w-full rounded-2xl bg-white text-slate-900 ghost-border shadow-soft overflow-hidden">
+      {/* Spotlight header with tabs */}
+      <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2 border-b border-slate-200">
+        <div className="flex items-center gap-3 min-w-0">
+          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-slate-900 shrink-0">Spotlight</p>
+          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5">
+            <button
+              type="button"
+              onClick={() => setTab("relay")}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.14em] uppercase transition",
+                tab === "relay" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              <Radio className="w-3 h-3" /> Availability Relay
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("coordination")}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.14em] uppercase transition",
+                tab === "coordination" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              <Network className="w-3 h-3" /> Coordination
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {tab === "relay" ? (
+      <>
       {/* Availability Relay */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex items-center justify-between mb-2">
@@ -270,6 +360,44 @@ const SpotlightWindow = () => {
       >
         Full Availability Directory <ArrowRight className="w-3 h-3" />
       </Link>
+      </>
+      ) : (
+      <div className="p-3 bg-[#F8FAFC]">
+        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-500 mb-2">
+          Live Pulse of Your Intentional Network
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* LEFT: Available / Busy / Offline */}
+          <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-slate-100 text-center">
+              <span className="text-[13px] font-bold tracking-[0.08em]">
+                <span className="text-emerald-600">AVAILABLE</span>
+                <span className="text-slate-300 mx-1.5">/</span>
+                <span className="text-amber-600">BUSY</span>
+                <span className="text-slate-300 mx-1.5">/</span>
+                <span className="text-slate-500">OFFLINE</span>
+              </span>
+            </div>
+            <div>
+              {BOARD_LEFT.map((t) => <BoardRow key={t.id} t={t} />)}
+            </div>
+          </div>
+          {/* RIGHT: Focus / Driving */}
+          <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-slate-100 text-center">
+              <span className="text-[13px] font-bold tracking-[0.08em]">
+                <span className="text-rose-600">FOCUS</span>
+                <span className="text-slate-300 mx-1.5">/</span>
+                <span className="text-violet-600">DRIVING</span>
+              </span>
+            </div>
+            <div>
+              {BOARD_RIGHT.map((t) => <BoardRow key={t.id} t={t} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
     </section>
   );
 };
