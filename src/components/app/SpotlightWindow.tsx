@@ -138,28 +138,117 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
 };
 
 const SpotlightWindow = () => {
-  const [watchlist, setWatchlist] = useState<WatchlistId>("mine");
+  const base = ALL_ROWS;
   const [tab, setTab] = useState<"relay" | "coordination">("relay");
-  const [following, setFollowing] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(ALL_ROWS.map((r) => [r.id, true]))
+  const [lists, setLists] = useState<Watchlist[]>(() => DEFAULT_WATCHLISTS(base));
+  const [activeId, setActiveId] = useState<string>("mine");
+  const [manageOpen, setManageOpen] = useState(false);
+  const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [bulk, setBulk] = useState<Set<string>>(new Set());
+  const [trash, setTrash] = useState<{ list: Watchlist; index: number } | null>(null);
+  const trashTimer = useRef<number | null>(null);
+  const [newListName, setNewListName] = useState("");
+
+  const active = lists.find((l) => l.id === activeId) ?? lists[0];
+  const followed = useMemo(
+    () => base.filter((r) => active?.members.includes(r.id)),
+    [base, active]
   );
 
-  const base = ALL_ROWS;
-  const followed = useMemo(() => base.filter((r) => following[r.id]), [base, following]);
-
-  // Relay strip — priority order: Available → Busy → Focus → Driving → Offline
   const relay = useMemo(
     () => [...followed].sort((a, b) => RELAY_RANK[a.status] - RELAY_RANK[b.status]),
     [followed]
   );
 
-  // Main feed — newest activity first
-  const feed = useMemo(
-    () => [...followed].sort((a, b) => a.updatedMinAgo - b.updatedMinAgo),
-    [followed]
-  );
+  // Build 12-tile board (6 left, 6 right) from followed contacts, padded if needed.
+  const board = useMemo(() => {
+    const toTile = (r: RelayRow): BoardTile => ({
+      id: r.id, name: r.name, initials: r.initials, status: r.status,
+      context: r.context, time: r.activity,
+    });
+    const leftStatuses: BoardStatus[] = ["available", "busy", "offline"];
+    const rightStatuses: BoardStatus[] = ["focus", "driving"];
+    const left = followed.filter((r) => leftStatuses.includes(r.status)).map(toTile);
+    const right = followed.filter((r) => rightStatuses.includes(r.status)).map(toTile);
+    const padL = [...BOARD_LEFT].filter((t) => !left.find((x) => x.id === t.id));
+    const padR = [...BOARD_RIGHT].filter((t) => !right.find((x) => x.id === t.id));
+    return {
+      left: [...left, ...padL].slice(0, 6),
+      right: [...right, ...padR].slice(0, 6),
+    };
+  }, [followed]);
 
-  const active = WATCHLISTS.find((w) => w.id === watchlist) ?? WATCHLISTS[0];
+  // Mutators
+  const toggleMember = (listId: string, contactId: string) => {
+    setLists((ls) =>
+      ls.map((l) =>
+        l.id === listId
+          ? { ...l, members: l.members.includes(contactId)
+              ? l.members.filter((m) => m !== contactId)
+              : [...l.members, contactId] }
+          : l,
+      ),
+    );
+  };
+  const bulkAdd = (listId: string) => {
+    setLists((ls) =>
+      ls.map((l) =>
+        l.id === listId
+          ? { ...l, members: Array.from(new Set([...l.members, ...Array.from(bulk)])) }
+          : l,
+      ),
+    );
+    setBulk(new Set());
+  };
+  const bulkRemove = (listId: string) => {
+    setLists((ls) =>
+      ls.map((l) =>
+        l.id === listId ? { ...l, members: l.members.filter((m) => !bulk.has(m)) } : l,
+      ),
+    );
+    setBulk(new Set());
+  };
+  const createList = () => {
+    const name = newListName.trim();
+    if (!name) return;
+    const id = `wl_${Date.now()}`;
+    setLists((ls) => [...ls, { id, label: name, icon: "users", members: [] }]);
+    setNewListName("");
+    setActiveId(id);
+  };
+  const renameList = (id: string, label: string) => {
+    setLists((ls) => ls.map((l) => (l.id === id ? { ...l, label } : l)));
+  };
+  const setListIcon = (id: string, icon: IconKey) => {
+    setLists((ls) => ls.map((l) => (l.id === id ? { ...l, icon } : l)));
+  };
+  const deleteList = (id: string) => {
+    const idx = lists.findIndex((l) => l.id === id);
+    if (idx < 0) return;
+    const removed = lists[idx];
+    if (removed.system) return;
+    setTrash({ list: removed, index: idx });
+    setLists((ls) => ls.filter((l) => l.id !== id));
+    if (activeId === id) setActiveId("mine");
+    if (trashTimer.current) window.clearTimeout(trashTimer.current);
+    trashTimer.current = window.setTimeout(() => setTrash(null), 8000);
+  };
+  const undoDelete = () => {
+    if (!trash) return;
+    setLists((ls) => {
+      const next = [...ls];
+      next.splice(trash.index, 0, trash.list);
+      return next;
+    });
+    setTrash(null);
+  };
+
+  const filteredContacts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter((r) => r.name.toLowerCase().includes(q));
+  }, [base, search]);
 
   return (
     <section className="w-full min-w-0 max-w-full rounded-2xl bg-white text-slate-900 ghost-border shadow-soft overflow-hidden">
