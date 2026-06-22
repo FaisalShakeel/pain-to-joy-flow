@@ -7,7 +7,6 @@ import AppShell from "@/components/app/AppShell";
 import StatusPill from "@/components/app/StatusPill";
 import Avatar from "@/components/app/Avatar";
 import MessagesPanel from "@/components/app/MessagesPanel";
-import PriorityContactsWidget from "@/components/app/PriorityContactsWidget";
 import SpotlightWindow from "@/components/app/SpotlightWindow";
 import { me, contacts, threads } from "@/lib/mockData";
 import { useRequests } from "@/components/app/RequestsContext";
