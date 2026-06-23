@@ -91,14 +91,14 @@ const WaitingList = () => {
 
   return (
     <div className="dashboard-module p-4 md:p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+        <div className="flex items-center gap-2 min-w-0">
           <span className="grid place-items-center w-7 h-7 rounded-full bg-primary/10 text-primary">
             <Users className="w-3.5 h-3.5" />
           </span>
-          <div>
-            <h3 className="font-headline font-bold text-primary text-sm">Waiting List</h3>
-            <p className="text-[11px] text-muted-foreground">Demand in one place — overflow & approval</p>
+          <div className="min-w-0">
+            <h3 className="font-headline font-bold text-primary text-sm truncate">Waiting List</h3>
+            <p className="text-[11px] text-muted-foreground truncate">Demand in one place — overflow & approval</p>
           </div>
         </div>
         <span className={cn(
