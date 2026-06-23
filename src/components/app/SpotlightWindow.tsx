@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
+  ArrowRight, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
   Plus, Check, Users, MoreHorizontal, Pencil, Trash2, Undo2, Search, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
