@@ -117,8 +117,7 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
   return (
     <Link
       to={`/app/contact/${t.id}`}
-      className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0"
-      style={{ height: 52 }}
+      className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0 min-h-[52px]"
     >
       <div className="relative shrink-0">
         <div className={cn("w-8 h-8 rounded-full grid place-items-center text-white text-[10px] font-bold", c.bg)}>
@@ -126,12 +125,23 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
         </div>
         <span className={cn("absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-white", c.dot)} />
       </div>
-      <p className="flex-1 min-w-0 text-[12px] text-slate-700 leading-tight line-clamp-2">
-        {t.context}
-      </p>
-      <div className="text-right shrink-0">
-        <p className="text-[12px] font-semibold text-slate-900 leading-tight">{t.name}</p>
-        <p className="text-[10px] text-slate-400 leading-tight">{t.time}</p>
+      {/* Desktop/tablet: context | name+time on the right */}
+      <div className="hidden sm:flex flex-1 min-w-0 items-center gap-2">
+        <p className="flex-1 min-w-0 text-[12px] text-slate-700 leading-tight line-clamp-2">
+          {t.context}
+        </p>
+        <div className="text-right shrink-0 max-w-[40%]">
+          <p className="text-[12px] font-semibold text-slate-900 leading-tight truncate">{t.name}</p>
+          <p className="text-[10px] text-slate-400 leading-tight truncate">{t.time}</p>
+        </div>
+      </div>
+      {/* Mobile: two stacked rows — context, then name • time */}
+      <div className="flex sm:hidden flex-1 min-w-0 flex-col">
+        <p className="text-[12px] text-slate-700 leading-tight line-clamp-2">{t.context}</p>
+        <p className="text-[11px] leading-tight truncate">
+          <span className="font-semibold text-slate-900">{t.name}</span>
+          <span className="text-slate-400"> • {t.time}</span>
+        </p>
       </div>
     </Link>
   );
