@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowRight, Filter, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
+  ArrowRight, Briefcase, Heart, Home, Star, Crown, Layers, Radio, Network,
   Plus, Check, Users, MoreHorizontal, Pencil, Trash2, Undo2, Search, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -117,8 +117,7 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
   return (
     <Link
       to={`/app/contact/${t.id}`}
-      className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0"
-      style={{ height: 52 }}
+      className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0 min-h-[52px]"
     >
       <div className="relative shrink-0">
         <div className={cn("w-8 h-8 rounded-full grid place-items-center text-white text-[10px] font-bold", c.bg)}>
@@ -126,12 +125,23 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
         </div>
         <span className={cn("absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-white", c.dot)} />
       </div>
-      <p className="flex-1 min-w-0 text-[12px] text-slate-700 leading-tight line-clamp-2">
-        {t.context}
-      </p>
-      <div className="text-right shrink-0">
-        <p className="text-[12px] font-semibold text-slate-900 leading-tight">{t.name}</p>
-        <p className="text-[10px] text-slate-400 leading-tight">{t.time}</p>
+      {/* Desktop/tablet: context | name+time on the right */}
+      <div className="hidden sm:flex flex-1 min-w-0 items-center gap-2">
+        <p className="flex-1 min-w-0 text-[12px] text-slate-700 leading-tight line-clamp-2">
+          {t.context}
+        </p>
+        <div className="text-right shrink-0 max-w-[40%]">
+          <p className="text-[12px] font-semibold text-slate-900 leading-tight truncate">{t.name}</p>
+          <p className="text-[10px] text-slate-400 leading-tight truncate">{t.time}</p>
+        </div>
+      </div>
+      {/* Mobile: two stacked rows — context, then name • time */}
+      <div className="flex sm:hidden flex-1 min-w-0 flex-col">
+        <p className="text-[12px] text-slate-700 leading-tight line-clamp-2">{t.context}</p>
+        <p className="text-[11px] leading-tight truncate">
+          <span className="font-semibold text-slate-900">{t.name}</span>
+          <span className="text-slate-400"> • {t.time}</span>
+        </p>
       </div>
     </Link>
   );
@@ -252,13 +262,17 @@ const SpotlightWindow = () => {
 
   return (
     <section className="w-full min-w-0 max-w-full rounded-2xl bg-white text-slate-900 ghost-border shadow-soft overflow-hidden">
-      {/* Contact Pulse header — title + subtitle on left, controls on right */}
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
+      {/* Contact Pulse header — match dashboard module header treatment */}
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
         <div className="min-w-0">
-          <h2 className="text-[18px] font-bold tracking-tight text-slate-900 leading-tight">
+          <p className="module-eyebrow inline-flex items-center gap-1.5">
+            {tab === "pulse" ? <Radio className="w-3 h-3 text-accent/80" /> : <Network className="w-3 h-3 text-accent/80" />}
+            {tab === "pulse" ? "Contact · Live" : "Coordination · Board"}
+          </p>
+          <h2 className="module-title mt-1.5">
             {tab === "pulse" ? "Contact Pulse" : "Coordination"}
           </h2>
-          <p className="text-[12px] font-normal text-slate-500 leading-snug mt-0.5">
+          <p className="module-meta mt-1">
             {tab === "pulse"
               ? "Live availability of people you care about right now."
               : "Real-time board of who's reachable, busy, or focused."}
@@ -287,7 +301,7 @@ const SpotlightWindow = () => {
             </button>
           </div>
         </div>
-        {/* RIGHT: watchlist selector + filter + add */}
+        {/* RIGHT: single watch-list dropdown — groups live behind it to maximize contact visibility */}
         <div className="flex items-center gap-1.5 shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -320,28 +334,13 @@ const SpotlightWindow = () => {
               })}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setManageOpen(true)}>
+                <Plus className="w-3.5 h-3.5 mr-2" /> Create New List
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setManageOpen(true)}>
                 <Pencil className="w-3.5 h-3.5 mr-2" /> Manage watch lists
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <button
-            type="button"
-            onClick={() => setManageOpen(true)}
-            className="grid place-items-center w-8 h-8 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-            aria-label="Filter"
-            title="Filter"
-          >
-            <Filter className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setManageOpen(true)}
-            className="grid place-items-center w-8 h-8 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-            aria-label="Add to watch list"
-            title="Add to watch list"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
 
@@ -387,7 +386,7 @@ const SpotlightWindow = () => {
       <div className="px-3 pt-2 pb-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="rounded-lg bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-2.5 py-1.5 border-b border-slate-100 text-center">
+            <div className="px-2.5 py-1.5 border-b border-slate-100 text-left">
               <span className="text-[11px] font-bold tracking-[0.08em]">
                 <span className="text-emerald-600">AVAILABLE</span>
                 <span className="text-slate-300 mx-1">/</span>
@@ -396,19 +395,25 @@ const SpotlightWindow = () => {
                 <span className="text-slate-500">OFFLINE</span>
               </span>
             </div>
-            <div className="no-scrollbar overflow-y-auto" style={{ maxHeight: 52 * 6 }}>
+            <div
+              className="no-scrollbar overflow-y-auto overscroll-contain"
+              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+            >
               {board.left.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
           </div>
           <div className="rounded-lg bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-2.5 py-1.5 border-b border-slate-100 text-center">
+            <div className="px-2.5 py-1.5 border-b border-slate-100 text-left">
               <span className="text-[11px] font-bold tracking-[0.08em]">
-                <span className="text-rose-600">FOCUS</span>
-                <span className="text-slate-300 mx-1">/</span>
                 <span className="text-violet-600">DRIVING</span>
+                <span className="text-slate-300 mx-1">/</span>
+                <span className="text-rose-600">FOCUS</span>
               </span>
             </div>
-            <div className="no-scrollbar overflow-y-auto" style={{ maxHeight: 52 * 6 }}>
+            <div
+              className="no-scrollbar overflow-y-auto overscroll-contain"
+              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+            >
               {board.right.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
           </div>
@@ -428,7 +433,7 @@ const SpotlightWindow = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* LEFT: Available / Busy / Offline */}
           <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-slate-100 text-center">
+            <div className="px-3 py-2.5 border-b border-slate-100 text-left">
               <span className="text-[13px] font-bold tracking-[0.08em]">
                 <span className="text-emerald-600">AVAILABLE</span>
                 <span className="text-slate-300 mx-1.5">/</span>
@@ -441,13 +446,13 @@ const SpotlightWindow = () => {
               {BOARD_LEFT.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
           </div>
-          {/* RIGHT: Focus / Driving */}
+          {/* RIGHT: Driving / Focus */}
           <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-slate-100 text-center">
+            <div className="px-3 py-2.5 border-b border-slate-100 text-left">
               <span className="text-[13px] font-bold tracking-[0.08em]">
-                <span className="text-rose-600">FOCUS</span>
-                <span className="text-slate-300 mx-1.5">/</span>
                 <span className="text-violet-600">DRIVING</span>
+                <span className="text-slate-300 mx-1.5">/</span>
+                <span className="text-rose-600">FOCUS</span>
               </span>
             </div>
             <div>
