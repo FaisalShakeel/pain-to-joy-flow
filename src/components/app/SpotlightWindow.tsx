@@ -386,7 +386,7 @@ const SpotlightWindow = () => {
       <div className="px-3 pt-2 pb-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="rounded-lg bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-2.5 py-1.5 border-b border-slate-100 text-center">
+            <div className="px-2.5 py-1.5 border-b border-slate-100 text-left">
               <span className="text-[11px] font-bold tracking-[0.08em]">
                 <span className="text-emerald-600">AVAILABLE</span>
                 <span className="text-slate-300 mx-1">/</span>
@@ -395,19 +395,25 @@ const SpotlightWindow = () => {
                 <span className="text-slate-500">OFFLINE</span>
               </span>
             </div>
-            <div className="no-scrollbar overflow-y-auto" style={{ maxHeight: 52 * 6 }}>
+            <div
+              className="no-scrollbar overflow-y-auto overscroll-contain"
+              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+            >
               {board.left.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
           </div>
           <div className="rounded-lg bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-2.5 py-1.5 border-b border-slate-100 text-center">
+            <div className="px-2.5 py-1.5 border-b border-slate-100 text-left">
               <span className="text-[11px] font-bold tracking-[0.08em]">
-                <span className="text-rose-600">FOCUS</span>
-                <span className="text-slate-300 mx-1">/</span>
                 <span className="text-violet-600">DRIVING</span>
+                <span className="text-slate-300 mx-1">/</span>
+                <span className="text-rose-600">FOCUS</span>
               </span>
             </div>
-            <div className="no-scrollbar overflow-y-auto" style={{ maxHeight: 52 * 6 }}>
+            <div
+              className="no-scrollbar overflow-y-auto overscroll-contain"
+              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+            >
               {board.right.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
           </div>
@@ -427,7 +433,7 @@ const SpotlightWindow = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* LEFT: Available / Busy / Offline */}
           <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-slate-100 text-center">
+            <div className="px-3 py-2.5 border-b border-slate-100 text-left">
               <span className="text-[13px] font-bold tracking-[0.08em]">
                 <span className="text-emerald-600">AVAILABLE</span>
                 <span className="text-slate-300 mx-1.5">/</span>
@@ -440,13 +446,13 @@ const SpotlightWindow = () => {
               {BOARD_LEFT.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
           </div>
-          {/* RIGHT: Focus / Driving */}
+          {/* RIGHT: Driving / Focus */}
           <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-slate-100 text-center">
+            <div className="px-3 py-2.5 border-b border-slate-100 text-left">
               <span className="text-[13px] font-bold tracking-[0.08em]">
-                <span className="text-rose-600">FOCUS</span>
-                <span className="text-slate-300 mx-1.5">/</span>
                 <span className="text-violet-600">DRIVING</span>
+                <span className="text-slate-300 mx-1.5">/</span>
+                <span className="text-rose-600">FOCUS</span>
               </span>
             </div>
             <div>
