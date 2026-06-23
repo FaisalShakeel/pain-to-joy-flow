@@ -479,100 +479,62 @@ const SpotlightWindow = () => {
 
       {/* Manage Watchlists Sheet */}
       <Sheet open={manageOpen} onOpenChange={setManageOpen}>
-        <SheetContent side="right" className="w-[92vw] sm:w-[480px] flex flex-col">
-          <SheetHeader>
-            <SheetTitle>Manage Watchlists</SheetTitle>
-          </SheetHeader>
-
-          {/* Create new list */}
-          <div className="mt-3 flex items-center gap-2">
-            <Input
-              placeholder="New watch list name…"
-              value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") createList(); }}
-              className="h-9"
-            />
-            <button
-              type="button"
-              onClick={createList}
-              disabled={!newListName.trim()}
-              className="inline-flex items-center gap-1 px-3 h-9 rounded-md bg-slate-900 text-white text-[12px] font-semibold disabled:opacity-40"
-            >
-              <Plus className="w-3.5 h-3.5" /> Create
-            </button>
-          </div>
-
-          {/* List of watchlists */}
-          <div className="mt-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Your lists</p>
-            <ul className="rounded-lg border border-slate-200 overflow-hidden divide-y divide-slate-100">
-              {lists.map((l) => {
-                const I = ICONS[l.icon];
-                const isActive = l.id === activeId;
-                const isEditing = editingListId === l.id;
-                return (
-                  <li key={l.id} className={cn("flex items-center gap-2 px-2 py-1.5", isActive && "bg-slate-50")}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button type="button" className="grid place-items-center w-7 h-7 rounded-md hover:bg-slate-100 text-slate-600" title="Change icon">
-                          <I className="w-3.5 h-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        {(Object.keys(ICONS) as IconKey[]).map((k) => {
-                          const Ic = ICONS[k];
-                          return (
-                            <DropdownMenuItem key={k} onClick={() => setListIcon(l.id, k)}>
-                              <Ic className="w-3.5 h-3.5 mr-2" /> {k}
-                            </DropdownMenuItem>
-                          );
-                        })}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {isEditing ? (
-                      <Input
-                        autoFocus
-                        defaultValue={l.label}
-                        onBlur={(e) => { renameList(l.id, e.target.value || l.label); setEditingListId(null); }}
-                        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                        className="h-7 text-[13px] flex-1"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setActiveId(l.id)}
-                        className="flex-1 min-w-0 text-left text-[13px] font-semibold text-slate-800 truncate"
-                      >
-                        {l.label}
-                      </button>
-                    )}
-                    <span className="text-[10px] text-slate-400">{l.members.length}</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button type="button" className="grid place-items-center w-7 h-7 rounded-md hover:bg-slate-100 text-slate-500" aria-label="More">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem disabled={!!l.system} onClick={() => setEditingListId(l.id)}>
-                          <Pencil className="w-3.5 h-3.5 mr-2" /> Rename
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          disabled={!!l.system}
-                          onClick={() => {
-                            if (confirm(`Delete watch list "${l.label}"?`)) deleteList(l.id);
-                          }}
-                          className="text-rose-600 focus:text-rose-700"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </li>
-                );
-              })}
-            </ul>
+        <SheetContent side="right" className="w-[92vw] sm:w-[480px] flex flex-col p-0">
+          {/* Header: list identity + Save/Cancel — no permanent group selectors */}
+          <div className="px-4 pt-4 pb-3 border-b border-slate-200">
+            <SheetHeader>
+              <SheetTitle className="text-[13px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
+                {isNewList ? "Create Watch List" : "Manage Watch List"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="mt-3 flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="grid place-items-center w-9 h-9 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-700"
+                    title="Change icon"
+                  >
+                    {(() => { const I = ICONS[draftIcon]; return <I className="w-4 h-4" />; })()}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {(Object.keys(ICONS) as IconKey[]).map((k) => {
+                    const Ic = ICONS[k];
+                    return (
+                      <DropdownMenuItem key={k} onClick={() => setDraftIcon(k)}>
+                        <Ic className="w-3.5 h-3.5 mr-2" /> {k}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Input
+                placeholder="Watch list name…"
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                className="h-9 flex-1"
+                disabled={!isNewList && lists.find((l) => l.id === manageListId)?.system}
+              />
+              <span className="text-[11px] font-semibold text-slate-500 px-1.5 py-0.5 rounded bg-slate-100">
+                {draftMembers.size}
+              </span>
+              {!isNewList && !lists.find((l) => l.id === manageListId)?.system && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`Delete watch list "${draftName}"?`)) {
+                      deleteList(manageListId);
+                      setManageOpen(false);
+                    }
+                  }}
+                  className="grid place-items-center w-9 h-9 rounded-md hover:bg-rose-50 text-rose-600 border border-transparent hover:border-rose-200"
+                  title="Delete list"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             {trash && (
               <div className="mt-2 flex items-center justify-between gap-2 rounded-md bg-amber-50 border border-amber-200 px-2 py-1.5 text-[12px] text-amber-800">
                 <span>Deleted "{trash.list.label}"</span>
@@ -583,80 +545,80 @@ const SpotlightWindow = () => {
             )}
           </div>
 
-          {/* Contact editor for the active list */}
-          <div className="mt-4 flex-1 min-h-0 flex flex-col">
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500">
-                Members of <span className="text-slate-700 font-semibold">{active?.label}</span>
-              </p>
-              {bulk.size > 0 && active && (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => bulkAdd(active.id)}
-                    className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white"
-                  >
-                    Add {bulk.size}
-                  </button>
-                  <button
-                    onClick={() => bulkRemove(active.id)}
-                    className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white"
-                  >
-                    Remove {bulk.size}
-                  </button>
-                  <button
-                    onClick={() => setBulk(new Set())}
-                    className="px-1.5 py-0.5 rounded text-[10px] text-slate-500 hover:text-slate-700"
-                    aria-label="Clear selection"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
-            </div>
-            <div className="relative mb-2">
-              <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+          {/* Search */}
+          <div className="px-4 pt-3">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search contacts…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-8 pl-7 text-[13px]"
+                className="h-9 pl-8 text-[13px]"
               />
             </div>
-            <ul className="flex-1 min-h-0 overflow-y-auto no-scrollbar divide-y divide-slate-100 border border-slate-200 rounded-lg">
+          </div>
+
+          {/* Contacts — maximum vertical space */}
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 py-3">
+            <ul className="rounded-lg border border-slate-200 divide-y divide-slate-100 overflow-hidden">
               {filteredContacts.map((r) => {
-                const inList = active?.members.includes(r.id);
-                const selected = bulk.has(r.id);
+                const inList = draftMembers.has(r.id);
                 return (
-                  <li key={r.id} className="flex items-center gap-2 px-2 py-1.5">
+                  <li key={r.id} className="flex items-center gap-2 px-2.5 py-2">
                     <input
                       type="checkbox"
-                      checked={selected}
+                      checked={inList}
                       onChange={(e) => {
-                        setBulk((b) => {
-                          const next = new Set(b);
+                        setDraftMembers((m) => {
+                          const next = new Set(m);
                           if (e.target.checked) next.add(r.id); else next.delete(r.id);
                           return next;
                         });
                       }}
-                      className="h-3.5 w-3.5"
+                      className="h-4 w-4 accent-emerald-600"
+                      aria-label={inList ? `Remove ${r.name}` : `Add ${r.name}`}
                     />
                     <Avatar initials={r.initials} accent={r.accent} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-semibold text-slate-800 truncate">{r.name}</p>
                       <p className="text-[10px] text-slate-500 truncate">{STATUS[r.status].label}</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => active && toggleMember(active.id, r.id)}
-                      className={cn(
-                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition",
-                        inList
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50",
-                      )}
-                    >
-                      {inList ? <><Check className="w-3 h-3" /> In list</> : <><Plus className="w-3 h-3" /> Add</>}
-                    </button>
+                    {/* Move To dropdown — direct cross-list move */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 px-2 h-7 rounded-md border border-slate-200 hover:bg-slate-50 text-[11px] font-semibold text-slate-700"
+                          title="Move to another list"
+                        >
+                          Move To <span className="text-slate-400">▾</span>
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-slate-500">
+                          Move to
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {lists
+                          .filter((l) => !l.system && l.id !== manageListId)
+                          .map((l) => {
+                            const Ic = ICONS[l.icon];
+                            return (
+                              <DropdownMenuItem
+                                key={l.id}
+                                onClick={() => moveContactTo(r.id, l.id)}
+                              >
+                                <Ic className="w-3.5 h-3.5 mr-2" />
+                                <span className="flex-1">{l.label}</span>
+                                <span className="text-[10px] text-slate-400">{l.members.length}</span>
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        {lists.filter((l) => !l.system && l.id !== manageListId).length === 0 && (
+                          <div className="px-2 py-1.5 text-[11px] text-slate-500">No other lists yet.</div>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </li>
                 );
               })}
@@ -664,6 +626,24 @@ const SpotlightWindow = () => {
                 <li className="text-center text-[12px] text-slate-500 py-6">No contacts match "{search}".</li>
               )}
             </ul>
+          </div>
+
+          {/* Footer: Save / Cancel */}
+          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-end gap-2 bg-slate-50">
+            <button
+              type="button"
+              onClick={() => setManageOpen(false)}
+              className="px-3 h-9 rounded-md border border-slate-200 bg-white text-[12px] font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={saveManage}
+              className="px-4 h-9 rounded-md bg-slate-900 text-white text-[12px] font-semibold hover:bg-slate-800"
+            >
+              Save
+            </button>
           </div>
         </SheetContent>
       </Sheet>
