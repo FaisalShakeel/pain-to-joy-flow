@@ -153,12 +153,14 @@ const SpotlightWindow = () => {
   const [lists, setLists] = useState<Watchlist[]>(() => DEFAULT_WATCHLISTS(base));
   const [activeId, setActiveId] = useState<string>("mine");
   const [manageOpen, setManageOpen] = useState(false);
-  const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [manageListId, setManageListId] = useState<string>("mine");
+  const [draftMembers, setDraftMembers] = useState<Set<string>>(new Set());
+  const [draftName, setDraftName] = useState<string>("");
+  const [draftIcon, setDraftIcon] = useState<IconKey>("users");
+  const [isNewList, setIsNewList] = useState(false);
   const [search, setSearch] = useState("");
-  const [bulk, setBulk] = useState<Set<string>>(new Set());
   const [trash, setTrash] = useState<{ list: Watchlist; index: number } | null>(null);
   const trashTimer = useRef<number | null>(null);
-  const [newListName, setNewListName] = useState("");
 
   const active = lists.find((l) => l.id === activeId) ?? lists[0];
   const followed = useMemo(
@@ -189,49 +191,58 @@ const SpotlightWindow = () => {
     };
   }, [followed]);
 
-  // Mutators
-  const toggleMember = (listId: string, contactId: string) => {
+  // Open manage drawer for an existing list
+  const openManage = (listId: string) => {
+    const l = lists.find((x) => x.id === listId);
+    if (!l) return;
+    setIsNewList(false);
+    setManageListId(listId);
+    setDraftMembers(new Set(l.members));
+    setDraftName(l.label);
+    setDraftIcon(l.icon);
+    setSearch("");
+    setManageOpen(true);
+  };
+  // Open manage drawer for a brand-new list
+  const openCreate = () => {
+    setIsNewList(true);
+    setManageListId("__new__");
+    setDraftMembers(new Set());
+    setDraftName("");
+    setDraftIcon("users");
+    setSearch("");
+    setManageOpen(true);
+  };
+  const saveManage = () => {
+    const name = draftName.trim() || (isNewList ? "Untitled list" : "");
+    if (isNewList) {
+      const id = `wl_${Date.now()}`;
+      setLists((ls) => [...ls, { id, label: name, icon: draftIcon, members: Array.from(draftMembers) }]);
+      setActiveId(id);
+    } else {
+      setLists((ls) =>
+        ls.map((l) =>
+          l.id === manageListId
+            ? { ...l, label: l.system ? l.label : name, icon: draftIcon, members: Array.from(draftMembers) }
+            : l,
+        ),
+      );
+    }
+    setManageOpen(false);
+  };
+  const moveContactTo = (contactId: string, targetListId: string) => {
     setLists((ls) =>
-      ls.map((l) =>
-        l.id === listId
-          ? { ...l, members: l.members.includes(contactId)
-              ? l.members.filter((m) => m !== contactId)
-              : [...l.members, contactId] }
-          : l,
-      ),
+      ls.map((l) => {
+        if (l.id === targetListId && !l.members.includes(contactId)) {
+          return { ...l, members: [...l.members, contactId] };
+        }
+        return l;
+      }),
     );
-  };
-  const bulkAdd = (listId: string) => {
-    setLists((ls) =>
-      ls.map((l) =>
-        l.id === listId
-          ? { ...l, members: Array.from(new Set([...l.members, ...Array.from(bulk)])) }
-          : l,
-      ),
-    );
-    setBulk(new Set());
-  };
-  const bulkRemove = (listId: string) => {
-    setLists((ls) =>
-      ls.map((l) =>
-        l.id === listId ? { ...l, members: l.members.filter((m) => !bulk.has(m)) } : l,
-      ),
-    );
-    setBulk(new Set());
-  };
-  const createList = () => {
-    const name = newListName.trim();
-    if (!name) return;
-    const id = `wl_${Date.now()}`;
-    setLists((ls) => [...ls, { id, label: name, icon: "users", members: [] }]);
-    setNewListName("");
-    setActiveId(id);
-  };
-  const renameList = (id: string, label: string) => {
-    setLists((ls) => ls.map((l) => (l.id === id ? { ...l, label } : l)));
-  };
-  const setListIcon = (id: string, icon: IconKey) => {
-    setLists((ls) => ls.map((l) => (l.id === id ? { ...l, icon } : l)));
+    // Also reflect in current draft if managing target
+    if (targetListId === manageListId) {
+      setDraftMembers((m) => new Set([...Array.from(m), contactId]));
+    }
   };
   const deleteList = (id: string) => {
     const idx = lists.findIndex((l) => l.id === id);
@@ -311,7 +322,10 @@ const SpotlightWindow = () => {
                 aria-label="Switch watch list"
               >
                 {active && (() => { const I = ICONS[active.icon]; return <I className="w-3.5 h-3.5" />; })()}
-                <span className="max-w-[140px] truncate">{active?.label ?? "My Watch List"}</span>
+                <span className="max-w-[160px] truncate">
+                  {active?.label ?? "My Watch List"}{" "}
+                  <span className="text-slate-400 font-normal">({active?.members.length ?? 0})</span>
+                </span>
                 <span className="text-slate-400">▾</span>
               </button>
             </DropdownMenuTrigger>
@@ -333,10 +347,10 @@ const SpotlightWindow = () => {
                 );
               })}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setManageOpen(true)}>
+              <DropdownMenuItem onClick={openCreate}>
                 <Plus className="w-3.5 h-3.5 mr-2" /> Create New List
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setManageOpen(true)}>
+              <DropdownMenuItem onClick={() => openManage(activeId)}>
                 <Pencil className="w-3.5 h-3.5 mr-2" /> Manage watch lists
               </DropdownMenuItem>
             </DropdownMenuContent>
