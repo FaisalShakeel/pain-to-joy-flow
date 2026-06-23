@@ -262,13 +262,17 @@ const SpotlightWindow = () => {
 
   return (
     <section className="w-full min-w-0 max-w-full rounded-2xl bg-white text-slate-900 ghost-border shadow-soft overflow-hidden">
-      {/* Contact Pulse header — title + subtitle on left, controls on right */}
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
+      {/* Contact Pulse header — match dashboard module header treatment */}
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
         <div className="min-w-0">
-          <h2 className="text-[18px] font-bold tracking-tight text-slate-900 leading-tight">
+          <p className="module-eyebrow inline-flex items-center gap-1.5">
+            {tab === "pulse" ? <Radio className="w-3 h-3 text-accent/80" /> : <Network className="w-3 h-3 text-accent/80" />}
+            {tab === "pulse" ? "Contact · Live" : "Coordination · Board"}
+          </p>
+          <h2 className="module-title mt-1.5">
             {tab === "pulse" ? "Contact Pulse" : "Coordination"}
           </h2>
-          <p className="text-[12px] font-normal text-slate-500 leading-snug mt-0.5">
+          <p className="module-meta mt-1">
             {tab === "pulse"
               ? "Live availability of people you care about right now."
               : "Real-time board of who's reachable, busy, or focused."}
@@ -297,7 +301,7 @@ const SpotlightWindow = () => {
             </button>
           </div>
         </div>
-        {/* RIGHT: watchlist selector + filter + add */}
+        {/* RIGHT: single watch-list dropdown — groups live behind it to maximize contact visibility */}
         <div className="flex items-center gap-1.5 shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -330,28 +334,13 @@ const SpotlightWindow = () => {
               })}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setManageOpen(true)}>
+                <Plus className="w-3.5 h-3.5 mr-2" /> Create New List
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setManageOpen(true)}>
                 <Pencil className="w-3.5 h-3.5 mr-2" /> Manage watch lists
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <button
-            type="button"
-            onClick={() => setManageOpen(true)}
-            className="grid place-items-center w-8 h-8 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-            aria-label="Filter"
-            title="Filter"
-          >
-            <Filter className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setManageOpen(true)}
-            className="grid place-items-center w-8 h-8 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600"
-            aria-label="Add to watch list"
-            title="Add to watch list"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
 
