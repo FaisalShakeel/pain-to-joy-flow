@@ -54,15 +54,49 @@ const ICONS: Record<IconKey, React.ComponentType<{ className?: string }>> = {
   star: Star, layers: Layers, briefcase: Briefcase, crown: Crown,
   heart: Heart, home: Home, users: Users,
 };
-interface Watchlist { id: string; label: string; icon: IconKey; members: string[]; system?: boolean; }
+type VisibilityMode = "always" | "business" | "custom";
+interface VisibilityWindow {
+  mode: VisibilityMode;
+  from?: string; // "HH:MM" 24h, used when mode === "custom"
+  to?: string;   // "HH:MM" 24h, used when mode === "custom"
+}
+interface Watchlist {
+  id: string;
+  label: string;
+  icon: IconKey;
+  members: string[];
+  system?: boolean;
+  visibility: VisibilityWindow;
+}
+const DEFAULT_VIS: Record<string, VisibilityWindow> = {
+  mine:       { mode: "always" },
+  all:        { mode: "always" },
+  colleagues: { mode: "business", from: "09:00", to: "18:00" },
+  clients:    { mode: "custom",   from: "09:00", to: "19:00" },
+  friends:    { mode: "always" },
+  family:     { mode: "always" },
+};
+const BUSINESS_WINDOW = { from: "09:00", to: "18:00" };
+const fmt12 = (hhmm?: string) => {
+  if (!hhmm) return "";
+  const [h, m] = hhmm.split(":").map(Number);
+  const ap = h >= 12 ? "PM" : "AM";
+  const hh = ((h + 11) % 12) + 1;
+  return m ? `${hh}:${String(m).padStart(2, "0")} ${ap}` : `${hh} ${ap}`;
+};
+const visibilityLabel = (v: VisibilityWindow) => {
+  if (v.mode === "always") return "24/7";
+  if (v.mode === "business") return `${fmt12(BUSINESS_WINDOW.from)}–${fmt12(BUSINESS_WINDOW.to)}`;
+  return `${fmt12(v.from)}–${fmt12(v.to)}`;
+};
 const ALL_IDS = (rows: RelayRow[]) => rows.map((r) => r.id);
 const DEFAULT_WATCHLISTS = (rows: RelayRow[]): Watchlist[] => [
-  { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true },
-  { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true },
-  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"] },
-  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"] },
-  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"] },
-  { id: "family",     label: "Family",       icon: "home",      members: [] },
+  { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true, visibility: DEFAULT_VIS.mine },
+  { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true, visibility: DEFAULT_VIS.all },
+  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"], visibility: DEFAULT_VIS.colleagues },
+  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"], visibility: DEFAULT_VIS.clients },
+  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"], visibility: DEFAULT_VIS.friends },
+  { id: "family",     label: "Family",       icon: "home",      members: [], visibility: DEFAULT_VIS.family },
 ];
 
 const ALL_ROWS: RelayRow[] = [
