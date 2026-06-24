@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Avatar from "./Avatar";
 import { Link } from "react-router-dom";
+import { useDragScroll } from "@/hooks/use-drag-scroll";
 
 /* ------------------------------------------------------------------ */
 /* Spotlight Relay Board — Mobile-First Availability Intelligence     */
@@ -150,6 +151,9 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
 const SpotlightWindow = () => {
   const base = ALL_ROWS;
   const [tab, setTab] = useState<"pulse" | "coordination">("pulse");
+  const stripRef = useDragScroll<HTMLDivElement>("x");
+  const leftBoardRef = useDragScroll<HTMLDivElement>("y");
+  const rightBoardRef = useDragScroll<HTMLDivElement>("y");
   const [lists, setLists] = useState<Watchlist[]>(() => DEFAULT_WATCHLISTS(base));
   const [activeId, setActiveId] = useState<string>("mine");
   const [manageOpen, setManageOpen] = useState(false);
@@ -363,7 +367,11 @@ const SpotlightWindow = () => {
       {/* Watchlist avatar strip */}
       <div className="px-3 pt-3 pb-2">
         <div className="rounded-2xl bg-slate-50 border border-slate-200/70 px-3 py-3">
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
+          <div
+            ref={stripRef}
+            className="flex items-center gap-3 overflow-x-auto no-scrollbar overscroll-contain select-none"
+            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+          >
             {relay.map((r) => {
               const s = STATUS[r.status];
               return (
@@ -410,8 +418,9 @@ const SpotlightWindow = () => {
               </span>
             </div>
             <div
+              ref={leftBoardRef}
               className="no-scrollbar overflow-y-auto overscroll-contain"
-              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y", userSelect: "none" }}
             >
               {board.left.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
@@ -425,8 +434,9 @@ const SpotlightWindow = () => {
               </span>
             </div>
             <div
+              ref={rightBoardRef}
               className="no-scrollbar overflow-y-auto overscroll-contain"
-              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+              style={{ maxHeight: 52 * 6, WebkitOverflowScrolling: "touch", touchAction: "pan-y", userSelect: "none" }}
             >
               {board.right.map((t) => <BoardRow key={t.id} t={t} />)}
             </div>
