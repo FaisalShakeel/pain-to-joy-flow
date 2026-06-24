@@ -595,6 +595,74 @@ const SpotlightWindow = () => {
                 </button>
               </div>
             )}
+            {/* Visibility Window — per-list cut-off policy */}
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-500">
+                Visibility Window
+              </p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Choose when this list can see your live availability.
+              </p>
+              <div className="mt-2 grid grid-cols-1 gap-1.5">
+                {([
+                  { mode: "business" as const, title: "Business Hours Only", hint: "9:00 AM – 6:00 PM" },
+                  { mode: "custom" as const,   title: "Custom Hours",        hint: "Set your own cut-off time" },
+                  { mode: "always" as const,   title: "Always Show Availability", hint: "Visible 24/7" },
+                ]).map((opt) => {
+                  const on = draftVisibility.mode === opt.mode;
+                  return (
+                    <label
+                      key={opt.mode}
+                      className={cn(
+                        "flex items-start gap-2 px-2.5 py-2 rounded-md border cursor-pointer transition",
+                        on ? "border-emerald-500 bg-white ring-1 ring-emerald-500/30"
+                           : "border-slate-200 bg-white hover:bg-slate-50",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="visibility-mode"
+                        className="mt-0.5 accent-emerald-600"
+                        checked={on}
+                        onChange={() =>
+                          setDraftVisibility((v) =>
+                            opt.mode === "custom"
+                              ? { mode: "custom", from: v.from ?? "09:00", to: v.to ?? "18:00" }
+                              : { mode: opt.mode },
+                          )
+                        }
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold text-slate-800 leading-tight">{opt.title}</p>
+                        <p className="text-[10px] text-slate-500 leading-tight">{opt.hint}</p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+              {draftVisibility.mode === "custom" && (
+                <div className="mt-2 flex items-center gap-2">
+                  <label className="text-[11px] font-semibold text-slate-600">From</label>
+                  <input
+                    type="time"
+                    value={draftVisibility.from ?? "09:00"}
+                    onChange={(e) =>
+                      setDraftVisibility((v) => ({ ...v, mode: "custom", from: e.target.value }))
+                    }
+                    className="h-8 px-2 rounded-md border border-slate-200 bg-white text-[12px]"
+                  />
+                  <label className="text-[11px] font-semibold text-slate-600">Until</label>
+                  <input
+                    type="time"
+                    value={draftVisibility.to ?? "18:00"}
+                    onChange={(e) =>
+                      setDraftVisibility((v) => ({ ...v, mode: "custom", to: e.target.value }))
+                    }
+                    className="h-8 px-2 rounded-md border border-slate-200 bg-white text-[12px]"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Search */}
