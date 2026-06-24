@@ -116,20 +116,22 @@ const WaitingList = () => {
       ) : (
         <ul className="space-y-2 mb-3">
           {qs.map((w) => (
-            <li key={w.id} className="flex items-center gap-2.5 p-2 rounded-xl nested-surface flex-wrap sm:flex-nowrap">
+            <li key={w.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 p-2 rounded-xl nested-surface">
+              <div className="flex items-start gap-2.5 min-w-0 w-full">
               <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
                 {w.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
               </span>
-              <div className="flex-1 min-w-0 basis-0">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-sm font-semibold text-primary truncate">{w.name}</p>
                   <ChannelChip channel="QS" />
                 </div>
-                <p className="text-[11px] text-muted-foreground truncate">
+                <p className="text-[11px] text-muted-foreground break-words">
                   {w.note || "No note"} · <span className="inline-flex items-center gap-0.5"><Clock3 className="w-2.5 h-2.5" />joined {fmtAgo(w.joinedAt)} · {fmtExpiry(w.expiresAt)}</span>
                 </p>
               </div>
-              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end basis-full sm:basis-auto">
+              </div>
+              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end w-full sm:w-auto">
                 <ActionBtn title="Approve — create extra slot" tone="emerald" onClick={() => {
                   updateWaitingStatus(w.id, "approved");
                   toast({ title: "Approved", description: `Extra Quick Sync slot offered to ${w.name}.` });
@@ -165,21 +167,23 @@ const WaitingList = () => {
             const name = c?.name || "Unknown";
             const initials = c?.initials || name.split(" ").map((s) => s[0]).slice(0, 2).join("");
             return (
-              <li key={r.id} className="flex items-center gap-2.5 p-2 rounded-xl nested-surface flex-wrap sm:flex-nowrap">
+              <li key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 p-2 rounded-xl nested-surface">
+                <div className="flex items-start gap-2.5 min-w-0 w-full">
                 <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
                   {initials}
                 </span>
-                <div className="flex-1 min-w-0 basis-0">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="text-sm font-semibold text-primary truncate">{name}</p>
                     <ChannelChip channel={channel} />
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 text-[9px] font-bold uppercase tracking-wider">Pending</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-[11px] text-muted-foreground break-words">
                     {r.reason} · <span className="inline-flex items-center gap-0.5"><CalendarClock className="w-2.5 h-2.5" />{r.receivedAt}</span>
                   </p>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end basis-full sm:basis-auto">
+                </div>
+                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end w-full sm:w-auto">
                   <ActionBtn title="Approve — move to Reserved" tone="emerald" onClick={() => {
                     act(r.id, "scheduled");
                     trackMetric("approved_interaction", { dedupeKey: `req:${r.id}` });
@@ -217,14 +221,15 @@ const WaitingList = () => {
           {watched.map((c) => {
             const available = c.status === "available";
             return (
-              <li key={c.id} className="flex items-center gap-2.5 p-2 rounded-xl nested-surface flex-wrap sm:flex-nowrap">
+              <li key={c.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 p-2 rounded-xl nested-surface">
+                <div className="flex items-start gap-2.5 min-w-0 w-full">
                 <span className="relative grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
                   {c.initials}
                   {available && (
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-background animate-pulse" />
                   )}
                 </span>
-                <div className="flex-1 min-w-0 basis-0">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="text-sm font-semibold text-primary truncate">{c.name}</p>
                     <span
@@ -238,13 +243,14 @@ const WaitingList = () => {
                       {available ? "Available now" : c.status}
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-[11px] text-muted-foreground break-words">
                     {available
                       ? `${c.name} is now available for a direct call`
                       : `${c.title || c.org || "Contact"} · waiting for availability`}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end basis-full sm:basis-auto">
+                </div>
+                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end w-full sm:w-auto">
                   {available && (
                     <Link
                       to={`/app/contact/${c.id}`}
