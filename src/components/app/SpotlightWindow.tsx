@@ -195,6 +195,7 @@ const SpotlightWindow = () => {
   const [draftMembers, setDraftMembers] = useState<Set<string>>(new Set());
   const [draftName, setDraftName] = useState<string>("");
   const [draftIcon, setDraftIcon] = useState<IconKey>("users");
+  const [draftVisibility, setDraftVisibility] = useState<VisibilityWindow>({ mode: "always" });
   const [isNewList, setIsNewList] = useState(false);
   const [search, setSearch] = useState("");
   const [trash, setTrash] = useState<{ list: Watchlist; index: number } | null>(null);
@@ -238,6 +239,7 @@ const SpotlightWindow = () => {
     setDraftMembers(new Set(l.members));
     setDraftName(l.label);
     setDraftIcon(l.icon);
+    setDraftVisibility(l.visibility ?? { mode: "always" });
     setSearch("");
     setManageOpen(true);
   };
@@ -248,6 +250,7 @@ const SpotlightWindow = () => {
     setDraftMembers(new Set());
     setDraftName("");
     setDraftIcon("users");
+    setDraftVisibility({ mode: "always" });
     setSearch("");
     setManageOpen(true);
   };
@@ -255,13 +258,13 @@ const SpotlightWindow = () => {
     const name = draftName.trim() || (isNewList ? "Untitled list" : "");
     if (isNewList) {
       const id = `wl_${Date.now()}`;
-      setLists((ls) => [...ls, { id, label: name, icon: draftIcon, members: Array.from(draftMembers) }]);
+      setLists((ls) => [...ls, { id, label: name, icon: draftIcon, members: Array.from(draftMembers), visibility: draftVisibility }]);
       setActiveId(id);
     } else {
       setLists((ls) =>
         ls.map((l) =>
           l.id === manageListId
-            ? { ...l, label: l.system ? l.label : name, icon: draftIcon, members: Array.from(draftMembers) }
+            ? { ...l, label: l.system ? l.label : name, icon: draftIcon, members: Array.from(draftMembers), visibility: draftVisibility }
             : l,
         ),
       );
