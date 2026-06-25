@@ -280,7 +280,7 @@ const DecisionInterface = ({
   onAct,
 }: {
   request: AccessRequest;
-  onAct: (id: string, s: ActState) => void;
+  onAct: (id: string, s: ActState, audience?: Audience) => void;
 }) => {
   const c = contacts.find((x) => x.id === request.contactId)!;
   const venue: Venue = (request as any).venue ?? "online";
