@@ -19,6 +19,11 @@ import AccessRequestDetailsPanel from "@/components/app/AccessRequestDetailsPane
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRelayState, AUDIENCE_LABEL, type Audience } from "@/lib/relayStore";
 
 type Channel = "voice" | "message" | "calendar" | "quicksync";
 type Venue = "online" | "onsite" | "hybrid";
