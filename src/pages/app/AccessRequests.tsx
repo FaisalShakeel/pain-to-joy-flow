@@ -19,6 +19,11 @@ import AccessRequestDetailsPanel from "@/components/app/AccessRequestDetailsPane
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRelayState, AUDIENCE_LABEL, type Audience } from "@/lib/relayStore";
 
 type Channel = "voice" | "message" | "calendar" | "quicksync";
 type Venue = "online" | "onsite" | "hybrid";
@@ -73,20 +78,27 @@ const AccessRequests = () => {
 
   // Undo support
   const undoRef = useRef<{ snapshot: AccessRequest[]; id: string } | null>(null);
+  const { assignAudience } = useRelayState();
 
   const handleAct = useCallback(
-    (id: string, state: ActState) => {
+    (id: string, state: ActState, audience?: Audience) => {
       undoRef.current = { snapshot: list, id };
       // pre-pick next so the UI advances smoothly
       const idx = pending.findIndex((r) => r.id === id);
       const nextId = pending[idx + 1]?.id ?? pending[idx - 1]?.id ?? null;
       actCtx(id, state);
+      if (state === "approved") {
+        const r = list.find((x) => x.id === id);
+        if (r) assignAudience(r.contactId, audience ?? "colleague");
+      }
       setCursorId(nextId);
       toast({
         title:
           state === "approved" ? "Approved" :
           state === "denied" ? "Declined" : "Scheduled",
-        description: "Tap Undo to reverse.",
+        description: state === "approved" && audience
+          ? `Audience set to ${AUDIENCE_LABEL[audience]}. Tap Undo to reverse.`
+          : "Tap Undo to reverse.",
         action: (
           <button
             onClick={() => {
@@ -103,7 +115,7 @@ const AccessRequests = () => {
         ) as any,
       });
     },
-    [list, pending, actCtx, setList],
+    [list, pending, actCtx, setList, assignAudience],
   );
 
   // Keyboard shortcuts
@@ -268,7 +280,7 @@ const DecisionInterface = ({
   onAct,
 }: {
   request: AccessRequest;
-  onAct: (id: string, s: ActState) => void;
+  onAct: (id: string, s: ActState, audience?: Audience) => void;
 }) => {
   const c = contacts.find((x) => x.id === request.contactId)!;
   const venue: Venue = (request as any).venue ?? "online";
@@ -380,12 +392,26 @@ const DecisionInterface = ({
 
       {/* Actions */}
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <button
-          onClick={() => onAct(request.id, "approved")}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-gradient-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition"
-        >
-          <Check className="w-4 h-4" /> Approve
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-gradient-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition"
+            >
+              <Check className="w-4 h-4" /> Approve as…
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center">
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Assign audience
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {(["colleague","client","friend","vip_family"] as Audience[]).map((a) => (
+              <DropdownMenuItem key={a} onClick={() => onAct(request.id, "approved", a)}>
+                {AUDIENCE_LABEL[a]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button
           onClick={() => onAct(request.id, "denied")}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl ghost-border bg-surface-low text-sm font-bold text-rose-600 hover:bg-rose-500/5 transition"

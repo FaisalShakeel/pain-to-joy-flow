@@ -54,49 +54,21 @@ const ICONS: Record<IconKey, React.ComponentType<{ className?: string }>> = {
   star: Star, layers: Layers, briefcase: Briefcase, crown: Crown,
   heart: Heart, home: Home, users: Users,
 };
-type VisibilityMode = "always" | "business" | "custom";
-interface VisibilityWindow {
-  mode: VisibilityMode;
-  from?: string; // "HH:MM" 24h, used when mode === "custom"
-  to?: string;   // "HH:MM" 24h, used when mode === "custom"
-}
 interface Watchlist {
   id: string;
   label: string;
   icon: IconKey;
   members: string[];
   system?: boolean;
-  visibility: VisibilityWindow;
 }
-const DEFAULT_VIS: Record<string, VisibilityWindow> = {
-  mine:       { mode: "always" },
-  all:        { mode: "always" },
-  colleagues: { mode: "business", from: "09:00", to: "18:00" },
-  clients:    { mode: "custom",   from: "09:00", to: "19:00" },
-  friends:    { mode: "always" },
-  family:     { mode: "always" },
-};
-const BUSINESS_WINDOW = { from: "09:00", to: "18:00" };
-const fmt12 = (hhmm?: string) => {
-  if (!hhmm) return "";
-  const [h, m] = hhmm.split(":").map(Number);
-  const ap = h >= 12 ? "PM" : "AM";
-  const hh = ((h + 11) % 12) + 1;
-  return m ? `${hh}:${String(m).padStart(2, "0")} ${ap}` : `${hh} ${ap}`;
-};
-const visibilityLabel = (v: VisibilityWindow) => {
-  if (v.mode === "always") return "24/7";
-  if (v.mode === "business") return `${fmt12(BUSINESS_WINDOW.from)}–${fmt12(BUSINESS_WINDOW.to)}`;
-  return `${fmt12(v.from)}–${fmt12(v.to)}`;
-};
 const ALL_IDS = (rows: RelayRow[]) => rows.map((r) => r.id);
 const DEFAULT_WATCHLISTS = (rows: RelayRow[]): Watchlist[] => [
-  { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true, visibility: DEFAULT_VIS.mine },
-  { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true, visibility: DEFAULT_VIS.all },
-  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"], visibility: DEFAULT_VIS.colleagues },
-  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"], visibility: DEFAULT_VIS.clients },
-  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"], visibility: DEFAULT_VIS.friends },
-  { id: "family",     label: "Family",       icon: "home",      members: [], visibility: DEFAULT_VIS.family },
+  { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true },
+  { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true },
+  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"] },
+  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"] },
+  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"] },
+  { id: "family",     label: "Family",       icon: "home",      members: [] },
 ];
 
 const ALL_ROWS: RelayRow[] = [
@@ -195,7 +167,7 @@ const SpotlightWindow = () => {
   const [draftMembers, setDraftMembers] = useState<Set<string>>(new Set());
   const [draftName, setDraftName] = useState<string>("");
   const [draftIcon, setDraftIcon] = useState<IconKey>("users");
-  const [draftVisibility, setDraftVisibility] = useState<VisibilityWindow>({ mode: "always" });
+  // (visibility moved to /app/settings/relay — watch lists are organization only)
   const [isNewList, setIsNewList] = useState(false);
   const [search, setSearch] = useState("");
   const [trash, setTrash] = useState<{ list: Watchlist; index: number } | null>(null);
@@ -239,7 +211,6 @@ const SpotlightWindow = () => {
     setDraftMembers(new Set(l.members));
     setDraftName(l.label);
     setDraftIcon(l.icon);
-    setDraftVisibility(l.visibility ?? { mode: "always" });
     setSearch("");
     setManageOpen(true);
   };
@@ -250,7 +221,6 @@ const SpotlightWindow = () => {
     setDraftMembers(new Set());
     setDraftName("");
     setDraftIcon("users");
-    setDraftVisibility({ mode: "always" });
     setSearch("");
     setManageOpen(true);
   };
@@ -258,13 +228,13 @@ const SpotlightWindow = () => {
     const name = draftName.trim() || (isNewList ? "Untitled list" : "");
     if (isNewList) {
       const id = `wl_${Date.now()}`;
-      setLists((ls) => [...ls, { id, label: name, icon: draftIcon, members: Array.from(draftMembers), visibility: draftVisibility }]);
+      setLists((ls) => [...ls, { id, label: name, icon: draftIcon, members: Array.from(draftMembers) }]);
       setActiveId(id);
     } else {
       setLists((ls) =>
         ls.map((l) =>
           l.id === manageListId
-            ? { ...l, label: l.system ? l.label : name, icon: draftIcon, members: Array.from(draftMembers), visibility: draftVisibility }
+            ? { ...l, label: l.system ? l.label : name, icon: draftIcon, members: Array.from(draftMembers) }
             : l,
         ),
       );
@@ -383,9 +353,6 @@ const SpotlightWindow = () => {
                     <I className="w-3.5 h-3.5 mr-2" />
                     <span className="flex-1">
                       {w.label}
-                      <span className="block text-[9px] text-slate-400 leading-none mt-0.5">
-                        Visible {visibilityLabel(w.visibility)}
-                      </span>
                     </span>
                     <span className="text-[10px] text-slate-400 mr-1">{w.members.length}</span>
                     {on && <Check className="w-3.5 h-3.5 text-emerald-600" />}
@@ -596,73 +563,13 @@ const SpotlightWindow = () => {
               </div>
             )}
             {/* Visibility Window — per-list cut-off policy */}
-            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
-              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-500">
-                Visibility Window
-              </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Choose when this list can see your live availability.
-              </p>
-              <div className="mt-2 grid grid-cols-1 gap-1.5">
-                {([
-                  { mode: "business" as const, title: "Business Hours Only", hint: "9:00 AM – 6:00 PM" },
-                  { mode: "custom" as const,   title: "Custom Hours",        hint: "Set your own cut-off time" },
-                  { mode: "always" as const,   title: "Always Show Availability", hint: "Visible 24/7" },
-                ]).map((opt) => {
-                  const on = draftVisibility.mode === opt.mode;
-                  return (
-                    <label
-                      key={opt.mode}
-                      className={cn(
-                        "flex items-start gap-2 px-2.5 py-2 rounded-md border cursor-pointer transition",
-                        on ? "border-emerald-500 bg-white ring-1 ring-emerald-500/30"
-                           : "border-slate-200 bg-white hover:bg-slate-50",
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="visibility-mode"
-                        className="mt-0.5 accent-emerald-600"
-                        checked={on}
-                        onChange={() =>
-                          setDraftVisibility((v) =>
-                            opt.mode === "custom"
-                              ? { mode: "custom", from: v.from ?? "09:00", to: v.to ?? "18:00" }
-                              : { mode: opt.mode },
-                          )
-                        }
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-semibold text-slate-800 leading-tight">{opt.title}</p>
-                        <p className="text-[10px] text-slate-500 leading-tight">{opt.hint}</p>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-              {draftVisibility.mode === "custom" && (
-                <div className="mt-2 flex items-center gap-2">
-                  <label className="text-[11px] font-semibold text-slate-600">From</label>
-                  <input
-                    type="time"
-                    value={draftVisibility.from ?? "09:00"}
-                    onChange={(e) =>
-                      setDraftVisibility((v) => ({ ...v, mode: "custom", from: e.target.value }))
-                    }
-                    className="h-8 px-2 rounded-md border border-slate-200 bg-white text-[12px]"
-                  />
-                  <label className="text-[11px] font-semibold text-slate-600">Until</label>
-                  <input
-                    type="time"
-                    value={draftVisibility.to ?? "18:00"}
-                    onChange={(e) =>
-                      setDraftVisibility((v) => ({ ...v, mode: "custom", to: e.target.value }))
-                    }
-                    className="h-8 px-2 rounded-md border border-slate-200 bg-white text-[12px]"
-                  />
-                </div>
-              )}
-            </div>
+            <p className="mt-3 text-[11px] text-slate-500 px-1">
+              Visibility rules moved to{" "}
+              <Link to="/app/settings/relay" className="font-semibold text-slate-800 underline">
+                Settings · Relay Control
+              </Link>
+              .
+            </p>
           </div>
 
           {/* Search */}
