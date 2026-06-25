@@ -353,9 +353,6 @@ const SpotlightWindow = () => {
                     <I className="w-3.5 h-3.5 mr-2" />
                     <span className="flex-1">
                       {w.label}
-                      <span className="block text-[9px] text-slate-400 leading-none mt-0.5">
-                        Visible {visibilityLabel(w.visibility)}
-                      </span>
                     </span>
                     <span className="text-[10px] text-slate-400 mr-1">{w.members.length}</span>
                     {on && <Check className="w-3.5 h-3.5 text-emerald-600" />}
