@@ -392,12 +392,26 @@ const DecisionInterface = ({
 
       {/* Actions */}
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <button
-          onClick={() => onAct(request.id, "approved")}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-gradient-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition"
-        >
-          <Check className="w-4 h-4" /> Approve
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-gradient-primary text-primary-foreground text-sm font-bold shadow-elevated hover:opacity-95 transition"
+            >
+              <Check className="w-4 h-4" /> Approve as…
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center">
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Assign audience
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {(["colleague","client","friend","vip_family"] as Audience[]).map((a) => (
+              <DropdownMenuItem key={a} onClick={() => onAct(request.id, "approved", a)}>
+                {AUDIENCE_LABEL[a]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button
           onClick={() => onAct(request.id, "denied")}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl ghost-border bg-surface-low text-sm font-bold text-rose-600 hover:bg-rose-500/5 transition"
