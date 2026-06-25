@@ -78,20 +78,27 @@ const AccessRequests = () => {
 
   // Undo support
   const undoRef = useRef<{ snapshot: AccessRequest[]; id: string } | null>(null);
+  const { assignAudience } = useRelayState();
 
   const handleAct = useCallback(
-    (id: string, state: ActState) => {
+    (id: string, state: ActState, audience?: Audience) => {
       undoRef.current = { snapshot: list, id };
       // pre-pick next so the UI advances smoothly
       const idx = pending.findIndex((r) => r.id === id);
       const nextId = pending[idx + 1]?.id ?? pending[idx - 1]?.id ?? null;
       actCtx(id, state);
+      if (state === "approved") {
+        const r = list.find((x) => x.id === id);
+        if (r) assignAudience(r.contactId, audience ?? "colleague");
+      }
       setCursorId(nextId);
       toast({
         title:
           state === "approved" ? "Approved" :
           state === "denied" ? "Declined" : "Scheduled",
-        description: "Tap Undo to reverse.",
+        description: state === "approved" && audience
+          ? `Audience set to ${AUDIENCE_LABEL[audience]}. Tap Undo to reverse.`
+          : "Tap Undo to reverse.",
         action: (
           <button
             onClick={() => {
@@ -108,7 +115,7 @@ const AccessRequests = () => {
         ) as any,
       });
     },
-    [list, pending, actCtx, setList],
+    [list, pending, actCtx, setList, assignAudience],
   );
 
   // Keyboard shortcuts
