@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio } from "lucide-react";
+import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio, Eye } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import Avatar from "@/components/app/Avatar";
 import BypassSettingsPanel from "@/components/app/BypassSettingsPanel";
@@ -46,6 +46,27 @@ const AccountSettings = () => {
                   <h3 className="font-headline font-bold text-primary">Relay Control</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Single source of truth for who sees your availability, when, and for how long.
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </div>
+          </Link>
+
+          {/* Availability Disclosure */}
+          <Link
+            to="/app/settings/disclosure"
+            className="block rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient hover:bg-surface transition"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
+                  <Eye className="w-4 h-4" />
+                </span>
+                <div>
+                  <h3 className="font-headline font-bold text-primary">Availability Disclosure</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Privacy mode, status mapping, audience visibility, temporary overrides and trust policies.
                   </p>
                 </div>
               </div>
