@@ -443,7 +443,7 @@ const NewOverrideDialog = ({
 const AudienceField = ({ label, value, onChange, allowNormal }: { label: string; value: string; onChange: (v: string) => void; allowNormal?: boolean }) => (
   <div>
     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</label>
-    <Select value={value} onValueChange={(v) => onChange(v as T)}>
+    <Select value={value} onValueChange={(v) => onChange(v)}>
       <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue /></SelectTrigger>
       <SelectContent>
         {allowNormal && <SelectItem value="normal">Normal</SelectItem>}
