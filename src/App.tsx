@@ -50,6 +50,7 @@ import Analytics from "./pages/app/Analytics.tsx";
 import ShareProfile from "./pages/app/ShareProfile.tsx";
 import AccountSettings from "./pages/app/AccountSettings.tsx";
 import RelayControl from "./pages/app/RelayControl.tsx";
+import DisclosureCenter from "./pages/app/DisclosureCenter.tsx";
 import EditProfile from "./pages/app/EditProfile.tsx";
 import Upgrade from "./pages/app/Upgrade.tsx";
 import Explore from "./pages/app/Explore.tsx";
@@ -133,6 +134,7 @@ const App = () => (
           <Route path="/app/reserved" element={<Reserved />} />
           <Route path="/app/settings" element={<AccountSettings />} />
           <Route path="/app/settings/relay" element={<RelayControl />} />
+          <Route path="/app/settings/disclosure" element={<DisclosureCenter />} />
           <Route path="/app/settings/edit" element={<EditProfile />} />
           <Route path="/app/upgrade" element={<Upgrade />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
