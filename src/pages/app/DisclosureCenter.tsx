@@ -440,7 +440,7 @@ const NewOverrideDialog = ({
   );
 };
 
-const AudienceField = <T extends string>({ label, value, onChange, allowNormal }: { label: string; value: T; onChange: (v: T) => void; allowNormal?: boolean }) => (
+const AudienceField = ({ label, value, onChange, allowNormal }: { label: string; value: string; onChange: (v: string) => void; allowNormal?: boolean }) => (
   <div>
     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</label>
     <Select value={value} onValueChange={(v) => onChange(v as T)}>
