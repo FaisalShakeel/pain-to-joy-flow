@@ -416,9 +416,9 @@ const NewOverrideDialog = ({
             <Input type="number" min={1} max={365} className="mt-1 h-9 text-sm" value={days} onChange={(e) => setDays(Math.max(1, Number(e.target.value) || 1))} />
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <AudienceField label="Clients" value={clients} onChange={setClients} />
-            <AudienceField label="Public" value={publicAud} onChange={setPublicAud} />
-            <AudienceField label="Family" value={family} onChange={setFamily} allowNormal />
+            <AudienceField label="Clients" value={clients} onChange={(v) => setClients(v as PublishedStatus)} />
+            <AudienceField label="Public" value={publicAud} onChange={(v) => setPublicAud(v as PublishedStatus)} />
+            <AudienceField label="Family" value={family} onChange={(v) => setFamily(v as PublishedStatus | "normal")} allowNormal />
           </div>
         </div>
         <DialogFooter>
