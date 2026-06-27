@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import Avatar from "./Avatar";
 import { Link } from "react-router-dom";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
+import CoordinationBoard from "./spotlight/CoordinationBoard";
 
 /* ------------------------------------------------------------------ */
 /* Spotlight Relay Board — Mobile-First Availability Intelligence     */
