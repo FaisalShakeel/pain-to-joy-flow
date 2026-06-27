@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   CalendarDays, Bell, Megaphone, PartyPopper, HelpCircle, Zap, FileText,
   CheckCircle2, Home, Heart, Briefcase, Gem, Star, Users as UsersIcon,
-  Layers, Plus, ChevronDown, Paperclip, X,
+  Layers, Plus, ChevronDown, Paperclip,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
