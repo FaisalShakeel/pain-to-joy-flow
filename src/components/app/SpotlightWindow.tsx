@@ -104,20 +104,20 @@ const BOARD_COLOR: Record<BoardStatus, { bg: string; dot: string; text: string }
   driving:   { bg: "bg-violet-500",  dot: "bg-violet-500",  text: "text-violet-600"  },
 };
 const BOARD_LEFT: BoardTile[] = [
-  { id: "elena",  name: "Elena M.", initials: "EM", status: "available", context: "Coffee shop co-working. Open for sync.",            time: "2m ago" },
-  { id: "kl",     name: "Kai L.",   initials: "KL", status: "busy",      context: "On a call. Try again at 4 PM.",                     time: "2m ago" },
-  { id: "ahmed",  name: "Ahmed",    initials: "AH", status: "offline",   context: "Client meeting until 2:30 PM (Architectural Hub).", time: "2m ago" },
-  { id: "rashid", name: "Rashid",   initials: "RA", status: "available", context: "Open for Quick Sync calls after sprint review.",    time: "2m ago" },
-  { id: "lisa",   name: "Lisa S.",  initials: "LS", status: "available", context: "Available for support.",                            time: "2m ago" },
-  { id: "maya",   name: "Maya T.",  initials: "MT", status: "offline",   context: "Out of office. Back tomorrow.",                     time: "2m ago" },
+  { id: "elena-vance",   name: "Elena M.", initials: "EM", status: "available", context: "Coffee shop co-working. Open for sync.",            time: "2m ago" },
+  { id: "kenji-tanaka",  name: "Kai L.",   initials: "KL", status: "busy",      context: "On a call. Try again at 4 PM.",                     time: "2m ago" },
+  { id: "samir-khan",    name: "Ahmed",    initials: "AH", status: "offline",   context: "Client meeting until 2:30 PM (Architectural Hub).", time: "2m ago" },
+  { id: "rashid-al-amir",name: "Rashid",   initials: "RA", status: "available", context: "Open for Quick Sync calls after sprint review.",    time: "2m ago" },
+  { id: "amelia-reyes",  name: "Lisa S.",  initials: "LS", status: "available", context: "Available for support.",                            time: "2m ago" },
+  { id: "mira-coelho",   name: "Maya T.",  initials: "MT", status: "offline",   context: "Out of office. Back tomorrow.",                     time: "2m ago" },
 ];
 const BOARD_RIGHT: BoardTile[] = [
-  { id: "sarah",  name: "Sarah",    initials: "SA", status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",   time: "2m ago" },
-  { id: "jd",     name: "Jordan",   initials: "JD", status: "focus",     context: "Deep work block until 5:00 PM.",                   time: "2m ago" },
-  { id: "rt",     name: "Riya T.",  initials: "RT", status: "driving",   context: "Driving home. ETA 30 min.",                        time: "2m ago" },
-  { id: "daniel", name: "Daniel S.",initials: "DS", status: "focus",     context: "Focus time. Do not disturb.",                      time: "2m ago" },
-  { id: "priya",  name: "Priya C.", initials: "PC", status: "focus",     context: "Code review focus block.",                         time: "2m ago" },
-  { id: "naveed", name: "Naveed W.",initials: "NW", status: "driving",   context: "On the way to client site.",                       time: "2m ago" },
+  { id: "sarah-jenkins", name: "Sarah",    initials: "SA", status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",   time: "2m ago" },
+  { id: "julian-vane",   name: "Jordan",   initials: "JD", status: "focus",     context: "Deep work block until 5:00 PM.",                   time: "2m ago" },
+  { id: "yara-nasser",   name: "Riya T.",  initials: "RT", status: "driving",   context: "Driving home. ETA 30 min.",                        time: "2m ago" },
+  { id: "david-okafor",  name: "Daniel S.",initials: "DS", status: "focus",     context: "Focus time. Do not disturb.",                      time: "2m ago" },
+  { id: "priya-shah",    name: "Priya C.", initials: "PC", status: "focus",     context: "Code review focus block.",                         time: "2m ago" },
+  { id: "mark-thompson", name: "Naveed W.",initials: "NW", status: "driving",   context: "On the way to client site.",                       time: "2m ago" },
 ];
 
 const BoardRow = ({ t }: { t: BoardTile }) => {
