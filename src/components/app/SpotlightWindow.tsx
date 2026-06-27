@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import Avatar from "./Avatar";
 import { Link } from "react-router-dom";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
+import CoordinationBoard from "./spotlight/CoordinationBoard";
 
 /* ------------------------------------------------------------------ */
 /* Spotlight Relay Board — Mobile-First Availability Intelligence     */
@@ -462,38 +463,7 @@ const SpotlightWindow = () => {
       </Link>
       </>
       ) : (
-      <div className="p-3 bg-[#F8FAFC]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* LEFT: Available / Busy / Offline */}
-          <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-slate-100 text-left">
-              <span className="text-[13px] font-bold tracking-[0.08em]">
-                <span className="text-emerald-600">AVAILABLE</span>
-                <span className="text-slate-300 mx-1.5">/</span>
-                <span className="text-amber-600">BUSY</span>
-                <span className="text-slate-300 mx-1.5">/</span>
-                <span className="text-slate-500">OFFLINE</span>
-              </span>
-            </div>
-            <div>
-              {BOARD_LEFT.map((t) => <BoardRow key={t.id} t={t} />)}
-            </div>
-          </div>
-          {/* RIGHT: Driving / Focus */}
-          <div className="rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-slate-100 text-left">
-              <span className="text-[13px] font-bold tracking-[0.08em]">
-                <span className="text-violet-600">DRIVING</span>
-                <span className="text-slate-300 mx-1.5">/</span>
-                <span className="text-rose-600">FOCUS</span>
-              </span>
-            </div>
-            <div>
-              {BOARD_RIGHT.map((t) => <BoardRow key={t.id} t={t} />)}
-            </div>
-          </div>
-        </div>
-      </div>
+      <CoordinationBoard />
       )}
 
       {/* Manage Watchlists Sheet */}
