@@ -521,7 +521,41 @@ export const transactions: Transaction[] = [
   { id: "tx3", description: "Add-on · Power Calls (10)", amount: "$4.00", date: "Feb 28, 2026", status: "Paid" },
 ];
 
-export const findContact = (id: string) => contacts.find((c) => c.id === id);
+const CONTACT_ID_ALIASES: Record<string, string> = {
+  julian: "julian-vane",
+  rashid: "rashid-al-amir",
+  elena: "elena-vance",
+  sarah: "sarah-jenkins",
+  mark: "mark-thompson",
+  alex: "alex-rivera",
+  noor: "noor-hassan",
+  david: "david-okafor",
+  lin: "lin-wei",
+  amelia: "amelia-reyes",
+  tomas: "tomas-berg",
+  priya: "priya-shah",
+  owen: "owen-blake",
+  isla: "isla-moreau",
+  kenji: "kenji-tanaka",
+  hana: "hana-park",
+  leo: "leo-fontaine",
+  mira: "mira-coelho",
+  samir: "samir-khan",
+  yara: "yara-nasser",
+  kl: "kenji-tanaka",
+  ah: "samir-khan",
+  ls: "amelia-reyes",
+  mt: "mira-coelho",
+  jd: "julian-vane",
+  rt: "yara-nasser",
+  ds: "david-okafor",
+  pc: "priya-shah",
+  nw: "mark-thompson",
+};
+
+export const resolveContactId = (id: string) => CONTACT_ID_ALIASES[id] ?? id;
+
+export const findContact = (id: string) => contacts.find((c) => c.id === resolveContactId(id));
 
 /* ============================================================
  * Owner-controlled profile schema (input = output)

@@ -4,7 +4,7 @@ import { format, addDays, addWeeks } from "date-fns";
 import {
   ArrowLeft, Zap, Calendar as CalIcon, Clock, Timer, Copy as CloneIcon, Lock, Check,
   Globe, Users as UsersIcon, Crown, Sparkles, Plus, Pencil, Trash2, Copy,
-  ChevronRight, X, CheckCircle2,
+  ChevronRight, X, CheckCircle2, CalendarPlus, Minus, Radio,
 } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
 import { Calendar } from "@/components/ui/calendar";
@@ -128,6 +128,7 @@ const QuickSyncBuilder = () => {
   const [justCreated, setJustCreated] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [relay, setRelay] = useState<RelayConfig>({ ...DEFAULT_RELAY, tone: "offer" });
+  const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
   const { createRelay } = useSpotlight();
 
   const isEditing = !!draft.id;
@@ -373,311 +374,396 @@ const QuickSyncBuilder = () => {
   return (
     <AppShell
       title="Quick Sync Builder"
-      subtitle="Create it. Manage it. Stay interruption-free."
+      subtitle="Fast availability for short, intentional conversations."
       actions={
         <div className="flex items-center gap-2">
           <SchedulingSwitcher current="quicksync" />
         </div>
       }
     >
-      {/* CREATION PANEL */}
-      <section className="rounded-3xl bg-surface-lowest ghost-border p-4 md:p-6 shadow-ambient">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary text-primary-foreground">
-            <Zap className="w-4 h-4" />
-          </span>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">{isEditing ? "Edit" : "New"} Quick Sync</p>
-            <h2 className="font-headline font-extrabold text-primary text-base md:text-lg">Short-call organizer for fast coordination</h2>
+      <DailyOccupancy
+        date={draft.date}
+        onBlockClick={(id, action) => {
+          const s = slots.find((x) => x.id === id);
+          if (!s) return;
+          if (action === "edit") editSlot(s);
+          else if (action === "delete") {
+            setSlots((p) => p.filter((x) => x.id !== id));
+            toast({ title: "Quick Sync deleted" });
+          } else if (action === "clone") {
+            setDraft({ ...s, id: undefined, date: toISO(addDays(new Date(s.date), 1)), dateTo: undefined, cloneDates: [] });
+            setStep(1);
+            setDirty(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            toast({ title: "Cloning availability", description: "Pick a new date and save to create." });
+          }
+        }}
+      />
+
+      <aside className="mt-3 rounded-2xl bg-gradient-vault text-primary-foreground p-3 md:p-4 shadow-elevated">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-x-2 gap-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold shrink-0">Live Preview</span>
+          <span className="text-primary-foreground/30 hidden md:inline">/</span>
+          <p className="text-[11px] text-primary-foreground/90 leading-snug">
+            <span className="whitespace-nowrap">{format(new Date(draft.date), "MMMM d, yyyy")}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">Quick Sync</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{draft.callMin} Min + {draft.bufferMin} Min Buffer</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{fmtTime(draft.startMin)}–{fmtTime(draft.endMin)}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{accessMeta[draft.access].label}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{draft.booking === "instant" ? "Pre-Approved" : "Approval-Based"}</span>
+            <span className="text-primary-foreground/40 mx-1">/</span>
+            <span className="whitespace-nowrap">{count} Slot{count === 1 ? "" : "s"}</span>
+          </p>
+        </div>
+      </aside>
+
+      <section className="mt-3 rounded-2xl bg-surface-lowest ghost-border p-3 md:p-4 shadow-ambient">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="min-w-0">
+            <p className="font-headline font-extrabold text-primary text-[13px] uppercase tracking-[0.18em] mb-2">
+              Select Date(s)
+            </p>
+            <p className="text-[10px] text-muted-foreground mb-2 leading-snug">
+              Tap to toggle · Shift-click (or tap a second date) for a continuous range
+            </p>
+            <div className="rounded-xl ghost-border bg-surface-lowest p-1">
+              {(() => {
+                const selectedISO = new Set<string>();
+                const startD = new Date(draft.date);
+                const endD = draft.dateTo ? new Date(draft.dateTo) : startD;
+                for (let d = new Date(startD); d <= endD; d = addDays(d, 1)) selectedISO.add(toISO(d));
+                for (const c of draft.cloneDates ?? []) selectedISO.add(c);
+                const selectedDates = Array.from(selectedISO).map((s) => new Date(s));
+
+                const commit = (isoSet: Set<string>) => {
+                  const sorted = Array.from(isoSet).sort();
+                  if (sorted.length === 0) {
+                    setDraft((dr) => ({ ...dr, date: toISO(new Date()), dateTo: undefined, cloneDates: [] }));
+                    setDirty(true);
+                    return;
+                  }
+                  let contiguous = true;
+                  for (let i = 1; i < sorted.length; i++) {
+                    const prev = new Date(sorted[i - 1]);
+                    const cur = new Date(sorted[i]);
+                    if (toISO(addDays(prev, 1)) !== toISO(cur)) { contiguous = false; break; }
+                  }
+                  if (contiguous && sorted.length > 1) {
+                    setDraft((dr) => ({ ...dr, date: sorted[0], dateTo: sorted[sorted.length - 1], cloneDates: [] }));
+                  } else {
+                    setDraft((dr) => ({ ...dr, date: sorted[0], dateTo: undefined, cloneDates: sorted.slice(1) }));
+                  }
+                  setDirty(true);
+                };
+
+                const sortedSel = Array.from(selectedISO).sort();
+                const rangeStarts: Date[] = [];
+                const rangeEnds: Date[] = [];
+                const rangeMids: Date[] = [];
+                let runStart = 0;
+                for (let i = 0; i <= sortedSel.length; i++) {
+                  const endRun =
+                    i === sortedSel.length ||
+                    (i > 0 && toISO(addDays(new Date(sortedSel[i - 1]), 1)) !== sortedSel[i]);
+                  if (endRun) {
+                    const len = i - runStart;
+                    if (len >= 2) {
+                      rangeStarts.push(new Date(sortedSel[runStart]));
+                      rangeEnds.push(new Date(sortedSel[i - 1]));
+                      for (let k = runStart + 1; k < i - 1; k++) rangeMids.push(new Date(sortedSel[k]));
+                    }
+                    runStart = i;
+                  }
+                }
+
+                return (
+                  <Calendar
+                    mode="multiple"
+                    selected={selectedDates}
+                    modifiers={{ range_start: rangeStarts, range_end: rangeEnds, range_middle: rangeMids }}
+                    modifiersClassNames={{
+                      range_start: "bg-primary text-primary-foreground rounded-l-md rounded-r-none",
+                      range_end: "bg-primary text-primary-foreground rounded-r-md rounded-l-none",
+                      range_middle: "bg-primary/25 text-primary rounded-none",
+                    }}
+                    onDayClick={(day, _m, e) => {
+                      const iso = toISO(day);
+                      const shift = (e as React.MouseEvent).shiftKey;
+                      const next = new Set(selectedISO);
+                      if (shift && rangeAnchor) {
+                        const a = new Date(rangeAnchor);
+                        const b = day;
+                        const [from, to] = a <= b ? [a, b] : [b, a];
+                        for (let d = new Date(from); d <= to; d = addDays(d, 1)) next.add(toISO(d));
+                        commit(next);
+                        setRangeAnchor(iso);
+                        return;
+                      }
+                      if (rangeAnchor && rangeAnchor !== iso && !next.has(iso)) {
+                        const a = new Date(rangeAnchor);
+                        const b = day;
+                        const [from, to] = a <= b ? [a, b] : [b, a];
+                        for (let d = new Date(from); d <= to; d = addDays(d, 1)) next.add(toISO(d));
+                        commit(next);
+                        setRangeAnchor(null);
+                        return;
+                      }
+                      if (next.has(iso)) {
+                        next.delete(iso);
+                        setRangeAnchor(null);
+                      } else {
+                        next.add(iso);
+                        setRangeAnchor(iso);
+                      }
+                      commit(next);
+                    }}
+                    className="pointer-events-auto w-full"
+                  />
+                );
+              })()}
+            </div>
+            <div className="mt-2 rounded-xl ghost-border bg-surface-lowest px-3 py-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Selected</span>
+              {(() => {
+                const isoSet = new Set<string>();
+                const sD = new Date(draft.date);
+                const eD = draft.dateTo ? new Date(draft.dateTo) : sD;
+                for (let d = new Date(sD); d <= eD; d = addDays(d, 1)) isoSet.add(toISO(d));
+                for (const c of draft.cloneDates ?? []) isoSet.add(c);
+                const sorted = Array.from(isoSet).sort();
+                const n = sorted.length;
+                if (n === 0) return <span className="text-[11px] text-muted-foreground">None</span>;
+                if (draft.dateTo && draft.dateTo !== draft.date && (draft.cloneDates?.length ?? 0) === 0) {
+                  return (
+                    <span className="text-[11px] font-bold text-primary">
+                      {format(new Date(draft.date), "MMM d")} – {format(new Date(draft.dateTo), "MMM d")}
+                      <span className="ml-2 text-muted-foreground font-normal">· {n} Days</span>
+                    </span>
+                  );
+                }
+                if (n === 1) return <span className="text-[11px] font-bold text-primary">{format(new Date(sorted[0]), "EEE, MMM d")}</span>;
+                return <span className="text-[11px] font-bold text-primary">{n} Dates</span>;
+              })()}
+            </div>
           </div>
-          {isEditing && (
-            <button onClick={reset} className="ml-auto text-[11px] font-bold text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-              <X className="w-3 h-3" /> Discard edit
-            </button>
-          )}
-        </div>
 
-        {/* DAILY OCCUPANCY (today) */}
-        <div className="mb-5">
-          <DailyOccupancy
-            date={draft.date}
-            onBlockClick={(id, action) => {
-              const s = slots.find((x) => x.id === id);
-              if (!s) return;
-              if (action === "edit") editSlot(s);
-              else if (action === "delete") {
-                setSlots((p) => p.filter((x) => x.id !== id));
-                toast({ title: "Quick Sync deleted" });
-              } else if (action === "clone") {
-                setDraft({ ...s, id: undefined, date: toISO(addDays(new Date(s.date), 1)), dateTo: undefined, cloneDates: [] });
-                setStep(1);
-                setDirty(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                toast({ title: "Cloning availability", description: "Pick a new date and save to create." });
-              }
-            }}
-          />
-        </div>
+          <div className="min-w-0 flex flex-col">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-headline font-extrabold text-primary text-[13px] uppercase tracking-[0.18em]">
+                Slot Builder
+              </p>
+              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">
+                {isEditing ? "Editing" : "New"}
+              </span>
+            </div>
 
-        {/* Stepper with fixed Back/Next anchors */}
-        <div className="flex items-center gap-2 mb-5">
-          <button
-            onClick={reset}
-            title="Start a fresh slot"
-            aria-label="New slot"
-            className="shrink-0 grid place-items-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:opacity-90"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
-            {[
-              "Date", "Call Size", "Window", "Buffer", "Clone", "Booking", "Access",
-            ].map((label, i) => {
-              const n = i + 1;
-              const active = step === n;
-              const done = step > n;
-              return (
-                <button
-                  key={label}
-                  onClick={() => setStep(n)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition",
-                    active && "bg-amber-500 text-white",
-                    !active && done && "bg-emerald-500/15 text-emerald-700",
-                    !active && !done && "bg-surface-low text-muted-foreground hover:text-primary",
-                  )}
-                >
-                  <span className={cn("grid place-items-center w-4 h-4 rounded-full text-[9px]", active ? "bg-white/25" : done ? "bg-emerald-500/20" : "bg-background/60")}>
-                    {done ? <Check className="w-2.5 h-2.5" /> : n}
-                  </span>
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          {isEditing && dirty ? (
-            <button
-              onClick={save}
-              disabled={hasDraftConflict}
-              title={hasDraftConflict ? "Resolve date/time conflict before saving" : undefined}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <CheckCircle2 className="w-3 h-3" /> Update
-            </button>
-          ) : step < 7 ? (
-            <button
-              onClick={() => setStep((s) => Math.min(7, s + 1))}
-              disabled={hasDraftConflict || justCreated}
-              title={
-                hasDraftConflict
-                  ? "Time conflict on this date — change date or window"
-                  : justCreated
-                  ? "Press + to start a new slot"
-                  : undefined
-              }
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Next <ChevronRight className="w-3 h-3" />
-            </button>
-          ) : (
-            <button
-              onClick={save}
-              disabled={hasDraftConflict || justCreated}
-              title={
-                hasDraftConflict
-                  ? "Time conflict on this date — change date or window"
-                  : justCreated
-                  ? "Press + to start a new slot"
-                  : undefined
-              }
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold shadow-elevated disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <CheckCircle2 className="w-3 h-3" /> {isEditing ? "Done" : "Create"}
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          {/* Step content */}
-          <div className="space-y-4">
-            {step === 1 && (
-              <Section title="Step 1 — Select Date" icon={CalIcon} hint="Pick the day this Quick Sync block runs">
-                <DateRangePopover
-                  from={draft.date}
-                  to={draft.dateTo}
-                onChange={(f, t) => { setDraft((d) => ({ ...d, date: f, dateTo: t && t !== f ? t : undefined })); setDirty(true); }}
-                />
-                {draft.dateTo && draft.dateTo !== draft.date && (
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    Creates one Quick Sync per day across the selected range.
-                  </p>
-                )}
-              </Section>
-            )}
-
-            {step === 2 && (
-              <Section title="Step 2 — Call Size" icon={Timer} hint="How long is each mini-call?">
-                <div className="flex flex-wrap gap-2">
-                  {([3, 5, 8] as CallMin[]).map((d) => (
-                    <Pill key={d} active={draft.callMin === d} onClick={() => set("callMin", d)}>{d} minutes</Pill>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground">Each slot will be <strong className="text-primary">{draft.callMin} min</strong> long. Used to auto-build the window.</p>
-              </Section>
-            )}
-
-            {step === 3 && (
-              <Section title="Step 3 — Time Window" icon={Clock} hint="Set Start, End, and Slot Count — calculations update live.">
-                <WindowTabs
-                  startMin={draft.startMin}
-                  endMin={draft.endMin}
-                  callMin={draft.callMin}
-                  count={count}
-                  onStart={(v) => set("startMin", v)}
-                  onEnd={(v) => set("endMin", v)}
-                  onCount={(n) => set("endMin", Math.min(24 * 60, draft.startMin + Math.max(1, n) * draft.callMin))}
-                />
-              </Section>
-            )}
-
-            {step === 4 && (
-              <Section title="Step 4 — Flexible Buffer" icon={Timer} hint="Allows early-join and soft extension. Does NOT add gaps between slots.">
-                <div className="flex flex-wrap gap-2">
-                  {([1, 2, 3] as BufferMin[]).map((b) => (
-                    <Pill key={b} active={draft.bufferMin === b} onClick={() => set("bufferMin", b)}>{b} minute{b > 1 ? "s" : ""}</Pill>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Participants may join up to <strong className="text-primary">{draft.bufferMin} min</strong> early or run <strong className="text-primary">{draft.bufferMin} min</strong> over. Slot timing stays back-to-back.
-                </p>
-              </Section>
-            )}
-
-            {step === 5 && (
-              <Section title="Step 5 — Clone" icon={CloneIcon} hint="Pick additional dates to clone this slot to. Click again to unselect.">
-                <CloneDatePicker
-                  baseDate={draft.date}
-                  baseDateTo={draft.dateTo}
-                  value={draft.cloneDates ?? []}
-                  onChange={(arr) => set("cloneDates", arr)}
-                  startMin={draft.startMin}
-                  endMin={draft.endMin}
-                  excludeId={draft.id}
-                />
-              </Section>
-            )}
-
-            {step === 6 && (
-              <Section title="Step 6 — Booking Mode" icon={Lock}>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["instant", "approval"] as const).map((b) => (
+            <BuilderRow label="Mode">
+              <div className="inline-flex w-full rounded-lg ghost-border bg-surface-lowest p-0.5 gap-0.5">
+                {([
+                  ["public", "Open"],
+                  ["contacts", "Contacts"],
+                  ["priority", "Priority"],
+                ] as const).map(([k, l]) => {
+                  const active = draft.access === k;
+                  return (
                     <button
-                      key={b}
-                      onClick={() => set("booking", b)}
+                      key={k}
+                      type="button"
+                      onClick={() => {
+                        set("access", k as Access);
+                        if (k === "priority") set("booking", "approval");
+                        else set("booking", "instant");
+                      }}
+                      aria-pressed={active}
                       className={cn(
-                        "p-3 rounded-xl text-left transition",
-                        draft.booking === b ? "bg-primary text-primary-foreground shadow-glass" : "bg-surface-low text-muted-foreground hover:text-primary",
+                        "flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[11px] font-bold transition",
+                        active ? "bg-emerald-500 text-white shadow-glass" : "text-muted-foreground hover:text-primary",
                       )}
                     >
-                      <p className="text-xs font-bold flex items-center gap-1.5">
-                        {b === "instant" ? <Check className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                        {b === "instant" ? "Instant Booking" : "Approval Required"}
-                      </p>
-                      <p className="text-[10px] mt-1 opacity-80 leading-snug">
-                        {b === "instant" ? "Auto-reserved on selection" : "Manual approval before booking"}
-                      </p>
+                      <Zap className="w-3.5 h-3.5" /> {l}
                     </button>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {step === 7 && (
-              <Section title="Step 7 — Access Control" icon={UsersIcon} hint="Choose who can book">
-                <div className="grid grid-cols-2 gap-2">
-                  {(Object.keys(accessMeta) as Access[]).map((a) => {
-                    const M = accessMeta[a];
-                    return (
-                      <button
-                        key={a}
-                        onClick={() => set("access", a)}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition",
-                          draft.access === a ? "bg-primary text-primary-foreground" : `${M.cls} hover:opacity-90`,
-                        )}
-                      >
-                        <M.icon className="w-3.5 h-3.5" /> {M.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
-            )}
-
-          </div>
-
-          {/* Live preview — horizontal */}
-          <aside className="rounded-2xl bg-gradient-vault text-primary-foreground p-4 shadow-elevated">
-            <div className="flex items-center gap-2 mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Live preview</p>
-              <span className="text-[10px] text-primary-foreground/50">·</span>
-              <h4 className="font-headline font-extrabold text-sm">Quick Sync</h4>
-              {isEditing && draft.id && (
-                <div className="ml-auto flex items-center gap-1">
-                  <button onClick={() => setStep(1)} className="px-2 py-0.5 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-[10px] font-bold">Edit</button>
-                  <button onClick={() => { const s = slots.find((x) => x.id === draft.id); if (s) duplicate(s, "tomorrow"); }} className="px-2 py-0.5 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-[10px] font-bold">Clone</button>
-                  <button onClick={() => setConfirmDelete(draft.id!)} className="px-2 py-0.5 rounded-full bg-rose-500/30 hover:bg-rose-500/40 text-[10px] font-bold">Delete</button>
-                  <button onClick={reset} className="px-2 py-0.5 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 text-[10px] font-bold">Close</button>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap items-stretch gap-3 text-[10px]">
-              <div className="flex-1 min-w-[140px]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60">When</p>
-                <p className="text-[11px] text-primary-foreground/90 mt-0.5">{format(new Date(draft.date), "EEE, MMM d")}</p>
-                <p className="text-[11px] text-primary-foreground/90">{fmtTime(draft.startMin)} – {fmtTime(draft.endMin)}</p>
+                  );
+                })}
               </div>
-              <Stat label="Call" value={`${draft.callMin}m`} />
-              <Stat label="Buffer" value={`${draft.bufferMin}m`} />
-              <Stat label="Sub-slots" value={`${count}`} />
-              <Stat label="Clones" value={`${(draft.cloneDates ?? []).length}`} />
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-                  {draft.booking === "instant" ? "Instant" : "Approval"}
+            </BuilderRow>
+
+            <div className="py-1.5 flex items-center gap-3 border-b border-border/40">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Call Size
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold">
-                  {accessMeta[draft.access].label}
+                <CompactSelect
+                  value={String(draft.callMin)}
+                  onChange={(v) => {
+                    const next = parseInt(v, 10) as CallMin;
+                    const slots = Math.max(1, Math.round((draft.endMin - draft.startMin) / draft.callMin));
+                    setDraft((d) => ({ ...d, callMin: next, endMin: d.startMin + slots * next }));
+                    setDirty(true);
+                  }}
+                  options={[3, 5, 8].map((d) => ({ value: String(d), label: `${d} Min` }))}
+                />
+              </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Buffer
+                </span>
+                <CompactSelect
+                  value={String(draft.bufferMin)}
+                  onChange={(v) => set("bufferMin", parseInt(v, 10) as BufferMin)}
+                  options={[1, 2, 3].map((b) => ({ value: String(b), label: `${b} Min` }))}
+                />
+              </div>
+            </div>
+
+            <BuilderRow label="Time Block">
+              <div className="inline-flex items-stretch rounded-lg ghost-border overflow-hidden w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const span = draft.endMin - draft.startMin;
+                    const next = Math.max(0, draft.startMin - 15);
+                    setDraft((d) => ({ ...d, startMin: next, endMin: next + span }));
+                    setDirty(true);
+                  }}
+                  className="px-3 grid place-items-center bg-surface-lowest hover:bg-primary/10 text-primary"
+                  aria-label="Earlier"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex-1 grid place-items-center text-[12px] font-bold text-primary tabular-nums bg-surface-lowest">
+                  {fmtTime(draft.startMin)}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const span = draft.endMin - draft.startMin;
+                    const next = Math.min(23 * 60 + 45, draft.startMin + 15);
+                    setDraft((d) => ({ ...d, startMin: next, endMin: next + span }));
+                    setDirty(true);
+                  }}
+                  className="px-3 grid place-items-center bg-primary text-primary-foreground hover:opacity-90"
+                  aria-label="Later"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </BuilderRow>
+
+            <BuilderRow label="Slots">
+              <div className="inline-flex items-stretch rounded-lg ghost-border overflow-hidden w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (count <= 1) return;
+                    set("endMin", draft.endMin - draft.callMin);
+                  }}
+                  className="px-3 grid place-items-center bg-surface-lowest hover:bg-primary/10 text-primary"
+                  aria-label="Decrease"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex-1 grid place-items-center text-[12px] font-bold text-primary tabular-nums bg-surface-lowest">
+                  {count}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => set("endMin", draft.endMin + draft.callMin)}
+                  className="px-3 grid place-items-center bg-primary text-primary-foreground hover:opacity-90"
+                  aria-label="Increase"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </BuilderRow>
+
+            <div className="py-1.5 flex items-center gap-3 border-b border-border/40">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Visibility
+                </span>
+                <CompactSelect
+                  value={draft.access}
+                  onChange={(v) => set("access", v as Access)}
+                  options={[
+                    { value: "public", label: "Public" },
+                    { value: "contacts", label: "Contacts" },
+                    { value: "priority", label: "Priority" },
+                    { value: "paid", label: "Paid" },
+                  ]}
+                />
+              </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  Approval
+                </span>
+                <CompactSelect
+                  value={draft.booking}
+                  onChange={(v) => set("booking", v as Booking)}
+                  options={[
+                    { value: "instant", label: "Pre-Approved" },
+                    { value: "approval", label: "Approval-Based" },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className="mt-2.5 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={relay.enabled}
+                onClick={() => setRelay({ ...relay, enabled: !relay.enabled })}
+                className="inline-flex items-center gap-2 select-none"
+              >
+                <Radio className={cn("w-3.5 h-3.5", relay.enabled ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("text-[11px] font-bold", relay.enabled ? "text-primary" : "text-muted-foreground")}>
+                  Relay {relay.enabled ? "On" : "Off"}
                 </span>
                 <span className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-bold",
-                  relay.enabled ? "bg-emerald-400/25 text-emerald-100" : "bg-primary-foreground/10 text-primary-foreground/70",
+                  "relative inline-block w-9 h-5 rounded-full transition",
+                  relay.enabled ? "bg-primary" : "bg-surface-low ghost-border",
                 )}>
-                  Relay {relay.enabled ? "ON" : "OFF"}
+                  <span className={cn(
+                    "absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-primary-foreground shadow transition-transform",
+                    relay.enabled && "translate-x-4",
+                  )} />
                 </span>
-              </div>
-            </div>
-            {timeline.length > 0 && (
-              <div className="mt-3 rounded-lg bg-primary-foreground/10 p-2">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60 mb-1">
-                  Generated sub-slots
-                </p>
-                <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] font-mono">
-                  {timeline.slice(0, 8).map((it, i) => (
-                    <li key={i} className="text-primary-foreground/90">
-                      {fmtTime(it.start)}–{fmtTime(it.end)}
-                    </li>
-                  ))}
-                  {timeline.length > 8 && (
-                    <li className="text-[9px] text-primary-foreground/60 italic">+ {timeline.length - 8} more</li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </aside>
-        </div>
+              </button>
 
-        <div className="mt-5">
-          <RelayToSpotlightPanel value={relay} onChange={setRelay} />
+              {isEditing && (
+                <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-low text-muted-foreground hover:text-primary text-[11px] font-bold">
+                  <X className="w-3.5 h-3.5" /> Discard
+                </button>
+              )}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={save}
+                disabled={hasDraftConflict || justCreated}
+                title={
+                  hasDraftConflict
+                    ? "Time conflict on this date — change date or window"
+                    : justCreated
+                    ? "Press New to start another slot"
+                    : undefined
+                }
+                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold shadow-elevated hover:opacity-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CalendarPlus className="w-4 h-4" /> {isEditing ? "Update Quick Sync" : "Create Quick Sync"}
+              </button>
+              {justCreated && (
+                <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-primary/10 text-primary text-[11px] font-bold">
+                  <Plus className="w-3.5 h-3.5" /> New
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -877,6 +963,43 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
     <div className="mt-1">{children}</div>
   </label>
+);
+
+const CompactSelect = ({
+  value, onChange, options,
+}: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) => (
+  <select
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full px-2 py-1 rounded-lg ghost-border bg-surface-lowest text-[11px] font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+  >
+    {options.map((o) => (
+      <option key={o.value} value={o.value}>{o.label}</option>
+    ))}
+  </select>
+);
+
+const BuilderRow = ({
+  label, children, stacked,
+}: { label: string; children: React.ReactNode; stacked?: boolean }) => (
+  <div
+    className={cn(
+      "py-1.5",
+      stacked
+        ? "flex flex-col gap-1"
+        : "flex items-center gap-3 border-b border-border/40 last:border-b-0",
+    )}
+  >
+    <span
+      className={cn(
+        "text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0",
+        !stacked && "w-[88px]",
+      )}
+    >
+      {label}
+    </span>
+    <div className="flex-1 min-w-0">{children}</div>
+  </div>
 );
 
 const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (

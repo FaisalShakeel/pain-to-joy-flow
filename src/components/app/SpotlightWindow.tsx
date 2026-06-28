@@ -16,6 +16,7 @@ import Avatar from "./Avatar";
 import { Link } from "react-router-dom";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
 import CoordinationBoard from "./spotlight/CoordinationBoard";
+import { contacts, type Contact } from "@/lib/mockData";
 
 /* ------------------------------------------------------------------ */
 /* Spotlight Relay Board — Mobile-First Availability Intelligence     */
@@ -50,6 +51,23 @@ const ACTION: Record<"qs" | "fs" | "ea", { label: string; cls: string; href: str
   ea: { label: "Event",      cls: "text-amber-700 bg-amber-500/15 hover:bg-amber-500/25",       href: "/app/availability/webinars" },
 };
 
+const contactById = (id: string) => contacts.find((c) => c.id === id)!;
+
+const toPulseRow = (
+  contact: Contact,
+  overrides: Partial<Pick<RelayRow, "status" | "context" | "activity" | "updatedMinAgo" | "action">> = {},
+): RelayRow => ({
+  id: contact.id,
+  name: contact.name.split(" ")[0],
+  initials: contact.initials,
+  accent: contact.accent,
+  status: (overrides.status ?? contact.status) as BoardStatus,
+  context: overrides.context ?? contact.availabilityContext,
+  activity: overrides.activity ?? "2m ago",
+  updatedMinAgo: overrides.updatedMinAgo ?? 2,
+  action: overrides.action,
+});
+
 type IconKey = "star" | "layers" | "briefcase" | "crown" | "heart" | "home" | "users";
 const ICONS: Record<IconKey, React.ComponentType<{ className?: string }>> = {
   star: Star, layers: Layers, briefcase: Briefcase, crown: Crown,
@@ -66,21 +84,21 @@ const ALL_IDS = (rows: RelayRow[]) => rows.map((r) => r.id);
 const DEFAULT_WATCHLISTS = (rows: RelayRow[]): Watchlist[] => [
   { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true },
   { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true },
-  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"] },
-  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"] },
-  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"] },
+  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid-al-amir","sarah-jenkins","samir-khan","julian-vane"] },
+  { id: "clients",    label: "Clients",      icon: "crown",     members: ["elena-vance","david-okafor"] },
+  { id: "friends",    label: "Friends",      icon: "heart",     members: ["kenji-tanaka","yara-nasser"] },
   { id: "family",     label: "Family",       icon: "home",      members: [] },
 ];
 
 const ALL_ROWS: RelayRow[] = [
-  { id: "rashid", name: "Rashid",   initials: "RA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago",     updatedMinAgo: 1,  action: "qs" },
-  { id: "sarah",  name: "Sarah",    initials: "SA", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",  activity: "2h steady",  updatedMinAgo: 8,  action: "fs" },
-  { id: "ahmed",  name: "Ahmed",    initials: "AH", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" },
-  { id: "david",  name: "David",    initials: "DA", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Traveling. Hands-free only. Desk by 4:00 PM.",    activity: "35m ago",    updatedMinAgo: 35 },
-  { id: "elena",  name: "Elena M.", initials: "EM", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Coffee shop co-working. Open for sync.",           activity: "Just now",   updatedMinAgo: 0,  action: "qs" },
-  { id: "jd",     name: "Jordan",   initials: "JD", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Deep work block until 5:00 PM.",                  activity: "12m",        updatedMinAgo: 12, action: "fs" },
-  { id: "kl",     name: "Kai L.",   initials: "KL", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "On a call. Try again at 4 PM.",                   activity: "18m",        updatedMinAgo: 18 },
-  { id: "rt",     name: "Riya T.",  initials: "RT", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Driving home. ETA 30 min.",                       activity: "5m",         updatedMinAgo: 5 },
+  toPulseRow(contactById("rashid-al-amir"), { status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago", updatedMinAgo: 1, action: "qs" }),
+  toPulseRow(contactById("sarah-jenkins"), { status: "focus", context: "Drafting security audit. Available at 3:00 PM.", activity: "2h steady", updatedMinAgo: 8, action: "fs" }),
+  toPulseRow(contactById("samir-khan"), { status: "busy", context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" }),
+  toPulseRow(contactById("david-okafor"), { status: "driving", context: "Traveling. Hands-free only. Desk by 4:00 PM.", activity: "35m ago", updatedMinAgo: 35 }),
+  toPulseRow(contactById("elena-vance"), { status: "available", context: "Coffee shop co-working. Open for sync.", activity: "Just now", updatedMinAgo: 0, action: "qs" }),
+  toPulseRow(contactById("julian-vane"), { status: "focus", context: "Deep work block until 5:00 PM.", activity: "12m", updatedMinAgo: 12, action: "fs" }),
+  toPulseRow(contactById("kenji-tanaka"), { status: "busy", context: "On a call. Try again at 4 PM.", activity: "18m", updatedMinAgo: 18 }),
+  toPulseRow(contactById("yara-nasser"), { status: "driving", context: "Driving home. ETA 30 min.", activity: "5m", updatedMinAgo: 5 }),
 ];
 
 const RELAY_RANK: Record<BoardStatus, number> = {
@@ -103,21 +121,33 @@ const BOARD_COLOR: Record<BoardStatus, { bg: string; dot: string; text: string }
   focus:     { bg: "bg-rose-500",    dot: "bg-rose-500",    text: "text-rose-600"    },
   driving:   { bg: "bg-violet-500",  dot: "bg-violet-500",  text: "text-violet-600"  },
 };
+const boardTile = (id: string, status?: BoardStatus, context?: string): BoardTile => {
+  const c = contactById(id);
+  return {
+    id: c.id,
+    name: c.name,
+    initials: c.initials,
+    status: status ?? (c.status as BoardStatus),
+    context: context ?? c.availabilityContext,
+    time: "2m ago",
+  };
+};
+
 const BOARD_LEFT: BoardTile[] = [
-  { id: "elena-vance",   name: "Elena M.", initials: "EM", status: "available", context: "Coffee shop co-working. Open for sync.",            time: "2m ago" },
-  { id: "kenji-tanaka",  name: "Kai L.",   initials: "KL", status: "busy",      context: "On a call. Try again at 4 PM.",                     time: "2m ago" },
-  { id: "samir-khan",    name: "Ahmed",    initials: "AH", status: "offline",   context: "Client meeting until 2:30 PM (Architectural Hub).", time: "2m ago" },
-  { id: "rashid-al-amir",name: "Rashid",   initials: "RA", status: "available", context: "Open for Quick Sync calls after sprint review.",    time: "2m ago" },
-  { id: "amelia-reyes",  name: "Lisa S.",  initials: "LS", status: "available", context: "Available for support.",                            time: "2m ago" },
-  { id: "mira-coelho",   name: "Maya T.",  initials: "MT", status: "offline",   context: "Out of office. Back tomorrow.",                     time: "2m ago" },
+  boardTile("elena-vance", "available", "Coffee shop co-working. Open for sync."),
+  boardTile("kenji-tanaka", "busy", "On a call. Try again at 4 PM."),
+  boardTile("samir-khan", "offline", "Client meeting until 2:30 PM (Architectural Hub)."),
+  boardTile("rashid-al-amir", "available", "Open for Quick Sync calls after sprint review."),
+  boardTile("amelia-reyes", "available", "Available for support."),
+  boardTile("mira-coelho", "offline", "Out of office. Back tomorrow."),
 ];
 const BOARD_RIGHT: BoardTile[] = [
-  { id: "sarah-jenkins", name: "Sarah",    initials: "SA", status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",   time: "2m ago" },
-  { id: "julian-vane",   name: "Jordan",   initials: "JD", status: "focus",     context: "Deep work block until 5:00 PM.",                   time: "2m ago" },
-  { id: "yara-nasser",   name: "Riya T.",  initials: "RT", status: "driving",   context: "Driving home. ETA 30 min.",                        time: "2m ago" },
-  { id: "david-okafor",  name: "Daniel S.",initials: "DS", status: "focus",     context: "Focus time. Do not disturb.",                      time: "2m ago" },
-  { id: "priya-shah",    name: "Priya C.", initials: "PC", status: "focus",     context: "Code review focus block.",                         time: "2m ago" },
-  { id: "mark-thompson", name: "Naveed W.",initials: "NW", status: "driving",   context: "On the way to client site.",                       time: "2m ago" },
+  boardTile("sarah-jenkins", "focus", "Drafting security audit. Available at 3:00 PM."),
+  boardTile("julian-vane", "focus", "Deep work block until 5:00 PM."),
+  boardTile("yara-nasser", "driving", "Driving home. ETA 30 min."),
+  boardTile("david-okafor", "focus", "Focus time. Do not disturb."),
+  boardTile("priya-shah", "focus", "Code review focus block."),
+  boardTile("mark-thompson", "driving", "On the way to client site."),
 ];
 
 const BoardRow = ({ t }: { t: BoardTile }) => {
@@ -125,6 +155,9 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
   return (
     <Link
       to={`/app/contact/${t.id}`}
+      data-no-drag-scroll
+      draggable={false}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0 min-h-[52px]"
     >
       <div className="relative shrink-0">
@@ -192,7 +225,7 @@ const SpotlightWindow = () => {
       context: r.context, time: r.activity,
     });
     const leftStatuses: BoardStatus[] = ["available", "busy", "offline"];
-    const rightStatuses: BoardStatus[] = ["focus", "driving"];
+    const rightStatuses: BoardStatus[] = ["driving", "focus"];
     const left = followed.filter((r) => leftStatuses.includes(r.status)).map(toTile);
     const right = followed.filter((r) => rightStatuses.includes(r.status)).map(toTile);
     const padL = [...BOARD_LEFT].filter((t) => !left.find((x) => x.id === t.id));
@@ -390,6 +423,9 @@ const SpotlightWindow = () => {
                   to={`/app/contact/${r.id}`}
                   title={`${r.name} · ${s.label}`}
                   className="relative shrink-0"
+                  data-no-drag-scroll
+                  draggable={false}
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                   <Avatar initials={r.initials} accent={r.accent} size="md" />
                   <span className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-slate-50", s.dot)} />
