@@ -51,6 +51,23 @@ const ACTION: Record<"qs" | "fs" | "ea", { label: string; cls: string; href: str
   ea: { label: "Event",      cls: "text-amber-700 bg-amber-500/15 hover:bg-amber-500/25",       href: "/app/availability/webinars" },
 };
 
+const contactById = (id: string) => contacts.find((c) => c.id === id)!;
+
+const toPulseRow = (
+  contact: Contact,
+  overrides: Partial<Pick<RelayRow, "status" | "context" | "activity" | "updatedMinAgo" | "action">> = {},
+): RelayRow => ({
+  id: contact.id,
+  name: contact.name.split(" ")[0],
+  initials: contact.initials,
+  accent: contact.accent,
+  status: (overrides.status ?? contact.status) as BoardStatus,
+  context: overrides.context ?? contact.availabilityContext,
+  activity: overrides.activity ?? "2m ago",
+  updatedMinAgo: overrides.updatedMinAgo ?? 2,
+  action: overrides.action,
+});
+
 type IconKey = "star" | "layers" | "briefcase" | "crown" | "heart" | "home" | "users";
 const ICONS: Record<IconKey, React.ComponentType<{ className?: string }>> = {
   star: Star, layers: Layers, briefcase: Briefcase, crown: Crown,
