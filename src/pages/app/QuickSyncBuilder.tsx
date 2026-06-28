@@ -565,7 +565,7 @@ const QuickSyncBuilder = () => {
             <BuilderRow label="Mode">
               <div className="inline-flex w-full rounded-lg ghost-border bg-surface-lowest p-0.5 gap-0.5">
                 {([
-                  ["open", "Open"],
+                  ["public", "Open"],
                   ["contacts", "Contacts"],
                   ["priority", "Priority"],
                 ] as const).map(([k, l]) => {
@@ -963,6 +963,43 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
     <div className="mt-1">{children}</div>
   </label>
+);
+
+const CompactSelect = ({
+  value, onChange, options,
+}: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) => (
+  <select
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full px-2 py-1 rounded-lg ghost-border bg-surface-lowest text-[11px] font-bold text-primary outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+  >
+    {options.map((o) => (
+      <option key={o.value} value={o.value}>{o.label}</option>
+    ))}
+  </select>
+);
+
+const BuilderRow = ({
+  label, children, stacked,
+}: { label: string; children: React.ReactNode; stacked?: boolean }) => (
+  <div
+    className={cn(
+      "py-1.5",
+      stacked
+        ? "flex flex-col gap-1"
+        : "flex items-center gap-3 border-b border-border/40 last:border-b-0",
+    )}
+  >
+    <span
+      className={cn(
+        "text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0",
+        !stacked && "w-[88px]",
+      )}
+    >
+      {label}
+    </span>
+    <div className="flex-1 min-w-0">{children}</div>
+  </div>
 );
 
 const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
