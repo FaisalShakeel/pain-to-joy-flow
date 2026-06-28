@@ -91,14 +91,14 @@ const DEFAULT_WATCHLISTS = (rows: RelayRow[]): Watchlist[] => [
 ];
 
 const ALL_ROWS: RelayRow[] = [
-  { id: "rashid-al-amir", name: "Rashid",  initials: "RA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago",     updatedMinAgo: 1,  action: "qs" },
-  { id: "sarah-jenkins",  name: "Sarah",   initials: "SJ", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",  activity: "2h steady",  updatedMinAgo: 8,  action: "fs" },
-  { id: "samir-khan",     name: "Samir",   initials: "SK", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" },
-  { id: "david-okafor",   name: "David",   initials: "DO", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Traveling. Hands-free only. Desk by 4:00 PM.",    activity: "35m ago",    updatedMinAgo: 35 },
-  { id: "elena-vance",    name: "Elena",   initials: "EV", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Coffee shop co-working. Open for sync.",           activity: "Just now",   updatedMinAgo: 0,  action: "qs" },
-  { id: "julian-vane",    name: "Julian",  initials: "JV", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Deep work block until 5:00 PM.",                  activity: "12m",        updatedMinAgo: 12, action: "fs" },
-  { id: "kenji-tanaka",   name: "Kenji",   initials: "KT", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "On a call. Try again at 4 PM.",                   activity: "18m",        updatedMinAgo: 18 },
-  { id: "yara-nasser",    name: "Yara",    initials: "YN", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Driving home. ETA 30 min.",                       activity: "5m",         updatedMinAgo: 5 },
+  toPulseRow(contactById("rashid-al-amir"), { status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago", updatedMinAgo: 1, action: "qs" }),
+  toPulseRow(contactById("sarah-jenkins"), { status: "focus", context: "Drafting security audit. Available at 3:00 PM.", activity: "2h steady", updatedMinAgo: 8, action: "fs" }),
+  toPulseRow(contactById("samir-khan"), { status: "busy", context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" }),
+  toPulseRow(contactById("david-okafor"), { status: "driving", context: "Traveling. Hands-free only. Desk by 4:00 PM.", activity: "35m ago", updatedMinAgo: 35 }),
+  toPulseRow(contactById("elena-vance"), { status: "available", context: "Coffee shop co-working. Open for sync.", activity: "Just now", updatedMinAgo: 0, action: "qs" }),
+  toPulseRow(contactById("julian-vane"), { status: "focus", context: "Deep work block until 5:00 PM.", activity: "12m", updatedMinAgo: 12, action: "fs" }),
+  toPulseRow(contactById("kenji-tanaka"), { status: "busy", context: "On a call. Try again at 4 PM.", activity: "18m", updatedMinAgo: 18 }),
+  toPulseRow(contactById("yara-nasser"), { status: "driving", context: "Driving home. ETA 30 min.", activity: "5m", updatedMinAgo: 5 }),
 ];
 
 const RELAY_RANK: Record<BoardStatus, number> = {
