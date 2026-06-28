@@ -155,6 +155,8 @@ const BoardRow = ({ t }: { t: BoardTile }) => {
   return (
     <Link
       to={`/app/contact/${t.id}`}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0 min-h-[52px]"
     >
       <div className="relative shrink-0">
@@ -420,6 +422,8 @@ const SpotlightWindow = () => {
                   to={`/app/contact/${r.id}`}
                   title={`${r.name} · ${s.label}`}
                   className="relative shrink-0"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                   <Avatar initials={r.initials} accent={r.accent} size="md" />
                   <span className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-slate-50", s.dot)} />
