@@ -121,21 +121,33 @@ const BOARD_COLOR: Record<BoardStatus, { bg: string; dot: string; text: string }
   focus:     { bg: "bg-rose-500",    dot: "bg-rose-500",    text: "text-rose-600"    },
   driving:   { bg: "bg-violet-500",  dot: "bg-violet-500",  text: "text-violet-600"  },
 };
+const boardTile = (id: string, status?: BoardStatus, context?: string): BoardTile => {
+  const c = contactById(id);
+  return {
+    id: c.id,
+    name: c.name,
+    initials: c.initials,
+    status: status ?? (c.status as BoardStatus),
+    context: context ?? c.availabilityContext,
+    time: "2m ago",
+  };
+};
+
 const BOARD_LEFT: BoardTile[] = [
-  { id: "elena-vance",   name: "Elena M.", initials: "EM", status: "available", context: "Coffee shop co-working. Open for sync.",            time: "2m ago" },
-  { id: "kenji-tanaka",  name: "Kai L.",   initials: "KL", status: "busy",      context: "On a call. Try again at 4 PM.",                     time: "2m ago" },
-  { id: "samir-khan",    name: "Ahmed",    initials: "AH", status: "offline",   context: "Client meeting until 2:30 PM (Architectural Hub).", time: "2m ago" },
-  { id: "rashid-al-amir",name: "Rashid",   initials: "RA", status: "available", context: "Open for Quick Sync calls after sprint review.",    time: "2m ago" },
-  { id: "amelia-reyes",  name: "Lisa S.",  initials: "LS", status: "available", context: "Available for support.",                            time: "2m ago" },
-  { id: "mira-coelho",   name: "Maya T.",  initials: "MT", status: "offline",   context: "Out of office. Back tomorrow.",                     time: "2m ago" },
+  boardTile("elena-vance", "available", "Coffee shop co-working. Open for sync."),
+  boardTile("kenji-tanaka", "busy", "On a call. Try again at 4 PM."),
+  boardTile("samir-khan", "offline", "Client meeting until 2:30 PM (Architectural Hub)."),
+  boardTile("rashid-al-amir", "available", "Open for Quick Sync calls after sprint review."),
+  boardTile("amelia-reyes", "available", "Available for support."),
+  boardTile("mira-coelho", "offline", "Out of office. Back tomorrow."),
 ];
 const BOARD_RIGHT: BoardTile[] = [
-  { id: "sarah-jenkins", name: "Sarah",    initials: "SA", status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",   time: "2m ago" },
-  { id: "julian-vane",   name: "Jordan",   initials: "JD", status: "focus",     context: "Deep work block until 5:00 PM.",                   time: "2m ago" },
-  { id: "yara-nasser",   name: "Riya T.",  initials: "RT", status: "driving",   context: "Driving home. ETA 30 min.",                        time: "2m ago" },
-  { id: "david-okafor",  name: "Daniel S.",initials: "DS", status: "focus",     context: "Focus time. Do not disturb.",                      time: "2m ago" },
-  { id: "priya-shah",    name: "Priya C.", initials: "PC", status: "focus",     context: "Code review focus block.",                         time: "2m ago" },
-  { id: "mark-thompson", name: "Naveed W.",initials: "NW", status: "driving",   context: "On the way to client site.",                       time: "2m ago" },
+  boardTile("sarah-jenkins", "focus", "Drafting security audit. Available at 3:00 PM."),
+  boardTile("julian-vane", "focus", "Deep work block until 5:00 PM."),
+  boardTile("yara-nasser", "driving", "Driving home. ETA 30 min."),
+  boardTile("david-okafor", "focus", "Focus time. Do not disturb."),
+  boardTile("priya-shah", "focus", "Code review focus block."),
+  boardTile("mark-thompson", "driving", "On the way to client site."),
 ];
 
 const BoardRow = ({ t }: { t: BoardTile }) => {
