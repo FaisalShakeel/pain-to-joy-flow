@@ -139,6 +139,15 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
     return [];
   })();
 
+  const profileModeTitle = (() => {
+    switch (contact.status) {
+      case "available": return "Open for business.";
+      case "focus": return "Focus window protected.";
+      case "busy": return "Currently occupied.";
+      default: return "Async only.";
+    }
+  })();
+
   // Smart-CTA action list — Book Meeting / Quick Sync / Ping / Request Access.
   const goSchedule = () => navigate(`/app/schedule/${contact.id}`);
   const goMessage = () => navigate("/app/messages");
@@ -274,9 +283,11 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                 <span className={`h-1.5 w-1.5 rounded-full ${statusData.dotClass}`} />
                 <span className="text-[10px] font-extrabold tracking-wider uppercase">{statusData.label}</span>
               </div>
-              <p className="italic text-xs text-foreground/70">Available for technical sync</p>
+              <p className="italic text-xs text-foreground/70">
+                {show("availabilityContext") ? owner.availabilityContext : statusData.subLabel}
+              </p>
               <h2 className="text-xl sm:text-2xl font-extrabold font-headline tracking-tight text-primary uppercase leading-tight">
-                Hopen 4 Business.
+                {profileModeTitle}
               </h2>
               {syncWindows.length > 0 && (
                 <button
