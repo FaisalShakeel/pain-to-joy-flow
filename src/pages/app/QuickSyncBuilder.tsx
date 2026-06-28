@@ -374,7 +374,7 @@ const QuickSyncBuilder = () => {
   return (
     <AppShell
       title="Quick Sync Builder"
-      subtitle="Create it. Manage it. Stay interruption-free."
+      subtitle="Fast availability for short, intentional conversations."
       actions={
         <div className="flex items-center gap-2">
           <SchedulingSwitcher current="quicksync" />
