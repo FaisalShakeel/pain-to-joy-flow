@@ -16,6 +16,7 @@ import Avatar from "./Avatar";
 import { Link } from "react-router-dom";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
 import CoordinationBoard from "./spotlight/CoordinationBoard";
+import { contacts, type Contact } from "@/lib/mockData";
 
 /* ------------------------------------------------------------------ */
 /* Spotlight Relay Board — Mobile-First Availability Intelligence     */
