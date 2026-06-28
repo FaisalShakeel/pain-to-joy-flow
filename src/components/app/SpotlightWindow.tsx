@@ -66,21 +66,21 @@ const ALL_IDS = (rows: RelayRow[]) => rows.map((r) => r.id);
 const DEFAULT_WATCHLISTS = (rows: RelayRow[]): Watchlist[] => [
   { id: "mine",       label: "My Watchlist", icon: "star",      members: ALL_IDS(rows), system: true },
   { id: "all",        label: "All",          icon: "layers",    members: ALL_IDS(rows), system: true },
-  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid","sarah","ahmed","jd"] },
-  { id: "clients",    label: "Clients",      icon: "crown",     members: ["ahmed","david"] },
-  { id: "friends",    label: "Friends",      icon: "heart",     members: ["elena","kl","rt"] },
+  { id: "colleagues", label: "Colleagues",   icon: "briefcase", members: ["rashid-al-amir","sarah-jenkins","samir-khan","julian-vane"] },
+  { id: "clients",    label: "Clients",      icon: "crown",     members: ["elena-vance","david-okafor"] },
+  { id: "friends",    label: "Friends",      icon: "heart",     members: ["kenji-tanaka","yara-nasser"] },
   { id: "family",     label: "Family",       icon: "home",      members: [] },
 ];
 
 const ALL_ROWS: RelayRow[] = [
-  { id: "rashid", name: "Rashid",   initials: "RA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago",     updatedMinAgo: 1,  action: "qs" },
-  { id: "sarah",  name: "Sarah",    initials: "SA", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",  activity: "2h steady",  updatedMinAgo: 8,  action: "fs" },
-  { id: "ahmed",  name: "Ahmed",    initials: "AH", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" },
-  { id: "david",  name: "David",    initials: "DA", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Traveling. Hands-free only. Desk by 4:00 PM.",    activity: "35m ago",    updatedMinAgo: 35 },
-  { id: "elena",  name: "Elena M.", initials: "EM", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Coffee shop co-working. Open for sync.",           activity: "Just now",   updatedMinAgo: 0,  action: "qs" },
-  { id: "jd",     name: "Jordan",   initials: "JD", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Deep work block until 5:00 PM.",                  activity: "12m",        updatedMinAgo: 12, action: "fs" },
-  { id: "kl",     name: "Kai L.",   initials: "KL", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "On a call. Try again at 4 PM.",                   activity: "18m",        updatedMinAgo: 18 },
-  { id: "rt",     name: "Riya T.",  initials: "RT", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Driving home. ETA 30 min.",                       activity: "5m",         updatedMinAgo: 5 },
+  { id: "rashid-al-amir", name: "Rashid",  initials: "RA", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Open for Quick Sync calls after sprint review.", activity: "1m ago",     updatedMinAgo: 1,  action: "qs" },
+  { id: "sarah-jenkins",  name: "Sarah",   initials: "SJ", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Drafting security audit. Available at 3:00 PM.",  activity: "2h steady",  updatedMinAgo: 8,  action: "fs" },
+  { id: "samir-khan",     name: "Samir",   initials: "SK", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "Client meeting until 2:30 PM (Architectural Hub).", activity: "22m active", updatedMinAgo: 22, action: "ea" },
+  { id: "david-okafor",   name: "David",   initials: "DO", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Traveling. Hands-free only. Desk by 4:00 PM.",    activity: "35m ago",    updatedMinAgo: 35 },
+  { id: "elena-vance",    name: "Elena",   initials: "EV", accent: "from-emerald-500 to-emerald-700", status: "available", context: "Coffee shop co-working. Open for sync.",           activity: "Just now",   updatedMinAgo: 0,  action: "qs" },
+  { id: "julian-vane",    name: "Julian",  initials: "JV", accent: "from-rose-500 to-rose-700",       status: "focus",     context: "Deep work block until 5:00 PM.",                  activity: "12m",        updatedMinAgo: 12, action: "fs" },
+  { id: "kenji-tanaka",   name: "Kenji",   initials: "KT", accent: "from-amber-500 to-amber-700",     status: "busy",      context: "On a call. Try again at 4 PM.",                   activity: "18m",        updatedMinAgo: 18 },
+  { id: "yara-nasser",    name: "Yara",    initials: "YN", accent: "from-violet-500 to-violet-700",   status: "driving",   context: "Driving home. ETA 30 min.",                       activity: "5m",         updatedMinAgo: 5 },
 ];
 
 const RELAY_RANK: Record<BoardStatus, number> = {
