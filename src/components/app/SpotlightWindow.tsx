@@ -225,7 +225,7 @@ const SpotlightWindow = () => {
       context: r.context, time: r.activity,
     });
     const leftStatuses: BoardStatus[] = ["available", "busy", "offline"];
-    const rightStatuses: BoardStatus[] = ["focus", "driving"];
+    const rightStatuses: BoardStatus[] = ["driving", "focus"];
     const left = followed.filter((r) => leftStatuses.includes(r.status)).map(toTile);
     const right = followed.filter((r) => rightStatuses.includes(r.status)).map(toTile);
     const padL = [...BOARD_LEFT].filter((t) => !left.find((x) => x.id === t.id));
