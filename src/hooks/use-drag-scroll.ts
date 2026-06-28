@@ -45,6 +45,8 @@ export function useDragScroll<T extends HTMLElement>(axis: "x" | "y" = "y") {
     const onDown = (e: PointerEvent) => {
       // Allow native clicks on interactive children — only hijack on primary drag
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('a, button, input, textarea, select, [role="button"], [data-no-drag-scroll]')) return;
       isDown = true;
       cancelMomentum();
       startPos = getPos(e);
