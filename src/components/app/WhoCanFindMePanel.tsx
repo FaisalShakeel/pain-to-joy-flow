@@ -58,6 +58,7 @@ function estimateReach(s: DiscoverySettings): number {
 export default function WhoCanFindMePanel() {
   const [settings, setSettings] = useState<DiscoverySettings>(DEFAULT_DISCOVERY);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const set = <K extends keyof DiscoverySettings>(k: K, v: DiscoverySettings[K]) =>
     setSettings((s) => ({ ...s, [k]: v }));
@@ -93,8 +94,17 @@ export default function WhoCanFindMePanel() {
             Stay discoverable when it matters. Control access without awkward conversations.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="grid place-items-center w-8 h-8 rounded-full bg-surface-low hover:bg-surface text-primary transition"
+        >
+          {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
       </div>
 
+      {open && (<>
       {/* Mode selector */}
       <div className="mt-4 grid grid-cols-3 gap-2">
         {(Object.keys(MODE_META) as DiscoveryMode[]).map((m) => {
@@ -242,6 +252,7 @@ export default function WhoCanFindMePanel() {
           </SubBlock>
         </div>
       )}
+      </>)}
     </div>
   );
 }

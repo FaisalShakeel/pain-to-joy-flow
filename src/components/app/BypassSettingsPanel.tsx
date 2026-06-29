@@ -1,4 +1,5 @@
-import { Zap, ShieldCheck, Activity, BellOff } from "lucide-react";
+import { useState } from "react";
+import { Zap, ShieldCheck, Activity, BellOff, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBypass, type BypassScope, type BypassWindow } from "./BypassContext";
 import { contacts } from "@/lib/mockData";
@@ -20,6 +21,7 @@ const windowOptions: { id: BypassWindow; label: string }[] = [
 
 const BypassSettingsPanel = () => {
   const { settings, setSettings, toggleAllowed, usage } = useBypass();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -35,11 +37,22 @@ const BypassSettingsPanel = () => {
             Allow trusted senders to skip protocol lanes and reach you instantly. Reach through when it truly matters.
           </p>
         </div>
-        <span className="grid place-items-center w-9 h-9 rounded-xl bg-gold/15 text-gold shrink-0">
-          <ShieldCheck className="w-4 h-4" />
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="grid place-items-center w-9 h-9 rounded-xl bg-gold/15 text-gold">
+            <ShieldCheck className="w-4 h-4" />
+          </span>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="grid place-items-center w-8 h-8 rounded-full bg-surface-low hover:bg-surface text-primary transition"
+          >
+            {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
+      {open && (<>
       {/* Scope */}
       <div className="mt-5">
         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
@@ -149,6 +162,7 @@ const BypassSettingsPanel = () => {
           ) : "No one muted from bypass"}
         </p>
       </div>
+      </>)}
     </div>
   );
 };
