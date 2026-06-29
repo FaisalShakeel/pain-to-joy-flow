@@ -77,9 +77,6 @@ const AccountSettings = () => {
           {/* Call Watch */}
           <CallWatchSettingsPanel />
 
-          {/* Feedback identity — sound + haptics */}
-          <AccountFeedbackPanel />
-
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />
 
@@ -116,6 +113,9 @@ const AccountSettings = () => {
               ))}
             </ul>
           </div>
+
+          {/* Feedback identity — sound + haptics (end of list) */}
+          <AccountFeedbackPanel />
         </div>
 
         <aside className="space-y-4">
