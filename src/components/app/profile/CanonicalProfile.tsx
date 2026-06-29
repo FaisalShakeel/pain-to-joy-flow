@@ -302,10 +302,10 @@ const CanonicalProfile = ({ guestMode = false }: CanonicalProfileProps) => {
                 </button>
               )}
             </div>
-            {/* Spotlight */}
+            {/* Contact Pulse */}
             <div className="md:col-span-2 rounded-2xl bg-surface-low p-3 flex flex-col h-full">
               <div className="flex items-center justify-between mb-1.5">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Spotlight</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Contact Pulse</h4>
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               </div>
               <p className="text-xs font-headline font-light italic leading-snug text-foreground">
