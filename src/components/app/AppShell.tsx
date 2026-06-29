@@ -68,7 +68,7 @@ const baseItems: NavItem[] = [
   { to: "/app/contacts", label: "Contacts", icon: Users },
   {
     to: "/app/availability",
-    label: "Availability",
+    label: "Access Schedule",
     icon: CalendarDays,
     children: [
       { to: "/app/availability/focus-meetings", label: "Focus Sync", icon: CalendarClock },
