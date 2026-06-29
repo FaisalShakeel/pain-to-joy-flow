@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CreditCard, LogOut, Pencil, ShieldCheck, ArrowRight, Crown, Radio, Eye } from "lucide-react";
 import AppShell from "@/components/app/AppShell";
@@ -11,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
+  const [payTab, setPayTab] = useState<"method" | "history">("method");
 
   return (
     <AppShell subtitle="Account" title="Settings">
@@ -80,38 +82,59 @@ const AccountSettings = () => {
           {/* Priority Bypass settings */}
           <BypassSettingsPanel />
 
-          {/* Payment */}
+          {/* Payment method + Transaction history (tabbed) */}
           <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline font-bold text-primary">Payment method</h3>
-              <Link to="/app/upgrade" className="text-xs font-semibold text-accent hover:underline">Manage</Link>
-            </div>
-            <div className="mt-4 flex items-center gap-3 p-4 rounded-2xl ghost-border bg-surface-low">
-              <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary"><CreditCard className="w-4 h-4" /></span>
-              <div>
-                <p className="text-sm font-semibold text-primary">Visa · ending 4242</p>
-                <p className="text-xs text-muted-foreground">Expires 08/29</p>
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <h3 className="font-headline font-bold text-primary">Payment</h3>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex p-1 rounded-full bg-surface-low ghost-border">
+                  <button
+                    type="button"
+                    onClick={() => setPayTab("method")}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${
+                      payTab === "method" ? "bg-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary"
+                    }`}
+                  >
+                    Payment method
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPayTab("history")}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${
+                      payTab === "history" ? "bg-primary text-primary-foreground shadow-elevated" : "text-muted-foreground hover:text-primary"
+                    }`}
+                  >
+                    Transaction history
+                  </button>
+                </div>
+                <Link to="/app/upgrade" className="text-xs font-semibold text-accent hover:underline">Manage</Link>
               </div>
             </div>
-          </div>
 
-          {/* Transactions */}
-          <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
-            <h3 className="font-headline font-bold text-primary">Transaction history</h3>
-            <ul className="mt-4 divide-y divide-border/50 text-sm">
-              {transactions.map((t) => (
-                <li key={t.id} className="py-3 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-primary">{t.description}</p>
-                    <p className="text-xs text-muted-foreground">{t.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-primary">{t.amount}</p>
-                    <p className="text-xs text-emerald-700">{t.status}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {payTab === "method" ? (
+              <div className="mt-4 flex items-center gap-3 p-4 rounded-2xl ghost-border bg-surface-low">
+                <span className="grid place-items-center w-10 h-10 rounded-xl bg-primary/10 text-primary"><CreditCard className="w-4 h-4" /></span>
+                <div>
+                  <p className="text-sm font-semibold text-primary">Visa · ending 4242</p>
+                  <p className="text-xs text-muted-foreground">Expires 08/29</p>
+                </div>
+              </div>
+            ) : (
+              <ul className="mt-4 divide-y divide-border/50 text-sm">
+                {transactions.map((t) => (
+                  <li key={t.id} className="py-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-primary">{t.description}</p>
+                      <p className="text-xs text-muted-foreground">{t.date}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-primary">{t.amount}</p>
+                      <p className="text-xs text-emerald-700">{t.status}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Feedback identity — sound + haptics (end of list) */}
