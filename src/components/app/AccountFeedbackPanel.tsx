@@ -1,10 +1,12 @@
-import { Volume2, Vibrate, Radar, Play } from "lucide-react";
+import { useState } from "react";
+import { Volume2, Vibrate, Radar, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { feedback, FEEDBACK_EVENTS, useFeedbackPrefs } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
 
 const AccountFeedbackPanel = () => {
   const { prefs, update } = useFeedbackPrefs();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -20,14 +22,25 @@ const AccountFeedbackPanel = () => {
             On-brand confirmation for every meaningful action — radar pings, shield closes, unlock chimes. No chat or social media sounds.
           </p>
         </div>
-        <span className={cn(
-          "grid place-items-center w-9 h-9 rounded-xl shrink-0",
-          prefs.sfxEnabled ? "bg-emerald-500/15 text-emerald-600" : "bg-surface-low text-muted-foreground",
-        )}>
-          <Volume2 className="w-4 h-4" />
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={cn(
+            "grid place-items-center w-9 h-9 rounded-xl",
+            prefs.sfxEnabled ? "bg-emerald-500/15 text-emerald-600" : "bg-surface-low text-muted-foreground",
+          )}>
+            <Volume2 className="w-4 h-4" />
+          </span>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="grid place-items-center w-8 h-8 rounded-full bg-surface-low hover:bg-surface text-primary transition"
+          >
+            {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
+      {open && (<>
       <div className="mt-5 grid sm:grid-cols-2 gap-3">
         <label className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-surface-low ghost-border">
           <div className="min-w-0 flex items-center gap-2">
@@ -72,6 +85,7 @@ const AccountFeedbackPanel = () => {
           ))}
         </div>
       </div>
+      </>)}
     </div>
   );
 };

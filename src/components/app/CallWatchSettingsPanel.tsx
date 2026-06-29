@@ -1,4 +1,5 @@
-import { Phone, Radar, Users, Star, Globe, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Phone, Radar, Users, Star, Globe, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useCallWatchSettings, type CallWatchScope } from "@/lib/callWatchSettingsStore";
@@ -13,6 +14,7 @@ const scopeOptions: { id: CallWatchScope; label: string; desc: string; icon: typ
 
 const CallWatchSettingsPanel = () => {
   const { settings, setSettings } = useCallWatchSettings();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="rounded-3xl bg-surface-lowest ghost-border p-6 shadow-ambient">
@@ -28,14 +30,25 @@ const CallWatchSettingsPanel = () => {
             When on, others can tap the Call Watch icon on your contact tile and get notified the moment you're available. Turn it off to hide the option entirely.
           </p>
         </div>
-        <span className={cn(
-          "grid place-items-center w-9 h-9 rounded-xl shrink-0",
-          settings.enabled ? "bg-emerald-500/15 text-emerald-600" : "bg-surface-low text-muted-foreground",
-        )}>
-          <Phone className="w-4 h-4" />
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={cn(
+            "grid place-items-center w-9 h-9 rounded-xl",
+            settings.enabled ? "bg-emerald-500/15 text-emerald-600" : "bg-surface-low text-muted-foreground",
+          )}>
+            <Phone className="w-4 h-4" />
+          </span>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="grid place-items-center w-8 h-8 rounded-full bg-surface-low hover:bg-surface text-primary transition"
+          >
+            {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
+      {open && (<>
       {/* On/Off */}
       <label className="mt-5 flex items-center justify-between gap-3 p-4 rounded-2xl bg-surface-low ghost-border">
         <div className="min-w-0">
@@ -83,6 +96,7 @@ const CallWatchSettingsPanel = () => {
           })}
         </div>
       </div>
+      </>)}
     </div>
   );
 };
